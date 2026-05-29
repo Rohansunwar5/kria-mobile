@@ -6,6 +6,7 @@ const extraPkgs = [
   'nativewind',
   'react-native-css-interop',
   '@reduxjs/toolkit',
+  'immer',
   'react-redux',
   'socket.io-client',
   'axios',
