@@ -8,11 +8,11 @@ import { fetchTournament } from '@/store/slices/tournamentSlice';
 import { fetchTournamentCategories, fetchMyRegistrations } from '@/store/slices/registrationSlice';
 import { fetchTournamentTeams } from '@/store/slices/teamSlice';
 import { formatDate } from '@/lib/format';
-import { OverviewTab } from './_components/OverviewTab';
-import { AwardsTab } from './_components/AwardsTab';
-import { CategoriesTab } from './_components/CategoriesTab';
-import { PlayersTab } from './_components/PlayersTab';
-import { TeamsTab } from './_components/TeamsTab';
+import { OverviewTab } from '@/components/tournament/OverviewTab';
+import { AwardsTab } from '@/components/tournament/AwardsTab';
+import { CategoriesTab } from '@/components/tournament/CategoriesTab';
+import { PlayersTab } from '@/components/tournament/PlayersTab';
+import { TeamsTab } from '@/components/tournament/TeamsTab';
 
 type TabKey = 'overview' | 'categories' | 'players' | 'teams' | 'awards';
 const TABS: TabKey[] = ['overview', 'categories', 'players', 'teams', 'awards'];
