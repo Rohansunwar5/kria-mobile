@@ -8,6 +8,10 @@ module.exports = {
         brand: '#F97316',
         ink: '#111111',
       },
+      fontFamily: {
+        oswald: ['Oswald_500Medium'],
+        montserrat: ['Montserrat_400Regular'],
+      },
     },
   },
   plugins: [],
