@@ -1,9 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
+import tournamentReducer from './slices/tournamentSlice';
+import registrationReducer from './slices/registrationSlice';
+import teamReducer from './slices/teamSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    tournament: tournamentReducer,
+    registration: registrationReducer,
+    team: teamReducer,
   },
 });
 
