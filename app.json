@@ -42,7 +42,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiBaseUrl": ""
+      "apiBaseUrl": "https://api.kria.club"
     }
   }
 }
