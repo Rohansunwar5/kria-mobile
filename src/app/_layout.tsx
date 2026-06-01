@@ -56,6 +56,7 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="tournament/[id]" />
+        <Stack.Screen name="profile" />
       </Stack>
     </View>
   );
