@@ -216,6 +216,21 @@ export const updateProfile = createAsyncThunk(
   }
 );
 
+export const uploadPlayerProfileImage = createAsyncThunk(
+  'auth/uploadPlayerProfileImage',
+  async (asset: { uri: string; name: string; type: string }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      // React Native FormData takes a { uri, name, type } object, not a web File.
+      formData.append('image', asset as any);
+      const response = await API.put('/player/auth/profile-image', formData);
+      return response.data?.data?.data || response.data?.data;
+    } catch (error) {
+      return rejectWithValue(extractError(error));
+    }
+  }
+);
+
 export const logout = createAsyncThunk('auth/logout', async () => {
   await storage.clearAuth();
 });
@@ -280,6 +295,13 @@ export const authSlice = createSlice({
       if (state.user && action.payload) state.user = { ...state.user, ...action.payload };
     });
     builder.addCase(updateProfile.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
+
+    builder.addCase(uploadPlayerProfileImage.pending, (state) => { state.isLoading = true; state.error = null; });
+    builder.addCase(uploadPlayerProfileImage.fulfilled, (state, action) => {
+      state.isLoading = false;
+      if (state.user && action.payload) state.user = { ...state.user, ...action.payload };
+    });
+    builder.addCase(uploadPlayerProfileImage.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
 
     builder.addCase(fetchPlayerStats.pending, (state) => { state.statsLoading = true; });
     builder.addCase(fetchPlayerStats.fulfilled, (state, action) => { state.statsLoading = false; state.playerStats = action.payload; });
