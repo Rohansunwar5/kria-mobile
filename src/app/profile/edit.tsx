@@ -13,6 +13,7 @@ export default function EditProfile() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, isLoading, error } = useAppSelector((s) => s.auth);
+  const [formError, setFormError] = useState('');
 
   const [form, setForm] = useState({
     firstName: user?.firstName || '',
@@ -26,6 +27,11 @@ export default function EditProfile() {
   const set = (k: keyof typeof form) => (v: string) => setForm((p) => ({ ...p, [k]: v }));
 
   const save = async () => {
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.phone.trim()) {
+      setFormError('First name, last name and phone are required.');
+      return;
+    }
+    setFormError('');
     // Required fields always sent; optional fields omitted when blank so the
     // server's isISO8601()/optional() validators don't 400 on empty strings.
     const data: Record<string, string> = {
@@ -53,7 +59,7 @@ export default function EditProfile() {
         <TextInput className={input} placeholder="Sport (e.g. Badminton)" placeholderTextColor="#666" value={form.sport} onChangeText={set('sport')} />
         <TextInput className={input} placeholder="Location (e.g. Bangalore)" placeholderTextColor="#666" value={form.location} onChangeText={set('location')} />
 
-        {!!error && <Text className="text-center font-montserrat text-sm text-red-400">{error}</Text>}
+        {(!!formError || !!error) && <Text className="text-center font-montserrat text-sm text-red-400">{formError || error}</Text>}
 
         <Pressable onPress={save} disabled={isLoading} className="mt-2 flex-row items-center justify-center gap-2 rounded-2xl bg-brand py-3.5 active:opacity-80">
           {isLoading && <ActivityIndicator color="#fff" />}

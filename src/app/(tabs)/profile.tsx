@@ -7,7 +7,6 @@ import { MenuRow } from '@/components/profile/MenuRow';
 import { AvatarPicker } from '@/components/profile/AvatarPicker';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPlayerStats, logout } from '@/store/slices/authSlice';
-import { fetchMyRegistrations } from '@/store/slices/registrationSlice';
 
 export default function Profile() {
   const dispatch = useAppDispatch();
@@ -16,7 +15,6 @@ export default function Profile() {
 
   useEffect(() => {
     dispatch(fetchPlayerStats());
-    dispatch(fetchMyRegistrations());
   }, [dispatch]);
 
   return (

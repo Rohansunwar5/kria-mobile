@@ -5,7 +5,11 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 // Emits an ISO YYYY-MM-DD string; `value` is that same string or ''.
 export function DobField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [show, setShow] = useState(false);
-  const date = value ? new Date(value) : new Date(2000, 0, 1);
+  const parseLocal = (v: string) => {
+    const [y, m, d] = v.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
+  const date = value ? parseLocal(value) : new Date(2000, 0, 1);
 
   const handle = (_e: unknown, picked?: Date) => {
     if (Platform.OS === 'android') setShow(false);
@@ -20,7 +24,7 @@ export function DobField({ value, onChange }: { value: string; onChange: (v: str
         className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3"
       >
         <Text className="font-montserrat text-white">
-          {value ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Select date'}
+          {value ? parseLocal(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Select date'}
         </Text>
       </Pressable>
       {show && (
