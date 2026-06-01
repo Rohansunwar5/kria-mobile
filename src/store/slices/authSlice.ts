@@ -11,6 +11,12 @@ interface User {
   email: string;
   phone: string;
   status: string;
+  gender?: string;
+  dateOfBirth?: string;
+  sport?: string;
+  location?: string;
+  profileImage?: string;
+  titles?: string[];
   [key: string]: any;
 }
 

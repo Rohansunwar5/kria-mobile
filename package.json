@@ -5,11 +5,13 @@
   "dependencies": {
     "@expo-google-fonts/montserrat": "^0.4.2",
     "@expo-google-fonts/oswald": "^0.4.2",
+    "@react-native-community/datetimepicker": "8.4.4",
     "@reduxjs/toolkit": "^2.12.0",
     "axios": "^1.16.1",
     "expo": "~54.0.0",
     "expo-constants": "~18.0.13",
     "expo-font": "~14.0.12",
+    "expo-image-picker": "~17.0.11",
     "expo-linking": "~8.0.12",
     "expo-router": "~6.0.24",
     "expo-secure-store": "~15.0.8",
