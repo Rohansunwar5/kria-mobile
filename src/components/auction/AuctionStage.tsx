@@ -28,13 +28,16 @@ export function AuctionStage({ player, status }: { player: AuctionPlayer | null;
   const prevBid = useRef(bid);
 
   useEffect(() => {
+    let anim: Animated.CompositeAnimation | undefined;
     if (bid > prevBid.current && prevBid.current > 0) {
-      Animated.sequence([
+      anim = Animated.sequence([
         Animated.timing(scale, { toValue: 1.08, duration: 180, useNativeDriver: true }),
         Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
-      ]).start();
+      ]);
+      anim.start();
     }
     prevBid.current = bid;
+    return () => anim?.stop();
   }, [bid, scale]);
 
   if (!player) {

@@ -13,10 +13,12 @@ export function SoldCelebration({ playerName, teamName, teamColor, soldPrice }: 
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.parallel([
+    const anim = Animated.parallel([
       Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 6 }),
       Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
-    ]).start();
+    ]);
+    anim.start();
+    return () => anim.stop();
   }, [scale, opacity]);
 
   return (
