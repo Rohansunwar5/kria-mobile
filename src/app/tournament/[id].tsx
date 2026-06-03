@@ -13,9 +13,10 @@ import { AwardsTab } from '@/components/tournament/AwardsTab';
 import { CategoriesTab } from '@/components/tournament/CategoriesTab';
 import { PlayersTab } from '@/components/tournament/PlayersTab';
 import { TeamsTab } from '@/components/tournament/TeamsTab';
+import { AuctionTab } from '@/components/tournament/AuctionTab';
 
-type TabKey = 'overview' | 'categories' | 'players' | 'teams' | 'awards';
-const TABS: TabKey[] = ['overview', 'categories', 'players', 'teams', 'awards'];
+type TabKey = 'overview' | 'categories' | 'auction' | 'players' | 'teams' | 'awards';
+const TABS: TabKey[] = ['overview', 'categories', 'auction', 'players', 'teams', 'awards'];
 
 export default function TournamentDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -108,6 +109,9 @@ export default function TournamentDetail() {
         )}
         {activeTab === 'categories' && id && (
           <CategoriesTab tournamentId={id} tournamentStatus={tournament.status} />
+        )}
+        {activeTab === 'auction' && id && (
+          <AuctionTab tournamentId={id} categories={categories} />
         )}
         {activeTab === 'players' && <PlayersTab />}
         {activeTab === 'teams' && <TeamsTab myTeam={myTeam} />}
