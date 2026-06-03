@@ -8,7 +8,7 @@ import { MatchCard } from '@/components/bracket/MatchCard';
 import { RoundSelector } from '@/components/bracket/RoundSelector';
 import { StandingsTable } from '@/components/bracket/StandingsTable';
 import { FixturesList } from '@/components/bracket/FixturesList';
-import { BracketEmpty, TeamLeagueNotice } from '@/components/bracket/BracketNotices';
+import { BracketEmpty, BracketError, TeamLeagueNotice } from '@/components/bracket/BracketNotices';
 
 function BackBar({ onBack }: { onBack: () => void }) {
   return (
@@ -72,7 +72,18 @@ export default function BracketScreen() {
 
   const refresh = <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#F97316" />;
 
-  if (error || !data || data.matches.length === 0) {
+  if (error || !data) {
+    return (
+      <Frame>
+        <BackBar onBack={back} />
+        <ScrollView refreshControl={refresh} contentContainerStyle={{ flexGrow: 1 }}>
+          <BracketError />
+        </ScrollView>
+      </Frame>
+    );
+  }
+
+  if (data.matches.length === 0) {
     return (
       <Frame>
         <BackBar onBack={back} />

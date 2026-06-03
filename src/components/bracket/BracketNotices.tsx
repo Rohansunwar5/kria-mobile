@@ -22,3 +22,14 @@ export function TeamLeagueNotice() {
     </View>
   );
 }
+
+export function BracketError() {
+  return (
+    <View className="m-4 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-10">
+      <Text className="text-4xl">⚠️</Text>
+      <Text className="text-center font-montserrat text-gray-400">
+        Couldn't load the bracket. Pull down to retry.
+      </Text>
+    </View>
+  );
+}
