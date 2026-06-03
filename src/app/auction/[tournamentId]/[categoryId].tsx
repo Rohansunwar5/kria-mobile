@@ -22,6 +22,14 @@ function BackBar({ title, onBack }: { title: string; onBack: () => void }) {
   );
 }
 
+function Frame({ children }: { children: React.ReactNode }) {
+  return (
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#111111' }}>
+      <View className="flex-1 bg-ink">{children}</View>
+    </SafeAreaView>
+  );
+}
+
 export default function AuctionBroadcast() {
   const { tournamentId, categoryId } = useLocalSearchParams<{ tournamentId: string; categoryId: string }>();
   const router = useRouter();
@@ -30,12 +38,6 @@ export default function AuctionBroadcast() {
   const tournamentName = data?.tournament?.name || 'Auction';
   const categoryName = data?.category?.name || '';
   const back = () => router.back();
-
-  const Frame = ({ children }: { children: React.ReactNode }) => (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#111111' }}>
-      <View className="flex-1 bg-ink">{children}</View>
-    </SafeAreaView>
-  );
 
   if (loading) {
     return (
@@ -76,16 +78,22 @@ export default function AuctionBroadcast() {
     );
   }
 
-  if (status.status === 'sold' && status.lastSoldResult) {
+  if (status.status === 'sold') {
     return (
       <Frame>
         <BackBar title={tournamentName} onBack={back} />
-        <SoldCelebration
-          playerName={status.lastSoldResult.playerName}
-          teamName={status.lastSoldResult.teamName}
-          teamColor={status.lastSoldResult.teamColor}
-          soldPrice={status.lastSoldResult.soldPrice}
-        />
+        {status.lastSoldResult ? (
+          <SoldCelebration
+            playerName={status.lastSoldResult.playerName}
+            teamName={status.lastSoldResult.teamName}
+            teamColor={status.lastSoldResult.teamColor}
+            soldPrice={status.lastSoldResult.soldPrice}
+          />
+        ) : (
+          <View className="flex-1 items-center justify-center">
+            <Text className="font-oswald text-2xl uppercase tracking-widest text-emerald-400">Sold</Text>
+          </View>
+        )}
       </Frame>
     );
   }
