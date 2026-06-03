@@ -3,9 +3,9 @@ import { useRouter } from 'expo-router';
 import { Category } from '@/store/slices/registrationSlice';
 
 function statusConfig(status: Category['status']) {
-  if (status === 'auction_in_progress') return { label: 'Live Now', cls: 'border-red-500/20 bg-red-500/10 text-red-400', live: true };
-  if (status === 'ongoing' || status === 'completed') return { label: 'Completed', cls: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-400', live: false };
-  return { label: 'Upcoming', cls: 'border-white/10 bg-white/5 text-gray-400', live: false };
+  if (status === 'auction_in_progress') return { label: 'Live Now', cls: 'border-red-500/20 bg-red-500/10', textCls: 'text-red-400', live: true };
+  if (status === 'ongoing' || status === 'completed') return { label: 'Completed', cls: 'border-emerald-400/20 bg-emerald-400/10', textCls: 'text-emerald-400', live: false };
+  return { label: 'Upcoming', cls: 'border-white/10 bg-white/5', textCls: 'text-gray-400', live: false };
 }
 
 export function AuctionTab({ tournamentId, categories }: { tournamentId: string; categories: Category[] }) {
@@ -30,7 +30,7 @@ export function AuctionTab({ tournamentId, categories }: { tournamentId: string;
               <Text className="font-oswald text-lg font-bold uppercase text-white" numberOfLines={1}>{cat.name}</Text>
               <View className={`flex-row items-center gap-1.5 rounded-full border px-2.5 py-1 ${cfg.cls}`}>
                 {cfg.live && <View className="h-1.5 w-1.5 rounded-full bg-red-400" />}
-                <Text className={`font-montserrat text-[10px] font-bold uppercase ${cfg.cls.split(' ').pop()}`}>{cfg.label}</Text>
+                <Text className={`font-montserrat text-[10px] font-bold uppercase ${cfg.textCls}`}>{cfg.label}</Text>
               </View>
             </View>
             <Pressable
