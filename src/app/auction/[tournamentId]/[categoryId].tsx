@@ -33,7 +33,7 @@ function Frame({ children }: { children: React.ReactNode }) {
 export default function AuctionBroadcast() {
   const { tournamentId, categoryId } = useLocalSearchParams<{ tournamentId: string; categoryId: string }>();
   const router = useRouter();
-  const { data, soldLog, loading, error } = useAuctionSocket(tournamentId, categoryId);
+  const { data, soldLog, loading, error, reload } = useAuctionSocket(tournamentId, categoryId);
 
   const tournamentName = data?.tournament?.name || 'Auction';
   const categoryName = data?.category?.name || '';
@@ -42,6 +42,7 @@ export default function AuctionBroadcast() {
   if (loading) {
     return (
       <Frame>
+        <BackBar title="Auction" onBack={back} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color="#F97316" size="large" />
         </View>
@@ -53,8 +54,11 @@ export default function AuctionBroadcast() {
     return (
       <Frame>
         <BackBar title="Auction" onBack={back} />
-        <View className="flex-1 items-center justify-center px-8">
+        <View className="flex-1 items-center justify-center gap-4 px-8">
           <Text className="font-montserrat text-gray-400">Auction unavailable.</Text>
+          <Pressable onPress={() => reload()} className="rounded-xl bg-brand px-5 py-2.5">
+            <Text className="font-montserrat text-sm font-bold uppercase text-white">Retry</Text>
+          </Pressable>
         </View>
       </Frame>
     );

@@ -59,6 +59,9 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
       socket.emit('leave:auction', { tournamentId, categoryId });
       socket.off('auction:update', apply);
       socket.off('connect', onReconnect);
+      // Sole socket consumer in the app today, so disconnecting on unmount is safe.
+      // If another feature (e.g. live bracket/scoreboard) starts sharing this singleton,
+      // move connection lifecycle to an app-level owner instead of disconnecting here.
       socket.disconnect();
     };
   }, [tournamentId, categoryId, load]);
