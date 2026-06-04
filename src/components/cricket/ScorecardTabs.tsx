@@ -106,7 +106,8 @@ export function ScorecardTabs({
   live: LiveState | null;
 }) {
   const hasTwo = !!innings1 && !!innings2;
-  const [inningsView, setInningsView] = useState<1 | 2>(currentInnings);
+  const [inningsOverride, setInningsOverride] = useState<1 | 2 | null>(null);
+  const inningsView = inningsOverride ?? currentInnings;
   const [sub, setSub] = useState<SubTab>('batting');
   const innings = inningsView === 1 ? innings1 : innings2;
   if (!innings) return null;
@@ -116,7 +117,7 @@ export function ScorecardTabs({
       {hasTwo && (
         <View className="flex-row gap-2">
           {[1, 2].map((n) => (
-            <Pressable key={n} onPress={() => setInningsView(n as 1 | 2)} className={`rounded-lg px-3 py-1.5 ${inningsView === n ? 'bg-white/10' : ''}`}>
+            <Pressable key={n} onPress={() => setInningsOverride(n as 1 | 2)} className={`rounded-lg px-3 py-1.5 ${inningsView === n ? 'bg-white/10' : ''}`}>
               <Text className={`font-montserrat text-xs ${inningsView === n ? 'text-white' : 'text-gray-500'}`}>Innings {n}</Text>
             </Pressable>
           ))}
