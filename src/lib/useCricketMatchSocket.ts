@@ -20,6 +20,7 @@ export function useCricketMatchSocket(matchId?: string) {
     error: false,
   });
   const lastTally = useRef<string>('');
+  const ready = useRef<boolean>(false);
 
   const loadScorecard = useCallback(async (id: string) => {
     try {
@@ -38,6 +39,7 @@ export function useCricketMatchSocket(matchId?: string) {
         getLiveState(matchId).catch(() => null),
       ]);
       lastTally.current = tallyKey(live);
+      ready.current = true;
       setState((s) => ({ ...s, match, live, loading: false, error: false }));
       await loadScorecard(matchId);
     } catch {
@@ -54,7 +56,7 @@ export function useCricketMatchSocket(matchId?: string) {
       if (!live || !active) return;
       const key = tallyKey(live);
       setState((s) => ({ ...s, live }));
-      if (key !== lastTally.current) {
+      if (ready.current && key !== lastTally.current) {
         lastTally.current = key;
         loadScorecard(matchId);
       }
@@ -70,6 +72,7 @@ export function useCricketMatchSocket(matchId?: string) {
 
     return () => {
       active = false;
+      ready.current = false;
       socket.emit('leave:match', { matchId });
       socket.off('ball:recorded', onBall);
       socket.off('connect', onReconnect);
