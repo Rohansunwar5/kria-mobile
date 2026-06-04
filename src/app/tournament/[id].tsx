@@ -65,6 +65,8 @@ export default function TournamentDetail() {
   return (
     <Screen>
       <ScrollView stickyHeaderIndices={[1]}>
+        {/* Hero + Live-Now banner wrapped as one child so the sticky tab bar stays at index 1 */}
+        <View>
         {/* Hero */}
         <View className="relative h-64 w-full">
           {tournament.bannerImage ? (
@@ -96,6 +98,7 @@ export default function TournamentDetail() {
 
         {/* Live-Now banner (cricket only) */}
         {id && <LiveNowBanner tournamentId={id} sport={tournament.sport} />}
+        </View>
 
         {/* Sticky tab bar */}
         <View className="border-b border-white/10 bg-ink">
