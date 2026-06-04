@@ -15,6 +15,7 @@ import { PlayersTab } from '@/components/tournament/PlayersTab';
 import { TeamsTab } from '@/components/tournament/TeamsTab';
 import { AuctionTab } from '@/components/tournament/AuctionTab';
 import { BracketTab } from '@/components/tournament/BracketTab';
+import { LiveNowBanner } from '@/components/tournament/LiveNowBanner';
 
 type TabKey = 'overview' | 'categories' | 'auction' | 'bracket' | 'players' | 'teams' | 'awards';
 const TABS: TabKey[] = ['overview', 'categories', 'auction', 'bracket', 'players', 'teams', 'awards'];
@@ -92,6 +93,9 @@ export default function TournamentDetail() {
             </Text>
           </View>
         </View>
+
+        {/* Live-Now banner (cricket only) */}
+        {id && <LiveNowBanner tournamentId={id} sport={tournament.sport} />}
 
         {/* Sticky tab bar */}
         <View className="border-b border-white/10 bg-ink">
