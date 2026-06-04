@@ -1,4 +1,5 @@
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Match } from '@/api/match';
 import { Competitor, getCompetitors } from '@/lib/bracketView';
 
@@ -34,6 +35,7 @@ function CompetitorRow({ c, competitorType }: { c: Competitor; competitorType: '
 }
 
 export function MatchCard({ match, competitorType }: { match: Match; competitorType: 'player' | 'team' }) {
+  const router = useRouter();
   const { c1, c2 } = getCompetitors(match, competitorType);
   const badge = statusBadge(match, c1.isTBD || c2.isTBD);
   // Per-game chips render only for badminton (cricket matches carry no gameScores).
@@ -42,8 +44,11 @@ export function MatchCard({ match, competitorType }: { match: Match; competitorT
     .sort((a, b) => a.gameNumber - b.gameNumber)
     .map((g) => `${g.team1Score}-${g.team2Score}`);
 
-  return (
-    <View className={`overflow-hidden rounded-xl border ${badge.live ? 'border-red-500/40' : 'border-white/10'} bg-white/5`}>
+  // Only cricket matches that are in progress have a live scoreboard to open.
+  const tappable = match.sportType === 'cricket' && match.status === 'in_progress';
+
+  const body = (
+    <>
       <View className="flex-row items-center justify-between border-b border-white/5 bg-black/20 px-3 py-1.5">
         <View className="flex-1 flex-row items-center gap-2">
           <Text className="font-mono text-[9px] tracking-widest text-gray-600">M{match.matchNumber}</Text>
@@ -57,6 +62,25 @@ export function MatchCard({ match, competitorType }: { match: Match; competitorT
       <CompetitorRow c={c1} competitorType={competitorType} />
       <View className="h-px bg-white/5" />
       <CompetitorRow c={c2} competitorType={competitorType} />
-    </View>
+      {tappable && (
+        <View className="border-t border-white/5 bg-red-500/5 px-3 py-1.5">
+          <Text className="font-montserrat text-[9px] font-bold uppercase tracking-widest text-red-400">Watch live →</Text>
+        </View>
+      )}
+    </>
   );
+
+  const containerCls = `overflow-hidden rounded-xl border ${badge.live ? 'border-red-500/40' : 'border-white/10'} bg-white/5`;
+
+  if (tappable) {
+    return (
+      <Pressable
+        onPress={() => router.push({ pathname: '/live/[matchId]', params: { matchId: match._id } })}
+        className={containerCls}
+      >
+        {body}
+      </Pressable>
+    );
+  }
+  return <View className={containerCls}>{body}</View>;
 }
