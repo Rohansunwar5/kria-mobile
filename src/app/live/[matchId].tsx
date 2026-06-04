@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -78,17 +78,31 @@ export default function LiveScreen() {
   const [sport, setSport] = useState<string | null>(null);
   const [resolving, setResolving] = useState(true);
   const [resolveErr, setResolveErr] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const reqId = useRef(0);
 
-  useEffect(() => {
-    let active = true;
+  const resolve = useCallback(async () => {
     if (!matchId) return;
+    const myReq = ++reqId.current;
     setResolving(true);
     setResolveErr(false);
-    resolveMatchSport(matchId)
-      .then((s) => { if (active) { setSport(s); setResolving(false); } })
-      .catch(() => { if (active) { setResolveErr(true); setResolving(false); } });
-    return () => { active = false; };
+    try {
+      const s = await resolveMatchSport(matchId);
+      if (reqId.current === myReq) setSport(s);
+    } catch {
+      if (reqId.current === myReq) setResolveErr(true);
+    } finally {
+      if (reqId.current === myReq) setResolving(false);
+    }
   }, [matchId]);
+
+  useEffect(() => { resolve(); }, [resolve]);
+
+  const onResolveRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await resolve();
+    setRefreshing(false);
+  }, [resolve]);
 
   if (!matchId) return <Frame><BackBar /></Frame>;
 
@@ -101,7 +115,17 @@ export default function LiveScreen() {
     );
   }
   if (resolveErr) {
-    return <Frame><BackBar /><CricketError /></Frame>;
+    return (
+      <Frame>
+        <BackBar />
+        <ScrollView
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onResolveRefresh} tintColor="#F97316" />}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <CricketError />
+        </ScrollView>
+      </Frame>
+    );
   }
   if (sport !== 'cricket') {
     return <Frame><BackBar /><UnsupportedSport /></Frame>;
