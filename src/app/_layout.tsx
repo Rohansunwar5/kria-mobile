@@ -45,9 +45,14 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
     const isPublic = root !== 'undefined' && PUBLIC_ROOTS.includes(root);
 
     if (user) {
-      // A user who just signed up via onboarding stays in the flow until creating/welcome-done finish.
-      if (pendingOnboarding && root === '(onboarding)') return;
-      if (root === 'undefined' || root === '(auth)' || (root === '(onboarding)' && !pendingOnboarding)) {
+      if (pendingOnboarding) {
+        // Just signed up via onboarding: move from (auth) into the creating screen,
+        // and stay within (onboarding) until creating/welcome-done clear the flag.
+        if (root === '(onboarding)') return;
+        router.replace('/(onboarding)/creating');
+        return;
+      }
+      if (root === 'undefined' || root === '(auth)' || root === '(onboarding)') {
         router.replace('/(tabs)/home');
       }
     } else if (!isPublic) {
