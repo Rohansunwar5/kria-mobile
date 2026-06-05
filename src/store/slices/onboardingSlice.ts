@@ -1,15 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'competitive';
-
 export interface OnboardingState {
   sport: string | null;
   fullName: string;
   age: number | null;
   gender: string | null;
   photoUri: string | null;
-  level: SkillLevel | null;
-  motivations: string[];
 }
 
 export const initialOnboardingState: OnboardingState = {
@@ -18,8 +14,6 @@ export const initialOnboardingState: OnboardingState = {
   age: null,
   gender: null,
   photoUri: null,
-  level: null,
-  motivations: [],
 };
 
 const onboardingSlice = createSlice({
@@ -35,20 +29,10 @@ const onboardingSlice = createSlice({
     ) => {
       Object.assign(state, action.payload);
     },
-    setLevel: (state, action: PayloadAction<SkillLevel>) => {
-      state.level = action.payload;
-    },
-    toggleMotivation: (state, action: PayloadAction<string>) => {
-      const key = action.payload;
-      state.motivations = state.motivations.includes(key)
-        ? state.motivations.filter((m) => m !== key)
-        : [...state.motivations, key];
-    },
     resetOnboarding: () => initialOnboardingState,
   },
 });
 
-export const { setSport, setProfileFields, setLevel, toggleMotivation, resetOnboarding } =
-  onboardingSlice.actions;
+export const { setSport, setProfileFields, resetOnboarding } = onboardingSlice.actions;
 
 export default onboardingSlice.reducer;

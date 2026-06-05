@@ -1,8 +1,6 @@
 import reducer, {
   setSport,
   setProfileFields,
-  setLevel,
-  toggleMotivation,
   resetOnboarding,
   initialOnboardingState,
 } from '@/store/slices/onboardingSlice';
@@ -20,16 +18,9 @@ describe('onboardingSlice', () => {
     expect(s.gender).toBeNull();
   });
 
-  it('sets level', () => {
-    const s = reducer(initialOnboardingState, setLevel('intermediate'));
-    expect(s.level).toBe('intermediate');
-  });
-
-  it('toggles motivation on and off', () => {
-    const on = reducer(initialOnboardingState, toggleMotivation('winning'));
-    expect(on.motivations).toEqual(['winning']);
-    const off = reducer(on, toggleMotivation('winning'));
-    expect(off.motivations).toEqual([]);
+  it('does not expose level or motivations on state', () => {
+    expect(initialOnboardingState).not.toHaveProperty('level');
+    expect(initialOnboardingState).not.toHaveProperty('motivations');
   });
 
   it('resets to initial state', () => {
