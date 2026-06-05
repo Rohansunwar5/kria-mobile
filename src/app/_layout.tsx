@@ -52,7 +52,9 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         router.replace('/(onboarding)/creating');
         return;
       }
-      if (root === 'undefined' || root === '(auth)' || root === '(onboarding)') {
+      // Don't bounce a finished onboarding user off the (onboarding) welcome-done screen —
+      // its "Explore Tournaments" button handles the exit (and resetOnboarding) itself.
+      if (root === 'undefined' || root === '(auth)') {
         router.replace('/(tabs)/home');
       }
     } else if (!isPublic) {
