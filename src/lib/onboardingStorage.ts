@@ -1,11 +1,11 @@
-import * as SecureStore from 'expo-secure-store';
+import { getItem, setItem } from './secureStore';
 
 const ONBOARDING_KEY = 'onboardingComplete';
 
 export async function getOnboardingComplete(): Promise<boolean> {
-  return (await SecureStore.getItemAsync(ONBOARDING_KEY)) === 'true';
+  return (await getItem(ONBOARDING_KEY)) === 'true';
 }
 
 export async function setOnboardingComplete(): Promise<void> {
-  await SecureStore.setItemAsync(ONBOARDING_KEY, 'true');
+  await setItem(ONBOARDING_KEY, 'true');
 }
