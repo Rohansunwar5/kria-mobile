@@ -19,6 +19,9 @@ export default function CardPreview() {
 
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-ink px-6">
+      <View className="py-4">
+        <StepDots total={5} current={4} />
+      </View>
       <View className="flex-1 justify-center">
         <PlayerIDCard
           name={fullName || 'Your Name'}
