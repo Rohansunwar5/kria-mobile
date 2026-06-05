@@ -8,25 +8,19 @@ import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
 import { StepDots } from '@/components/onboarding/StepDots';
 import { SPORT_LABELS } from '@/lib/sports';
 
-function titleCase(s?: string | null) {
-  if (!s) return '';
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
 export default function CardPreview() {
   const router = useRouter();
-  const { fullName, sport, level, photoUri } = useAppSelector((s) => s.onboarding);
+  const { fullName, sport, photoUri } = useAppSelector((s) => s.onboarding);
 
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-ink px-6">
       <View className="py-4">
-        <StepDots total={5} current={4} />
+        <StepDots total={3} current={1} />
       </View>
       <View className="flex-1 justify-center">
         <PlayerIDCard
           name={fullName || 'Your Name'}
           sport={SPORT_LABELS[sport || ''] || 'Badminton'}
-          level={titleCase(level)}
           photoUri={photoUri}
           locked="preview"
         />

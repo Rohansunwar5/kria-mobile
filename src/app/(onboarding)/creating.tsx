@@ -8,7 +8,7 @@ import { updateProfile, uploadPlayerProfileImage, endOnboardingHandoff } from '@
 import { setOnboardingComplete } from '@/lib/onboardingStorage';
 import { ProgressStep } from '@/components/onboarding/ProgressStep';
 
-const STEPS = ['Profile Created', 'Skill Rating Set', 'Tournament Feed Ready', 'Rankings Enabled'];
+const STEPS = ['Profile Created', 'Player Profile Ready', 'Tournament Feed Ready', 'Rankings Enabled'];
 
 function ageToDob(age: number | null): string | undefined {
   if (!age) return undefined;
