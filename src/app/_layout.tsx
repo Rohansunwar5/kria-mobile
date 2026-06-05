@@ -1,5 +1,5 @@
 import '../global.css';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { bootstrapAuth, logout } from '@/store/slices/authSlice';
 import { setUnauthorizedHandler } from '@/api/axios';
 import { colors } from '@/lib/theme';
+import { getOnboardingComplete } from '@/lib/onboardingStorage';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -18,30 +19,41 @@ setUnauthorizedHandler(() => {
   store.dispatch(logout());
 });
 
-const PUBLIC_ROOTS = ['(auth)', 'auction', 'bracket', 'live'];
+const PUBLIC_ROOTS = ['(auth)', '(onboarding)', 'auction', 'bracket', 'live'];
 
 function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const segments = useSegments();
   const { bootstrapped, user } = useAppSelector((s) => s.auth);
+  const pendingOnboarding = useAppSelector((s) => s.auth.pendingOnboarding);
+  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    getOnboardingComplete().then(setOnboardingDone);
+  }, []);
 
   useEffect(() => {
     dispatch(bootstrapAuth());
   }, [dispatch]);
 
-  const ready = fontsLoaded && bootstrapped;
+  const ready = fontsLoaded && bootstrapped && onboardingDone !== null;
 
   useEffect(() => {
     if (!ready) return;
     const root = String(segments[0]);
     const isPublic = root !== 'undefined' && PUBLIC_ROOTS.includes(root);
+
     if (user) {
-      if (root === 'undefined' || root === '(auth)') router.replace('/(tabs)/home');
+      // A user who just signed up via onboarding stays in the flow until creating/welcome-done finish.
+      if (pendingOnboarding && root === '(onboarding)') return;
+      if (root === 'undefined' || root === '(auth)' || (root === '(onboarding)' && !pendingOnboarding)) {
+        router.replace('/(tabs)/home');
+      }
     } else if (!isPublic) {
-      router.replace('/(auth)/login');
+      router.replace(onboardingDone ? '/(auth)/login' : '/(onboarding)/welcome');
     }
-  }, [ready, user, segments, router]);
+  }, [ready, user, segments, router, pendingOnboarding, onboardingDone]);
 
   const onLayout = useCallback(async () => {
     if (ready) await SplashScreen.hideAsync();
@@ -54,6 +66,7 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(onboarding)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="tournament/[id]" />
         <Stack.Screen name="profile" />
