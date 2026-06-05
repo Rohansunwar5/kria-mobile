@@ -39,6 +39,9 @@ yarn-error.*
 # test coverage
 coverage/
 
+# superpowers brainstorm mockups
+.superpowers/
+
 example
 
 # generated native folders
