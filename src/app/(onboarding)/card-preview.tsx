@@ -34,7 +34,7 @@ export default function CardPreview() {
           photoUri={photoUri}
           locked="preview"
         />
-        <Text className="mt-8 text-center font-oswald text-2xl uppercase text-white">Let's change that.</Text>
+        <Text className="mt-8 text-center font-oswald text-2xl uppercase text-white">{"Let's change that."}</Text>
       </View>
       <View className="py-4">
         <OnboardingButton label="Continue" onPress={() => router.push('/(onboarding)/auth')} />

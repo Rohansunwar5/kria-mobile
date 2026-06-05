@@ -25,7 +25,7 @@ export default function Level() {
       <View className="py-4">
         <StepDots total={5} current={2} />
       </View>
-      <Text className="mb-6 font-oswald text-4xl uppercase text-white">What's your level?</Text>
+      <Text className="mb-6 font-oswald text-4xl uppercase text-white">{"What's your level?"}</Text>
       <ScrollView className="flex-1" contentContainerStyle={{ gap: 12 }}>
         {LEVELS.map((lv) => (
           <SelectableCard
