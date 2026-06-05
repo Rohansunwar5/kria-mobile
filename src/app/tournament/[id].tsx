@@ -15,10 +15,10 @@ import { PlayersTab } from '@/components/tournament/PlayersTab';
 import { TeamsTab } from '@/components/tournament/TeamsTab';
 import { AuctionTab } from '@/components/tournament/AuctionTab';
 import { BracketTab } from '@/components/tournament/BracketTab';
+import { TeamLeagueTab } from '@/components/tournament/TeamLeagueTab';
 import { LiveNowBanner } from '@/components/tournament/LiveNowBanner';
 
-type TabKey = 'overview' | 'categories' | 'auction' | 'bracket' | 'players' | 'teams' | 'awards';
-const TABS: TabKey[] = ['overview', 'categories', 'auction', 'bracket', 'players', 'teams', 'awards'];
+type TabKey = 'overview' | 'categories' | 'auction' | 'bracket' | 'teamLeague' | 'players' | 'teams' | 'awards';
 
 export default function TournamentDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -26,6 +26,8 @@ export default function TournamentDetail() {
   const dispatch = useAppDispatch();
   const { currentTournament: tournament, isLoading, error } = useAppSelector((s) => s.tournament);
   const { categories, myRegistrations, isLoading: isRegLoading } = useAppSelector((s) => s.registration);
+  const hasTeamLeague = categories.some((c) => c.bracketType === 'team_league');
+  const TABS: TabKey[] = ['overview', 'categories', 'auction', 'bracket', ...(hasTeamLeague ? (['teamLeague'] as TabKey[]) : []), 'players', 'teams', 'awards'];
   const { teams, isLoading: isTeamsLoading } = useAppSelector((s) => s.team);
   const { user } = useAppSelector((s) => s.auth);
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
@@ -105,7 +107,7 @@ export default function TournamentDetail() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10, gap: 8 }}>
             {TABS.map((tab) => (
               <Pressable key={tab} onPress={() => setActiveTab(tab)} className={`rounded-xl px-5 py-2 ${activeTab === tab ? 'bg-white/10' : ''}`}>
-                <Text className={`font-montserrat text-sm capitalize ${activeTab === tab ? 'text-white' : 'text-gray-400'}`}>{tab}</Text>
+                <Text className={`font-montserrat text-sm capitalize ${activeTab === tab ? 'text-white' : 'text-gray-400'}`}>{tab === 'teamLeague' ? 'Team League' : tab}</Text>
               </Pressable>
             ))}
           </ScrollView>
@@ -123,6 +125,9 @@ export default function TournamentDetail() {
         )}
         {activeTab === 'bracket' && id && (
           <BracketTab tournamentId={id} categories={categories} />
+        )}
+        {activeTab === 'teamLeague' && id && (
+          <TeamLeagueTab tournamentId={id} categories={categories} />
         )}
         {activeTab === 'players' && <PlayersTab />}
         {activeTab === 'teams' && <TeamsTab myTeam={myTeam} />}
