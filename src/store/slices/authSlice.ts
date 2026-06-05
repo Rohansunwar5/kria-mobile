@@ -43,6 +43,7 @@ interface AuthState {
   playerStats: PlayerStats | null;
   statsLoading: boolean;
   bootstrapped: boolean;
+  pendingOnboarding: boolean;
 }
 
 const initialState: AuthState = {
@@ -56,6 +57,7 @@ const initialState: AuthState = {
   playerStats: null,
   statsLoading: false,
   bootstrapped: false,
+  pendingOnboarding: false,
 };
 
 const extractError = (err: any) =>
@@ -247,6 +249,12 @@ export const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    beginOnboardingHandoff: (state) => {
+      state.pendingOnboarding = true;
+    },
+    endOnboardingHandoff: (state) => {
+      state.pendingOnboarding = false;
+    },
   },
   extraReducers: (builder) => {
     const handleLoginSuccess = (state: AuthState, action: any) => {
@@ -344,6 +352,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { resetRegistration, clearError } = authSlice.actions;
+export const { resetRegistration, clearError, beginOnboardingHandoff, endOnboardingHandoff } = authSlice.actions;
 
 export default authSlice.reducer;
