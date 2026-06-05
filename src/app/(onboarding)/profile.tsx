@@ -35,7 +35,7 @@ export default function Profile() {
 
   const onContinue = () => {
     dispatch(setProfileFields({ fullName: name.trim(), age: ageNum, gender: genderVal || null }));
-    router.push('/(onboarding)/level');
+    router.push('/(onboarding)/card-preview');
   };
 
   const input = 'mb-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-montserrat text-white';
@@ -43,7 +43,7 @@ export default function Profile() {
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-ink px-6">
       <View className="py-4">
-        <StepDots total={5} current={1} />
+        <StepDots total={3} current={1} />
       </View>
       <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
         <Text className="mb-6 font-oswald text-4xl uppercase text-white">Tell us about yourself</Text>
