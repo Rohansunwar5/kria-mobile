@@ -8,15 +8,10 @@ import { PlayerIDCard } from '@/components/onboarding/PlayerIDCard';
 import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
 import { SPORT_LABELS } from '@/lib/sports';
 
-function titleCase(s?: string | null) {
-  if (!s) return '';
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
 export default function WelcomeDone() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { fullName, sport, level, photoUri } = useAppSelector((s) => s.onboarding);
+  const { fullName, sport, photoUri } = useAppSelector((s) => s.onboarding);
 
   const explore = () => {
     dispatch(resetOnboarding());
@@ -33,7 +28,6 @@ export default function WelcomeDone() {
         <PlayerIDCard
           name={fullName || 'Your Name'}
           sport={SPORT_LABELS[sport || ''] || 'Badminton'}
-          level={titleCase(level)}
           photoUri={photoUri}
           locked="unranked"
         />
