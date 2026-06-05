@@ -26,6 +26,14 @@ export function RegistrationCard({ reg, onWithdraw }: { reg: Registration; onWit
         <Pressable onPress={() => router.push(`/tournament/${reg.tournamentId}`)} className="flex-1 items-center rounded-lg bg-white/10 py-2 active:bg-white/20">
           <Text className="font-montserrat text-sm text-white">View</Text>
         </Pressable>
+        {(reg.paymentStatus === 'pending' || reg.paymentStatus === 'failed') && (
+          <Pressable
+            onPress={() => router.push({ pathname: '/checkout/[tournamentId]/[categoryId]', params: { tournamentId: reg.tournamentId, categoryId: reg.categoryId } })}
+            className="flex-1 items-center rounded-lg bg-brand py-2 active:bg-brand/80"
+          >
+            <Text className="font-montserrat text-sm font-bold text-white">Pay</Text>
+          </Pressable>
+        )}
         {canWithdraw && (
           <Pressable onPress={() => onWithdraw(reg._id)} className="flex-1 items-center rounded-lg border border-red-500/40 py-2 active:bg-red-500/10">
             <Text className="font-montserrat text-sm text-red-400">Withdraw</Text>
