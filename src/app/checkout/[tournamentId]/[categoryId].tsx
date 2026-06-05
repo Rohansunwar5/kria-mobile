@@ -108,6 +108,9 @@ export default function CheckoutScreen() {
   }
 
   if (checkoutState === 'result') {
+    if (resultKind === null) {
+      return <Frame><View className="flex-1 items-center justify-center"><ActivityIndicator color="#F97316" size="large" /></View></Frame>;
+    }
     const success = resultKind === 'success';
     return (
       <Frame>
