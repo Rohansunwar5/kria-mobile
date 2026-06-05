@@ -6,6 +6,7 @@ export default function OnboardingLayout() {
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#111111' } }}>
       <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
       <Stack.Screen name="creating" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="welcome-done" options={{ gestureEnabled: false }} />
     </Stack>
   );
 }
