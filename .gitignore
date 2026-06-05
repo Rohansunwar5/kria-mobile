@@ -42,6 +42,9 @@ coverage/
 # superpowers brainstorm mockups
 .superpowers/
 
+# claude worktrees
+.claude/worktrees/
+
 example
 
 # generated native folders
