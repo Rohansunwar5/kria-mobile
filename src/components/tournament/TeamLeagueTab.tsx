@@ -21,8 +21,7 @@ export function TeamLeagueTab({ tournamentId, categories }: { tournamentId: stri
         <View key={cat._id} className="flex-row items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
           <Text className="flex-1 font-oswald text-lg font-bold uppercase text-white" numberOfLines={1}>{cat.name}</Text>
           <Pressable
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onPress={() => router.push({ pathname: '/team-league/[tournamentId]/[categoryId]' as any, params: { tournamentId, categoryId: cat._id } })}
+            onPress={() => router.push({ pathname: '/team-league/[tournamentId]/[categoryId]', params: { tournamentId, categoryId: cat._id } })}
             className="rounded-xl bg-brand px-4 py-2"
           >
             <Text className="font-montserrat text-xs font-bold uppercase text-white">View</Text>
