@@ -15,7 +15,11 @@ export function CategoriesTab({ tournamentId, tournamentStatus }: { tournamentId
 
   const openRegister = (cat: Category) => {
     if (!user) { router.push('/(auth)/login'); return; }
-    setSelected(cat);
+    if (cat.isPaidRegistration && cat.registrationFee > 0) {
+      router.push({ pathname: '/checkout/[tournamentId]/[categoryId]', params: { tournamentId, categoryId: cat._id } });
+    } else {
+      setSelected(cat);
+    }
   };
 
   if (categories.length === 0) {
