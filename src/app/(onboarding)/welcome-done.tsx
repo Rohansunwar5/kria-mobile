@@ -6,15 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { resetOnboarding } from '@/store/slices/onboardingSlice';
 import { PlayerIDCard } from '@/components/onboarding/PlayerIDCard';
 import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
-
-const SPORT_LABELS: Record<string, string> = {
-  badminton: 'Badminton',
-  cricket: 'Cricket',
-  football: 'Football',
-  table_tennis: 'Table Tennis',
-  tennis: 'Tennis',
-  kabaddi: 'Kabaddi',
-};
+import { SPORT_LABELS } from '@/lib/sports';
 
 export default function WelcomeDone() {
   const router = useRouter();

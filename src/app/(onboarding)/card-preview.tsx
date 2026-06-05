@@ -5,15 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppSelector } from '@/store/hooks';
 import { PlayerIDCard } from '@/components/onboarding/PlayerIDCard';
 import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
-
-const SPORT_LABELS: Record<string, string> = {
-  badminton: 'Badminton',
-  cricket: 'Cricket',
-  football: 'Football',
-  table_tennis: 'Table Tennis',
-  tennis: 'Tennis',
-  kabaddi: 'Kabaddi',
-};
+import { StepDots } from '@/components/onboarding/StepDots';
+import { SPORT_LABELS } from '@/lib/sports';
 
 function titleCase(s?: string | null) {
   if (!s) return '';
