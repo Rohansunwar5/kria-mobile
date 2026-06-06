@@ -20,7 +20,7 @@ export default function Welcome() {
             Join tournaments, get drafted into teams, and build your player profile.
           </Text>
           <View className="gap-3">
-            <OnboardingButton label="Get Started" onPress={() => router.push('/(onboarding)/sport')} />
+            <OnboardingButton label="Get Started" onPress={() => router.push('/(onboarding)/story')} />
             <OnboardingButton label="Sign In" variant="secondary" onPress={() => router.replace('/(auth)/login')} />
           </View>
         </SafeAreaView>
