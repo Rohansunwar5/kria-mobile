@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginUser, requestLoginOtp, verifyLoginOtp, clearError } from '@/store/slices/authSlice';
 import { AuthInput } from '@/components/auth/AuthInput';
+import { CloseButton } from '@/components/auth/CloseButton';
 import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
 
 type Mode = 'password' | 'otp';
@@ -47,7 +48,10 @@ export default function Login() {
             style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
           />
           <SafeAreaView edges={['top']} className="px-6">
-            <Text className="mt-4 font-oswald text-3xl uppercase tracking-wide text-brand">Kria</Text>
+            <View className="mt-4 flex-row items-center justify-between">
+              <Text className="font-oswald text-3xl uppercase tracking-wide text-brand">Kria</Text>
+              <CloseButton />
+            </View>
           </SafeAreaView>
           <View className="px-6 pb-2">
             <Text className="font-oswald text-5xl uppercase leading-[0.92] text-white">Welcome{'\n'}back.</Text>

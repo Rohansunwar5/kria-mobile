@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ImageBackground, View, AccessibilityInfo } from 'react-native';
+import { ImageBackground, View, Text, AccessibilityInfo } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -7,22 +7,22 @@ import Animated, {
   withRepeat,
   interpolate,
   Extrapolation,
-  SharedValue,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MOTION } from '@/lib/motion';
 
-interface Props {
+export interface Beat {
   source: string;
   kicker: string;
   headline: string;
-  // Word(s) within `headline` to render in the brand accent color.
-  accent: string;
+  accent: string; // word(s) within headline rendered in brand orange
   subtext: string;
-  index: number;
-  active: boolean;
-  scrollX: SharedValue<number>;
-  width: number;
+}
+
+interface Props {
+  beat: Beat;
+  // Changes whenever the active beat changes, used to retrigger the reveal.
+  beatKey: number;
 }
 
 // Splits a headline into segments, marking the accent run so it can be colored.
@@ -36,7 +36,7 @@ function segments(headline: string, accent: string): { text: string; accent: boo
   ].filter((s) => s.text.length > 0);
 }
 
-export function StoryBeat({ source, kicker, headline, accent, subtext, index, active, scrollX, width }: Props) {
+export function StoryBeat({ beat, beatKey }: Props) {
   const enter = useSharedValue(0);
   const zoom = useSharedValue(1);
   const reduceMotion = useSharedValue(false);
@@ -50,26 +50,17 @@ export function StoryBeat({ source, kicker, headline, accent, subtext, index, ac
     });
   }, [reduceMotion, zoom]);
 
+  // Retrigger the reveal each time the beat changes (crossfade in).
   useEffect(() => {
-    enter.value = active ? withTiming(1, { duration: MOTION.enterMs + 150 }) : 0;
-  }, [active, enter]);
+    enter.value = 0;
+    enter.value = withTiming(1, { duration: MOTION.enterMs + 150 });
+  }, [beatKey, enter]);
 
-  const imageStyle = useAnimatedStyle(() => {
-    const parallax = interpolate(
-      scrollX.value,
-      [(index - 1) * width, index * width, (index + 1) * width],
-      [width * 0.2, 0, -width * 0.2],
-      Extrapolation.CLAMP
-    );
-    return {
-      transform: [
-        { translateX: reduceMotion.value ? 0 : parallax },
-        { scale: reduceMotion.value ? 1 : zoom.value },
-      ],
-    };
-  });
+  const imageStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(enter.value, [0, 0.6], [0.4, 1], Extrapolation.CLAMP),
+    transform: [{ scale: reduceMotion.value ? 1 : zoom.value }],
+  }));
 
-  // Staggered reveal: kicker first, then headline, then subtext.
   const kickerStyle = useAnimatedStyle(() => ({
     opacity: interpolate(enter.value, [0, 0.5], [0, 1], Extrapolation.CLAMP),
     transform: [{ translateY: interpolate(enter.value, [0, 1], [20, 0], Extrapolation.CLAMP) }],
@@ -84,43 +75,50 @@ export function StoryBeat({ source, kicker, headline, accent, subtext, index, ac
   }));
 
   return (
-    <View style={{ width }} className="flex-1">
-      <Animated.View style={[{ flex: 1 }, imageStyle]}>
-        <ImageBackground source={{ uri: source }} className="flex-1" style={{ backgroundColor: '#111111' }} />
+    <View style={{ flex: 1, backgroundColor: '#111111' }}>
+      <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, imageStyle]}>
+        <ImageBackground source={{ uri: beat.source }} style={{ flex: 1, backgroundColor: '#111111' }} />
       </Animated.View>
 
-      {/* Full-height cinematic scrim: subtle at top, near-solid ink at the bottom. */}
+      {/* Cinematic scrim: subtle at top, near-solid ink at the bottom. */}
       <LinearGradient
-        colors={['rgba(17,17,17,0.35)', 'rgba(17,17,17,0.15)', 'rgba(17,17,17,0.85)', '#111111']}
+        colors={['rgba(17,17,17,0.40)', 'rgba(17,17,17,0.15)', 'rgba(17,17,17,0.88)', '#111111']}
         locations={[0, 0.35, 0.72, 1]}
         style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
       />
 
-      {/* Type block lifted into the lower-middle so the headline dominates. */}
-      <View className="absolute bottom-0 left-0 right-0 px-6 pb-48">
+      {/* Type block. All visual styles are INLINE — NativeWind className is not
+          reliably applied to Animated.* on web, which previously rendered the
+          headline as small black text. */}
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 24, paddingBottom: 200 }}>
         <Animated.Text
-          style={kickerStyle}
-          className="mb-4 font-oswald text-sm uppercase tracking-[4px] text-brand"
+          style={[
+            { fontFamily: 'Oswald_500Medium', fontSize: 13, letterSpacing: 4, color: '#F97316', textTransform: 'uppercase', marginBottom: 16 },
+            kickerStyle,
+          ]}
         >
-          {kicker}
+          {beat.kicker}
         </Animated.Text>
 
-        <Animated.Text
-          style={headlineStyle}
-          className="font-oswald text-6xl uppercase leading-[0.92] text-white"
-        >
-          {segments(headline, accent).map((seg, i) => (
-            <Animated.Text key={i} className={seg.accent ? 'text-brand' : 'text-white'}>
-              {seg.text}
-            </Animated.Text>
-          ))}
-        </Animated.Text>
+        <Animated.View style={headlineStyle}>
+          <Text
+            style={{ fontFamily: 'Oswald_500Medium', fontSize: 52, lineHeight: 50, color: '#FFFFFF', textTransform: 'uppercase' }}
+          >
+            {segments(beat.headline, beat.accent).map((seg, i) => (
+              <Text key={i} style={{ color: seg.accent ? '#F97316' : '#FFFFFF' }}>
+                {seg.text}
+              </Text>
+            ))}
+          </Text>
+        </Animated.View>
 
         <Animated.Text
-          style={subtextStyle}
-          className="mt-5 max-w-[300px] font-montserrat text-base leading-6 text-gray-300"
+          style={[
+            { fontFamily: 'Montserrat_400Regular', fontSize: 15, lineHeight: 23, color: '#D4D4D4', marginTop: 20, maxWidth: 320 },
+            subtextStyle,
+          ]}
         >
-          {subtext}
+          {beat.subtext}
         </Animated.Text>
       </View>
     </View>

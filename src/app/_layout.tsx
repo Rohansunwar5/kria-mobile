@@ -12,6 +12,7 @@ import { bootstrapAuth, logout } from '@/store/slices/authSlice';
 import { setUnauthorizedHandler } from '@/api/axios';
 import { colors } from '@/lib/theme';
 import { getOnboardingComplete } from '@/lib/onboardingStorage';
+import { BrandIntro } from '@/components/BrandIntro';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,6 +29,7 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
   const { bootstrapped, user } = useAppSelector((s) => s.auth);
   const pendingOnboarding = useAppSelector((s) => s.auth.pendingOnboarding);
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+  const [introDone, setIntroDone] = useState(false);
 
   useEffect(() => {
     getOnboardingComplete().then(setOnboardingDone);
@@ -83,6 +85,7 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="team-league/[tournamentId]/[categoryId]" />
         <Stack.Screen name="checkout/[tournamentId]/[categoryId]" />
       </Stack>
+      {!introDone ? <BrandIntro onDone={() => setIntroDone(true)} /> : null}
     </View>
   );
 }
