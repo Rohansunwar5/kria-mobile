@@ -43,7 +43,7 @@ export default function Profile() {
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-ink px-6">
       <View className="py-4">
-        <StepDots total={3} current={1} />
+        <StepDots total={2} current={0} />
       </View>
       <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
         <Text className="mb-6 font-oswald text-4xl uppercase text-white">Tell us about yourself</Text>
