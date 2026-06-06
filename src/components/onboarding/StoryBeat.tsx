@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ImageBackground, View, Text, AccessibilityInfo } from 'react-native';
+import { ImageBackground, View, AccessibilityInfo } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
