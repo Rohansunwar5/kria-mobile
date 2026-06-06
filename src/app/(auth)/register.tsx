@@ -3,10 +3,12 @@ import { View, Text, ImageBackground, KeyboardAvoidingView, Platform, ScrollView
 import { useRouter, Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { registerUser, clearError } from '@/store/slices/authSlice';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
+import { MOTION } from '@/lib/motion';
 
 const HERO = 'https://images.unsplash.com/photo-1613918431703-aa50889e3be9?auto=format&fit=crop&w=900&q=80';
 
@@ -38,26 +40,41 @@ export default function Register() {
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
         <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
-          <Text className="mb-6 font-oswald text-4xl uppercase text-white">Join the league.</Text>
+          <Animated.Text
+            entering={FadeInDown.duration(MOTION.enterMs)}
+            className="mb-6 font-oswald text-4xl uppercase text-white"
+          >
+            Join the league.
+          </Animated.Text>
 
-          <AuthInput label="First name" value={firstName} onChangeText={setFirstName} />
-          <AuthInput label="Last name" value={lastName} onChangeText={setLastName} />
-          <AuthInput
-            label="Email"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
-          />
-          <AuthInput label="Phone number" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
+          <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs)}>
+            <AuthInput label="First name" value={firstName} onChangeText={setFirstName} />
+          </Animated.View>
+          <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs * 2)}>
+            <AuthInput label="Last name" value={lastName} onChangeText={setLastName} />
+          </Animated.View>
+          <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs * 3)}>
+            <AuthInput
+              label="Email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
+            />
+          </Animated.View>
+          <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs * 4)}>
+            <AuthInput label="Phone number" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
+          </Animated.View>
 
           {error ? <Text className="mb-3 font-montserrat text-red-400">{error}</Text> : null}
 
-          <OnboardingButton
-            label="Continue"
-            loading={isLoading}
-            onPress={() => dispatch(registerUser({ data: { firstName, lastName, email, phone } }))}
-          />
+          <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs * 5)}>
+            <OnboardingButton
+              label="Continue"
+              loading={isLoading}
+              onPress={() => dispatch(registerUser({ data: { firstName, lastName, email, phone } }))}
+            />
+          </Animated.View>
 
           <Link href="/(auth)/login" className="mt-6 text-center font-montserrat text-[#aaa]">
             Already have an account? Log in

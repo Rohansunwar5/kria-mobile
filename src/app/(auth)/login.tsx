@@ -3,10 +3,12 @@ import { View, Text, Pressable, ImageBackground, KeyboardAvoidingView, Platform,
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginUser, requestLoginOtp, verifyLoginOtp, clearError } from '@/store/slices/authSlice';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
+import { MOTION } from '@/lib/motion';
 
 type Mode = 'password' | 'otp';
 
@@ -46,25 +48,34 @@ export default function Login() {
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
         <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
-          <Text className="mb-6 font-oswald text-4xl uppercase text-white">Welcome back.</Text>
+          <Animated.Text
+            entering={FadeInDown.duration(MOTION.enterMs)}
+            className="mb-6 font-oswald text-4xl uppercase text-white"
+          >
+            Welcome back.
+          </Animated.Text>
 
-          <AuthInput
-            label="Email"
-            placeholder="you@email.com"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
-          />
+          <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs)}>
+            <AuthInput
+              label="Email"
+              placeholder="you@email.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
+            />
+          </Animated.View>
 
           {mode === 'password' ? (
-            <AuthInput
-              label="Password"
-              placeholder="Your password"
-              secureToggle
-              value={password}
-              onChangeText={setPassword}
-            />
+            <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs * 2)}>
+              <AuthInput
+                label="Password"
+                placeholder="Your password"
+                secureToggle
+                value={password}
+                onChangeText={setPassword}
+              />
+            </Animated.View>
           ) : null}
 
           {mode === 'otp' && otpRequested ? (
@@ -79,7 +90,9 @@ export default function Login() {
 
           {error ? <Text className="mb-3 font-montserrat text-red-400">{error}</Text> : null}
 
-          <OnboardingButton label={ctaLabel} loading={isLoading} onPress={onCta} />
+          <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs * 3)}>
+            <OnboardingButton label={ctaLabel} loading={isLoading} onPress={onCta} />
+          </Animated.View>
 
           <Pressable
             className="mt-4 items-center"
