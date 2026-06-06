@@ -3,12 +3,10 @@ import { View, Text, Pressable, ImageBackground, KeyboardAvoidingView, Platform,
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginUser, requestLoginOtp, verifyLoginOtp, clearError } from '@/store/slices/authSlice';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
-import { MOTION } from '@/lib/motion';
 
 type Mode = 'password' | 'otp';
 
@@ -34,48 +32,48 @@ export default function Login() {
   const onCta = mode === 'password' ? submitPassword : otpRequested ? submitOtp : requestOtp;
 
   return (
-    <View className="flex-1 bg-ink">
-      <View className="h-56 w-full">
-        <ImageBackground source={{ uri: HERO }} className="flex-1" style={{ backgroundColor: '#111111' }} />
-        <LinearGradient
-          colors={['transparent', 'rgba(17,17,17,0.7)', '#111111']}
-          style={{ position: 'absolute', left: 0, right: 0, bottom: 0, top: 0 }}
-        />
-        <SafeAreaView edges={['top']} className="absolute left-0 right-0 top-0 px-6">
-          <Text className="mt-4 font-oswald text-3xl uppercase text-brand">Kria</Text>
-        </SafeAreaView>
-      </View>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-ink">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero: headline lives INSIDE the image over a deep gradient that melts into ink. */}
+        <View style={{ height: 320 }} className="w-full justify-between">
+          <ImageBackground source={{ uri: HERO }} className="absolute inset-0" style={{ backgroundColor: '#111111' }} />
+          <LinearGradient
+            colors={['rgba(17,17,17,0.55)', 'rgba(17,17,17,0.1)', 'rgba(17,17,17,0.85)', '#111111']}
+            locations={[0, 0.4, 0.82, 1]}
+            style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+          />
+          <SafeAreaView edges={['top']} className="px-6">
+            <Text className="mt-4 font-oswald text-3xl uppercase tracking-wide text-brand">Kria</Text>
+          </SafeAreaView>
+          <View className="px-6 pb-2">
+            <Text className="font-oswald text-5xl uppercase leading-[0.92] text-white">Welcome{'\n'}back.</Text>
+            <Text className="mt-2 font-montserrat text-sm text-gray-300">Pick up where you left off.</Text>
+          </View>
+        </View>
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
-          <Animated.Text
-            entering={FadeInDown.duration(MOTION.enterMs)}
-            className="mb-6 font-oswald text-4xl uppercase text-white"
-          >
-            Welcome back.
-          </Animated.Text>
-
-          <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs)}>
-            <AuthInput
-              label="Email"
-              placeholder="you@email.com"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
-            />
-          </Animated.View>
+        {/* Form */}
+        <View className="px-6 pt-7">
+          <AuthInput
+            label="Email"
+            placeholder="you@email.com"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
+          />
 
           {mode === 'password' ? (
-            <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs * 2)}>
-              <AuthInput
-                label="Password"
-                placeholder="Your password"
-                secureToggle
-                value={password}
-                onChangeText={setPassword}
-              />
-            </Animated.View>
+            <AuthInput
+              label="Password"
+              placeholder="Your password"
+              secureToggle
+              value={password}
+              onChangeText={setPassword}
+            />
           ) : null}
 
           {mode === 'otp' && otpRequested ? (
@@ -88,31 +86,32 @@ export default function Login() {
             />
           ) : null}
 
-          {error ? <Text className="mb-3 font-montserrat text-red-400">{error}</Text> : null}
+          {error ? (
+            <Text className="mb-3 font-montserrat text-sm text-red-400">{error}</Text>
+          ) : null}
 
-          <Animated.View entering={FadeInDown.duration(MOTION.enterMs).delay(MOTION.staggerMs * 3)}>
-            <OnboardingButton label={ctaLabel} loading={isLoading} onPress={onCta} />
-          </Animated.View>
+          <OnboardingButton label={ctaLabel} loading={isLoading} onPress={onCta} />
 
           <Pressable
-            className="mt-4 items-center"
+            className="mt-5 items-center"
             onPress={() => {
               setMode((m) => (m === 'password' ? 'otp' : 'password'));
               setOtpRequested(false);
               dispatch(clearError());
             }}
+            hitSlop={8}
           >
-            <Text className="font-montserrat text-brand">
+            <Text className="font-montserrat text-sm font-medium text-brand">
               {mode === 'password' ? 'Log in with OTP instead' : 'Use password instead'}
             </Text>
           </Pressable>
 
-          <View className="mt-6 flex-row justify-between">
-            <Link href="/(auth)/forgot-password" className="font-montserrat text-[#aaa]">Forgot password?</Link>
-            <Link href="/(auth)/register" className="font-montserrat text-[#aaa]">Create account</Link>
+          <View className="mt-8 flex-row justify-between border-t border-white/10 pt-5">
+            <Link href="/(auth)/forgot-password" className="font-montserrat text-sm text-[#aaa]">Forgot password?</Link>
+            <Link href="/(auth)/register" className="font-montserrat text-sm font-medium text-white">Create account</Link>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
