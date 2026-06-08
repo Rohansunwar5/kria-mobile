@@ -21,7 +21,7 @@ export default function WelcomeDone() {
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-ink px-6">
       <View className="flex-1 justify-center">
-        <Text className="font-oswald text-5xl uppercase leading-[0.95] text-white">Your journey starts today.</Text>
+        <Text className="font-oswald uppercase text-white" style={{ fontSize: 44, lineHeight: 50, paddingTop: 4 }}>Your journey starts today.</Text>
         <Text className="mb-8 mt-4 font-montserrat text-base text-gray-300">
           Join your first tournament and earn your first ranking.
         </Text>

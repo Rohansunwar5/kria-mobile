@@ -39,7 +39,15 @@ export function AuthInput({ label, error, secureToggle, ...rest }: Props) {
             focus.value = withTiming(0, { duration: 150 });
             rest.onBlur?.(e);
           }}
-          className="flex-1 py-3.5 font-montserrat text-base text-white"
+          className="flex-1 font-montserrat text-white"
+          style={{
+            height: 52,
+            fontSize: 16,
+            lineHeight: 20,
+            paddingVertical: 0,
+            textAlignVertical: 'center',
+            includeFontPadding: false,
+          }}
         />
         {secureToggle ? (
           <Pressable

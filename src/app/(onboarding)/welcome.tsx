@@ -13,7 +13,10 @@ export default function Welcome() {
     <ImageBackground source={{ uri: HERO }} className="flex-1" style={{ backgroundColor: '#111111' }}>
       <View className="flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}>
         <SafeAreaView edges={['top', 'bottom']} className="flex-1 justify-end px-6 pb-10">
-          <Text className="font-oswald text-5xl uppercase leading-[0.95] text-white">
+          <Text
+            className="font-oswald uppercase text-white"
+            style={{ fontSize: 44, lineHeight: 50, paddingTop: 4 }}
+          >
             Play. Compete. Get Recognized.
           </Text>
           <Text className="mb-8 mt-4 font-montserrat text-base text-gray-300">

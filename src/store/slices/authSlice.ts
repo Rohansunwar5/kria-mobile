@@ -225,7 +225,10 @@ export const uploadPlayerProfileImage = createAsyncThunk(
       const formData = new FormData();
       // React Native FormData takes a { uri, name, type } object, not a web File.
       formData.append('image', asset as any);
-      const response = await API.put('/player/auth/profile-image', formData);
+      const response = await API.put('/player/auth/profile-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        transformRequest: (data) => data,
+      });
       return response.data?.data?.data || response.data?.data;
     } catch (error) {
       return rejectWithValue(extractError(error));

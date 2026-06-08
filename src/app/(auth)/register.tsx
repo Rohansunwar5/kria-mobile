@@ -45,7 +45,7 @@ export default function Register() {
             </View>
           </SafeAreaView>
           <View className="px-6 pb-2">
-            <Text className="font-oswald text-5xl uppercase leading-[0.92] text-white">Join the{'\n'}league.</Text>
+            <Text className="font-oswald uppercase text-white" style={{ fontSize: 44, lineHeight: 48, paddingTop: 4 }}>Join the{'\n'}league.</Text>
             <Text className="mt-2 font-montserrat text-sm text-gray-300">Create your player account.</Text>
           </View>
         </View>

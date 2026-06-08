@@ -43,7 +43,7 @@ export default function Story() {
     dispatch(setSport('badminton'));
   }, [dispatch]);
 
-  const finish = () => router.push('/(onboarding)/profile');
+  const finish = () => router.push('/(onboarding)/card-preview');
   const isLast = active === BEATS.length - 1;
 
   const next = () => {

@@ -102,7 +102,7 @@ export function StoryBeat({ beat, beatKey }: Props) {
 
         <Animated.View style={headlineStyle}>
           <Text
-            style={{ fontFamily: 'Oswald_500Medium', fontSize: 52, lineHeight: 50, color: '#FFFFFF', textTransform: 'uppercase' }}
+            style={{ fontFamily: 'Oswald_500Medium', fontSize: 50, lineHeight: 56, paddingTop: 4, color: '#FFFFFF', textTransform: 'uppercase' }}
           >
             {segments(beat.headline, beat.accent).map((seg, i) => (
               <Text key={i} style={{ color: seg.accent ? '#F97316' : '#FFFFFF' }}>

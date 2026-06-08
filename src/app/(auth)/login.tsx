@@ -54,7 +54,7 @@ export default function Login() {
             </View>
           </SafeAreaView>
           <View className="px-6 pb-2">
-            <Text className="font-oswald text-5xl uppercase leading-[0.92] text-white">Welcome{'\n'}back.</Text>
+            <Text className="font-oswald uppercase text-white" style={{ fontSize: 44, lineHeight: 48, paddingTop: 4 }}>Welcome{'\n'}back.</Text>
             <Text className="mt-2 font-montserrat text-sm text-gray-300">Pick up where you left off.</Text>
           </View>
         </View>

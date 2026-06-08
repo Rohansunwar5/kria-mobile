@@ -4,7 +4,7 @@ import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updateProfile, uploadPlayerProfileImage, endOnboardingHandoff } from '@/store/slices/authSlice';
+import { updateProfile, endOnboardingHandoff } from '@/store/slices/authSlice';
 import { setOnboardingComplete } from '@/lib/onboardingStorage';
 import { ProgressStep } from '@/components/onboarding/ProgressStep';
 
@@ -41,15 +41,6 @@ export default function Creating() {
         ).unwrap();
       } catch {
         // ignore — onboarding still completes
-      }
-      if (onboarding.photoUri) {
-        try {
-          await dispatch(
-            uploadPlayerProfileImage({ uri: onboarding.photoUri, name: 'avatar.jpg', type: 'image/jpeg' })
-          ).unwrap();
-        } catch {
-          // ignore
-        }
       }
     };
     persist();
