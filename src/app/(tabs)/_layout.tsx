@@ -1,17 +1,13 @@
 import { Tabs } from 'expo-router';
-import { colors } from '@/lib/theme';
+import { PremiumTabBar } from '@/components/navigation/PremiumTabBar';
 
 export default function TabsLayout() {
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.brand,
-        tabBarInactiveTintColor: '#888',
-        tabBarStyle: { backgroundColor: colors.ink, borderTopColor: '#222' },
-      }}
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <PremiumTabBar {...props} />}
     >
-      <Tabs.Screen name="home" options={{ title: 'Home' }} />
+      <Tabs.Screen name="home" options={{ title: 'Tournaments' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>
   );
