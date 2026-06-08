@@ -224,11 +224,11 @@ export const uploadPlayerProfileImage = createAsyncThunk(
     try {
       const formData = new FormData();
       // React Native FormData takes a { uri, name, type } object, not a web File.
+      // The server keys its image filter on the filename extension, so callers
+      // must pass a name ending in .jpg/.png. Let axios set the multipart
+      // boundary itself (do not force Content-Type here).
       formData.append('image', asset as any);
-      const response = await API.put('/player/auth/profile-image', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        transformRequest: (data) => data,
-      });
+      const response = await API.put('/player/auth/profile-image', formData);
       return response.data?.data?.data || response.data?.data;
     } catch (error) {
       return rejectWithValue(extractError(error));

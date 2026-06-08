@@ -54,9 +54,18 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         router.replace('/(onboarding)/creating');
         return;
       }
-      // Don't bounce a finished onboarding user off the (onboarding) welcome-done screen —
-      // its "Explore Tournaments" button handles the exit (and resetOnboarding) itself.
-      if (root === 'undefined' || root === '(auth)') {
+      // A returning user who just authenticated: send them through the branded
+      // "entering" transition, which then lands on home. The transition screen
+      // and home itself must not be redirected.
+      if (root === '(auth)') {
+        const screen = String(segments[1]);
+        if (screen !== 'entering') {
+          router.replace('/(auth)/entering');
+        }
+        return;
+      }
+      // Fresh launch with a valid session and no route yet → straight to home.
+      if (root === 'undefined') {
         router.replace('/(tabs)/home');
       }
     } else if (!isPublic) {

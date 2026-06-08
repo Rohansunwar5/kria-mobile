@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, View, Image, Text, ActivityIndicator, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { useAppDispatch } from '@/store/hooks';
 import { uploadPlayerProfileImage } from '@/store/slices/authSlice';
@@ -15,19 +16,22 @@ export function AvatarPicker({ name, imageUrl }: { name?: string; imageUrl?: str
       Alert.alert('Permission needed', 'Allow photo access to change your avatar.');
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
     if (result.canceled) return;
-    const asset = result.assets[0];
     setBusy(true);
     try {
+      // iOS often hands back HEIC and/or multi-MB originals. The server only
+      // accepts jpg/png/jpeg/gif by filename extension and caps at 5MB, so
+      // downscale to a 512px avatar and re-encode as JPEG before uploading.
+      const processed = await manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 512 } }],
+        { compress: 0.8, format: SaveFormat.JPEG }
+      );
       await dispatch(
-        uploadPlayerProfileImage({
-          uri: asset.uri,
-          name: asset.fileName || 'avatar.jpg',
-          type: asset.mimeType || 'image/jpeg',
-        })
+        uploadPlayerProfileImage({ uri: processed.uri, name: 'avatar.jpg', type: 'image/jpeg' })
       ).unwrap();
-    } catch (_e) {
+    } catch {
       Alert.alert('Upload failed', 'Could not update your photo. Try again.');
     } finally {
       setBusy(false);
