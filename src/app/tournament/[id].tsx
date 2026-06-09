@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, Image } from 'react-native';
+import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
-import { StatusPill } from '@/components/StatusPill';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTournament } from '@/store/slices/tournamentSlice';
 import { fetchTournamentCategories, fetchMyRegistrations } from '@/store/slices/registrationSlice';
 import { fetchTournamentTeams } from '@/store/slices/teamSlice';
-import { formatDate } from '@/lib/format';
+import { TournamentHero } from '@/components/tournament/TournamentHero';
+import { DetailTabBar } from '@/components/tournament/DetailTabBar';
 import { OverviewTab } from '@/components/tournament/OverviewTab';
 import { AwardsTab } from '@/components/tournament/AwardsTab';
 import { CategoriesTab } from '@/components/tournament/CategoriesTab';
@@ -66,56 +66,20 @@ export default function TournamentDetail() {
 
   return (
     <Screen>
-      <ScrollView stickyHeaderIndices={[1]}>
+      <ScrollView stickyHeaderIndices={[1]} contentContainerStyle={{ paddingBottom: 24 }}>
         {/* Hero + Live-Now banner wrapped as one child so the sticky tab bar stays at index 1 */}
         <View>
-        {/* Hero */}
-        <View className="relative h-64 w-full">
-          {tournament.bannerImage ? (
-            <Image source={{ uri: tournament.bannerImage }} className="h-full w-full" resizeMode="cover" />
-          ) : (
-            <View className="h-full w-full bg-[#1a1a1a]" />
-          )}
-          <View className="absolute left-4 top-2">
-            <Pressable onPress={() => router.back()} className="rounded-full bg-black/50 px-3 py-2">
-              <Text className="font-montserrat text-sm text-white">‹ Back</Text>
-            </Pressable>
-          </View>
-          <View className="absolute bottom-0 left-0 right-0 gap-2 px-5 pb-4">
-            <View className="flex-row gap-2">
-              <StatusPill status={tournament.status} />
-              <View className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1">
-                <Text className="font-montserrat text-[10px] font-bold uppercase text-white">{tournament.sport}</Text>
-              </View>
-            </View>
-            <Text className="font-oswald text-4xl font-extrabold uppercase text-white">{tournament.name}</Text>
-            <Text className="font-montserrat text-sm text-gray-200">
-              {tournament.venue?.name} · {tournament.venue?.city}
-            </Text>
-            <Text className="font-montserrat text-xs text-gray-400">
-              {formatDate(tournament.startDate)} – {formatDate(tournament.endDate)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Live-Now banner (cricket only) */}
-        {id && <LiveNowBanner tournamentId={id} sport={tournament.sport} />}
+          <TournamentHero tournament={tournament} onBack={() => router.back()} />
+          {/* Live-Now banner (cricket only) */}
+          {id && <LiveNowBanner tournamentId={id} sport={tournament.sport} />}
         </View>
 
         {/* Sticky tab bar */}
-        <View className="border-b border-white/10 bg-ink">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10, gap: 8 }}>
-            {TABS.map((tab) => (
-              <Pressable key={tab} onPress={() => setActiveTab(tab)} className={`rounded-xl px-5 py-2 ${activeTab === tab ? 'bg-white/10' : ''}`}>
-                <Text className={`font-montserrat text-sm capitalize ${activeTab === tab ? 'text-white' : 'text-gray-400'}`}>{tab === 'teamLeague' ? 'Team League' : tab}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
+        <DetailTabBar tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
         {/* Tab content */}
         {activeTab === 'overview' && (
-          <OverviewTab description={tournament.description} user={user} myTeam={myTeam} myTeamAssignment={myTeamAssignment} isTeamDataReady={isTeamDataReady} />
+          <OverviewTab tournament={tournament} user={user} myTeam={myTeam} myTeamAssignment={myTeamAssignment} isTeamDataReady={isTeamDataReady} />
         )}
         {activeTab === 'categories' && id && (
           <CategoriesTab tournamentId={id} tournamentStatus={tournament.status} />
