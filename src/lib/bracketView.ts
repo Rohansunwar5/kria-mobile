@@ -4,6 +4,7 @@ export interface Competitor {
   id: string;
   name: string;
   teamName: string;
+  logo?: string;
   isTBD: boolean;
   isBye: boolean;
   score?: number;
@@ -25,26 +26,36 @@ export interface Standing {
   points: number;
 }
 
-function extract(match: Match, slot: 1 | 2, competitorType: 'player' | 'team') {
+function extract(
+  match: Match,
+  slot: 1 | 2,
+  competitorType: 'player' | 'team',
+  logoById?: Record<string, string | undefined>
+) {
   const player = slot === 1 ? match.player1 : match.player2;
   if (competitorType === 'player' && player) {
     return {
       id: player.registrationId,
       name: player.name,
       teamName: player.teamName,
+      logo: logoById?.[player.teamId],
       isTBD: player.registrationId === 'TBD',
       isBye: player.name === 'TBD' && player.registrationId === 'TBD',
     };
   }
   const name = (slot === 1 ? match.teams?.team1Name : match.teams?.team2Name) || 'TBD';
   const id = (slot === 1 ? match.teams?.team1Id : match.teams?.team2Id) || '';
-  return { id, name, teamName: '', isTBD: name === 'TBD', isBye: name === 'BYE' };
+  return { id, name, teamName: '', logo: logoById?.[id], isTBD: name === 'TBD', isBye: name === 'BYE' };
 }
 
-export function getCompetitors(match: Match, competitorType: 'player' | 'team'): { c1: Competitor; c2: Competitor } {
+export function getCompetitors(
+  match: Match,
+  competitorType: 'player' | 'team',
+  logoById?: Record<string, string | undefined>
+): { c1: Competitor; c2: Competitor } {
   const done = match.status === 'completed' || match.status === 'walkover';
-  const b1 = extract(match, 1, competitorType);
-  const b2 = extract(match, 2, competitorType);
+  const b1 = extract(match, 1, competitorType, logoById);
+  const b2 = extract(match, 2, competitorType, logoById);
   return {
     c1: { ...b1, score: match.result?.team1Total, isWinner: done && !!match.winnerId && match.winnerId === b1.id },
     c2: { ...b2, score: match.result?.team2Total, isWinner: done && !!match.winnerId && match.winnerId === b2.id },

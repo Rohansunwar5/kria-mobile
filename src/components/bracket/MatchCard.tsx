@@ -1,7 +1,9 @@
 import { View, Text, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Match } from '@/api/match';
 import { Competitor, getCompetitors } from '@/lib/bracketView';
+import { TeamLogo } from '@/components/TeamLogo';
 
 function statusBadge(match: Match, hasTBD: boolean) {
   const done = match.status === 'completed' || match.status === 'walkover';
@@ -14,8 +16,9 @@ function statusBadge(match: Match, hasTBD: boolean) {
 function CompetitorRow({ c, competitorType }: { c: Competitor; competitorType: 'player' | 'team' }) {
   const dim = c.isTBD || c.isBye;
   return (
-    <View className={`relative flex-row items-center px-3 py-2.5 ${c.isWinner ? 'bg-emerald-500/5' : ''} ${dim ? 'opacity-30' : ''}`}>
+    <View className={`relative flex-row items-center gap-2.5 px-3 py-2.5 ${c.isWinner ? 'bg-emerald-500/5' : ''} ${dim ? 'opacity-30' : ''}`}>
       {c.isWinner && <View className="absolute inset-y-0 left-0 w-[3px] bg-emerald-400" />}
+      {!dim ? <TeamLogo name={c.name} logo={c.logo} size={26} /> : null}
       <View className="flex-1">
         <Text
           className={`font-montserrat text-[13px] font-semibold ${c.isWinner ? 'text-emerald-400' : dim ? 'italic text-gray-600' : 'text-white/90'}`}
@@ -34,9 +37,17 @@ function CompetitorRow({ c, competitorType }: { c: Competitor; competitorType: '
   );
 }
 
-export function MatchCard({ match, competitorType }: { match: Match; competitorType: 'player' | 'team' }) {
+export function MatchCard({
+  match,
+  competitorType,
+  logoById,
+}: {
+  match: Match;
+  competitorType: 'player' | 'team';
+  logoById?: Record<string, string | undefined>;
+}) {
   const router = useRouter();
-  const { c1, c2 } = getCompetitors(match, competitorType);
+  const { c1, c2 } = getCompetitors(match, competitorType, logoById);
   const badge = statusBadge(match, c1.isTBD || c2.isTBD);
   // Per-game chips render only for badminton (cricket matches carry no gameScores).
   const chips = (match.gameScores || [])
@@ -63,8 +74,10 @@ export function MatchCard({ match, competitorType }: { match: Match; competitorT
       <View className="h-px bg-white/5" />
       <CompetitorRow c={c2} competitorType={competitorType} />
       {tappable && (
-        <View className="border-t border-white/5 bg-red-500/5 px-3 py-1.5">
-          <Text className="font-montserrat text-[9px] font-bold uppercase tracking-widest text-red-400">Watch live →</Text>
+        <View className="flex-row items-center justify-center gap-2 border-t border-red-500/20 bg-red-500/10 px-3 py-2.5">
+          <View className="h-1.5 w-1.5 rounded-full bg-red-500" />
+          <Text className="font-montserrat text-xs font-bold uppercase tracking-widest text-red-400">Watch live scoresheet</Text>
+          <Ionicons name="arrow-forward" size={13} color="#f87171" />
         </View>
       )}
     </>

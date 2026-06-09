@@ -19,8 +19,6 @@ function Stat({ icon, value, label }: { icon: IoniconName; value: string | numbe
 }
 
 export function TournamentHero({ tournament, onBack }: { tournament: Tournament; onBack: () => void }) {
-  const budget = tournament.settings?.defaultBudget;
-
   return (
     <View>
       <View className="relative h-72 w-full">
@@ -81,12 +79,6 @@ export function TournamentHero({ tournament, onBack }: { tournament: Tournament;
         <Stat icon="people-outline" value={tournament.registeredPlayersCount ?? 0} label="Players" />
         <View className="h-8 w-px bg-white/10" />
         <Stat icon="shield-outline" value={`${tournament.teamsCount ?? 0}/${tournament.settings?.maxTeams ?? '∞'}`} label="Teams" />
-        {budget ? (
-          <>
-            <View className="h-8 w-px bg-white/10" />
-            <Stat icon="wallet-outline" value={`₹${(budget / 1000).toFixed(0)}k`} label="Budget" />
-          </>
-        ) : null}
       </View>
     </View>
   );

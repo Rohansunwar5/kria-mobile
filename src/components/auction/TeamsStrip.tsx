@@ -1,5 +1,6 @@
 import { View, Text, ScrollView } from 'react-native';
 import { AuctionTeam } from '@/api/auction';
+import { TeamLogo } from '@/components/TeamLogo';
 
 function purse(n: number): string {
   return n >= 100000 ? `${(n / 100000).toFixed(1)}L` : n.toLocaleString();
@@ -14,7 +15,7 @@ export function TeamsStrip({ teams }: { teams: AuctionTeam[] }) {
         {teams.map((team) => (
           <View key={team._id} className="w-40 rounded-xl border border-white/10 bg-white/5 p-3">
             <View className="mb-2 flex-row items-center gap-2">
-              <View className="h-2 w-2 rounded-full" style={{ backgroundColor: team.primaryColor || '#F97316' }} />
+              <TeamLogo name={team.name} logo={team.logo} color={team.primaryColor || '#F97316'} size={22} />
               <Text className="flex-1 font-oswald text-sm font-bold uppercase text-white" numberOfLines={1}>
                 {team.name}
               </Text>

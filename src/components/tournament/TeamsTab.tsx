@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, ActivityIndicator, Linking } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import API from '@/api/axios';
 import type { Team } from '@/store/slices/teamSlice';
 import { useAppSelector } from '@/store/hooks';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
+import { TeamLogo } from '@/components/TeamLogo';
 
 interface RosterPlayer {
   _id: string;
@@ -55,7 +57,7 @@ export function TeamsTab({ myTeam }: { myTeam: Team | null | undefined }) {
           <View key={team._id} className="overflow-hidden rounded-3xl border bg-black/40" style={{ borderColor: isMine ? `${color}60` : 'rgba(255,255,255,0.08)' }}>
             <View className="h-1 w-full" style={{ backgroundColor: color }} />
             <Pressable onPress={() => setExpanded(isOpen ? null : team._id)} className="flex-row items-center gap-4 p-5">
-              <InitialsAvatar name={team.name} size={48} color={color} />
+              <TeamLogo name={team.name} logo={team.logo} size={48} color={color} />
               <View className="flex-1">
                 <View className="flex-row items-center gap-2">
                   <Text className="font-oswald text-lg font-black text-white">{team.name}</Text>
@@ -65,7 +67,7 @@ export function TeamsTab({ myTeam }: { myTeam: Team | null | undefined }) {
                   {loadingRoster[team._id] ? 'Loading…' : `${roster.length} player${roster.length !== 1 ? 's' : ''}`}
                 </Text>
               </View>
-              <Text className="text-gray-400">{isOpen ? '▲' : '▼'}</Text>
+              <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={18} color="#9a9a9a" />
             </Pressable>
             {isOpen && (
               <View className="gap-3 border-t border-white/10 px-5 pb-5 pt-4">

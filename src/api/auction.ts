@@ -10,6 +10,7 @@ export interface AuctionPlayer {
 export interface AuctionTeam {
   _id: string;
   name: string;
+  logo?: string;
   budget: number;
   initialBudget: number;
   playersCount: number;

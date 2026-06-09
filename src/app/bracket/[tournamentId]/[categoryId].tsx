@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import API from '@/api/axios';
 import { getCategoryBracket, BracketResponse } from '@/api/match';
 import { visibleRounds, leagueStandings } from '@/lib/bracketView';
 import { MatchCard } from '@/components/bracket/MatchCard';
@@ -30,9 +31,10 @@ function Frame({ children }: { children: React.ReactNode }) {
 }
 
 export default function BracketScreen() {
-  const { categoryId, type } = useLocalSearchParams<{ tournamentId: string; categoryId: string; type?: string }>();
+  const { tournamentId, categoryId, type } = useLocalSearchParams<{ tournamentId: string; categoryId: string; type?: string }>();
   const router = useRouter();
   const [data, setData] = useState<BracketResponse | null>(null);
+  const [logoById, setLogoById] = useState<Record<string, string | undefined>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -53,6 +55,26 @@ export default function BracketScreen() {
   }, [categoryId]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Team logos live on the team records, not on the bracket payload — fetch them
+  // once and build an id → logo map for the match cards. Best-effort.
+  useEffect(() => {
+    if (!tournamentId) return;
+    let active = true;
+    (async () => {
+      try {
+        const res = await API.get(`/tournaments/${tournamentId}/teams`);
+        const teams = (res.data?.data?.data || res.data?.data || []) as { _id: string; logo?: string }[];
+        if (!active) return;
+        const map: Record<string, string | undefined> = {};
+        teams.forEach((t) => { map[t._id] = t.logo; });
+        setLogoById(map);
+      } catch {
+        // logos are optional; ignore
+      }
+    })();
+    return () => { active = false; };
+  }, [tournamentId]);
 
   const onRefresh = () => { setRefreshing(true); load(); };
   const back = () => router.back();
@@ -122,7 +144,7 @@ export default function BracketScreen() {
             <Text className="font-oswald text-sm uppercase tracking-widest text-gray-500">
               {round.name} · {round.matches.length} match{round.matches.length !== 1 ? 'es' : ''}
             </Text>
-            {round.matches.map((m) => <MatchCard key={m._id} match={m} competitorType={data.competitorType} />)}
+            {round.matches.map((m) => <MatchCard key={m._id} match={m} competitorType={data.competitorType} logoById={logoById} />)}
           </>
         )}
       </ScrollView>
