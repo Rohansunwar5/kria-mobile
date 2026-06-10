@@ -34,6 +34,7 @@ export default function BracketScreen() {
   const { tournamentId, categoryId, type } = useLocalSearchParams<{ tournamentId: string; categoryId: string; type?: string }>();
   const router = useRouter();
   const [data, setData] = useState<BracketResponse | null>(null);
+  const [sport, setSport] = useState<string | undefined>(undefined);
   const [logoById, setLogoById] = useState<Record<string, string | undefined>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -71,6 +72,24 @@ export default function BracketScreen() {
         setLogoById(map);
       } catch {
         // logos are optional; ignore
+      }
+    })();
+    return () => { active = false; };
+  }, [tournamentId]);
+
+  // Cricket matches carry no `sportType`, so the match cards can't tell which
+  // matches have a viewable scoreboard. Resolve the tournament's sport once and
+  // pass it down. Best-effort — falls back to per-match sportType in the card.
+  useEffect(() => {
+    if (!tournamentId) return;
+    let active = true;
+    (async () => {
+      try {
+        const res = await API.get(`/tournaments/${tournamentId}`);
+        const t = (res.data?.data?.data || res.data?.data) as { sport?: string } | undefined;
+        if (active && t?.sport) setSport(t.sport);
+      } catch {
+        // sport is best-effort; the card falls back to match.sportType
       }
     })();
     return () => { active = false; };
@@ -144,7 +163,7 @@ export default function BracketScreen() {
             <Text className="font-oswald text-sm uppercase tracking-widest text-gray-500">
               {round.name} · {round.matches.length} match{round.matches.length !== 1 ? 'es' : ''}
             </Text>
-            {round.matches.map((m) => <MatchCard key={m._id} match={m} competitorType={data.competitorType} logoById={logoById} />)}
+            {round.matches.map((m) => <MatchCard key={m._id} match={m} competitorType={data.competitorType} logoById={logoById} sport={sport} />)}
           </>
         )}
       </ScrollView>

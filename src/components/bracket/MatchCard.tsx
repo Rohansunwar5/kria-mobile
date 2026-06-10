@@ -41,10 +41,15 @@ export function MatchCard({
   match,
   competitorType,
   logoById,
+  sport,
 }: {
   match: Match;
   competitorType: 'player' | 'team';
   logoById?: Record<string, string | undefined>;
+  // Cricket matches are stored in their own collection with no `sportType`
+  // field, so we can't rely on match.sportType to know the sport. The bracket
+  // screen resolves the tournament's sport once and passes it down here.
+  sport?: string;
 }) {
   const router = useRouter();
   const { c1, c2 } = getCompetitors(match, competitorType, logoById);
@@ -58,7 +63,7 @@ export function MatchCard({
   // Cricket matches expose a scoreboard while live AND after they finish
   // (completed/walkover) — same as the web bracket, where a done match links
   // to its full scorecard. Other sports have no mobile scoreboard.
-  const isCricket = match.sportType === 'cricket';
+  const isCricket = (sport ?? match.sportType) === 'cricket';
   const isLive = isCricket && match.status === 'in_progress';
   const isDone = isCricket && (match.status === 'completed' || match.status === 'walkover');
   const tappable = isLive || isDone;
