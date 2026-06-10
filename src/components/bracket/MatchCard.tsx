@@ -55,8 +55,13 @@ export function MatchCard({
     .sort((a, b) => a.gameNumber - b.gameNumber)
     .map((g) => `${g.team1Score}-${g.team2Score}`);
 
-  // Only cricket matches that are in progress have a live scoreboard to open.
-  const tappable = match.sportType === 'cricket' && match.status === 'in_progress';
+  // Cricket matches expose a scoreboard while live AND after they finish
+  // (completed/walkover) — same as the web bracket, where a done match links
+  // to its full scorecard. Other sports have no mobile scoreboard.
+  const isCricket = match.sportType === 'cricket';
+  const isLive = isCricket && match.status === 'in_progress';
+  const isDone = isCricket && (match.status === 'completed' || match.status === 'walkover');
+  const tappable = isLive || isDone;
 
   const body = (
     <>
@@ -73,11 +78,18 @@ export function MatchCard({
       <CompetitorRow c={c1} competitorType={competitorType} />
       <View className="h-px bg-white/5" />
       <CompetitorRow c={c2} competitorType={competitorType} />
-      {tappable && (
+      {isLive && (
         <View className="flex-row items-center justify-center gap-2 border-t border-red-500/20 bg-red-500/10 px-3 py-2.5">
           <View className="h-1.5 w-1.5 rounded-full bg-red-500" />
           <Text className="font-montserrat text-xs font-bold uppercase tracking-widest text-red-400">Watch live scoresheet</Text>
           <Ionicons name="arrow-forward" size={13} color="#f87171" />
+        </View>
+      )}
+      {isDone && (
+        <View className="flex-row items-center justify-center gap-2 border-t border-emerald-400/20 bg-emerald-400/10 px-3 py-2.5">
+          <Ionicons name="stats-chart" size={13} color="#34d399" />
+          <Text className="font-montserrat text-xs font-bold uppercase tracking-widest text-emerald-400">View scorecard</Text>
+          <Ionicons name="arrow-forward" size={13} color="#34d399" />
         </View>
       )}
     </>
