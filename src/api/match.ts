@@ -49,6 +49,15 @@ export interface Match {
   result?: MatchResult;
   winnerId?: string;
   winReason?: string;
+  // Cricket matches are stored in their own collection and carry no sportType,
+  // but they DO carry a cricket-only matchConfig (overs, etc). Presence of this
+  // is how we detect a cricket match for the live/completed scoreboard link.
+  matchConfig?: {
+    maxOvers?: number;
+    maxOversPerBowler?: number;
+    playersPerTeam?: number;
+    powerplayOvers?: number;
+  };
 }
 
 export interface BracketResponse {
