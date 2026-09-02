@@ -1,32 +1,135 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Screen } from '@/components/Screen';
+import { Icon } from '@/components/icons';
+import { Tag } from '@/components/StatusPill';
+import { Skeleton, ErrorBlock, EmptyState, StaleBanner } from '@/components/states';
 import { resolveMatchSport } from '@/api/cricketMatch';
 import { useCricketMatchSocket } from '@/lib/useCricketMatchSocket';
+import { useBadmintonMatchSocket } from '@/lib/useBadmintonMatchSocket';
 import { HeroScore } from '@/components/cricket/HeroScore';
 import { AtTheCrease } from '@/components/cricket/AtTheCrease';
 import { RecentOvers } from '@/components/cricket/RecentOvers';
 import { ScorecardTabs } from '@/components/cricket/ScorecardTabs';
-import { CricketError, NotStarted, UnsupportedSport } from '@/components/cricket/CricketStates';
+import { BadmintonScoreboard } from '@/components/badminton/BadmintonScoreboard';
+import { GamesTable } from '@/components/badminton/GamesTable';
+import { RallyLog } from '@/components/badminton/RallyLog';
+import { currentGame } from '@/lib/badmintonLive';
 
-function BackBar() {
+const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+
+function Header({ title, sub, live }: { title: string; sub?: string; live?: boolean }) {
   const router = useRouter();
   return (
-    <View className="flex-row items-center gap-3 border-b border-white/10 px-4 py-3">
-      <Pressable onPress={() => router.back()} className="rounded-full bg-white/10 px-3 py-1.5">
-        <Text className="font-montserrat text-sm text-white">‹ Back</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        onPress={() => router.back()}
+        hitSlop={8}
+        style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
       </Pressable>
-      <Text className="flex-1 font-oswald text-base font-bold uppercase text-white">Live</Text>
+      <View style={{ flex: 1 }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 15, color: '#fff' }}>
+          {title}
+        </Text>
+        {sub ? (
+          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+            {sub}
+          </Text>
+        ) : null}
+      </View>
+      {live ? <Tag label="Live" variant="live" dot /> : null}
     </View>
   );
 }
 
-function Frame({ children }: { children: React.ReactNode }) {
+function BadmintonView({ matchId }: { matchId: string }) {
+  const { match, log, loading, error, connected, lastUpdate, reload } = useBadmintonMatchSocket(matchId);
+  const [refreshing, setRefreshing] = useState(false);
+  const [now, setNow] = useState(Date.now());
+
+  // Only ticks while a rally log exists, so an idle scoreboard costs nothing.
+  useEffect(() => {
+    if (log.length === 0) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [log.length]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await reload();
+    setRefreshing(false);
+  }, [reload]);
+
+  if (loading && !match) {
+    return (
+      <>
+        <Header title="Live" />
+        <View style={{ gap: 0 }}>
+          <Skeleton h={66} style={{ borderRadius: 0, borderWidth: 0 }} />
+          <Skeleton h={66} style={{ borderRadius: 0, borderWidth: 0 }} />
+        </View>
+        <View style={{ padding: 16, gap: 12 }}>
+          <Skeleton h={10} w={60} line />
+          <Skeleton h={90} />
+        </View>
+      </>
+    );
+  }
+
+  if (error || !match) {
+    return (
+      <>
+        <Header title="Live" />
+        <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#F97316" />} contentContainerStyle={{ padding: 16 }}>
+          <ErrorBlock
+            label="Scoreboard unavailable"
+            message="This match could not be loaded. Pull to retry."
+            onRetry={reload}
+          />
+        </ScrollView>
+      </>
+    );
+  }
+
+  const isLive = match.status === 'in_progress';
+  // Whoever won the last rally serves. Unknown until a point arrives.
+  const serving = log.length ? log[0].side : null;
+  const court = match.schedule?.court ? `Court ${match.schedule.court}` : undefined;
+
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#111111' }}>
-      <View className="flex-1 bg-ink">{children}</View>
-    </SafeAreaView>
+    <>
+      <Header title={match.bracketRound} sub={court} live={isLive} />
+      {isLive && !connected ? <StaleBanner secondsAgo={Math.round((now - lastUpdate) / 1000)} /> : null}
+
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#F97316" />}
+        contentContainerStyle={{ paddingBottom: 24 }}
+        style={isLive && !connected ? { opacity: 0.5 } : undefined}
+      >
+        <BadmintonScoreboard match={match} serving={serving} />
+
+        {currentGame(match) ? (
+          <View style={{ paddingHorizontal: 16, paddingTop: 14, gap: 16 }}>
+            <View>
+              <Text style={{ ...LBL, marginBottom: 8 }}>Games</Text>
+              <GamesTable match={match} />
+            </View>
+            <RallyLog match={match} log={log} now={now} />
+          </View>
+        ) : (
+          <EmptyState
+            icon="shuttlecock"
+            title="Not on court yet"
+            message="The scoreboard goes live the moment the umpire starts scoring this match."
+          />
+        )}
+      </ScrollView>
+    </>
   );
 }
 
@@ -43,33 +146,59 @@ function CricketView({ matchId }: { matchId: string }) {
   const refresh = <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#F97316" />;
 
   if (loading) {
-    return <View className="flex-1 items-center justify-center"><ActivityIndicator color="#F97316" size="large" /></View>;
+    return (
+      <>
+        <Header title="Live" />
+        <View style={{ padding: 16, gap: 12 }}>
+          <Skeleton h={150} />
+          <Skeleton h={90} />
+          <Skeleton h={120} />
+        </View>
+      </>
+    );
   }
   if (error || !match) {
-    return <ScrollView refreshControl={refresh} contentContainerStyle={{ flexGrow: 1 }}><CricketError /></ScrollView>;
+    return (
+      <>
+        <Header title="Live" />
+        <ScrollView refreshControl={refresh} contentContainerStyle={{ padding: 16 }}>
+          <ErrorBlock label="Scoreboard unavailable" message="This match could not be loaded. Pull to retry." onRetry={reload} />
+        </ScrollView>
+      </>
+    );
   }
 
   const completed = live?.matchStatus === 'completed' || match.status === 'completed';
   const currentInnings = (live?.currentInnings ?? 1) as 1 | 2;
 
   return (
-    <ScrollView refreshControl={refresh} contentContainerStyle={{ padding: 16, gap: 12 }}>
-      <HeroScore match={match} live={live} completed={completed} />
-      {!live && !completed ? (
-        <NotStarted />
-      ) : (
-        <>
-          <AtTheCrease live={live} innings={currentInnings === 1 ? scorecard?.innings1 ?? null : scorecard?.innings2 ?? null} />
-          <RecentOvers innings={currentInnings === 1 ? scorecard?.innings1 ?? null : scorecard?.innings2 ?? null} />
-          <ScorecardTabs
-            innings1={scorecard?.innings1 ?? null}
-            innings2={scorecard?.innings2 ?? null}
-            currentInnings={currentInnings}
-            live={live}
+    <>
+      <Header
+        title={`${match.teams?.team1Name || 'TBD'} v ${match.teams?.team2Name || 'TBD'}`}
+        live={!completed}
+      />
+      <ScrollView refreshControl={refresh} contentContainerStyle={{ padding: 16, gap: 12 }}>
+        <HeroScore match={match} live={live} completed={completed} />
+        {!live && !completed ? (
+          <EmptyState
+            icon="cricket-bat"
+            title="Not started"
+            message="The scoreboard goes live once the first ball is bowled."
           />
-        </>
-      )}
-    </ScrollView>
+        ) : (
+          <>
+            <AtTheCrease live={live} innings={currentInnings === 1 ? scorecard?.innings1 ?? null : scorecard?.innings2 ?? null} />
+            <RecentOvers innings={currentInnings === 1 ? scorecard?.innings1 ?? null : scorecard?.innings2 ?? null} />
+            <ScorecardTabs
+              innings1={scorecard?.innings1 ?? null}
+              innings2={scorecard?.innings2 ?? null}
+              currentInnings={currentInnings}
+              live={live}
+            />
+          </>
+        )}
+      </ScrollView>
+    </>
   );
 }
 
@@ -78,7 +207,6 @@ export default function LiveScreen() {
   const [sport, setSport] = useState<string | null>(null);
   const [resolving, setResolving] = useState(true);
   const [resolveErr, setResolveErr] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const reqId = useRef(0);
 
   const resolve = useCallback(async () => {
@@ -96,39 +224,48 @@ export default function LiveScreen() {
     }
   }, [matchId]);
 
-  useEffect(() => { resolve(); }, [resolve]);
-
-  const onResolveRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await resolve();
-    setRefreshing(false);
+  useEffect(() => {
+    resolve();
   }, [resolve]);
 
-  if (!matchId) return <Frame><BackBar /></Frame>;
+  if (!matchId) return <Screen><Header title="Live" /></Screen>;
 
   if (resolving) {
     return (
-      <Frame>
-        <BackBar />
-        <View className="flex-1 items-center justify-center"><ActivityIndicator color="#F97316" size="large" /></View>
-      </Frame>
+      <Screen>
+        <Header title="Live" />
+        <View style={{ padding: 16, gap: 12 }}>
+          <Skeleton h={150} />
+          <Skeleton h={90} />
+        </View>
+      </Screen>
     );
   }
+
   if (resolveErr) {
     return (
-      <Frame>
-        <BackBar />
-        <ScrollView
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onResolveRefresh} tintColor="#F97316" />}
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <CricketError />
-        </ScrollView>
-      </Frame>
+      <Screen>
+        <Header title="Live" />
+        <View style={{ padding: 16 }}>
+          <ErrorBlock label="Match unavailable" message="We could not work out which match this is." onRetry={resolve} />
+        </View>
+      </Screen>
     );
   }
-  if (sport !== 'cricket') {
-    return <Frame><BackBar /><UnsupportedSport /></Frame>;
-  }
-  return <Frame><BackBar /><CricketView matchId={matchId} /></Frame>;
+
+  // Badminton and cricket are the two sports with live scoring implemented
+  // end to end. Anything else has no scoreboard to show.
+  if (sport === 'badminton') return <Screen><BadmintonView matchId={matchId} /></Screen>;
+  if (sport === 'cricket') return <Screen><CricketView matchId={matchId} /></Screen>;
+
+  return (
+    <Screen>
+      <Header title="Live" />
+      <EmptyState
+        icon="alert"
+        title="No live scoring"
+        message={`Live scoring is not available for ${sport || 'this sport'} yet. Check the draw for results once the match is done.`}
+      />
+    </Screen>
+  );
 }
