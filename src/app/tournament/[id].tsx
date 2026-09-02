@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -9,16 +9,23 @@ import { fetchTournamentTeams } from '@/store/slices/teamSlice';
 import { TournamentHero } from '@/components/tournament/TournamentHero';
 import { DetailTabBar } from '@/components/tournament/DetailTabBar';
 import { OverviewTab } from '@/components/tournament/OverviewTab';
-import { AwardsTab } from '@/components/tournament/AwardsTab';
-import { CategoriesTab } from '@/components/tournament/CategoriesTab';
-import { PlayersTab } from '@/components/tournament/PlayersTab';
+import { DrawTab } from '@/components/tournament/DrawTab';
 import { TeamsTab } from '@/components/tournament/TeamsTab';
-import { AuctionTab } from '@/components/tournament/AuctionTab';
-import { BracketTab } from '@/components/tournament/BracketTab';
-import { TeamLeagueTab } from '@/components/tournament/TeamLeagueTab';
+import { InfoTab } from '@/components/tournament/InfoTab';
 import { LiveNowBanner } from '@/components/tournament/LiveNowBanner';
+import { Skeleton, ErrorBlock } from '@/components/states';
 
-type TabKey = 'overview' | 'categories' | 'auction' | 'bracket' | 'teamLeague' | 'players' | 'teams' | 'awards';
+// Eight tabs collapsed to four. Draw absorbs auction + bracket + team league,
+// Info absorbs awards, Players folds into Teams.
+const TABS = ['overview', 'draw', 'teams', 'info'] as const;
+type TabKey = (typeof TABS)[number];
+
+const LABELS: Record<TabKey, string> = {
+  overview: 'Overview',
+  draw: 'Draw',
+  teams: 'Teams',
+  info: 'Info',
+};
 
 export default function TournamentDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -26,21 +33,25 @@ export default function TournamentDetail() {
   const dispatch = useAppDispatch();
   const { currentTournament: tournament, isLoading, error } = useAppSelector((s) => s.tournament);
   const { categories, myRegistrations, isLoading: isRegLoading } = useAppSelector((s) => s.registration);
-  const hasTeamLeague = categories.some((c) => c.bracketType === 'team_league');
-  const TABS: TabKey[] = ['overview', 'categories', 'auction', 'bracket', ...(hasTeamLeague ? (['teamLeague'] as TabKey[]) : []), 'players', 'teams', 'awards'];
   const { teams, isLoading: isTeamsLoading } = useAppSelector((s) => s.team);
   const { user } = useAppSelector((s) => s.auth);
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
 
+  const load = () => {
+    if (!id) return;
+    dispatch(fetchTournament(id));
+    dispatch(fetchTournamentCategories(id));
+    dispatch(fetchTournamentTeams(id));
+  };
+
   useEffect(() => {
-    if (id) {
-      dispatch(fetchTournament(id));
-      dispatch(fetchTournamentCategories(id));
-      dispatch(fetchTournamentTeams(id));
-    }
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id]);
 
-  useEffect(() => { if (user) dispatch(fetchMyRegistrations()); }, [dispatch, user]);
+  useEffect(() => {
+    if (user) dispatch(fetchMyRegistrations());
+  }, [dispatch, user]);
 
   const myTeamAssignment = user
     ? myRegistrations.find((r) => r.tournamentId === id && (r.status === 'auctioned' || r.status === 'assigned') && r.teamId)
@@ -48,54 +59,78 @@ export default function TournamentDetail() {
   const myTeam = myTeamAssignment && teams.length > 0 ? teams.find((t) => t._id === myTeamAssignment.teamId) ?? null : null;
   const isTeamDataReady = !isRegLoading && !isTeamsLoading;
 
-  if (isLoading || !tournament) {
-    return <Screen><View className="flex-1 items-center justify-center"><ActivityIndicator color="#F97316" size="large" /></View></Screen>;
-  }
-  if (error) {
+  // First load with nothing cached. The hero geometry is held by skeletons so
+  // the tab bar does not jump when the name arrives.
+  if (!tournament && isLoading) {
     return (
       <Screen>
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="mb-4 font-montserrat text-red-400">{error}</Text>
-          <Pressable onPress={() => router.back()} className="rounded-full bg-white/10 px-6 py-2">
-            <Text className="font-montserrat text-white">Go back</Text>
-          </Pressable>
+        <Skeleton h={262} style={{ borderRadius: 0, borderWidth: 0 }} />
+        <View style={{ padding: 16, gap: 7 }}>
+          <Skeleton h={62} />
+          <Skeleton h={62} />
         </View>
       </Screen>
     );
   }
 
+  // No tournament at all — nothing to keep on screen, so this is the one place
+  // a full-screen failure is honest.
+  if (!tournament) {
+    return (
+      <Screen>
+        <View style={{ padding: 16, paddingTop: 60 }}>
+          <ErrorBlock
+            label="Tournament unavailable"
+            message={error || 'This tournament could not be loaded. It may have been removed.'}
+            onRetry={load}
+          />
+        </View>
+      </Screen>
+    );
+  }
+
+  const share = () =>
+    Share.share({ message: `${tournament.name} on Kria — ${tournament.venue?.city || ''}`.trim() });
+
   return (
     <Screen>
       <ScrollView stickyHeaderIndices={[1]} contentContainerStyle={{ paddingBottom: 24 }}>
-        {/* Hero + Live-Now banner wrapped as one child so the sticky tab bar stays at index 1 */}
+        {/* Hero + live banner are one child so the sticky tab bar stays at index 1 */}
         <View>
-          <TournamentHero tournament={tournament} onBack={() => router.back()} />
-          {/* Live-Now banner (cricket only) */}
-          {id && <LiveNowBanner tournamentId={id} sport={tournament.sport} />}
+          <TournamentHero
+            tournament={tournament}
+            categoryCount={categories.length}
+            onBack={() => router.back()}
+            onShare={share}
+          />
+          {id ? <LiveNowBanner tournamentId={id} sport={tournament.sport} /> : null}
         </View>
 
-        {/* Sticky tab bar */}
-        <DetailTabBar tabs={TABS} active={activeTab} onChange={setActiveTab} />
+        <DetailTabBar tabs={TABS} active={activeTab} onChange={setActiveTab} labels={LABELS} />
 
-        {/* Tab content */}
-        {activeTab === 'overview' && (
-          <OverviewTab tournament={tournament} user={user} myTeam={myTeam} myTeamAssignment={myTeamAssignment} isTeamDataReady={isTeamDataReady} />
-        )}
-        {activeTab === 'categories' && id && (
-          <CategoriesTab tournamentId={id} tournamentStatus={tournament.status} />
-        )}
-        {activeTab === 'auction' && id && (
-          <AuctionTab tournamentId={id} categories={categories} />
-        )}
-        {activeTab === 'bracket' && id && (
-          <BracketTab tournamentId={id} categories={categories} />
-        )}
-        {activeTab === 'teamLeague' && id && (
-          <TeamLeagueTab tournamentId={id} categories={categories} />
-        )}
-        {activeTab === 'players' && <PlayersTab />}
-        {activeTab === 'teams' && <TeamsTab myTeam={myTeam} />}
-        {activeTab === 'awards' && <AwardsTab awards={tournament.awards || []} />}
+        {/* A failed sub-resource is scoped to its own tab — the hero, tabs and
+            back button stay usable. */}
+        {activeTab === 'overview' && id ? (
+          <OverviewTab
+            tournamentId={id}
+            tournamentStatus={tournament.status}
+            categories={categories}
+            myRegistrations={myRegistrations}
+            myTeam={myTeam}
+            myTeamAssignment={myTeamAssignment}
+            isTeamDataReady={isTeamDataReady}
+            isLoading={isRegLoading}
+            user={user}
+          />
+        ) : null}
+
+        {activeTab === 'draw' && id ? (
+          <DrawTab tournamentId={id} categories={categories} isLoading={isRegLoading} />
+        ) : null}
+
+        {activeTab === 'teams' ? <TeamsTab myTeam={myTeam} /> : null}
+
+        {activeTab === 'info' ? <InfoTab tournament={tournament} awards={tournament.awards || []} /> : null}
       </ScrollView>
     </Screen>
   );

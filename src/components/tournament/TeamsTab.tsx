@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, Linking } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, Pressable, Linking } from 'react-native';
 import API from '@/api/axios';
 import type { Team } from '@/store/slices/teamSlice';
 import { useAppSelector } from '@/store/hooks';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
-import { TeamLogo } from '@/components/TeamLogo';
+import { Tag } from '@/components/StatusPill';
+import { Chip } from '@/components/canvas';
+import { Icon } from '@/components/icons';
+import { Skeleton, EmptyState } from '@/components/states';
 
 interface RosterPlayer {
   _id: string;
@@ -14,6 +16,12 @@ interface RosterPlayer {
   status: string;
 }
 
+function initials(name: string) {
+  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+}
+
+// Teams absorbs the old Players tab: every player in this tournament is on a
+// roster, so the roster is the player list.
 export function TeamsTab({ myTeam }: { myTeam: Team | null | undefined }) {
   const { teams, isLoading } = useAppSelector((s) => s.team);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -40,63 +48,132 @@ export function TeamsTab({ myTeam }: { myTeam: Team | null | undefined }) {
     if (teams.length === 0) return;
     teams.forEach((t) => fetchRoster(t._id));
     if (myTeam?._id) setExpanded(myTeam._id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teams.map((t) => t._id).join(','), myTeam?._id]);
 
-  if (isLoading) return <View className="py-8"><ActivityIndicator color="#F97316" /></View>;
-  if (teams.length === 0) return <View className="px-5 py-10"><Text className="text-center font-montserrat text-gray-400">No teams registered yet.</Text></View>;
+  if (isLoading && teams.length === 0) {
+    return (
+      <View style={{ paddingHorizontal: 16, paddingTop: 14, gap: 7 }}>
+        <Skeleton h={70} />
+        <Skeleton h={70} />
+        <Skeleton h={70} />
+      </View>
+    );
+  }
+
+  if (teams.length === 0) {
+    return (
+      <View style={{ paddingTop: 14 }}>
+        <EmptyState
+          icon="shield"
+          title="No teams yet"
+          message="Teams appear here once the organiser creates them, and fill up as the auction runs."
+        />
+      </View>
+    );
+  }
 
   return (
-    <View className="gap-4 px-5 py-6">
-      <Text className="font-oswald text-2xl font-bold text-white">Participating Teams</Text>
+    <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 24, gap: 7 }}>
       {teams.map((team) => {
         const isMine = myTeam?._id === team._id;
         const isOpen = expanded === team._id;
         const roster = rosters[team._id] ?? [];
         const color = team.primaryColor || '#F97316';
+
         return (
-          <View key={team._id} className="overflow-hidden rounded-3xl border bg-black/40" style={{ borderColor: isMine ? `${color}60` : 'rgba(255,255,255,0.08)' }}>
-            <View className="h-1 w-full" style={{ backgroundColor: color }} />
-            <Pressable onPress={() => setExpanded(isOpen ? null : team._id)} className="flex-row items-center gap-4 p-5">
-              <TeamLogo name={team.name} logo={team.logo} size={48} color={color} />
-              <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  <Text className="font-oswald text-lg font-black text-white">{team.name}</Text>
-                  {isMine && <Text style={{ backgroundColor: color }} className="rounded-full px-2 py-0.5 font-montserrat text-[10px] font-black uppercase text-white">Your Team</Text>}
-                </View>
-                <Text className="mt-0.5 font-montserrat text-sm text-gray-400">
-                  {loadingRoster[team._id] ? 'Loading…' : `${roster.length} player${roster.length !== 1 ? 's' : ''}`}
+          <View
+            key={team._id}
+            style={{
+              backgroundColor: '#151515',
+              borderWidth: 1.5,
+              borderColor: isMine ? 'rgba(250,76,147,0.5)' : 'rgba(255,255,255,0.14)',
+              borderLeftWidth: 4,
+              borderLeftColor: color,
+              borderRadius: 6,
+              overflow: 'hidden',
+            }}
+          >
+            <Pressable
+              onPress={() => setExpanded(isOpen ? null : team._id)}
+              accessibilityRole="button"
+              accessibilityLabel={team.name}
+              accessibilityState={{ expanded: isOpen }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 13, paddingVertical: 12, minHeight: 44 }}
+            >
+              <View style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 14, color: '#fff' }}>{initials(team.name)}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: '#fff' }}>
+                  {team.name}
+                </Text>
+                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 4 }}>
+                  {loadingRoster[team._id] ? 'Loading roster' : `${roster.length} player${roster.length === 1 ? '' : 's'}`}
                 </Text>
               </View>
-              <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={18} color="#9a9a9a" />
+              {isMine ? <Tag label="You" variant="auction" /> : null}
+              <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={15} color="#7d7d7d" />
             </Pressable>
-            {isOpen && (
-              <View className="gap-3 border-t border-white/10 px-5 pb-5 pt-4">
-                {isMine && team.whatsappGroupLink && (
-                  <Pressable onPress={() => Linking.openURL(team.whatsappGroupLink!)} className="self-start rounded-2xl px-5 py-2.5" style={{ backgroundColor: '#128C7E' }}>
-                    <Text className="font-montserrat text-sm font-bold text-white">Join WhatsApp Group</Text>
+
+            {isOpen ? (
+              <View style={{ borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)', padding: 13, gap: 7 }}>
+                {isMine && team.whatsappGroupLink ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => Linking.openURL(team.whatsappGroupLink!)}
+                    style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' }}
+                  >
+                    <Chip label="Join team chat" selected variant="auction" />
                   </Pressable>
-                )}
+                ) : null}
+
                 {loadingRoster[team._id] ? (
-                  <ActivityIndicator color="#F97316" />
+                  <>
+                    <Skeleton h={44} />
+                    <Skeleton h={44} />
+                  </>
                 ) : roster.length === 0 ? (
-                  <Text className="py-4 text-center font-montserrat text-sm text-gray-500">No players assigned yet.</Text>
+                  <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#7d7d7d', paddingVertical: 8 }}>
+                    No players on this roster yet.
+                  </Text>
                 ) : (
                   roster.map((p) => {
-                    const name = `${p.profile.firstName} ${p.profile.lastName}`;
+                    const name = `${p.profile.firstName} ${p.profile.lastName}`.trim();
                     return (
-                      <View key={p._id} className="flex-row items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-                        <InitialsAvatar name={name} color={color} />
-                        <View className="flex-1">
-                          <Text className="font-montserrat text-sm font-semibold capitalize text-white">{name}</Text>
-                          <Text className="font-montserrat text-xs capitalize text-gray-500">{p.profile.gender}{p.profile.skillLevel ? ` · ${p.profile.skillLevel}` : ''}</Text>
+                      <View
+                        key={p._id}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: 9,
+                          backgroundColor: '#1E1E1E',
+                          borderWidth: 1.5,
+                          borderColor: 'rgba(255,255,255,0.10)',
+                          borderRadius: 6,
+                        }}
+                      >
+                        <InitialsAvatar name={name} size={32} color={color} />
+                        <View style={{ flex: 1 }}>
+                          <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 13, color: '#fff' }}>
+                            {name}
+                          </Text>
+                          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+                            {[p.profile.gender, p.profile.skillLevel].filter(Boolean).join(' · ')}
+                          </Text>
                         </View>
-                        {p.auctionData?.soldPrice ? <Text style={{ color }} className="font-montserrat text-xs font-bold">₹{p.auctionData.soldPrice.toLocaleString()}</Text> : null}
+                        {p.auctionData?.soldPrice ? (
+                          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#16C46A' }}>
+                            ₹{p.auctionData.soldPrice.toLocaleString('en-IN')}
+                          </Text>
+                        ) : null}
                       </View>
                     );
                   })
                 )}
               </View>
-            )}
+            ) : null}
           </View>
         );
       })}

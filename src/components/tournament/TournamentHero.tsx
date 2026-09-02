@@ -1,84 +1,97 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Tournament } from '@/store/slices/tournamentSlice';
-import { StatusPill } from '@/components/StatusPill';
+import { StatusPill, Tag } from '@/components/StatusPill';
+import { Icon, type IconName } from '@/components/icons';
+import { Hairlines } from '@/components/canvas';
+import { Ghost } from '@/components/states';
 import { formatShortDate } from '@/lib/format';
 
-type IoniconName = keyof typeof Ionicons.glyphMap;
-
-function Stat({ icon, value, label }: { icon: IoniconName; value: string | number; label: string }) {
+function IconButton({ name, label, onPress }: { name: IconName; label: string; onPress?: () => void }) {
   return (
-    <View className="flex-1 items-center">
-      <Ionicons name={icon} size={16} color="#F97316" />
-      <Text className="mt-1 font-oswald text-lg text-white">{value}</Text>
-      <Text className="font-montserrat text-[10px] uppercase tracking-wider text-gray-500">{label}</Text>
-    </View>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      hitSlop={6}
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: 4,
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255,255,255,0.12)',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Icon name={name} size={17} color="#fff" strokeWidth={1.9} />
+    </Pressable>
   );
 }
 
-export function TournamentHero({ tournament, onBack }: { tournament: Tournament; onBack: () => void }) {
+function monogram(name: string) {
+  const word = name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(Boolean);
+  return (word.find((w) => w.length > 3) || word[0] || 'KRIA').toUpperCase();
+}
+
+// TournamentDetail.dc.html: no banner photo — hairline texture, an oversized
+// ghost word, and the name in Anton carry the hero.
+export function TournamentHero({
+  tournament,
+  categoryCount,
+  onBack,
+  onShare,
+}: {
+  tournament: Tournament;
+  categoryCount?: number;
+  onBack: () => void;
+  onShare?: () => void;
+}) {
+  const meta = [
+    tournament.venue?.city,
+    `${formatShortDate(tournament.startDate)}–${formatShortDate(tournament.endDate)}`,
+    categoryCount ? `${categoryCount} categor${categoryCount === 1 ? 'y' : 'ies'}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
-    <View>
-      <View className="relative h-72 w-full">
-        {tournament.bannerImage ? (
-          <Image source={{ uri: tournament.bannerImage }} className="h-full w-full" resizeMode="cover" />
-        ) : (
-          <View className="h-full w-full bg-[#1a1a1a]" />
-        )}
-        <LinearGradient
-          colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0.05)', 'rgba(17,17,17,0.55)', '#111111']}
-          locations={[0, 0.35, 0.75, 1]}
-          style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-        />
+    <View style={{ height: 262, backgroundColor: '#0B0B0B', overflow: 'hidden' }}>
+      <Hairlines />
+      <Ghost text={monogram(tournament.name)} size={170} style={{ left: -16, top: 44 }} />
+      <LinearGradient
+        colors={['transparent', 'rgba(11,11,11,0.4)', '#0B0B0B']}
+        locations={[0.15, 0.5, 0.94]}
+        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+      />
 
-        <SafeAreaView edges={['top']} className="absolute left-0 right-0 top-0 px-4">
-          <Pressable
-            onPress={onBack}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-            hitSlop={8}
-            className="mt-1 h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40"
-          >
-            <Ionicons name="chevron-back" size={22} color="#fff" />
-          </Pressable>
-        </SafeAreaView>
-
-        <View className="absolute bottom-0 left-0 right-0 gap-2 px-5 pb-4">
-          <View className="flex-row gap-2">
-            <StatusPill status={tournament.status} />
-            <View className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1">
-              <Text className="font-montserrat text-[10px] font-bold uppercase text-white">
-                {tournament.sport?.replace('_', ' ')}
-              </Text>
-            </View>
-          </View>
-          <Text className="font-oswald uppercase text-white" style={{ fontSize: 34, lineHeight: 36, paddingTop: 2 }}>
-            {tournament.name}
-          </Text>
-          <View className="flex-row flex-wrap items-center gap-x-4 gap-y-1">
-            <View className="flex-row items-center gap-1.5">
-              <Ionicons name="location-outline" size={14} color="#F97316" />
-              <Text className="font-montserrat text-xs text-gray-200">
-                {tournament.venue?.name}{tournament.venue?.city ? `, ${tournament.venue.city}` : ''}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-1.5">
-              <Ionicons name="calendar-outline" size={14} color="#F97316" />
-              <Text className="font-montserrat text-xs text-gray-200">
-                {formatShortDate(tournament.startDate)} – {formatShortDate(tournament.endDate)}
-              </Text>
-            </View>
-          </View>
+      <SafeAreaView edges={['top']} style={{ position: 'absolute', left: 0, right: 0, top: 0 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 6 }}>
+          <IconButton name="chevron-left" label="Go back" onPress={onBack} />
+          <View style={{ flex: 1 }} />
+          {onShare ? <IconButton name="share" label="Share tournament" onPress={onShare} /> : null}
         </View>
-      </View>
+      </SafeAreaView>
 
-      {/* Stats strip */}
-      <View className="mx-5 -mt-2 mb-2 flex-row items-center rounded-2xl border border-white/10 bg-white/5 py-4">
-        <Stat icon="people-outline" value={tournament.registeredPlayersCount ?? 0} label="Players" />
-        <View className="h-8 w-px bg-white/10" />
-        <Stat icon="shield-outline" value={`${tournament.teamsCount ?? 0}/${tournament.settings?.maxTeams ?? '∞'}`} label="Teams" />
+      <View style={{ position: 'absolute', left: 16, right: 16, bottom: 12 }}>
+        <View style={{ flexDirection: 'row', gap: 7, marginBottom: 9 }}>
+          <StatusPill status={tournament.status} />
+          {tournament.sport ? <Tag label={tournament.sport.replace('_', ' ')} /> : null}
+        </View>
+        <Text
+          numberOfLines={2}
+          style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 36, color: '#fff' }}
+        >
+          {tournament.name}
+        </Text>
+        <Text
+          numberOfLines={1}
+          style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 9 }}
+        >
+          {meta}
+        </Text>
       </View>
     </View>
   );
