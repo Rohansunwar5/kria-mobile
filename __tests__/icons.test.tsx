@@ -45,11 +45,12 @@ describe('icon geometry', () => {
   it('declares solid support only for closed shapes', () => {
     expect(SOLID_CAPABLE).toContain('trophy');
     expect(SOLID_CAPABLE).toContain('person');
-    expect(SOLID_CAPABLE).toContain('shuttlecock');
     // Open-stroke glyphs would look broken filled.
     expect(SOLID_CAPABLE).not.toContain('chevron-right');
     expect(SOLID_CAPABLE).not.toContain('stumps');
     expect(SOLID_CAPABLE).not.toContain('court');
+    // Skirt and cork merge into one funnel when filled.
+    expect(SOLID_CAPABLE).not.toContain('shuttlecock');
   });
 
   it('ships the sport glyphs that carry the brand', () => {

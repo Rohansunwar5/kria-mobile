@@ -101,28 +101,27 @@ const ICONS: Record<string, IconDef> = {
     ],
   },
   medal: {
-    solid: true,
     paths: [
-      'M12 9.5 A5 5 0 1 1 12 19.5 A5 5 0 1 1 12 9.5 Z',
-      'M8 3 L10.5 10', 'M16 3 L13.5 10',
-      'M10.5 13 H13.5 V16.5 H10.5 Z',
+      'M7.5 2.5 L12 9', 'M16.5 2.5 L12 9',
+      'M12 10 A5 5 0 1 1 12 20 A5 5 0 1 1 12 10 Z',
+      'M10.2 13.2 H13.8 V16.8 H10.2 Z',
     ],
   },
   /** Badminton shuttlecock: flared feather skirt over a cork base. */
   shuttlecock: {
-    solid: true,
     paths: [
-      'M6.5 3.5 H17.5 L15 14.5 H9 Z',
-      'M9 14.5 H15 L14.5 17.5 A2.5 2.5 0 0 1 9.5 17.5 Z',
-      'M10.2 3.5 L11 14.5', 'M13.8 3.5 L13 14.5',
+      'M5 3.5 H19 L14.5 13 H9.5 Z',
+      'M9.5 13 H14.5 V15.5 A2.5 2.5 0 0 1 9.5 15.5 Z',
+      'M9.2 3.5 L10.6 13', 'M14.8 3.5 L13.4 13',
+      'M9.9 8.5 H14.1',
     ],
   },
-  /** Cricket bat: angled blade with a spliced handle. */
+  /** Cricket bat, tilted — upright reads as a bottle, angled reads as a bat. */
   'cricket-bat': {
     paths: [
-      'M8.5 20.5 L4 16 L12.5 7.5 L17 12 Z',
-      'M14 6.5 L18.5 2',
-      'M12.5 7.5 L14 6.5',
+      'M14.8 2.6 L16.8 3.4 L14.6 9.6 L12.6 8.8 Z',
+      'M9.6 7.7 L17.6 10.7 L13.5 21.1 L6.1 18.5 Z',
+      'M13.6 9.4 L11.9 14.1',
     ],
   },
   /** Cricket stumps with bails. */
@@ -134,7 +133,6 @@ const ICONS: Record<string, IconDef> = {
   },
   /** Cricket ball with seam. */
   ball: {
-    solid: true,
     paths: [
       'M12 3.5 A8.5 8.5 0 1 1 12 20.5 A8.5 8.5 0 1 1 12 3.5 Z',
       'M8 5 C10.5 8.5 10.5 15.5 8 19',
@@ -149,11 +147,12 @@ const ICONS: Record<string, IconDef> = {
       'M3 21 H13',
     ],
   },
-  /** Knockout bracket: two pairs merging into one. */
+  /** Knockout draw: four seeds resolving to one, read left to right. */
   bracket: {
     paths: [
-      'M3 6 H8.5 V12 H14.5', 'M3 18 H8.5 V12', 'M14.5 12 H21',
-      'M12.5 10 H16.5 V14 H12.5 Z',
+      'M3 4.5 H7.5', 'M3 9.5 H7.5', 'M7.5 4.5 V9.5', 'M7.5 7 H12',
+      'M3 14.5 H7.5', 'M3 19.5 H7.5', 'M7.5 14.5 V19.5', 'M7.5 17 H12',
+      'M12 7 V17', 'M12 12 H21',
     ],
   },
   /** Court with a net across the middle — badminton or tennis. */
