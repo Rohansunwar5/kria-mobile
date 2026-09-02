@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0B0B0B; font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #F97316; text-decoration: none; }
+    a:hover { color: #FA4C93; }
+
+    /* ---- Type layers ---- */
+    .ant { font-family: 'Anton', 'Arial Narrow', Haettenschweiler, Impact, sans-serif; text-transform: uppercase; font-weight: 400; letter-spacing: 0.01em; }
+    .mn { font-family: 'Space Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+    /* ---- Frame ---- */
+    .scr { width: 390px; height: 844px; background: #0B0B0B; color: #fff; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    .sheet { background: #0B0B0B; color: #fff; overflow: hidden; position: relative; }
+    .safe { height: 44px; flex: none; }
+
+    /* ---- Atmosphere ---- */
+    .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.16; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+    .dots { background-image: radial-gradient(rgba(255,255,255,0.16) 1px, transparent 1px); background-size: 9px 9px; }
+    .hazard { background-image: repeating-linear-gradient(115deg, rgba(249,115,22,0.9) 0 9px, transparent 9px 18px); }
+    .hairlines { background-image: repeating-linear-gradient(115deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 7px); }
+    .ghost { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.09); position: absolute; pointer-events: none; line-height: 0.78; }
+    .ghostfill { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; color: rgba(255,255,255,0.045); position: absolute; pointer-events: none; line-height: 0.78; }
+
+    /* ---- Blocks (hard-edged, heavy) ---- */
+    .blk { background: #151515; border: 1.5px solid rgba(255,255,255,0.14); border-radius: 6px; }
+    .blk2 { background: #1E1E1E; border: 1.5px solid rgba(255,255,255,0.10); border-radius: 6px; }
+    .blkb { background: #F97316; color: #0B0B0B; border-radius: 6px; }
+    .blkm { background: #FA4C93; color: #0B0B0B; border-radius: 6px; }
+    .edge { border-left: 4px solid #F97316; }
+    .divide { height: 1.5px; background: rgba(255,255,255,0.10); }
+
+    /* ---- Tags & pills ---- */
+    .tag { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; padding: 4px 7px; border-radius: 3px; display: inline-flex; align-items: center; gap: 5px; }
+    .t-live { background: #F97316; color: #0B0B0B; }
+    .t-open { background: #16C46A; color: #06240F; }
+    .t-mag { background: #FA4C93; color: #240614; }
+    .t-up { background: rgba(255,255,255,0.10); color: #d4d4d4; }
+    .t-end { background: rgba(255,255,255,0.06); color: #8a8a8a; }
+    .t-red { background: #FF4438; color: #2A0703; }
+    .t-out { background: transparent; color: #F97316; box-shadow: inset 0 0 0 1.5px #F97316; }
+
+    /* ---- Labels ---- */
+    .kick { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #F97316; }
+    .lbl { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #7d7d7d; }
+    .meta { font-size: 12px; color: #a3a3a3; }
+    .meta2 { font-size: 11px; color: #737373; }
+    .body { font-size: 13px; color: #d4d4d4; line-height: 19px; }
+
+    /* ---- Controls ---- */
+    .btnx { height: 54px; border-radius: 5px; background: #F97316; color: #0B0B0B; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 17px; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 9px; }
+    .btnk { height: 54px; border-radius: 5px; background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.22); color: #fff; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 15px; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .chip { border-radius: 3px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.16); padding: 7px 12px; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #bdbdbd; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .chip-on { background: #F97316; color: #0B0B0B; box-shadow: none; }
+    .chip-mag { background: #FA4C93; color: #240614; box-shadow: none; }
+    .iconbtn { width: 38px; height: 38px; border-radius: 4px; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; flex: none; }
+
+    /* ---- Header ---- */
+    .hdr { display: flex; align-items: center; gap: 12px; padding: 8px 16px 12px; border-bottom: 1.5px solid rgba(255,255,255,0.12); flex: none; position: relative; }
+
+    /* ---- Nav ---- */
+    .tabbar { position: absolute; left: 14px; right: 14px; bottom: 12px; display: flex; gap: 5px; padding: 5px; background: #F97316; border-radius: 7px; box-shadow: 0 10px 26px rgba(0,0,0,0.6); }
+    .tabitem { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 12px 0; border-radius: 4px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 13px; letter-spacing: 0.05em; color: rgba(11,11,11,0.62); }
+    .tabitem-on { background: #0B0B0B; color: #fff; }
+
+    /* ---- Identity ---- */
+    .avat { border-radius: 4px; background: #F97316; display: flex; align-items: center; justify-content: center; font-family: 'Anton', Impact, sans-serif; color: #0B0B0B; flex: none; }
+    .avatk { border-radius: 4px; background: rgba(255,255,255,0.09); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center; font-family: 'Anton', Impact, sans-serif; color: #d4d4d4; flex: none; }
+
+    /* ---- Rails ---- */
+    .rail { position: absolute; font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.22); writing-mode: vertical-rl; }
+    .apinote { font-family: 'Space Mono', monospace; font-size: 9px; color: #F97316; letter-spacing: 0.04em; }
+  </style>
+</helmet>
+<div class="scr">
+  <div class="safe"></div>
+  <div class="hdr">
+    <div class="iconbtn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"/></svg></div>
+    <div style="flex:1">
+      <div class="ant" style="font-size:16px;line-height:15px">Monsoon Premier League</div>
+      <div class="mn" style="font-size:9px;color:#7d7d7d;margin-top:4px;letter-spacing:0.1em">MATCH 12 &middot; GROUP B &middot; T20</div>
+    </div>
+    <div class="tag t-live"><span style="width:5px;height:5px;background:#0B0B0B;border-radius:999px;display:inline-block"></span>Live</div>
+  </div>
+
+  <!-- Sticky scoreboard -->
+  <div style="flex:none;position:relative;overflow:hidden;border-bottom:1.5px solid rgba(255,255,255,0.12)">
+    <div class="hairlines" style="position:absolute;inset:0"></div>
+    <div class="ghostfill" style="font-size:120px;right:-10px;top:-14px">2ND</div>
+    <div style="padding:13px 16px 0;position:relative">
+      <div style="display:flex;align-items:center;gap:9px">
+        <div style="width:26px;height:26px;border-radius:3px;background:#1d4ed8;display:flex;align-items:center;justify-content:center;flex:none"><span class="ant" style="font-size:10px">TB</span></div>
+        <span class="ant" style="font-size:17px">Thunder Blazers</span>
+        <div class="tag t-live" style="padding:2px 5px">Batting</div>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:9px;margin-top:8px">
+        <span class="mn" style="font-size:52px;line-height:46px;font-weight:700;color:#fff">142</span>
+        <span class="mn" style="font-size:26px;font-weight:700;color:#F97316">/4</span>
+        <span class="mn" style="font-size:14px;color:#a3a3a3">16.2 ov</span>
+      </div>
+      <div class="mn" style="font-size:10px;color:#a3a3a3;margin-top:8px;letter-spacing:0.08em">CHASING &mdash; STEEL KINGS 167/8 (20.0)</div>
+    </div>
+    <!-- Chase math -->
+    <div style="display:flex;margin-top:13px;border-top:1.5px solid rgba(255,255,255,0.10);position:relative">
+      <div style="flex:1;padding:9px 12px;border-right:1.5px solid rgba(255,255,255,0.10)">
+        <div class="lbl" style="letter-spacing:0.12em">Need</div>
+        <div class="mn" style="font-size:15px;font-weight:700;color:#fff;margin-top:3px">26 in 22</div>
+      </div>
+      <div style="flex:1;padding:9px 12px;border-right:1.5px solid rgba(255,255,255,0.10)">
+        <div class="lbl" style="letter-spacing:0.12em">CRR</div>
+        <div class="mn" style="font-size:15px;font-weight:700;color:#fff;margin-top:3px">8.69</div>
+      </div>
+      <div style="flex:1;padding:9px 12px;background:#F97316">
+        <div class="mn" style="font-size:9px;font-weight:700;color:rgba(11,11,11,0.7);letter-spacing:0.14em">RRR</div>
+        <div class="mn" style="font-size:15px;font-weight:700;color:#0B0B0B;margin-top:3px">7.09</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;overflow:hidden;padding:13px 16px 0;position:relative">
+    <!-- Crease -->
+    <div class="lbl" style="margin-bottom:8px">At the crease</div>
+    <div class="blk" style="padding:0;overflow:hidden;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 13px;background:rgba(249,115,22,0.08);border-left:4px solid #F97316">
+        <div class="avat" style="width:28px;height:28px;font-size:10px">AK</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:#fff">A. Kohli</div>
+          <div class="mn" style="font-size:8px;color:#F97316;letter-spacing:0.12em;margin-top:2px">ON STRIKE</div>
+        </div>
+        <div style="text-align:right">
+          <div class="mn" style="font-size:14px;font-weight:700;color:#fff">64 <span style="font-size:10px;color:#a3a3a3">(43)</span></div>
+          <div class="mn" style="font-size:8px;color:#7d7d7d;letter-spacing:0.1em;margin-top:2px">7x4 &middot; 2x6 &middot; SR 148</div>
+        </div>
+      </div>
+      <div class="divide" style="background:rgba(255,255,255,0.06)"></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 13px">
+        <div class="avatk" style="width:28px;height:28px;font-size:10px">SP</div>
+        <div style="flex:1">
+          <div style="font-size:12px;color:#d4d4d4">S. Patel</div>
+        </div>
+        <div style="text-align:right">
+          <div class="mn" style="font-size:14px;color:#fff">18 <span style="font-size:10px;color:#a3a3a3">(16)</span></div>
+          <div class="mn" style="font-size:8px;color:#7d7d7d;letter-spacing:0.1em;margin-top:2px">1x4 &middot; SR 113</div>
+        </div>
+      </div>
+      <div class="divide" style="background:rgba(255,255,255,0.06)"></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 13px;background:rgba(255,255,255,0.03)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7d7d7d" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M6 20V8M6 8l9-3v6l-9 3"/></svg>
+        <div style="flex:1;font-size:12px;color:#d4d4d4">M. Iqbal <span class="mn" style="font-size:9px;color:#7d7d7d">BOWLING</span></div>
+        <div class="mn" style="font-size:12px;font-weight:700;color:#fff">3.2-0-31-2</div>
+      </div>
+    </div>
+
+    <!-- This over -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="lbl">Over 17</div>
+      <div class="mn" style="font-size:9px;color:#F97316;font-weight:700;letter-spacing:0.1em">7 RUNS, 1 WKT</div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:15px">
+      <div class="mn" style="width:36px;height:36px;border-radius:4px;background:rgba(255,255,255,0.07);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:13px;color:#d4d4d4">1</div>
+      <div class="mn" style="width:36px;height:36px;border-radius:4px;background:#F97316;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0B0B0B">4</div>
+      <div class="mn" style="width:36px;height:36px;border-radius:4px;background:rgba(255,255,255,0.07);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:13px;color:#7d7d7d">&middot;</div>
+      <div class="mn" style="width:36px;height:36px;border-radius:4px;background:#FF4438;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#2A0703">W</div>
+      <div class="mn" style="width:36px;height:36px;border-radius:4px;background:rgba(255,255,255,0.07);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:13px;color:#d4d4d4">2</div>
+      <div class="mn" style="width:36px;height:36px;border-radius:4px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.10);display:flex;align-items:center;justify-content:center"></div>
+    </div>
+
+    <!-- Innings tabs -->
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <div class="chip chip-on">Blazers 142/4</div>
+      <div class="chip">Kings 167/8</div>
+    </div>
+    <div class="blk" style="padding:0;overflow:hidden">
+      <div style="display:flex;padding:8px 13px;background:rgba(255,255,255,0.04)">
+        <div class="lbl" style="flex:1;letter-spacing:0.12em">Batter</div>
+        <div class="lbl" style="width:30px;text-align:right;letter-spacing:0.1em">R</div>
+        <div class="lbl" style="width:30px;text-align:right;letter-spacing:0.1em">B</div>
+        <div class="lbl" style="width:44px;text-align:right;letter-spacing:0.1em">SR</div>
+      </div>
+      <div class="divide" style="background:rgba(255,255,255,0.06)"></div>
+      <div style="display:flex;padding:9px 13px;align-items:baseline">
+        <div style="flex:1">
+          <div style="font-size:12px;color:#fff">R. Sharma</div>
+          <div class="mn" style="font-size:8px;color:#7d7d7d;letter-spacing:0.06em;margin-top:2px">C IQBAL B RAO</div>
+        </div>
+        <div class="mn" style="width:30px;text-align:right;font-size:12px;color:#fff">31</div>
+        <div class="mn" style="width:30px;text-align:right;font-size:12px;color:#a3a3a3">22</div>
+        <div class="mn" style="width:44px;text-align:right;font-size:12px;color:#a3a3a3">140.9</div>
+      </div>
+    </div>
+  </div>
+  <div class="grain"></div>
+</div>
+</x-dc>
+</body>
+</html>
