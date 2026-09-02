@@ -1,42 +1,65 @@
 import { View, Text, Pressable } from 'react-native';
 import { Tie } from '@/api/teamLeague';
-import { TeamLeagueEmpty } from '@/components/teamleague/TeamLeagueStates';
+import { Tag } from '@/components/StatusPill';
+import { EmptyState } from '@/components/states';
 
 export function TieList({ ties, onSelect }: { ties: Tie[]; onSelect: (t: Tie) => void }) {
-  if (ties.length === 0) return <TeamLeagueEmpty message="No ties scheduled yet." />;
+  if (ties.length === 0) {
+    return (
+      <EmptyState
+        icon="bracket"
+        title="No ties yet"
+        message="Fixtures for this group appear once the organiser schedules them."
+      />
+    );
+  }
+
   return (
-    <View className="gap-2">
-      {ties.map((tie) => {
+    <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden' }}>
+      {ties.map((tie, i) => {
         const completed = tie.status === 'completed';
         const win1 = tie.winnerId === tie.teams?.team1Id;
         const win2 = tie.winnerId === tie.teams?.team2Id;
+        const progress =
+          tie.completedCount !== undefined && (tie.subMatchCount ?? 0) > 0
+            ? `${tie.completedCount}/${tie.subMatchCount}`
+            : 'VS';
+
+        const name = (label: string, won: boolean, align: 'right' | 'left') => (
+          <Text
+            numberOfLines={2}
+            style={{
+              flex: 1,
+              textAlign: align,
+              fontFamily: won ? 'SpaceGrotesk_700Bold' : 'SpaceGrotesk_400Regular',
+              fontSize: 13,
+              color: won ? '#16C46A' : completed ? 'rgba(255,255,255,0.5)' : '#fff',
+            }}
+          >
+            {label}
+          </Text>
+        );
+
         return (
-          <Pressable key={tie._id} onPress={() => onSelect(tie)} className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-            <View className="flex-row items-stretch">
-              <View className={`flex-1 items-end justify-center px-4 py-3.5 ${win1 ? 'bg-emerald-500/5' : ''}`}>
-                <Text className={`text-right font-montserrat text-sm font-semibold ${win1 ? 'font-bold text-emerald-300' : completed ? 'text-white/50' : 'text-white'}`} numberOfLines={2}>
-                  {tie.teams?.team1Name}
-                </Text>
-              </View>
-              <View className="min-w-[64px] items-center justify-center border-x border-white/5 px-3 py-3">
+          <View key={tie._id}>
+            {i > 0 ? <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} /> : null}
+            <Pressable
+              onPress={() => onSelect(tie)}
+              accessibilityRole="button"
+              accessibilityLabel={`${tie.teams?.team1Name} versus ${tie.teams?.team2Name}`}
+              style={{ flexDirection: 'row', alignItems: 'center', minHeight: 44, paddingHorizontal: 14, paddingVertical: 12 }}
+            >
+              {name(tie.teams?.team1Name || 'TBD', win1, 'right')}
+              <View style={{ minWidth: 64, alignItems: 'center', paddingHorizontal: 10 }}>
                 {completed ? (
-                  <Text className="font-montserrat text-[9px] font-bold uppercase tracking-widest text-emerald-400">Done</Text>
-                ) : tie.completedCount !== undefined && (tie.subMatchCount ?? 0) > 0 ? (
-                  <>
-                    <Text className="font-montserrat text-[9px] font-bold uppercase tracking-widest text-gray-600">vs</Text>
-                    <Text className="font-montserrat text-[9px] text-gray-600">{tie.completedCount}/{tie.subMatchCount}</Text>
-                  </>
+                  <Tag label="Done" variant="open" />
                 ) : (
-                  <Text className="font-montserrat text-[9px] font-bold uppercase tracking-widest text-gray-600">vs</Text>
+                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, color: '#7d7d7d' }}>{progress}</Text>
                 )}
               </View>
-              <View className={`flex-1 items-start justify-center px-4 py-3.5 ${win2 ? 'bg-emerald-500/5' : ''}`}>
-                <Text className={`font-montserrat text-sm font-semibold ${win2 ? 'font-bold text-emerald-300' : completed ? 'text-white/50' : 'text-white'}`} numberOfLines={2}>
-                  {tie.teams?.team2Name}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
+              {name(tie.teams?.team2Name || 'TBD', win2, 'left')}
+            </Pressable>
+          </View>
         );
       })}
     </View>

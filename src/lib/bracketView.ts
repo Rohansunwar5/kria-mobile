@@ -106,3 +106,27 @@ export function leagueStandings(matches: Match[], competitorType: 'player' | 'te
   });
   return Object.values(table).sort((a, b) => b.points - a.points || b.won - a.won);
 }
+
+/**
+ * Which sport a category is, inferred from its matches.
+ *
+ * Cricket and badminton matches live in separate collections and neither
+ * carries a reliable `sportType`, but their match configs differ: cricket is
+ * overs-based, badminton is points-based. This is what decides whether a card
+ * links to a scoreboard.
+ */
+export function categorySport(matches: Match[]): 'cricket' | 'badminton' | undefined {
+  if (matches.some((m) => m.matchConfig?.maxOvers != null)) return 'cricket';
+  if (matches.some((m) => m.matchConfig?.bestOf != null || m.matchConfig?.pointsToWin != null)) return 'badminton';
+  if (matches.some((m) => (m.gameScores?.length ?? 0) > 0)) return 'badminton';
+  return undefined;
+}
+
+/** Whether a match card opens a scoreboard, and which one it is showing. */
+export function scoreboardLink(match: Match, sport?: string): 'live' | 'result' | null {
+  // Badminton and cricket are the two sports with a mobile scoreboard.
+  if (sport !== 'cricket' && sport !== 'badminton') return null;
+  if (match.status === 'in_progress') return 'live';
+  if (match.status === 'completed' || match.status === 'walkover') return 'result';
+  return null;
+}

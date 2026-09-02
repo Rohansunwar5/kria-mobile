@@ -49,14 +49,18 @@ export interface Match {
   result?: MatchResult;
   winnerId?: string;
   winReason?: string;
-  // Cricket matches are stored in their own collection and carry no sportType,
-  // but they DO carry a cricket-only matchConfig (overs, etc). Presence of this
-  // is how we detect a cricket match for the live/completed scoreboard link.
+  schedule?: { date?: string; time?: string; court?: string; venue?: string };
+  // Cricket and badminton matches live in separate collections and carry no
+  // sportType, but their match configs differ — cricket is overs-based,
+  // badminton points-based. categorySport() uses this to decide which
+  // scoreboard, if any, a card links to.
   matchConfig?: {
     maxOvers?: number;
     maxOversPerBowler?: number;
     playersPerTeam?: number;
     powerplayOvers?: number;
+    bestOf?: number;
+    pointsToWin?: number;
   };
 }
 

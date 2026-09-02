@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAppSelector } from '@/store/hooks';
 import { useTeamLeague } from '@/lib/useTeamLeague';
@@ -8,27 +7,35 @@ import { detectChampion } from '@/lib/teamLeagueView';
 import { getTiesByGroup, getTieDetails, Group, Tie, SubMatch, Lineup } from '@/api/teamLeague';
 import { StageSelector, ViewSegment, TLView } from '@/components/teamleague/TeamLeagueControls';
 import { StandingsTable } from '@/components/teamleague/StandingsTable';
-import { ChampionBanner, TeamLeagueEmpty, TeamLeagueError } from '@/components/teamleague/TeamLeagueStates';
+import { ChampionBanner } from '@/components/teamleague/TeamLeagueStates';
+import { Screen } from '@/components/Screen';
+import { Icon } from '@/components/icons';
+import { Skeleton, ErrorBlock, EmptyState } from '@/components/states';
 import { GroupList } from '@/components/teamleague/GroupList';
 import { TieList } from '@/components/teamleague/TieList';
 import { TieDetail } from '@/components/teamleague/TieDetail';
 
-function BackBar({ onBack }: { onBack: () => void }) {
+function Header({ onBack, sub }: { onBack: () => void; sub?: string }) {
   return (
-    <View className="flex-row items-center gap-3 border-b border-white/10 px-4 py-3">
-      <Pressable onPress={onBack} className="rounded-full bg-white/10 px-3 py-1.5">
-        <Text className="font-montserrat text-sm text-white">‹ Back</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        onPress={onBack}
+        hitSlop={8}
+        style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
       </Pressable>
-      <Text className="flex-1 font-oswald text-base font-bold uppercase text-white">Team League</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: '#fff' }}>Team league</Text>
+        {sub ? (
+          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+            {sub}
+          </Text>
+        ) : null}
+      </View>
     </View>
-  );
-}
-
-function Frame({ children }: { children: React.ReactNode }) {
-  return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#111111' }}>
-      <View className="flex-1 bg-ink">{children}</View>
-    </SafeAreaView>
   );
 }
 
@@ -49,7 +56,13 @@ export default function TeamLeagueScreen() {
 
   // Slot labels come from the category config already in the registration slice.
   const categories = useAppSelector((s) => s.registration.categories);
-  const slots = categories.find((c) => c._id === categoryId)?.teamLeagueConfig?.subTeamSlots ?? [];
+  const category = categories.find((c) => c._id === categoryId);
+  const slots = category?.teamLeagueConfig?.subTeamSlots ?? [];
+  // Teams above this line advance out of the group.
+  const topN = category?.teamLeagueConfig?.topNPerGroup;
+  const sub = [category?.name, groups.length ? `${groups.length} groups` : null].filter(Boolean).join(' · ');
+  const myRegistrations = useAppSelector((s) => s.registration.myRegistrations);
+  const myTeamId = myRegistrations.find((r) => r.categoryId === categoryId)?.teamId;
 
   const resetDrill = () => { setSelectedGroup(null); setSelectedTie(null); setTieDetail(null); };
 
@@ -95,48 +108,69 @@ export default function TeamLeagueScreen() {
 
   if (loading) {
     return (
-      <Frame>
-        <BackBar onBack={back} />
-        <View className="flex-1 items-center justify-center"><ActivityIndicator color="#F97316" size="large" /></View>
-      </Frame>
+      <Screen>
+        <Header onBack={back} sub={sub} />
+        <View style={{ padding: 16, gap: 12 }}>
+          <Skeleton h={10} w={80} line />
+          <Skeleton h={180} />
+          <Skeleton h={180} />
+        </View>
+      </Screen>
     );
   }
   if (error) {
     return (
-      <Frame>
-        <BackBar onBack={back} />
-        <ScrollView refreshControl={refresh} contentContainerStyle={{ flexGrow: 1 }}><TeamLeagueError /></ScrollView>
-      </Frame>
+      <Screen>
+        <Header onBack={back} sub={sub} />
+        <ScrollView refreshControl={refresh} contentContainerStyle={{ padding: 16 }}>
+          <ErrorBlock label="League unavailable" message="The league tables could not be loaded. Pull to retry." onRetry={reload} />
+        </ScrollView>
+      </Screen>
     );
   }
 
   const stageChampion = detectChampion(standings);
 
   return (
-    <Frame>
-      <BackBar onBack={back} />
+    <Screen>
+      <Header onBack={back} sub={sub} />
       <StageSelector maxStage={maxStage} stage={stage} onSelect={changeStage} />
       <ViewSegment value={view} onChange={changeView} />
       <ScrollView refreshControl={refresh} contentContainerStyle={{ padding: 16, gap: 16 }}>
         {view === 'overall' && (
           overall.length === 0 ? (
-            <TeamLeagueEmpty message="No standings data yet." />
+            <EmptyState
+              icon="chart"
+              title="No table yet"
+              message="Standings appear once the first ties are played."
+            />
           ) : (
             <>
               {overallChampion && <ChampionBanner teamName={overallChampion.teamName} />}
-              <StandingsTable title="Overall Standings" subtitle="All stages combined" entries={overall} championTeamId={overallChampion?.teamId} />
+              <StandingsTable title="Overall standings" subtitle="All stages" entries={overall} championTeamId={overallChampion?.teamId} myTeamId={myTeamId} />
             </>
           )
         )}
 
         {view === 'standings' && (
           standings.length === 0 ? (
-            <TeamLeagueEmpty message="No standings data yet." />
+            <EmptyState
+              icon="chart"
+              title="No table yet"
+              message="Group standings appear once the first ties in this stage are played."
+            />
           ) : (
             <>
               {stageChampion && <ChampionBanner teamName={stageChampion.teamName} />}
               {standings.map((gs) => (
-                <StandingsTable key={gs.group._id} title={gs.group.groupName} subtitle={`${gs.completedTies}/${gs.totalTies} ties`} entries={gs.standings} />
+                <StandingsTable
+                  key={gs.group._id}
+                  title={gs.group.groupName}
+                  subtitle={`${gs.completedTies}/${gs.totalTies} ties`}
+                  entries={gs.standings}
+                  qualifyCount={topN}
+                  myTeamId={myTeamId}
+                />
               ))}
             </>
           )
@@ -146,19 +180,23 @@ export default function TeamLeagueScreen() {
           selectedTie && tieDetail ? (
             <TieDetail tie={selectedTie} subMatches={tieDetail.subMatches} lineups={tieDetail.lineups} slots={slots} onBack={() => { setSelectedTie(null); setTieDetail(null); }} />
           ) : selectedTie && detailLoading ? (
-            <View className="py-10"><ActivityIndicator color="#F97316" /></View>
+            <View style={{ gap: 10 }}><Skeleton h={70} /><Skeleton h={70} /></View>
           ) : selectedGroup ? (
             <View className="gap-3">
               <Pressable onPress={() => { setSelectedGroup(null); setSelectedTie(null); }} className="self-start">
                 <Text className="font-montserrat text-sm text-gray-400">‹ Groups · {selectedGroup.groupName}</Text>
               </Pressable>
-              {tiesLoading ? <View className="py-10"><ActivityIndicator color="#F97316" /></View> : <TieList ties={ties} onSelect={openTie} />}
+              {tiesLoading ? (
+                <View style={{ gap: 10 }}><Skeleton h={64} /><Skeleton h={64} /></View>
+              ) : (
+                <TieList ties={ties} onSelect={openTie} />
+              )}
             </View>
           ) : (
             <GroupList groups={groups} standings={standings} onSelect={openGroup} />
           )
         )}
       </ScrollView>
-    </Frame>
+    </Screen>
   );
 }
