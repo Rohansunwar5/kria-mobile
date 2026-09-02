@@ -1,38 +1,88 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import type { Tournament } from '@/store/slices/tournamentSlice';
-import { StatusPill } from './StatusPill';
+import { StatusPill, Tag } from './StatusPill';
+import { Ghost } from './states';
 import { formatShortDate } from '@/lib/format';
 
-const FALLBACK = 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1200&auto=format&fit=crop';
+// The "Open for entry" block from Main.dc.html: flat panel, 4px brand edge,
+// ghost index. No banner image — v2 leads with type, not photography.
+export function TournamentCard({
+  tournament,
+  onPress,
+  index,
+  entryFee,
+}: {
+  tournament: Tournament;
+  onPress: () => void;
+  index?: number;
+  entryFee?: number;
+}) {
+  const meta = [
+    tournament.venue?.city,
+    `${tournament.registeredPlayersCount ?? 0} players`,
+    `${tournament.teamsCount ?? 0}/${tournament.settings?.maxTeams || '∞'} teams`,
+    `${formatShortDate(tournament.startDate)}–${formatShortDate(tournament.endDate)}`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
-export function TournamentCard({ tournament, onPress }: { tournament: Tournament; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} className="mb-4 overflow-hidden rounded-3xl border border-white/10 bg-[#161616]">
-      <View className="relative h-44 w-full">
-        <Image source={{ uri: tournament.bannerImage || FALLBACK }} className="h-full w-full" resizeMode="cover" />
-        <View className="absolute left-3 right-3 top-3 flex-row items-start justify-between">
+    <Pressable
+      onPress={onPress}
+      style={{
+        marginBottom: 12,
+        backgroundColor: '#151515',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255,255,255,0.14)',
+        borderLeftWidth: 4,
+        borderLeftColor: '#F97316',
+        borderRadius: 6,
+        overflow: 'hidden',
+      }}
+    >
+      {index != null ? <Ghost text={String(index).padStart(2, '0')} size={72} style={{ right: 4, top: -6 }} /> : null}
+
+      <View style={{ paddingHorizontal: 14, paddingTop: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 8 }}>
           <StatusPill status={tournament.status} />
-          <View className="rounded-full border border-white/10 bg-black/50 px-2.5 py-1">
-            <Text className="font-montserrat text-[10px] font-bold uppercase text-white/70">
-              {tournament.sport?.replace('_', ' ')}
+          {tournament.sport ? <Tag label={tournament.sport.replace('_', ' ')} /> : null}
+        </View>
+        <Text
+          numberOfLines={2}
+          style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 23, lineHeight: 21, color: '#fff' }}
+        >
+          {tournament.name}
+        </Text>
+        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 8 }}>
+          {meta}
+        </Text>
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 14,
+          paddingVertical: 11,
+          marginTop: 12,
+          borderTopWidth: 1.5,
+          borderTopColor: 'rgba(255,255,255,0.10)',
+        }}
+      >
+        {entryFee != null ? (
+          <View>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+              Entry
+            </Text>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 16, color: '#16C46A', marginTop: 2 }}>
+              ₹{entryFee.toLocaleString('en-IN')}
             </Text>
           </View>
-        </View>
-        <View className="absolute bottom-0 left-0 right-0 px-4 pb-3">
-          <Text numberOfLines={2} className="font-oswald text-2xl font-bold text-white">{tournament.name}</Text>
-          <Text className="mt-1 font-montserrat text-xs text-gray-200">{tournament.venue?.city || 'TBD'}</Text>
-        </View>
-      </View>
-      <View className="flex-row items-center justify-between px-4 py-3">
-        <View>
-          <Text className="font-montserrat text-xs text-gray-400">
-            {tournament.registeredPlayersCount ?? 0} players · {tournament.teamsCount ?? 0}/{tournament.settings?.maxTeams || '∞'} teams
-          </Text>
-          <Text className="mt-1 font-montserrat text-xs text-gray-500">
-            {formatShortDate(tournament.startDate)} – {formatShortDate(tournament.endDate)}
-          </Text>
-        </View>
-        <Text className="font-montserrat text-xs text-brand">View →</Text>
+        ) : (
+          <View />
+        )}
+        <Tag label={tournament.status === 'registration_open' ? 'Enter now' : 'View'} variant="auction" />
       </View>
     </Pressable>
   );

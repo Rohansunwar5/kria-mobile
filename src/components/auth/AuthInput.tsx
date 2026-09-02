@@ -16,21 +16,33 @@ export function AuthInput({ label, error, secureToggle, ...rest }: Props) {
   // reliably on web/native instead of depending on NativeWind class merging.
   const boxStyle = useAnimatedStyle(() => ({
     borderWidth: 1.5,
-    borderRadius: 16,
+    borderRadius: 5,
     borderColor: error
-      ? '#F87171'
-      : interpolateColor(focus.value, [0, 1], ['rgba(255,255,255,0.18)', '#F97316']),
+      ? '#FF4438'
+      : interpolateColor(focus.value, [0, 1], ['rgba(255,255,255,0.14)', '#F97316']),
     backgroundColor: 'rgba(255,255,255,0.06)',
   }));
 
   return (
     <View className="mb-4">
-      <Text className="mb-1.5 font-montserrat text-xs uppercase tracking-wide text-gray-400">{label}</Text>
-      <Animated.View style={boxStyle} className="flex-row items-center px-4">
+      {/* .lbl — mono 9px, 0.18em tracking */}
+      <Text
+        style={{
+          fontFamily: 'SpaceMono_700Bold',
+          fontSize: 9,
+          letterSpacing: 0.18 * 9,
+          textTransform: 'uppercase',
+          color: '#7d7d7d',
+          marginBottom: 6,
+        }}
+      >
+        {label}
+      </Text>
+      <Animated.View style={boxStyle} className="flex-row items-center px-3.5">
         <TextInput
           {...rest}
           secureTextEntry={secureToggle ? hidden : rest.secureTextEntry}
-          placeholderTextColor="#7a7a7a"
+          placeholderTextColor="#7d7d7d"
           onFocus={(e) => {
             focus.value = withTiming(1, { duration: 150 });
             rest.onFocus?.(e);
@@ -39,10 +51,11 @@ export function AuthInput({ label, error, secureToggle, ...rest }: Props) {
             focus.value = withTiming(0, { duration: 150 });
             rest.onBlur?.(e);
           }}
-          className="flex-1 font-montserrat text-white"
+          className="flex-1 text-white"
           style={{
             height: 52,
-            fontSize: 16,
+            fontFamily: 'SpaceGrotesk_400Regular',
+            fontSize: 15,
             lineHeight: 20,
             paddingVertical: 0,
             textAlignVertical: 'center',
@@ -56,11 +69,25 @@ export function AuthInput({ label, error, secureToggle, ...rest }: Props) {
             onPress={() => setHidden((h) => !h)}
             hitSlop={12}
           >
-            <Text className="font-montserrat text-xs font-semibold uppercase text-brand">{hidden ? 'Show' : 'Hide'}</Text>
+            <Text
+              style={{
+                fontFamily: 'SpaceMono_700Bold',
+                fontSize: 10,
+                letterSpacing: 0.1 * 10,
+                textTransform: 'uppercase',
+                color: '#F97316',
+              }}
+            >
+              {hidden ? 'Show' : 'Hide'}
+            </Text>
           </Pressable>
         ) : null}
       </Animated.View>
-      {error ? <Text className="mt-1 font-montserrat text-xs text-red-400">{error}</Text> : null}
+      {error ? (
+        <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#FF4438', marginTop: 5 }}>
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

@@ -6,6 +6,13 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Provider } from 'react-redux';
 import { useFonts, Oswald_500Medium } from '@expo-google-fonts/oswald';
 import { Montserrat_400Regular } from '@expo-google-fonts/montserrat';
+import { Anton_400Regular } from '@expo-google-fonts/anton';
+import {
+  SpaceGrotesk_400Regular,
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_700Bold,
+} from '@expo-google-fonts/space-grotesk';
+import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import { store } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { bootstrapAuth, logout } from '@/store/slices/authSlice';
@@ -100,7 +107,17 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({ Oswald_500Medium, Montserrat_400Regular });
+  const [fontsLoaded] = useFonts({
+    Anton_400Regular,
+    SpaceGrotesk_400Regular,
+    SpaceGrotesk_500Medium,
+    SpaceGrotesk_700Bold,
+    SpaceMono_400Regular,
+    SpaceMono_700Bold,
+    // ponytail: v1 faces stay loaded until the last screen is migrated, then drop them.
+    Oswald_500Medium,
+    Montserrat_400Regular,
+  });
   return (
     <Provider store={store}>
       <AuthGate fontsLoaded={fontsLoaded} />

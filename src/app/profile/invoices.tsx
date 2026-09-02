@@ -3,7 +3,7 @@ import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { InvoiceCard } from '@/components/profile/InvoiceCard';
-import { EmptyState } from '@/components/profile/EmptyState';
+import { EmptyState } from '@/components/states';
 import { getMyPayments, type Invoice } from '@/api/payment';
 
 export default function Invoices() {
@@ -23,7 +23,7 @@ export default function Invoices() {
       {loading ? (
         <View className="flex-1 items-center justify-center"><ActivityIndicator color="#F97316" /></View>
       ) : invoices.length === 0 ? (
-        <View className="p-5"><EmptyState message="No payments made yet." cta="Find Tournaments" onCta={() => router.push('/(tabs)/home')} /></View>
+        <View className="p-5"><EmptyState ghost="0" icon="receipt-outline" title="No payments yet" message="Entry fees you pay show up here with their receipt and status." cta="Browse events" onCta={() => router.push('/(tabs)/home')} /></View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
           {invoices.map((inv) => <InvoiceCard key={inv._id} inv={inv} />)}

@@ -6,12 +6,14 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 type IoniconName = keyof typeof Ionicons.glyphMap;
 
 const ICONS: Record<string, { active: IoniconName; inactive: IoniconName; label: string }> = {
-  home: { active: 'trophy', inactive: 'trophy-outline', label: 'Tournaments' },
-  profile: { active: 'person', inactive: 'person-outline', label: 'Profile' },
+  home: { active: 'trophy', inactive: 'trophy-outline', label: 'Events' },
+  profile: { active: 'person', inactive: 'person-outline', label: 'Me' },
 };
 
-// Floating rounded dark tab bar with an active orange pill, in the Nike/Strava
-// vein. Custom-rendered so we control elevation, spacing, and the active state.
+const INACTIVE = 'rgba(11,11,11,0.62)';
+
+// Solid orange bar with a black active pill (.tabbar / .tabitem in _head.html),
+// replacing the v1 dark floating pill.
 export function PremiumTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
@@ -19,19 +21,18 @@ export function PremiumTabBar({ state, navigation }: BottomTabBarProps) {
     <View
       style={{
         position: 'absolute',
-        left: 16,
-        right: 16,
+        left: 14,
+        right: 14,
         bottom: Math.max(insets.bottom, 12),
         flexDirection: 'row',
-        backgroundColor: 'rgba(24,24,24,0.96)',
-        borderColor: 'rgba(255,255,255,0.08)',
-        borderWidth: 1,
-        borderRadius: 28,
-        padding: 6,
+        gap: 5,
+        padding: 5,
+        backgroundColor: '#F97316',
+        borderRadius: 7,
         shadowColor: '#000',
-        shadowOpacity: 0.4,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.6,
+        shadowRadius: 26,
+        shadowOffset: { width: 0, height: 10 },
         elevation: 12,
       }}
     >
@@ -57,22 +58,29 @@ export function PremiumTabBar({ state, navigation }: BottomTabBarProps) {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 8,
+              gap: 7,
               paddingVertical: 12,
-              borderRadius: 22,
-              backgroundColor: focused ? '#F97316' : 'transparent',
+              minHeight: 44, // canvas draws 41; hit targets stay 44
+              borderRadius: 4,
+              backgroundColor: focused ? '#0B0B0B' : 'transparent',
             }}
           >
             <Ionicons
               name={focused ? meta.active : meta.inactive}
-              size={20}
-              color={focused ? '#FFFFFF' : '#9a9a9a'}
+              size={17}
+              color={focused ? '#FFFFFF' : INACTIVE}
             />
-            {focused ? (
-              <Text style={{ fontFamily: 'Montserrat_400Regular', fontSize: 13, fontWeight: '600', color: '#FFFFFF' }}>
-                {meta.label}
-              </Text>
-            ) : null}
+            <Text
+              style={{
+                fontFamily: 'Anton_400Regular',
+                fontSize: 13,
+                letterSpacing: 0.05 * 13,
+                textTransform: 'uppercase',
+                color: focused ? '#FFFFFF' : INACTIVE,
+              }}
+            >
+              {meta.label}
+            </Text>
           </Pressable>
         );
       })}
