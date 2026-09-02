@@ -56,8 +56,8 @@ export function DrawTab({
         const tag = dest.kind === 'none' ? null : KIND_TAG[dest.kind];
 
         return (
+          <View key={cat._id}>
           <Pressable
-            key={cat._id}
             disabled={disabled}
             onPress={() => router.push(dest.href as any)}
             accessibilityRole="button"
@@ -88,6 +88,35 @@ export function DrawTab({
             {tag ? <Tag label={tag.label} variant={tag.variant} dot={live} /> : null}
             {disabled ? null : <Icon name="chevron-right" size={15} color="#7d7d7d" />}
           </Pressable>
+
+          {/* Standings stand alone: they stay readable after the draw is done. */}
+          {disabled ? null : (
+            <Pressable
+              onPress={() => router.push({ pathname: '/leaderboard/[categoryId]', params: { categoryId: cat._id } })}
+              accessibilityRole="button"
+              accessibilityLabel={`${cat.name} standings`}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                minHeight: 44,
+                paddingHorizontal: 13,
+                marginTop: -1.5,
+                borderWidth: 1.5,
+                borderTopWidth: 0,
+                borderColor: 'rgba(255,255,255,0.14)',
+                borderBottomLeftRadius: 6,
+                borderBottomRightRadius: 6,
+                backgroundColor: '#111',
+              }}
+            >
+              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+                Standings
+              </Text>
+              <Icon name="chevron-right" size={13} color="#7d7d7d" />
+            </Pressable>
+          )}
+        </View>
         );
       })}
     </View>
