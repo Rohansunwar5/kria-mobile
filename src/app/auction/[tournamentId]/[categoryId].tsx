@@ -1,8 +1,12 @@
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Screen } from '@/components/Screen';
+import { Icon } from '@/components/icons';
+import { Tag } from '@/components/StatusPill';
+import { Skeleton, ErrorBlock, EmptyState, StaleBanner, Ghost } from '@/components/states';
+import { useAppSelector } from '@/store/hooks';
 import { useAuctionSocket } from '@/lib/useAuctionSocket';
-import { LiveBadge } from '@/components/auction/LiveBadge';
 import { AuctionStage } from '@/components/auction/AuctionStage';
 import { BidHistoryList } from '@/components/auction/BidHistoryList';
 import { TeamsStrip } from '@/components/auction/TeamsStrip';
@@ -11,123 +15,166 @@ import { SoldCelebration } from '@/components/auction/SoldCelebration';
 import { TieBreakerPanel } from '@/components/auction/TieBreakerPanel';
 import { CompletedSummary } from '@/components/auction/CompletedSummary';
 
-function BackBar({ title, onBack }: { title: string; onBack: () => void }) {
+function Header({ title, sub, right }: { title: string; sub?: string; right?: React.ReactNode }) {
+  const router = useRouter();
   return (
-    <View className="flex-row items-center gap-3 border-b border-white/10 px-4 py-3">
-      <Pressable onPress={onBack} className="rounded-full bg-white/10 px-3 py-1.5">
-        <Text className="font-montserrat text-sm text-white">‹ Back</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        onPress={() => router.back()}
+        hitSlop={8}
+        style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
       </Pressable>
-      <Text className="flex-1 font-oswald text-base font-bold uppercase text-white" numberOfLines={1}>{title}</Text>
+      <View style={{ flex: 1 }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 15, color: '#fff' }}>
+          {title}
+        </Text>
+        {sub ? (
+          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+            {sub}
+          </Text>
+        ) : null}
+      </View>
+      {right}
     </View>
-  );
-}
-
-function Frame({ children }: { children: React.ReactNode }) {
-  return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#111111' }}>
-      <View className="flex-1 bg-ink">{children}</View>
-    </SafeAreaView>
   );
 }
 
 export default function AuctionBroadcast() {
   const { tournamentId, categoryId } = useLocalSearchParams<{ tournamentId: string; categoryId: string }>();
-  const router = useRouter();
-  const { data, soldLog, loading, error, reload } = useAuctionSocket(tournamentId, categoryId);
+  const { data, soldLog, loading, error, connected, lastUpdate, reload } = useAuctionSocket(tournamentId, categoryId);
+  const user = useAppSelector((s) => s.auth.user);
+  const [now, setNow] = useState(Date.now());
 
-  const tournamentName = data?.tournament?.name || 'Auction';
-  const categoryName = data?.category?.name || '';
-  const back = () => router.back();
+  const status = data?.auction;
+  const isLive = status?.status === 'in_progress' || status?.status === 'paused';
+  const dropped = isLive && !connected;
 
-  if (loading) {
+  // Only runs while the socket is down, to keep the "last update" honest.
+  useEffect(() => {
+    if (!dropped) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [dropped]);
+
+  const categoryName = data?.category?.name || 'Auction';
+  const title = `${categoryName} auction`;
+  const youName = user ? `${user.firstName} ${user.lastName}`.trim() : undefined;
+
+  if (loading && !data) {
     return (
-      <Frame>
-        <BackBar title="Auction" onBack={back} />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#F97316" size="large" />
+      <Screen>
+        <Header title="Auction" />
+        <View style={{ paddingHorizontal: 16, paddingTop: 14, gap: 12 }}>
+          <Skeleton h={10} w={90} line />
+          <Skeleton h={120} />
+          <Skeleton h={10} w={70} line style={{ marginTop: 4 }} />
+          <Skeleton h={110} />
         </View>
-      </Frame>
+      </Screen>
     );
   }
 
-  if (error || !data) {
+  if (error || !data || !status) {
     return (
-      <Frame>
-        <BackBar title="Auction" onBack={back} />
-        <View className="flex-1 items-center justify-center gap-4 px-8">
-          <Text className="font-montserrat text-gray-400">Auction unavailable.</Text>
-          <Pressable onPress={() => reload()} className="rounded-xl bg-brand px-5 py-2.5">
-            <Text className="font-montserrat text-sm font-bold uppercase text-white">Retry</Text>
-          </Pressable>
+      <Screen>
+        <Header title="Auction" />
+        <View style={{ padding: 16 }}>
+          <ErrorBlock
+            label="Auction unavailable"
+            message="The auction room could not be reached. The tournament page still works."
+            onRetry={reload}
+          />
         </View>
-      </Frame>
+      </Screen>
     );
   }
-
-  const status = data.auction;
 
   if (status.status === 'not_started') {
     return (
-      <Frame>
-        <BackBar title={tournamentName} onBack={back} />
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center font-oswald text-4xl font-extrabold uppercase text-white">{tournamentName}</Text>
-          {!!categoryName && (
-            <Text className="mt-2 font-oswald text-base uppercase tracking-widest text-gray-500">{categoryName} — Auction</Text>
-          )}
-          <View className="my-6 h-1 w-14 rounded-full bg-brand" />
-          <Text className="font-oswald text-base uppercase tracking-[0.3em] text-gray-500">Starting Soon</Text>
+      <Screen>
+        <Header title={title} />
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20, overflow: 'hidden' }}>
+          <Ghost text="SOON" size={150} style={{ right: -20, top: 40 }} />
+          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#FA4C93' }}>
+            {data.tournament?.name || 'Kria'}
+          </Text>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 36, color: '#fff', marginTop: 10 }}>
+            Starting{'\n'}soon
+          </Text>
+          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
+            {categoryName} goes under the hammer shortly. Leave this open — the board fills itself the moment bidding starts.
+          </Text>
         </View>
-      </Frame>
+      </Screen>
     );
   }
 
-  if (status.status === 'sold') {
+  if (status.status === 'sold' && status.lastSoldResult) {
     return (
-      <Frame>
-        <BackBar title={tournamentName} onBack={back} />
-        {status.lastSoldResult ? (
-          <SoldCelebration
-            playerName={status.lastSoldResult.playerName}
-            teamName={status.lastSoldResult.teamName}
-            teamColor={status.lastSoldResult.teamColor}
-            soldPrice={status.lastSoldResult.soldPrice}
-          />
-        ) : (
-          <View className="flex-1 items-center justify-center">
-            <Text className="font-oswald text-2xl uppercase tracking-widest text-emerald-400">Sold</Text>
-          </View>
-        )}
-      </Frame>
+      <Screen>
+        <Header title={title} />
+        <SoldCelebration
+          playerName={status.lastSoldResult.playerName}
+          teamName={status.lastSoldResult.teamName}
+          teamColor={status.lastSoldResult.teamColor}
+          soldPrice={status.lastSoldResult.soldPrice}
+        />
+      </Screen>
     );
   }
 
   if (status.status === 'completed') {
     return (
-      <Frame>
-        <BackBar title={tournamentName} onBack={back} />
-        <CompletedSummary tournamentName={tournamentName} categoryName={categoryName} teams={data.teams} />
-      </Frame>
+      <Screen>
+        <Header title={title} />
+        <CompletedSummary
+          tournamentName={data.tournament?.name || 'Kria'}
+          categoryName={categoryName}
+          teams={data.teams}
+        />
+      </Screen>
     );
   }
 
-  // in_progress | paused
   return (
-    <Frame>
-      <BackBar title={tournamentName} onBack={back} />
-      <View className="flex-row items-center justify-between px-4 py-2">
-        <Text className="font-oswald text-xs uppercase tracking-wider text-gray-500">
-          Player <Text className="text-brand">{status.currentPlayerIndex + 1}</Text>/{status.totalPlayers}
-        </Text>
-        <LiveBadge paused={status.status === 'paused'} />
-      </View>
-      <ScrollView contentContainerStyle={{ padding: 20, gap: 20 }}>
-        <AuctionStage player={data.currentPlayer} status={status} />
-        <TieBreakerPanel status={status} teams={data.teams} />
-        <BidHistoryList bids={status.liveBid?.bidHistory || []} teams={data.teams} />
-        <TeamsStrip teams={data.teams} />
-        <SoldLogList logs={soldLog} />
+    <Screen>
+      <Header
+        title={title}
+        sub={`Player ${status.currentPlayerIndex + 1} / ${status.totalPlayers}`}
+        right={
+          status.status === 'paused' ? (
+            <Tag label="Paused" variant="end" />
+          ) : dropped ? (
+            <Tag label="Stale" variant="end" />
+          ) : (
+            <Tag label="On air" variant="live" dot />
+          )
+        }
+      />
+      {dropped ? <StaleBanner secondsAgo={Math.round((now - lastUpdate) / 1000)} /> : null}
+
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} style={dropped ? { opacity: 0.5 } : undefined}>
+        <AuctionStage player={data.currentPlayer} status={status} teams={data.teams} />
+
+        <View style={{ paddingHorizontal: 16, paddingTop: 13, gap: 15 }}>
+          <TieBreakerPanel status={status} teams={data.teams} />
+          {status.liveBid?.bidHistory?.length ? (
+            <BidHistoryList bids={status.liveBid.bidHistory} teams={data.teams} />
+          ) : (
+            <EmptyState
+              icon="gavel"
+              title="No bids yet"
+              message="The floor is open. Bids appear here the moment a team raises."
+            />
+          )}
+          <TeamsStrip teams={data.teams} />
+          <SoldLogList logs={soldLog} youName={youName} />
+        </View>
       </ScrollView>
-    </Frame>
+    </Screen>
   );
 }

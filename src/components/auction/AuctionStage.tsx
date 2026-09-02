@@ -1,110 +1,83 @@
-import { useEffect, useRef } from 'react';
-import { Animated, View, Text, Image } from 'react-native';
-import { AuctionPlayer, AuctionStatus } from '@/api/auction';
+import { View, Text } from 'react-native';
+import { AuctionPlayer, AuctionStatus, AuctionTeam } from '@/api/auction';
 import { currentBid } from '@/lib/auctionView';
+import { InitialsAvatar } from '@/components/InitialsAvatar';
+import { Hairlines, Hazard } from '@/components/canvas';
+import { Ghost } from '@/components/states';
 
-function SkillBadge({ level }: { level?: string }) {
-  if (!level) return null;
-  return (
-    <View className="rounded-full border border-brand/40 bg-brand/10 px-3 py-0.5">
-      <Text className="font-oswald text-[10px] font-bold uppercase tracking-wider text-brand">{level}</Text>
-    </View>
-  );
-}
+const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
-function Chip({ label, value }: { label: string; value: string | number }) {
-  return (
-    <View className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
-      <Text className="font-oswald text-[10px] uppercase tracking-wider text-gray-500">{label}</Text>
-      <Text className="font-montserrat text-lg font-bold capitalize text-white">{value}</Text>
-    </View>
-  );
-}
+// "On the block" — the artboard's headline block: magenta kicker, the player in
+// Anton, and the current bid at 46px because it is the only number that matters.
+export function AuctionStage({
+  player,
+  status,
+  teams,
+}: {
+  player: AuctionPlayer | null;
+  status: AuctionStatus;
+  teams: AuctionTeam[];
+}) {
+  const name = player ? `${player.profile.firstName} ${player.profile.lastName}`.trim() : 'Waiting';
+  const base = player?.auctionData?.basePrice ?? 0;
+  const price = currentBid(status.liveBid?.currentPrice, base);
+  const leader = teams.find((t) => t._id === status.liveBid?.highestBidderId);
 
-export function AuctionStage({ player, status }: { player: AuctionPlayer | null; status: AuctionStatus }) {
-  const bid = currentBid(status.liveBid?.currentPrice, player?.auctionData?.basePrice);
-  const basePrice = player?.auctionData?.basePrice ?? 0;
-  const scale = useRef(new Animated.Value(1)).current;
-  const prevBid = useRef(bid);
-
-  useEffect(() => {
-    let anim: Animated.CompositeAnimation | undefined;
-    if (bid > prevBid.current && prevBid.current > 0) {
-      anim = Animated.sequence([
-        Animated.timing(scale, { toValue: 1.08, duration: 180, useNativeDriver: true }),
-        Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
-      ]);
-      anim.start();
-    }
-    prevBid.current = bid;
-    return () => anim?.stop();
-  }, [bid, scale]);
-
-  if (!player) {
-    return (
-      <View className="items-center py-16">
-        <Text className="font-montserrat text-base italic text-gray-500">Preparing next player…</Text>
-      </View>
-    );
-  }
-
-  const stats = player.careerStats;
-  const hasCareer = stats && stats.matchesPlayed > 0;
+  const stats = player?.careerStats;
+  const winRate = stats && stats.matchesPlayed > 0 ? Math.round((stats.matchesWon / stats.matchesPlayed) * 100) : null;
+  const meta = [
+    base ? `Base ₹${base.toLocaleString('en-IN')}` : null,
+    stats?.matchesPlayed ? `${stats.matchesPlayed} events` : null,
+    winRate !== null ? `${winRate}% win rate` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
-    <View className="items-center gap-4">
-      {/* Avatar */}
-      <View className="h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-brand/40 bg-[#1a1a1a]">
-        {player.profile.photo ? (
-          <Image source={{ uri: player.profile.photo }} className="h-full w-full" resizeMode="cover" />
-        ) : (
-          <Text className="text-5xl">👤</Text>
-        )}
-      </View>
+    <View style={{ overflow: 'hidden', borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
+      <Hairlines />
+      <Ghost text="BID" size={190} style={{ left: -22, top: -6 }} />
 
-      <View className="items-center gap-2">
-        <Text className="text-center font-oswald text-4xl font-extrabold uppercase text-white">
-          {player.profile.firstName} {player.profile.lastName}
+      <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#FA4C93' }}>
+          On the block
         </Text>
-        <SkillBadge level={player.profile.skillLevel} />
-      </View>
-
-      {/* Attribute chips */}
-      <View className="w-full flex-row gap-3">
-        <Chip label="Age" value={`${player.profile.age} yrs`} />
-        <Chip label="Gender" value={player.profile.gender} />
-      </View>
-
-      {/* Career stats */}
-      {hasCareer && (
-        <View className="w-full flex-row gap-3">
-          <Chip label="Played" value={stats!.matchesPlayed} />
-          <Chip label="Won" value={stats!.matchesWon} />
-          <Chip label="Points" value={stats!.pointsContributed} />
-        </View>
-      )}
-
-      {/* Price box */}
-      <View className="w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-        <View className="flex-row items-center justify-between border-b border-white/10 px-5 py-3">
-          <Text className="font-oswald text-[10px] uppercase tracking-widest text-gray-500">Base Price</Text>
-          <Text className="font-montserrat text-base font-bold text-gray-300">₹{basePrice.toLocaleString()}</Text>
-        </View>
-        <View className="items-center bg-brand/5 px-5 py-5">
-          <Text className="mb-1 font-oswald text-[10px] uppercase tracking-widest text-gray-500">Current Bid</Text>
-          <Animated.Text
-            style={{ transform: [{ scale }] }}
-            className="font-oswald text-5xl font-extrabold text-brand"
-          >
-            ₹{bid.toLocaleString()}
-          </Animated.Text>
-          {!!status.liveBid?.highestBidderName && (
-            <Text className="mt-1.5 font-oswald text-[11px] uppercase tracking-wider text-gray-500">
-              by <Text className="font-bold text-brand">{status.liveBid.highestBidderName}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 13, marginTop: 9 }}>
+          <InitialsAvatar name={name} size={58} color="#FA4C93" />
+          <View style={{ flex: 1, paddingBottom: 2 }}>
+            <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 26, color: '#fff' }}>
+              {name}
             </Text>
-          )}
+          </View>
         </View>
+        {meta ? (
+          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 10 }}>
+            {meta}
+          </Text>
+        ) : null}
       </View>
+
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 }}>
+        <View>
+          <Text style={LBL}>Current bid</Text>
+          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 46, lineHeight: 42, color: '#F97316', marginTop: 4 }}>
+            ₹{price.toLocaleString('en-IN')}
+          </Text>
+        </View>
+        {leader ? (
+          <View style={{ alignItems: 'flex-end', paddingBottom: 5 }}>
+            <Text style={LBL}>Leading</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 6 }}>
+              <InitialsAvatar name={leader.name} size={24} color={leader.primaryColor || '#F97316'} />
+              <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, color: '#fff', maxWidth: 120 }}>
+                {leader.name}
+              </Text>
+            </View>
+          </View>
+        ) : null}
+      </View>
+
+      <Hazard />
     </View>
   );
 }

@@ -1,36 +1,49 @@
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text } from 'react-native';
 import { AuctionTeam } from '@/api/auction';
-import { TeamLogo } from '@/components/TeamLogo';
+import { purseHealth, shortMoney } from '@/lib/auctionView';
 
-function purse(n: number): string {
-  return n >= 100000 ? `${(n / 100000).toFixed(1)}L` : n.toLocaleString();
-}
-
+// "Purses left" — one tile per team, the bar coloured by how much is gone.
 export function TeamsStrip({ teams }: { teams: AuctionTeam[] }) {
   if (teams.length === 0) return null;
+
   return (
-    <View className="gap-2">
-      <Text className="font-oswald text-[11px] uppercase tracking-widest text-gray-500">Teams</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-        {teams.map((team) => (
-          <View key={team._id} className="w-40 rounded-xl border border-white/10 bg-white/5 p-3">
-            <View className="mb-2 flex-row items-center gap-2">
-              <TeamLogo name={team.name} logo={team.logo} color={team.primaryColor || '#F97316'} size={22} />
-              <Text className="flex-1 font-oswald text-sm font-bold uppercase text-white" numberOfLines={1}>
-                {team.name}
-              </Text>
+    <View>
+      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginBottom: 8 }}>
+        Purses left
+      </Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+        {teams.map((team) => {
+          const { ratio, color } = purseHealth(team.budget, team.initialBudget);
+          const initials = team.name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+          return (
+            <View
+              key={team._id}
+              style={{
+                flexGrow: 1,
+                flexBasis: '30%',
+                minWidth: 96,
+                paddingHorizontal: 10,
+                paddingVertical: 9,
+                backgroundColor: '#1E1E1E',
+                borderWidth: 1.5,
+                borderColor: 'rgba(255,255,255,0.10)',
+                borderRadius: 6,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <View style={{ width: 14, height: 14, borderRadius: 2, backgroundColor: team.primaryColor || '#F97316' }} />
+                <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#a3a3a3' }}>
+                  {initials}
+                </Text>
+              </View>
+              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: '#fff' }}>{shortMoney(team.budget)}</Text>
+              <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.10)', marginTop: 6, borderRadius: 2, overflow: 'hidden' }}>
+                <View style={{ width: `${ratio * 100}%`, height: '100%', backgroundColor: color }} />
+              </View>
             </View>
-            <View className="flex-row justify-between">
-              <Text className="font-oswald text-[10px] uppercase tracking-wider text-gray-500">Purse</Text>
-              <Text className="font-montserrat text-xs font-bold text-emerald-400">₹{purse(team.budget)}</Text>
-            </View>
-            <View className="mt-1 flex-row justify-between">
-              <Text className="font-oswald text-[10px] uppercase tracking-wider text-gray-500">Players</Text>
-              <Text className="font-montserrat text-xs font-bold text-white">{team.playersCount}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+          );
+        })}
+      </View>
     </View>
   );
 }

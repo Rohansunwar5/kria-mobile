@@ -21,12 +21,17 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
     loading: true,
     error: null,
   });
+  // Patterns.dc.html 04: a dropped socket dims the price and says how old it
+  // is, rather than showing a wrong number as if it were current.
+  const [connected, setConnected] = useState(socket.connected);
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
 
   const load = useCallback(async () => {
     if (!tournamentId || !categoryId) return;
     try {
       const data = await getAuctionStatus(tournamentId, categoryId);
       setState((s) => ({ ...s, data, loading: false, error: null }));
+      setLastUpdate(Date.now());
     } catch {
       setState((s) => ({ ...s, loading: false, error: 'Auction unavailable' }));
     }
@@ -43,22 +48,27 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
 
     let active = true;
     const apply = (data: AuctionStatusResponse) => {
-      if (active) setState((s) => ({ ...s, data, loading: false, error: null }));
+      if (!active) return;
+      setState((s) => ({ ...s, data, loading: false, error: null }));
+      setLastUpdate(Date.now());
     };
     const join = () => socket.emit('join:auction', { tournamentId, categoryId });
-    const onReconnect = () => { join(); load(); };
+    const onReconnect = () => { setConnected(true); join(); load(); };
+    const onDisconnect = () => setConnected(false);
 
     load();
     if (!socket.connected) socket.connect();
     join();
     socket.on('auction:update', apply);
     socket.on('connect', onReconnect);
+    socket.on('disconnect', onDisconnect);
 
     return () => {
       active = false;
       socket.emit('leave:auction', { tournamentId, categoryId });
       socket.off('auction:update', apply);
       socket.off('connect', onReconnect);
+      socket.off('disconnect', onDisconnect);
       // Sole socket consumer in the app today, so disconnecting on unmount is safe.
       // If another feature (e.g. live bracket/scoreboard) starts sharing this singleton,
       // move connection lifecycle to an app-level owner instead of disconnecting here.
@@ -66,5 +76,5 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
     };
   }, [tournamentId, categoryId, load]);
 
-  return { ...state, reload: load };
+  return { ...state, connected, lastUpdate, reload: load };
 }

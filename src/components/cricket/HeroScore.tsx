@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import { CricketMatch, LiveState } from '@/api/cricketMatch';
 import { oversDisplay, currentRunRate, requiredRunRate, chaseLine } from '@/lib/cricketView';
-import { LiveBadge } from '@/components/auction/LiveBadge';
+import { Tag } from '@/components/StatusPill';
 
 export function HeroScore({ match, live, completed }: { match: CricketMatch; live: LiveState | null; completed: boolean }) {
   const maxOvers = match.matchConfig?.maxOvers;
@@ -25,7 +25,7 @@ export function HeroScore({ match, live, completed }: { match: CricketMatch; liv
             <Text className="font-oswald text-xs font-bold uppercase tracking-wider text-emerald-400">Full Time</Text>
           </View>
         ) : live ? (
-          <LiveBadge />
+          <Tag label="Live" variant="live" dot />
         ) : null}
       </View>
 
