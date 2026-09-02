@@ -106,6 +106,9 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="cricket/[matchId]/balls" />
         <Stack.Screen name="cricket/leaderboard/[categoryId]" />
         <Stack.Screen name="cricket/my-stats/[registrationId]" />
+        <Stack.Screen name="team/[teamId]" />
+        <Stack.Screen name="player/[playerId]" />
+        <Stack.Screen name="tournament/[id]/announcements" />
       </Stack>
       {!introDone ? <BrandIntro onDone={() => setIntroDone(true)} /> : null}
     </View>

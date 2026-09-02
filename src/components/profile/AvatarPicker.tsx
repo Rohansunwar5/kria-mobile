@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { Pressable, View, Image, Text, ActivityIndicator, Alert } from 'react-native';
+import { Pressable, View, Image, ActivityIndicator, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
+import { Icon } from '@/components/icons';
 import { useAppDispatch } from '@/store/hooks';
 import { uploadPlayerProfileImage } from '@/store/slices/authSlice';
 
-export function AvatarPicker({ name, imageUrl }: { name?: string; imageUrl?: string }) {
+/** Square now, 4px radius, with the camera affordance as a corner badge —
+ *  this is the only place a player can change their photo. */
+export function AvatarPicker({ name, imageUrl, size = 76 }: { name?: string; imageUrl?: string; size?: number }) {
   const dispatch = useAppDispatch();
   const [busy, setBusy] = useState(false);
 
@@ -39,16 +42,34 @@ export function AvatarPicker({ name, imageUrl }: { name?: string; imageUrl?: str
   };
 
   return (
-    <Pressable onPress={pick} disabled={busy} className="self-center">
-      <View className="h-28 w-28 items-center justify-center rounded-full border-2 border-brand bg-black">
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} className="h-full w-full rounded-full" />
-        ) : (
-          <InitialsAvatar name={name} size={104} />
-        )}
-        <View className="absolute inset-0 items-center justify-center rounded-full bg-black/40">
-          {busy ? <ActivityIndicator color="#fff" /> : <Text className="text-2xl">📷</Text>}
-        </View>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Change profile photo"
+      onPress={pick}
+      disabled={busy}
+      style={{ width: size, height: size }}
+    >
+      {imageUrl ? (
+        <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: 4 }} />
+      ) : (
+        <InitialsAvatar name={name} size={size} />
+      )}
+      <View
+        style={{
+          position: 'absolute',
+          right: -4,
+          bottom: -4,
+          width: 24,
+          height: 24,
+          borderRadius: 4,
+          backgroundColor: '#0B0B0B',
+          borderWidth: 1.5,
+          borderColor: 'rgba(255,255,255,0.22)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {busy ? <ActivityIndicator size="small" color="#F97316" /> : <Icon name="plus" size={13} color="#F97316" strokeWidth={2.6} />}
       </View>
     </Pressable>
   );

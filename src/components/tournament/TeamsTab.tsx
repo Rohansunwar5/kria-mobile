@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, Linking } from 'react-native';
 import API from '@/api/axios';
 import type { Team } from '@/store/slices/teamSlice';
+import { useRouter } from 'expo-router';
 import { useAppSelector } from '@/store/hooks';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Tag } from '@/components/StatusPill';
@@ -23,6 +24,7 @@ function initials(name: string) {
 // Teams absorbs the old Players tab: every player in this tournament is on a
 // roster, so the roster is the player list.
 export function TeamsTab({ myTeam }: { myTeam: Team | null | undefined }) {
+  const router = useRouter();
   const { teams, isLoading } = useAppSelector((s) => s.team);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [rosters, setRosters] = useState<Record<string, RosterPlayer[]>>({});
@@ -115,6 +117,20 @@ export function TeamsTab({ myTeam }: { myTeam: Team | null | undefined }) {
               {isMine ? <Tag label="You" variant="auction" /> : null}
               <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={15} color="#7d7d7d" />
             </Pressable>
+
+            {isOpen ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Open ${team.name}`}
+                onPress={() => router.push({ pathname: '/team/[teamId]', params: { teamId: team._id } })}
+                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44, paddingHorizontal: 13, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)' }}
+              >
+                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#F97316' }}>
+                  Team page
+                </Text>
+                <Icon name="chevron-right" size={13} color="#F97316" />
+              </Pressable>
+            ) : null}
 
             {isOpen ? (
               <View style={{ borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)', padding: 13, gap: 7 }}>

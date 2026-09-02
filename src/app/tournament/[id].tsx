@@ -102,6 +102,7 @@ export default function TournamentDetail() {
             categoryCount={categories.length}
             onBack={() => router.back()}
             onShare={share}
+            onAnnouncements={() => router.push({ pathname: '/tournament/[id]/announcements', params: { id } })}
           />
           {id ? <LiveNowBanner tournamentId={id} sport={tournament.sport} /> : null}
         </View>

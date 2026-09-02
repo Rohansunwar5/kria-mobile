@@ -43,11 +43,13 @@ export function TournamentHero({
   categoryCount,
   onBack,
   onShare,
+  onAnnouncements,
 }: {
   tournament: Tournament;
   categoryCount?: number;
   onBack: () => void;
   onShare?: () => void;
+  onAnnouncements?: () => void;
 }) {
   const meta = [
     tournament.venue?.city,
@@ -68,9 +70,10 @@ export function TournamentHero({
       />
 
       <SafeAreaView edges={['top']} style={{ position: 'absolute', left: 0, right: 0, top: 0 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingTop: 6 }}>
           <IconButton name="chevron-left" label="Go back" onPress={onBack} />
           <View style={{ flex: 1 }} />
+          {onAnnouncements ? <IconButton name="bell" label="Announcements" onPress={onAnnouncements} /> : null}
           {onShare ? <IconButton name="share" label="Share tournament" onPress={onShare} /> : null}
         </View>
       </SafeAreaView>

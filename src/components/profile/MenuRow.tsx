@@ -1,32 +1,34 @@
 import { Pressable, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-
-type IoniconName = keyof typeof Ionicons.glyphMap;
+import { Icon, type IconName } from '@/components/icons';
 
 export function MenuRow({
   label,
   icon,
   onPress,
   danger,
+  first,
 }: {
   label: string;
-  icon: IoniconName;
+  icon: IconName;
   onPress: () => void;
   danger?: boolean;
+  /** Rows stack inside one panel; only the first skips its top divider. */
+  first?: boolean;
 }) {
-  const tint = danger ? '#f87171' : '#FFFFFF';
+  const tint = danger ? '#FF4438' : '#fff';
   return (
-    <Pressable
-      onPress={onPress}
-      className="flex-row items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-4 active:bg-white/10"
-    >
-      <View className="flex-row items-center gap-3">
-        <View className={`h-9 w-9 items-center justify-center rounded-full ${danger ? 'bg-red-500/10' : 'bg-white/8'}`}>
-          <Ionicons name={icon} size={18} color={tint} />
-        </View>
-        <Text className={`font-montserrat text-base ${danger ? 'text-red-400' : 'text-white'}`}>{label}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={18} color={danger ? '#f87171' : '#6b6b6b'} />
-    </Pressable>
+    <View>
+      {first ? null : <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} />}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        onPress={onPress}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52, paddingHorizontal: 13, paddingVertical: 13 }}
+      >
+        <Icon name={icon} size={17} color={danger ? '#FF4438' : '#7d7d7d'} />
+        <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 14, color: tint }}>{label}</Text>
+        <Icon name="chevron-right" size={15} color={danger ? '#FF4438' : '#7d7d7d'} />
+      </Pressable>
+    </View>
   );
 }
