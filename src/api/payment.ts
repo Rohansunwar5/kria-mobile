@@ -38,3 +38,28 @@ export async function verifyPayment(
 ): Promise<void> {
   await API.post('/payments/verify', { razorpayOrderId, razorpayPaymentId, razorpaySignature });
 }
+
+export interface PaymentRecord {
+  _id: string;
+  razorpayOrderId: string;
+  razorpayPaymentId?: string;
+  tournamentId: string;
+  categoryId: string;
+  amount: number;
+  baseAmount: number;
+  feeBreakdown: { razorpayFee: number; platformFee: number; gst: number };
+  currency: string;
+  status: string;
+  createdAt: string;
+}
+
+/** Polled by /payment/[orderId]. A missing order is not an exception — the
+ *  screen shows its own "order unavailable" state. */
+export async function getPaymentStatus(orderId: string): Promise<PaymentRecord | null> {
+  try {
+    const res = await API.get(`/payments/status/${orderId}`);
+    return res.data?.data?.data || res.data?.data || null;
+  } catch {
+    return null;
+  }
+}
