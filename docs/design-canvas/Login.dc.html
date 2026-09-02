@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0B0B0B; font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #F97316; text-decoration: none; }
+    a:hover { color: #FA4C93; }
+
+    /* ---- Type layers ---- */
+    .ant { font-family: 'Anton', 'Arial Narrow', Haettenschweiler, Impact, sans-serif; text-transform: uppercase; font-weight: 400; letter-spacing: 0.01em; }
+    .mn { font-family: 'Space Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+    /* ---- Frame ---- */
+    .scr { width: 390px; height: 844px; background: #0B0B0B; color: #fff; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    .sheet { background: #0B0B0B; color: #fff; overflow: hidden; position: relative; }
+    .safe { height: 44px; flex: none; }
+
+    /* ---- Atmosphere ---- */
+    .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.16; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+    .dots { background-image: radial-gradient(rgba(255,255,255,0.16) 1px, transparent 1px); background-size: 9px 9px; }
+    .hazard { background-image: repeating-linear-gradient(115deg, rgba(249,115,22,0.9) 0 9px, transparent 9px 18px); }
+    .hairlines { background-image: repeating-linear-gradient(115deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 7px); }
+    .ghost { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.09); position: absolute; pointer-events: none; line-height: 0.78; }
+    .ghostfill { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; color: rgba(255,255,255,0.045); position: absolute; pointer-events: none; line-height: 0.78; }
+
+    /* ---- Blocks (hard-edged, heavy) ---- */
+    .blk { background: #151515; border: 1.5px solid rgba(255,255,255,0.14); border-radius: 6px; }
+    .blk2 { background: #1E1E1E; border: 1.5px solid rgba(255,255,255,0.10); border-radius: 6px; }
+    .blkb { background: #F97316; color: #0B0B0B; border-radius: 6px; }
+    .blkm { background: #FA4C93; color: #0B0B0B; border-radius: 6px; }
+    .edge { border-left: 4px solid #F97316; }
+    .divide { height: 1.5px; background: rgba(255,255,255,0.10); }
+
+    /* ---- Tags & pills ---- */
+    .tag { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; padding: 4px 7px; border-radius: 3px; display: inline-flex; align-items: center; gap: 5px; }
+    .t-live { background: #F97316; color: #0B0B0B; }
+    .t-open { background: #16C46A; color: #06240F; }
+    .t-mag { background: #FA4C93; color: #240614; }
+    .t-up { background: rgba(255,255,255,0.10); color: #d4d4d4; }
+    .t-end { background: rgba(255,255,255,0.06); color: #8a8a8a; }
+    .t-red { background: #FF4438; color: #2A0703; }
+    .t-out { background: transparent; color: #F97316; box-shadow: inset 0 0 0 1.5px #F97316; }
+
+    /* ---- Labels ---- */
+    .kick { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #F97316; }
+    .lbl { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #7d7d7d; }
+    .meta { font-size: 12px; color: #a3a3a3; }
+    .meta2 { font-size: 11px; color: #737373; }
+    .body { font-size: 13px; color: #d4d4d4; line-height: 19px; }
+
+    /* ---- Controls ---- */
+    .btnx { height: 54px; border-radius: 5px; background: #F97316; color: #0B0B0B; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 17px; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 9px; }
+    .btnk { height: 54px; border-radius: 5px; background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.22); color: #fff; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 15px; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .chip { border-radius: 3px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.16); padding: 7px 12px; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #bdbdbd; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .chip-on { background: #F97316; color: #0B0B0B; box-shadow: none; }
+    .chip-mag { background: #FA4C93; color: #240614; box-shadow: none; }
+    .iconbtn { width: 38px; height: 38px; border-radius: 4px; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; flex: none; }
+
+    /* ---- Header ---- */
+    .hdr { display: flex; align-items: center; gap: 12px; padding: 8px 16px 12px; border-bottom: 1.5px solid rgba(255,255,255,0.12); flex: none; position: relative; }
+
+    /* ---- Nav ---- */
+    .tabbar { position: absolute; left: 14px; right: 14px; bottom: 12px; display: flex; gap: 5px; padding: 5px; background: #F97316; border-radius: 7px; box-shadow: 0 10px 26px rgba(0,0,0,0.6); }
+    .tabitem { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 12px 0; border-radius: 4px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 13px; letter-spacing: 0.05em; color: rgba(11,11,11,0.62); }
+    .tabitem-on { background: #0B0B0B; color: #fff; }
+
+    /* ---- Identity ---- */
+    .avat { border-radius: 4px; background: #F97316; display: flex; align-items: center; justify-content: center; font-family: 'Anton', Impact, sans-serif; color: #0B0B0B; flex: none; }
+    .avatk { border-radius: 4px; background: rgba(255,255,255,0.09); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center; font-family: 'Anton', Impact, sans-serif; color: #d4d4d4; flex: none; }
+
+    /* ---- Rails ---- */
+    .rail { position: absolute; font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.22); writing-mode: vertical-rl; }
+    .apinote { font-family: 'Space Mono', monospace; font-size: 9px; color: #F97316; letter-spacing: 0.04em; }
+  </style>
+</helmet>
+<div class="scr">
+  <div style="position:absolute;inset:0;background:radial-gradient(110% 48% at 78% 6%,rgba(249,115,22,0.16) 0%,rgba(11,11,11,0) 62%)"></div>
+  <div class="hairlines" style="position:absolute;inset:0"></div>
+  <div class="ghost" style="font-size:270px;left:-44px;top:150px;-webkit-text-stroke-width:2px;-webkit-text-stroke-color:rgba(255,255,255,0.055)">K</div>
+
+  <div class="safe"></div>
+
+  <div style="flex:none;padding:16px 20px 0;position:relative">
+    <div class="ant" style="font-size:26px;line-height:24px">Kria</div>
+    <div class="lbl" style="color:#F97316;letter-spacing:0.3em;margin-top:4px">Player</div>
+  </div>
+
+  <div style="flex:1;overflow:hidden;position:relative;padding:0 20px;display:flex;flex-direction:column;justify-content:center">
+    <div style="position:relative">
+      <div class="ant" style="font-size:44px;line-height:38px">Welcome<br>back.</div>
+    </div>
+
+    <!-- Method switch -->
+    <div style="display:flex;gap:0;margin-top:26px;border:1.5px solid rgba(255,255,255,0.14);border-radius:5px;overflow:hidden;position:relative">
+      <div style="flex:1;padding:12px 0;text-align:center;background:#F97316"><span class="ant" style="font-size:13px;color:#0B0B0B">Password</span></div>
+      <div style="flex:1;padding:12px 0;text-align:center;border-left:1.5px solid rgba(255,255,255,0.14)"><span class="ant" style="font-size:13px;color:#7d7d7d">Email code</span></div>
+    </div>
+
+    <div style="padding-top:20px;position:relative">
+      <div class="lbl" style="margin-bottom:6px">Email</div>
+      <div style="height:52px;border-radius:5px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.14);display:flex;align-items:center;padding:0 13px;gap:10px;margin-bottom:14px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7d7d7d" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="flex:none"><path d="M3 5.5h18v13H3Z"/><path d="M3 5.5l9 7 9-7"/></svg>
+        <span style="flex:1;font-size:15px;color:#fff">rohan@kria.club</span>
+      </div>
+
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
+        <div class="lbl">Password</div>
+        <div class="mn" style="font-size:9px;font-weight:700;color:#F97316;letter-spacing:0.1em">FORGOT?</div>
+      </div>
+      <div style="height:52px;border-radius:5px;background:rgba(255,255,255,0.06);border:1.5px solid #F97316;display:flex;align-items:center;padding:0 13px;gap:10px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="flex:none"><path d="M5.5 11h13v9.5h-13Z"/><path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11"/></svg>
+        <span class="mn" style="flex:1;font-size:15px;color:#fff;letter-spacing:0.18em">••••••••••</span>
+        <span class="mn" style="font-size:9px;color:#F97316;font-weight:700;letter-spacing:0.12em">SHOW</span>
+      </div>
+
+      <!-- Failure state, scoped and specific -->
+      <div style="display:flex;align-items:center;gap:8px;margin-top:11px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF4438" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter" style="flex:none"><path d="M12 2.5L21.5 20.5H2.5Z"/><path d="M12 9v5.5"/></svg>
+        <span class="mn" style="font-size:9px;color:#FF4438;letter-spacing:0.1em">WRONG PASSWORD &mdash; 3 TRIES LEFT</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:none;padding:12px 20px 26px;position:relative">
+    <div class="btnx" style="margin-bottom:16px">
+      Sign in
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0B0B0B" stroke-width="2.8" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 12h14M12 6l6 6-6 6"/></svg>
+    </div>
+    <div class="mn" style="font-size:9px;color:#7d7d7d;letter-spacing:0.12em;text-align:center">NEW HERE? <span style="color:#F97316">CREATE AN ACCOUNT</span></div>
+  </div>
+  <div class="grain"></div>
+</div>
+</x-dc>
+</body>
+</html>

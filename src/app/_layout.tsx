@@ -4,8 +4,7 @@ import { View } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Provider } from 'react-redux';
-import { useFonts, Oswald_500Medium } from '@expo-google-fonts/oswald';
-import { Montserrat_400Regular } from '@expo-google-fonts/montserrat';
+import { useFonts } from 'expo-font';
 import { Anton_400Regular } from '@expo-google-fonts/anton';
 import {
   SpaceGrotesk_400Regular,
@@ -123,9 +122,6 @@ export default function RootLayout() {
     SpaceGrotesk_700Bold,
     SpaceMono_400Regular,
     SpaceMono_700Bold,
-    // ponytail: v1 faces stay loaded until the last screen is migrated, then drop them.
-    Oswald_500Medium,
-    Montserrat_400Regular,
   });
   return (
     <Provider store={store}>

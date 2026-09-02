@@ -10,6 +10,7 @@ import { StandingsTable } from '@/components/teamleague/StandingsTable';
 import { ChampionBanner } from '@/components/teamleague/TeamLeagueStates';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
+import { Lbl } from '@/components/canvas';
 import { Skeleton, ErrorBlock, EmptyState } from '@/components/states';
 import { GroupList } from '@/components/teamleague/GroupList';
 import { TieList } from '@/components/teamleague/TieList';
@@ -182,9 +183,16 @@ export default function TeamLeagueScreen() {
           ) : selectedTie && detailLoading ? (
             <View style={{ gap: 10 }}><Skeleton h={70} /><Skeleton h={70} /></View>
           ) : selectedGroup ? (
-            <View className="gap-3">
-              <Pressable onPress={() => { setSelectedGroup(null); setSelectedTie(null); }} className="self-start">
-                <Text className="font-montserrat text-sm text-gray-400">‹ Groups · {selectedGroup.groupName}</Text>
+            <View style={{ gap: 12 }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Back to groups"
+                onPress={() => { setSelectedGroup(null); setSelectedTie(null); }}
+                hitSlop={10}
+                style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 }}
+              >
+                <Icon name="chevron-left" size={13} color="#7d7d7d" strokeWidth={2.4} />
+                <Lbl style={{ letterSpacing: 0.12 * 9 }}>{`Groups · ${selectedGroup.groupName}`}</Lbl>
               </Pressable>
               {tiesLoading ? (
                 <View style={{ gap: 10 }}><Skeleton h={64} /><Skeleton h={64} /></View>

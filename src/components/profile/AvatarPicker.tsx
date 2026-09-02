@@ -57,19 +57,19 @@ export function AvatarPicker({ name, imageUrl, size = 76 }: { name?: string; ima
       <View
         style={{
           position: 'absolute',
-          right: -4,
-          bottom: -4,
-          width: 24,
-          height: 24,
+          right: -5,
+          bottom: -5,
+          width: 26,
+          height: 26,
           borderRadius: 4,
           backgroundColor: '#0B0B0B',
           borderWidth: 1.5,
-          borderColor: 'rgba(255,255,255,0.22)',
+          borderColor: '#F97316',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        {busy ? <ActivityIndicator size="small" color="#F97316" /> : <Icon name="plus" size={13} color="#F97316" strokeWidth={2.6} />}
+        {busy ? <ActivityIndicator size="small" color="#F97316" /> : <Icon name="edit" size={13} color="#F97316" strokeWidth={2.2} />}
       </View>
     </Pressable>
   );

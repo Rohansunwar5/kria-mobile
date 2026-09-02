@@ -33,9 +33,6 @@ module.exports = {
         'grotesk-bold': ['SpaceGrotesk_700Bold'],
         mono: ['SpaceMono_400Regular'],
         'mono-bold': ['SpaceMono_700Bold'],
-        // ponytail: Oswald/Montserrat stay until the last screen is migrated.
-        oswald: ['Oswald_500Medium'],
-        montserrat: ['Montserrat_400Regular'],
       },
     },
   },

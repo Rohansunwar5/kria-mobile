@@ -8,6 +8,8 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, withDelay, Easing } from 'react-native-reanimated';
 import { ProgressStep } from '@/components/onboarding/ProgressStep';
+import { Ghost } from '@/components/states';
+import { Hairlines, Kick } from '@/components/canvas';
 
 const STEPS = ['Signing you in', 'Loading your tournaments', 'Syncing your player profile'];
 
@@ -41,13 +43,15 @@ export default function Entering() {
   }));
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-ink px-6">
-      <View className="flex-1 justify-center">
-        <Animated.View style={logoStyle} className="mb-12 items-center">
-          <Text className="font-oswald uppercase text-brand" style={{ fontSize: 44, letterSpacing: 4, paddingTop: 4 }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
+      <Hairlines />
+      <Ghost text="Kria" size={200} style={{ left: -30, bottom: 120 }} />
+      <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 24 }}>
+        <Animated.View style={[logoStyle, { marginBottom: 34 }]}>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 44, lineHeight: 40, color: '#fff' }}>
             Kria
           </Text>
-          <Text className="mt-2 font-montserrat text-sm text-gray-400">Getting your arena ready…</Text>
+          <Kick style={{ letterSpacing: 0.3 * 9, marginTop: 6 }}>Getting your arena ready</Kick>
         </Animated.View>
         {STEPS.map((label, i) => (
           <ProgressStep key={label} label={label} done={i < done} />

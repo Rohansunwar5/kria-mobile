@@ -1,38 +1,341 @@
 {
   "pages": [
-    { "id": "page-1", "name": "Enter & discover" },
-    { "id": "page-2", "name": "Badminton" },
-    { "id": "page-3", "name": "Cricket" },
-    { "id": "page-4", "name": "Me" },
-    { "id": "page-5", "name": "System" }
+    {
+      "id": "page-1",
+      "name": "Enter & discover"
+    },
+    {
+      "id": "page-2",
+      "name": "Badminton"
+    },
+    {
+      "id": "page-3",
+      "name": "Cricket"
+    },
+    {
+      "id": "page-4",
+      "name": "Me"
+    },
+    {
+      "id": "page-5",
+      "name": "System"
+    },
+    {
+      "id": "page-6",
+      "name": "Onboarding & auth"
+    },
+    {
+      "id": "page-7",
+      "name": "Account"
+    }
   ],
   "artboards": [
-    { "file": "Main.dc.html", "page": "page-1", "title": "Home", "x": 0, "y": 0, "w": 390, "h": 844 },
-    { "file": "TournamentDetail.dc.html", "page": "page-1", "title": "Tournament", "x": 470, "y": 0, "w": 390, "h": 844 },
-    { "file": "CategoryRegister.dc.html", "page": "page-1", "title": "Category & entry", "x": 940, "y": 0, "w": 390, "h": 844 },
-    { "file": "Checkout.dc.html", "page": "page-1", "title": "Checkout", "x": 1410, "y": 0, "w": 390, "h": 844 },
-    { "file": "PaymentStatus.dc.html", "page": "page-1", "title": "Payment status", "x": 0, "y": 964, "w": 390, "h": 844 },
-
-    { "file": "BadmintonLive.dc.html", "page": "page-2", "title": "Live match (badminton)", "x": 0, "y": 0, "w": 390, "h": 844 },
-    { "file": "Bracket.dc.html", "page": "page-2", "title": "Knockout draw", "x": 470, "y": 0, "w": 390, "h": 844 },
-    { "file": "TeamLeague.dc.html", "page": "page-2", "title": "Team league", "x": 940, "y": 0, "w": 390, "h": 844 },
-    { "file": "Leaderboard.dc.html", "page": "page-2", "title": "Category standings", "x": 1410, "y": 0, "w": 390, "h": 844 },
-    { "file": "Auction.dc.html", "page": "page-2", "title": "Auction broadcast", "x": 0, "y": 964, "w": 390, "h": 844 },
-
-    { "file": "CricketLive.dc.html", "page": "page-3", "title": "Live match (cricket)", "x": 0, "y": 0, "w": 390, "h": 844 },
-    { "file": "CricketBalls.dc.html", "page": "page-3", "title": "Ball by ball", "x": 470, "y": 0, "w": 390, "h": 844 },
-    { "file": "CricketLeaderboard.dc.html", "page": "page-3", "title": "Category charts", "x": 940, "y": 0, "w": 390, "h": 844 },
-    { "file": "CricketMyStats.dc.html", "page": "page-3", "title": "My tournament stats", "x": 1410, "y": 0, "w": 390, "h": 844 },
-
-    { "file": "Profile.dc.html", "page": "page-4", "title": "Profile", "x": 0, "y": 0, "w": 390, "h": 844 },
-    { "file": "MyRegistrations.dc.html", "page": "page-4", "title": "My registrations", "x": 470, "y": 0, "w": 390, "h": 844 },
-    { "file": "TeamDetail.dc.html", "page": "page-4", "title": "Team detail", "x": 940, "y": 0, "w": 390, "h": 844 },
-    { "file": "PlayerProfile.dc.html", "page": "page-4", "title": "Public player profile", "x": 1410, "y": 0, "w": 390, "h": 844 },
-    { "file": "Announcements.dc.html", "page": "page-4", "title": "Announcements", "x": 0, "y": 964, "w": 390, "h": 844 },
-    { "file": "Settings.dc.html", "page": "page-4", "title": "Settings", "x": 470, "y": 964, "w": 390, "h": 844 },
-
-    { "file": "Patterns.dc.html", "page": "page-5", "title": "State patterns", "x": 0, "y": 0, "w": 900, "h": 1040 },
-    { "file": "Components.dc.html", "page": "page-5", "title": "Type, colour & components", "x": 980, "y": 0, "w": 900, "h": 1040 }
+    {
+      "file": "Main.dc.html",
+      "page": "page-1",
+      "title": "Home",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "TournamentDetail.dc.html",
+      "page": "page-1",
+      "title": "Tournament",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "CategoryRegister.dc.html",
+      "page": "page-1",
+      "title": "Category & entry",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Checkout.dc.html",
+      "page": "page-1",
+      "title": "Checkout",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "PaymentStatus.dc.html",
+      "page": "page-1",
+      "title": "Payment status",
+      "x": 0,
+      "y": 964,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "BadmintonLive.dc.html",
+      "page": "page-2",
+      "title": "Live match (badminton)",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Bracket.dc.html",
+      "page": "page-2",
+      "title": "Knockout draw",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "TeamLeague.dc.html",
+      "page": "page-2",
+      "title": "Team league",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Leaderboard.dc.html",
+      "page": "page-2",
+      "title": "Category standings",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Auction.dc.html",
+      "page": "page-2",
+      "title": "Auction broadcast",
+      "x": 0,
+      "y": 964,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "CricketLive.dc.html",
+      "page": "page-3",
+      "title": "Live match (cricket)",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "CricketBalls.dc.html",
+      "page": "page-3",
+      "title": "Ball by ball",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "CricketLeaderboard.dc.html",
+      "page": "page-3",
+      "title": "Category charts",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "CricketMyStats.dc.html",
+      "page": "page-3",
+      "title": "My tournament stats",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Profile.dc.html",
+      "page": "page-4",
+      "title": "Profile",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "MyRegistrations.dc.html",
+      "page": "page-4",
+      "title": "My registrations",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "TeamDetail.dc.html",
+      "page": "page-4",
+      "title": "Team detail",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "PlayerProfile.dc.html",
+      "page": "page-4",
+      "title": "Public player profile",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Announcements.dc.html",
+      "page": "page-4",
+      "title": "Announcements",
+      "x": 0,
+      "y": 964,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Settings.dc.html",
+      "page": "page-4",
+      "title": "Settings",
+      "x": 470,
+      "y": 964,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Patterns.dc.html",
+      "page": "page-5",
+      "title": "State patterns",
+      "x": 0,
+      "y": 0,
+      "w": 900,
+      "h": 1040
+    },
+    {
+      "file": "Components.dc.html",
+      "page": "page-5",
+      "title": "Type, colour & components",
+      "x": 980,
+      "y": 0,
+      "w": 900,
+      "h": 1040
+    },
+    {
+      "file": "Welcome.dc.html",
+      "page": "page-6",
+      "title": "Welcome",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Story.dc.html",
+      "page": "page-6",
+      "title": "Story beat",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "CardPreview.dc.html",
+      "page": "page-6",
+      "title": "Card preview",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "OnboardingAuth.dc.html",
+      "page": "page-6",
+      "title": "Name & photo",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Register.dc.html",
+      "page": "page-6",
+      "title": "Register",
+      "x": 0,
+      "y": 964,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "VerifyOtp.dc.html",
+      "page": "page-6",
+      "title": "Verify code",
+      "x": 470,
+      "y": 964,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Login.dc.html",
+      "page": "page-6",
+      "title": "Sign in",
+      "x": 940,
+      "y": 964,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "WelcomeDone.dc.html",
+      "page": "page-6",
+      "title": "Card issued",
+      "x": 1410,
+      "y": 964,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "EditProfile.dc.html",
+      "page": "page-7",
+      "title": "Edit profile",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "ChangePassword.dc.html",
+      "page": "page-7",
+      "title": "Change password",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Payments.dc.html",
+      "page": "page-7",
+      "title": "Payments",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "TournamentHistory.dc.html",
+      "page": "page-7",
+      "title": "Tournament history",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    }
   ],
   "annotations": [
     {
@@ -41,7 +344,7 @@
       "x": 0,
       "y": -210,
       "w": 760,
-      "text": "MAXIMALIST RESTYLE — a deliberate break from the old soft-card look.\nFonts: Anton (display, ultra-condensed, uppercase) + Space Grotesk (interface) + Space Mono (all data, tabular). Grotesque skeleton shared, width and rhythm contrasted; Grotesk and Mono are companion designs.\nColour: brand orange #F97316 plus two accents rotated in hue at identical lightness and chroma — oklch(0.70 0.19 h) at h46 / h350 / h145 — so orange, auction-magenta and open-green carry equal weight. Flat fills, no tinted-outline pills.\nSurfaces: 6px radii (was 24px), 1.5px borders, grain + hairline + hazard-stripe texture, oversized ghosted Anton type bleeding off frame edges, orange nav bar instead of a floating dark pill.\n\nPAGE 1 ENDPOINTS\nHome  GET /tournament?sport&city&status\nTournament  GET /tournament/:id · GET /tournaments/:id/categories · GET /tournaments/:id/teams\nCategory & entry  GET /categories/:id · GET /sports/:sport (format+scoring from SportConfig) · POST /registrations/register\nCheckout  POST /payments/create-order · POST /payments/verify\nPayment status  GET /payments/status/:orderId"
+      "text": "MAXIMALIST RESTYLE \u2014 a deliberate break from the old soft-card look.\nFonts: Anton (display, ultra-condensed, uppercase) + Space Grotesk (interface) + Space Mono (all data, tabular). Grotesque skeleton shared, width and rhythm contrasted; Grotesk and Mono are companion designs.\nColour: brand orange #F97316 plus two accents rotated in hue at identical lightness and chroma \u2014 oklch(0.70 0.19 h) at h46 / h350 / h145 \u2014 so orange, auction-magenta and open-green carry equal weight. Flat fills, no tinted-outline pills.\nSurfaces: 6px radii (was 24px), 1.5px borders, grain + hairline + hazard-stripe texture, oversized ghosted Anton type bleeding off frame edges, orange nav bar instead of a floating dark pill.\n\nPAGE 1 ENDPOINTS\nHome  GET /tournament?sport&city&status\nTournament  GET /tournament/:id \u00b7 GET /tournaments/:id/categories \u00b7 GET /tournaments/:id/teams\nCategory & entry  GET /categories/:id \u00b7 GET /sports/:sport (format+scoring from SportConfig) \u00b7 POST /registrations/register\nCheckout  POST /payments/create-order \u00b7 POST /payments/verify\nPayment status  GET /payments/status/:orderId"
     },
     {
       "id": "note-badminton",
@@ -49,7 +352,7 @@
       "x": 0,
       "y": -190,
       "w": 760,
-      "text": "BADMINTON — fully served by the backend, so every stage is covered.\nLive match  GET /sports/badminton/match/:id + socket. THE GAP: badminton live scoring is fully built server-side (POST /sports/badminton/match/:id/live/start and /live/point) but src/app/live/[matchId].tsx returns UnsupportedSport for anything that is not cricket. This artboard is that missing screen — games table, serve indicator, point-by-point feed.\nKnockout draw  GET /sports/badminton/match/by-category/:categoryId (rounds derived from match round field)\nTeam league  GET /sports/badminton/team-league/:categoryId/overview · /groups · /standings · /groups/:groupId/ties · /ties/:tieId · /ties/:tieId/lineup\nCategory standings  GET /matches/leaderboard/:categoryId (the sport-agnostic one)\nAuction broadcast  GET /auction/:tournamentId/:categoryId/status · /sold-log + socket. Sport-agnostic — this same screen serves cricket."
+      "text": "BADMINTON \u2014 fully served by the backend, so every stage is covered.\nLive match  GET /sports/badminton/match/:id + socket. THE GAP: badminton live scoring is fully built server-side (POST /sports/badminton/match/:id/live/start and /live/point) but src/app/live/[matchId].tsx returns UnsupportedSport for anything that is not cricket. This artboard is that missing screen \u2014 games table, serve indicator, point-by-point feed.\nKnockout draw  GET /sports/badminton/match/by-category/:categoryId (rounds derived from match round field)\nTeam league  GET /sports/badminton/team-league/:categoryId/overview \u00b7 /groups \u00b7 /standings \u00b7 /groups/:groupId/ties \u00b7 /ties/:tieId \u00b7 /ties/:tieId/lineup\nCategory standings  GET /matches/leaderboard/:categoryId (the sport-agnostic one)\nAuction broadcast  GET /auction/:tournamentId/:categoryId/status \u00b7 /sold-log + socket. Sport-agnostic \u2014 this same screen serves cricket."
     },
     {
       "id": "note-cricket",
@@ -57,7 +360,7 @@
       "x": 0,
       "y": -190,
       "w": 760,
-      "text": "CRICKET — three of these are corrections to the previous canvas, which had the API shapes wrong.\nLive match  GET /sports/cricket/match/:id · /:id/live · /:id/scorecard + socket\nBall by ball  GET /sports/cricket/stats/matches/:matchId/innings/:inningsNumber/balls — an endpoint that exists and had no screen at all. Innings switch, over headers, per-ball rows.\nCategory charts  GET /sports/cricket/stats/categories/:categoryId/leaderboard?sort=runs|wickets|sr|economy|fours|sixes|highest — SEVEN sort keys, not the Batting/Bowling/Fielding tabs drawn before. One chip per key; the table columns follow the active sort.\nMy tournament stats  GET /sports/cricket/stats/registrations/:registrationId/stats?tournamentId=… — per REGISTRATION, not per player, so it is scoped to one tournament.\nAlso live: POST /sports/cricket/stats/matches/:matchId/rebuild-stats, but that is organizer-only and gets no player screen."
+      "text": "CRICKET \u2014 three of these are corrections to the previous canvas, which had the API shapes wrong.\nLive match  GET /sports/cricket/match/:id \u00b7 /:id/live \u00b7 /:id/scorecard + socket\nBall by ball  GET /sports/cricket/stats/matches/:matchId/innings/:inningsNumber/balls \u2014 an endpoint that exists and had no screen at all. Innings switch, over headers, per-ball rows.\nCategory charts  GET /sports/cricket/stats/categories/:categoryId/leaderboard?sort=runs|wickets|sr|economy|fours|sixes|highest \u2014 SEVEN sort keys, not the Batting/Bowling/Fielding tabs drawn before. One chip per key; the table columns follow the active sort.\nMy tournament stats  GET /sports/cricket/stats/registrations/:registrationId/stats?tournamentId=\u2026 \u2014 per REGISTRATION, not per player, so it is scoped to one tournament.\nAlso live: POST /sports/cricket/stats/matches/:matchId/rebuild-stats, but that is organizer-only and gets no player screen."
     },
     {
       "id": "note-me",
@@ -65,7 +368,7 @@
       "x": 0,
       "y": -170,
       "w": 760,
-      "text": "THE PLAYER'S OWN SURFACES — everything player-facing the API serves.\nProfile  GET /player/auth/profile · /stats · PATCH /profile · PUT /profile-image\nMy registrations  GET /registrations/my-registrations · POST /registrations/:id/withdraw — covers all four states: auctioned into a team, approved and awaiting auction, unpaid with a held slot, and past.\nTeam detail  GET /teams/:id · GET /registrations/teams/:teamId/roster\nPublic player profile  GET /player/auth/public/:playerId — no screen existed for this\nAnnouncements  GET /tournaments/:tournamentId/announcements — no screen existed for this\nSettings  POST /player/auth/change-password · POST + DELETE /player/auth/fcm-token · POST /contact · GET /sports/:sport\nNot drawn, deliberately: tournament history and invoices already have working screens that this restyle does not change; say the word and I will bring them across too."
+      "text": "THE PLAYER'S OWN SURFACES \u2014 everything player-facing the API serves.\nProfile  GET /player/auth/profile \u00b7 /stats \u00b7 PATCH /profile \u00b7 PUT /profile-image\nMy registrations  GET /registrations/my-registrations \u00b7 POST /registrations/:id/withdraw \u2014 covers all four states: auctioned into a team, approved and awaiting auction, unpaid with a held slot, and past.\nTeam detail  GET /teams/:id \u00b7 GET /registrations/teams/:teamId/roster\nPublic player profile  GET /player/auth/public/:playerId \u2014 no screen existed for this\nAnnouncements  GET /tournaments/:tournamentId/announcements \u2014 no screen existed for this\nSettings  POST /player/auth/change-password \u00b7 POST + DELETE /player/auth/fcm-token \u00b7 POST /contact \u00b7 GET /sports/:sport\nNot drawn, deliberately: tournament history and invoices already have working screens that this restyle does not change; say the word and I will bring them across too."
     },
     {
       "id": "note-system",
@@ -73,8 +376,27 @@
       "x": 0,
       "y": -150,
       "w": 760,
-      "text": "BUILD THIS FIRST.\nState patterns is the highest-value artboard on the canvas: every screen currently blanks itself to a centred spinner. Fixing it once here beats fixing it twenty times later.\nType, colour & components carries the full restyle — the three fonts with their roles, the hue-rotated accent trio, tags, chips, controls, nav and the four atmosphere devices. Nothing on the other twenty artboards uses anything that is not on this sheet.\n\nSPORT SCOPE: home filters to badminton and cricket only. src/lib/tournamentConstants.ts currently offers bowling, basketball and volleyball, none of which SportConfig supports — those filters can only ever return empty."
+      "text": "BUILD THIS FIRST.\nState patterns is the highest-value artboard on the canvas: every screen currently blanks itself to a centred spinner. Fixing it once here beats fixing it twenty times later.\nType, colour & components carries the full restyle \u2014 the three fonts with their roles, the hue-rotated accent trio, tags, chips, controls, nav and the four atmosphere devices. Nothing on the other twenty artboards uses anything that is not on this sheet.\n\nSPORT SCOPE: home filters to badminton and cricket only. src/lib/tournamentConstants.ts currently offers bowling, basketball and volleyball, none of which SportConfig supports \u2014 those filters can only ever return empty."
+    },
+    {
+      "id": "note-onboarding",
+      "page": "page-6",
+      "x": 0,
+      "y": -190,
+      "w": 760,
+      "text": "ONBOARDING & AUTH \u2014 all 12 of these screens are still on the old Oswald/Montserrat styling; these eight artboards bring them across.\nFlow: Welcome -> Story (3 beats) -> Card preview -> Name & photo -> Register -> Verify code -> Card issued. Sign in is the side entrance from Welcome.\nThe player ID card is the payoff of the whole flow, so it is designed twice: PREVIEW (locked, no photo, player number pending) and ISSUED (photo, real number, brand border, glow). Do not water either down \u2014 this is the moment the product earns the account.\nNOT DRAWN, deliberately: Set password is Change password on page 7 minus the current-password field. Forgot password is Sign in with only the email field. Creating and Entering are transitions \u2014 use Skeleton + Ghost from Patterns rather than a spinner.\nEndpoints  POST /player/auth/register \u00b7 /verify-otp \u00b7 /set-password \u00b7 /resend-otp \u00b7 /login \u00b7 /login/otp \u00b7 /login/otp/verify \u00b7 /forgot-password"
+    },
+    {
+      "id": "note-account",
+      "page": "page-7",
+      "x": 0,
+      "y": -170,
+      "w": 760,
+      "text": "ACCOUNT \u2014 the four screens behind Profile.\nEdit profile  PATCH /player/auth/profile \u00b7 PUT /player/auth/profile-image. The form is long; it scrolls under a pinned save bar. Gender is a hard three-way segment, not a dropdown.\nChange password  POST /player/auth/change-password. Strength is four hard blocks, not a rounded bar; the rules list shows what is still missing rather than only failing on submit.\nPayments  GET /payments/my-payments \u00b7 GET /payments/status/:orderId. Total-paid is a slab at the top, not a footer total. Failed rows sort first and carry the retry \u2014 they are the only actionable ones.\nTournament history  GET /player/auth/tournament-history. Grouped by year, with the per-sport stat row switching between badminton (record) and cricket (runs/wickets).\nALREADY BUILT: profile/settings.tsx, profile/history.tsx and profile/registrations.tsx are migrated already \u2014 history here replaces the improvised version. profile/edit.tsx and profile/invoices.tsx are still stale."
     }
   ],
-  "launch": { "view": "canvas", "page": "page-1" }
+  "launch": {
+    "view": "canvas",
+    "page": "page-6"
+  }
 }

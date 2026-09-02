@@ -2,7 +2,7 @@
 
 The visual language for the player app. This file is the **reference**; the build handoff is
 [`docs/design-canvas/IMPLEMENTATION.md`](docs/design-canvas/IMPLEMENTATION.md), and the screen
-designs are the 22 artboards in [`docs/design-canvas/`](docs/design-canvas/) (open
+designs are the 34 artboards in [`docs/design-canvas/`](docs/design-canvas/) (open
 `docs/design-canvas/kria-player-app-screens.html` in a browser to view them all on one canvas).
 
 The direction is **maximalist and industrial** — sports-broadcast, not consumer-soft. Heavy type,
@@ -173,6 +173,7 @@ view — header, hero and nav — then snaps back. Replace that with:
 
 | | |
 |---|---|
-| Designed | 22 screens covering the full player journey for badminton and cricket |
-| Built | Icon set + tests. Screens are pre-migration — see `IMPLEMENTATION.md` Phase 1. |
+| Designed | 34 screens: the full player journey for badminton and cricket, plus onboarding/auth and the account screens |
+| Built | Foundation complete — fonts, tokens, icon set, state patterns. Most of the app surface migrated. |
+| Not yet migrated | All 12 onboarding and auth screens, `profile/edit`, `profile/invoices`, `team-league` |
 | Sport scope | Badminton and cricket only. `src/lib/tournamentConstants.ts` still offers bowling, basketball and volleyball, which `SportConfig` cannot serve. |

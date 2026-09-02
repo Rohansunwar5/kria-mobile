@@ -1,7 +1,12 @@
 import { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import { InningsScorecard, LiveState } from '@/api/cricketMatch';
 import { dismissalLine } from '@/lib/cricketView';
+import { Chip, Lbl } from '@/components/canvas';
+
+// CricketLive.dc.html's scorecard: a `.blk` with a tinted header row, hairline
+// dividers, mono numerals right-aligned in fixed columns. Innings and section
+// are both chip switches — no underlined web tabs.
 
 type SubTab = 'batting' | 'bowling' | 'fow';
 const SUBS: { key: SubTab; label: string }[] = [
@@ -10,95 +15,148 @@ const SUBS: { key: SubTab; label: string }[] = [
   { key: 'fow', label: 'FoW' },
 ];
 
-function HeaderRow({ cols }: { cols: string[] }) {
+const NUM = { fontFamily: 'SpaceMono_400Regular' as const, fontSize: 12, textAlign: 'right' as const };
+const NUM_BOLD = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 12, textAlign: 'right' as const };
+
+function Block({ children }: { children: React.ReactNode }) {
   return (
-    <View className="flex-row border-b border-white/10 px-3 py-2">
-      <Text className="flex-1 font-montserrat text-[9px] uppercase tracking-widest text-gray-600">{cols[0]}</Text>
-      {cols.slice(1).map((c) => (
-        <Text key={c} className="w-10 text-right font-montserrat text-[9px] uppercase tracking-widest text-gray-600">{c}</Text>
-      ))}
+    <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden' }}>
+      {children}
+    </View>
+  );
+}
+
+function Head({ first, cols }: { first: string; cols: { label: string; w: number }[] }) {
+  return (
+    <>
+      <View style={{ flexDirection: 'row', paddingHorizontal: 13, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.04)' }}>
+        <Lbl style={{ flex: 1, letterSpacing: 0.12 * 9 }}>{first}</Lbl>
+        {cols.map((c) => (
+          <Lbl key={c.label} style={{ width: c.w, textAlign: 'right', letterSpacing: 0.1 * 9 }}>
+            {c.label}
+          </Lbl>
+        ))}
+      </View>
+      <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+    </>
+  );
+}
+
+function Row({ active, children }: { active?: boolean; children: React.ReactNode }) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        paddingHorizontal: 13,
+        paddingVertical: 9,
+        borderTopWidth: 1.5,
+        borderTopColor: 'rgba(255,255,255,0.06)',
+        ...(active ? { backgroundColor: 'rgba(249,115,22,0.10)' } : null),
+      }}
+    >
+      {children}
     </View>
   );
 }
 
 function BattingTable({ innings, live }: { innings: InningsScorecard; live: LiveState | null }) {
   return (
-    <View>
-      <HeaderRow cols={['Batter', 'R', 'B', '4s', '6s', 'SR']} />
+    <Block>
+      <Head first="Batter" cols={[{ label: 'R', w: 30 }, { label: 'B', w: 30 }, { label: '4s', w: 28 }, { label: '6s', w: 28 }, { label: 'SR', w: 44 }]} />
       {innings.battingCard.map((b) => {
-        const isStriker = b.registrationId === live?.strikerId;
-        const isActive = isStriker || b.registrationId === live?.nonStrikerId;
+        const striker = b.registrationId === live?.strikerId;
+        const active = striker || b.registrationId === live?.nonStrikerId;
         return (
-          <View key={b.registrationId} className={`flex-row items-start border-b border-white/5 px-3 py-2.5 ${isActive ? 'bg-brand/5' : ''}`}>
-            <View className="flex-1 pr-2">
-              <Text className={`font-montserrat text-[13px] font-semibold ${isActive ? 'text-white' : 'text-gray-300'}`} numberOfLines={1}>
-                {b.name}{isStriker ? <Text className="text-brand font-black"> ★</Text> : null}
+          <Row key={b.registrationId} active={active}>
+            <View style={{ flex: 1, paddingRight: 6 }}>
+              <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: active ? '#fff' : '#d4d4d4' }}>
+                {b.name}
+                {striker ? <Text style={{ color: '#F97316' }}> ★</Text> : null}
               </Text>
-              <Text className="font-montserrat text-[10px] text-gray-600" numberOfLines={1}>{dismissalLine(b.dismissal)}</Text>
+              <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.06 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+                {dismissalLine(b.dismissal)}
+              </Text>
             </View>
-            <Text className="w-10 text-right font-oswald text-sm font-black text-white">{b.runs}</Text>
-            <Text className="w-10 text-right font-montserrat text-xs text-gray-500">{b.ballsFaced}</Text>
-            <Text className="w-10 text-right font-montserrat text-xs text-gray-400">{b.fours}</Text>
-            <Text className="w-10 text-right font-montserrat text-xs text-gray-400">{b.sixes}</Text>
-            <Text className="w-10 text-right font-montserrat text-xs text-gray-400">{b.strikeRate.toFixed(1)}</Text>
-          </View>
+            <Text style={{ ...NUM_BOLD, width: 30, color: '#fff' }}>{b.runs}</Text>
+            <Text style={{ ...NUM, width: 30, color: '#a3a3a3' }}>{b.ballsFaced}</Text>
+            <Text style={{ ...NUM, width: 28, color: '#a3a3a3' }}>{b.fours}</Text>
+            <Text style={{ ...NUM, width: 28, color: '#a3a3a3' }}>{b.sixes}</Text>
+            <Text style={{ ...NUM, width: 44, color: '#a3a3a3' }}>{b.strikeRate.toFixed(1)}</Text>
+          </Row>
         );
       })}
-      <View className="flex-row justify-between px-3 py-2.5">
-        <Text className="font-montserrat text-[11px] text-gray-500">Extras {innings.totals.extras.total}</Text>
-        <Text className="font-montserrat text-[11px] text-gray-300">
-          Total <Text className="font-oswald font-black text-white">{innings.totals.runs}/{innings.totals.wickets}</Text> ({innings.totals.overs} ov)
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 13, paddingVertical: 9, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)', backgroundColor: 'rgba(255,255,255,0.03)' }}>
+        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: '#7d7d7d' }}>
+          EXTRAS {innings.totals.extras.total}
+        </Text>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#fff' }}>
+          {innings.totals.runs}/{innings.totals.wickets}
+          <Text style={{ fontFamily: 'SpaceMono_400Regular', color: '#a3a3a3' }}>{`  ${innings.totals.overs} OV`}</Text>
         </Text>
       </View>
-    </View>
+    </Block>
   );
 }
 
 function BowlingTable({ innings, live }: { innings: InningsScorecard; live: LiveState | null }) {
   return (
-    <View>
-      <HeaderRow cols={['Bowler', 'O', 'M', 'R', 'W', 'Econ']} />
+    <Block>
+      <Head first="Bowler" cols={[{ label: 'O', w: 34 }, { label: 'M', w: 26 }, { label: 'R', w: 30 }, { label: 'W', w: 26 }, { label: 'Econ', w: 44 }]} />
       {innings.bowlingCard.map((b) => {
-        const isActive = b.registrationId === live?.currentBowlerId;
+        const active = b.registrationId === live?.currentBowlerId;
         return (
-          <View key={b.registrationId} className={`flex-row items-center border-b border-white/5 px-3 py-2.5 ${isActive ? 'bg-blue-500/5' : ''}`}>
-            <Text className={`flex-1 pr-2 font-montserrat text-[13px] font-semibold ${isActive ? 'text-white' : 'text-gray-300'}`} numberOfLines={1}>
-              {b.name}{isActive ? <Text className="text-blue-400 font-black"> ★</Text> : null}
+          <Row key={b.registrationId} active={active}>
+            <Text numberOfLines={1} style={{ flex: 1, paddingRight: 6, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: active ? '#fff' : '#d4d4d4' }}>
+              {b.name}
+              {active ? <Text style={{ color: '#F97316' }}> ★</Text> : null}
             </Text>
-            <Text className="w-10 text-right font-montserrat text-xs text-gray-400">{b.overs}</Text>
-            <Text className="w-10 text-right font-montserrat text-xs text-gray-500">{b.maidens}</Text>
-            <Text className="w-10 text-right font-montserrat text-xs text-gray-400">{b.runs}</Text>
-            <Text className="w-10 text-right font-oswald text-sm font-black text-white">{b.wickets}</Text>
-            <Text className="w-10 text-right font-montserrat text-xs text-gray-400">{b.economy.toFixed(2)}</Text>
-          </View>
+            <Text style={{ ...NUM, width: 34, color: '#a3a3a3' }}>{b.overs}</Text>
+            <Text style={{ ...NUM, width: 26, color: '#7d7d7d' }}>{b.maidens}</Text>
+            <Text style={{ ...NUM, width: 30, color: '#a3a3a3' }}>{b.runs}</Text>
+            <Text style={{ ...NUM_BOLD, width: 26, color: '#fff' }}>{b.wickets}</Text>
+            <Text style={{ ...NUM, width: 44, color: '#a3a3a3' }}>{b.economy.toFixed(2)}</Text>
+          </Row>
         );
       })}
-    </View>
+    </Block>
   );
 }
 
 function FallOfWickets({ innings }: { innings: InningsScorecard }) {
   if (innings.fallOfWickets.length === 0) {
-    return <Text className="px-3 py-6 text-center font-montserrat text-sm text-gray-500">No wickets have fallen.</Text>;
+    return (
+      <Block>
+        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'center', paddingVertical: 22 }}>
+          No wickets have fallen
+        </Text>
+      </Block>
+    );
   }
   return (
-    <View>
+    <Block>
+      <Head first="Wicket" cols={[{ label: 'Score', w: 56 }, { label: 'Ov', w: 44 }]} />
       {innings.fallOfWickets.map((w) => (
-        <View key={w.wicketNumber} className="flex-row items-center justify-between border-b border-white/5 px-3 py-2.5">
-          <View className="flex-1 pr-2">
-            <Text className="font-montserrat text-[13px] font-semibold text-gray-300" numberOfLines={1}>{w.batterName}</Text>
-            <Text className="font-montserrat text-[10px] text-gray-600" numberOfLines={1}>{w.dismissalLine}</Text>
+        <Row key={w.wicketNumber}>
+          <View style={{ flex: 1, paddingRight: 6 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#d4d4d4' }}>{w.batterName}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.06 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+              {w.dismissalLine}
+            </Text>
           </View>
-          <Text className="font-oswald text-sm font-black text-white">{w.score}</Text>
-          <Text className="ml-2 w-12 text-right font-montserrat text-xs text-gray-500">{w.overs} ov</Text>
-        </View>
+          <Text style={{ ...NUM_BOLD, width: 56, color: '#fff' }}>{w.score}</Text>
+          <Text style={{ ...NUM, width: 44, color: '#a3a3a3' }}>{w.overs}</Text>
+        </Row>
       ))}
-    </View>
+    </Block>
   );
 }
 
 export function ScorecardTabs({
-  innings1, innings2, currentInnings, live,
+  innings1,
+  innings2,
+  currentInnings,
+  live,
 }: {
   innings1: InningsScorecard | null;
   innings2: InningsScorecard | null;
@@ -112,30 +170,27 @@ export function ScorecardTabs({
   const innings = inningsView === 1 ? innings1 : innings2;
   if (!innings) return null;
 
-  return (
-    <View className="gap-3">
-      {hasTwo && (
-        <View className="flex-row gap-2">
-          {[1, 2].map((n) => (
-            <Pressable key={n} onPress={() => setInningsOverride(n as 1 | 2)} className={`rounded-lg px-3 py-1.5 ${inningsView === n ? 'bg-white/10' : ''}`}>
-              <Text className={`font-montserrat text-xs ${inningsView === n ? 'text-white' : 'text-gray-500'}`}>Innings {n}</Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
+  const liveFor = inningsView === currentInnings ? live : null;
 
-      <View className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-        <View className="flex-row border-b border-white/10">
-          {SUBS.map((s) => (
-            <Pressable key={s.key} onPress={() => setSub(s.key)} className={`flex-1 items-center py-2.5 ${sub === s.key ? 'border-b-2 border-brand' : ''}`}>
-              <Text className={`font-montserrat text-xs font-semibold ${sub === s.key ? 'text-brand' : 'text-gray-500'}`}>{s.label}</Text>
-            </Pressable>
+  return (
+    <View style={{ gap: 10 }}>
+      {hasTwo ? (
+        <View style={{ flexDirection: 'row', gap: 6 }}>
+          {([1, 2] as const).map((n) => (
+            <Chip key={n} label={`Innings ${n}`} selected={inningsView === n} onPress={() => setInningsOverride(n)} />
           ))}
         </View>
-        {sub === 'batting' && <BattingTable innings={innings} live={inningsView === currentInnings ? live : null} />}
-        {sub === 'bowling' && <BowlingTable innings={innings} live={inningsView === currentInnings ? live : null} />}
-        {sub === 'fow' && <FallOfWickets innings={innings} />}
+      ) : null}
+
+      <View style={{ flexDirection: 'row', gap: 6 }}>
+        {SUBS.map((s) => (
+          <Chip key={s.key} label={s.label} selected={sub === s.key} onPress={() => setSub(s.key)} />
+        ))}
       </View>
+
+      {sub === 'batting' ? <BattingTable innings={innings} live={liveFor} /> : null}
+      {sub === 'bowling' ? <BowlingTable innings={innings} live={liveFor} /> : null}
+      {sub === 'fow' ? <FallOfWickets innings={innings} /> : null}
     </View>
   );
 }

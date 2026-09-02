@@ -1,6 +1,6 @@
 # Implementing the v2 player-app design
 
-The design is 22 artboards in `mobile/docs/design-canvas/*.dc.html`.
+The design is 34 artboards in `mobile/docs/design-canvas/*.dc.html`.
 
 To view them: open `mobile/docs/design-canvas/kria-player-app-screens.html` in a browser — it is
 the whole canvas as one pan/zoom page, with PNG/PDF export. (It was published to a shareable link
@@ -32,9 +32,11 @@ port. Web-only constructs used in the artboards and their RN equivalents:
 Where an effect can't be done cheaply in RN, **drop it rather than approximating badly**, and say
 which ones you dropped.
 
-## Phase 1 — foundation (do this first, alone)
+## Phase 1 — foundation — DONE
 
-Nothing else should start until this lands.
+Landed already: all three fonts loaded in `_layout.tsx`, tokens in `tailwind.config.js`, the
+icon set in `src/components/icons/`, and the four state patterns in `src/components/states.tsx`
+(`Skeleton`, `EmptyState`, `ErrorBlock`, `StaleBanner`, `Ghost`). Kept for reference:
 
 1. **Fonts.** The design replaces Oswald/Montserrat with three faces:
    - `Anton` — display, uppercase, tight leading
@@ -84,6 +86,41 @@ One screen per commit. Each artboard maps to a route:
 | `Profile` | `src/app/(tabs)/profile.tsx` — group the flat menu into Playing / Account, drop the redundant "Find Tournaments" row |
 | `MyRegistrations` | `src/app/profile/registrations.tsx` |
 
+### Still on the OLD styling (Oswald/Montserrat) — DONE
+All migrated. Oswald and Montserrat are gone from `_layout.tsx`, `tailwind.config.js` and
+`package.json` — nothing references them any more, so do not reintroduce them.
+
+### Onboarding & auth — canvas page 6
+| Artboard | Route |
+|---|---|
+| `Welcome` | `src/app/(onboarding)/welcome.tsx` |
+| `Story` | `src/app/(onboarding)/story.tsx` |
+| `CardPreview` | `src/app/(onboarding)/card-preview.tsx` |
+| `OnboardingAuth` | `src/app/(onboarding)/auth.tsx` |
+| `WelcomeDone` | `src/app/(onboarding)/welcome-done.tsx` |
+| `Register` | `src/app/(auth)/register.tsx` |
+| `VerifyOtp` | `src/app/(auth)/verify-otp.tsx` |
+| `Login` | `src/app/(auth)/login.tsx` |
+
+Not drawn, on purpose: `set-password` is `ChangePassword` minus the current-password field;
+`forgot-password` is `Login` with only the email field; `creating` and `entering` are transitions
+— use `Skeleton` + `Ghost`, never a bare spinner.
+
+The **player ID card** is designed twice — `CardPreview` (locked, no photo, number pending) and
+`WelcomeDone` (photo, real number, brand border). It is the payoff of the whole flow; build it as
+a shared component and don't water either state down.
+
+### Account — canvas page 7
+| Artboard | Route | Endpoint |
+|---|---|---|
+| `EditProfile` | `src/app/profile/edit.tsx` | `PATCH /player/auth/profile`, `PUT /player/auth/profile-image` |
+| `ChangePassword` | `src/app/profile/change-password.tsx` (new) | `POST /player/auth/change-password` |
+| `Payments` | `src/app/profile/invoices.tsx` | `GET /payments/my-payments`, `GET /payments/status/:orderId` |
+| `TournamentHistory` | `src/app/profile/history.tsx` | `GET /player/auth/tournament-history` |
+
+`settings.tsx`, `history.tsx` and `registrations.tsx` are already migrated — `TournamentHistory`
+replaces the improvised version of history.
+
 ### New routes to create
 | Artboard | Suggested route | Endpoint |
 |---|---|---|
@@ -97,10 +134,44 @@ One screen per commit. Each artboard maps to a route:
 | `TeamDetail` | `src/app/team/[teamId].tsx` | `GET /teams/:id`, `GET /registrations/teams/:teamId/roster` |
 | `PlayerProfile` | `src/app/player/[playerId].tsx` | `GET /player/auth/public/:playerId` |
 | `Announcements` | `src/app/tournament/[id]/announcements.tsx` | `GET /tournaments/:tournamentId/announcements` |
-| `Settings` | `src/app/profile/settings.tsx` | `POST /player/auth/change-password`, `POST`+`DELETE /player/auth/fcm-token`, `POST /contact` |
+| `Settings` | `src/app/profile/settings.tsx` | `POST`+`DELETE /player/auth/fcm-token`, `POST /contact` |
+
+All of the above exist. `profile/change-password.tsx` was the last route missing and is now built;
+`Settings` links out to it rather than embedding a password form.
 
 Each page of the canvas carries a sticky note with the full endpoint list — read
 `canvas.json`'s `annotations` array for the authoritative mapping.
+
+## Deviations from the artboards
+
+Recorded here so nobody "fixes" them back:
+
+- **Radial gradients** (`Login`, `WelcomeDone`) are the nearest diagonal `expo-linear-gradient`.
+  RN has no radial gradient.
+- **`.grain`** and **`mix-blend-mode`** are dropped everywhere, as the table above says.
+- **`WelcomeDone`'s orange bloom** (`box-shadow: 0 20px 46px rgba(249,115,22,0.16)`) is dropped;
+  RN shadows take one colour, so only the black drop shadow survives.
+- **`Register`** gains a Full name field the artboard does not draw: `OnboardingAuth` captures the
+  name in the onboarding path, but register is also reachable straight from login, where nothing
+  has been captured. One always-visible field beats a branch.
+- **`OnboardingAuth`** replaced the old social-auth chooser (Google/Apple/Phone, all disabled and
+  fake). It now captures photo, name and sport, as drawn.
+- **`VerifyOtp`'s** resend is wired to the real `POST /player/auth/resend-otp`, which the doc did
+  not mention but the server has.
+- **`ChangePassword`** drops "last changed 4 months ago" — the profile payload has no password
+  timestamp — and says what the change does instead.
+- **`EditProfile`** replaces the free-text sport field with the two-chip picker; only badminton and
+  cricket are feature-complete.
+- **`Payments`** drops the header export button: there is no export endpoint. The "Receipt" chip is
+  a "Details" chip pointing at `PaymentStatus`, since receipts are gateway-emailed. Failed rows get
+  a red Retry chip into checkout.
+- **`TournamentHistory`** ribbon is Played / Matches / W-L / Earned, not Played / Titles / Finals /
+  W-L: the history endpoint carries no finishing position, so the per-row tag is the tournament
+  status rather than "2nd" / "QF" / "Group".
+- **The player number** on the ID card is derived from the tail of the player `_id`
+  (`KRIA·<last 4>`). There is no player-number field server-side; add one and this becomes real.
+- **`profile/_layout.tsx`** no longer shows the native header — every screen in that stack draws
+  the canvas `.hdr` itself, so it was rendering two headers.
 
 ## Three real bugs the design surfaced
 

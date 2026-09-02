@@ -11,7 +11,7 @@ import { Icon, type IconName } from '@/components/icons';
 
 /** Low-opacity oversized display type. RN has no text stroke, so this is
  *  .ghostfill from the canvas, not .ghost. */
-export function Ghost({ text, size, style }: { text: string; size: number; style?: ViewStyle }) {
+export function Ghost({ text, size, color, style }: { text: string; size: number; color?: string; style?: ViewStyle }) {
   return (
     <Text
       style={[
@@ -22,7 +22,7 @@ export function Ghost({ text, size, style }: { text: string; size: number; style
           textTransform: 'uppercase',
           fontSize: size,
           lineHeight: size * 0.78,
-          color: 'rgba(255,255,255,0.045)',
+          color: color ?? 'rgba(255,255,255,0.045)',
         },
         style as any,
       ]}

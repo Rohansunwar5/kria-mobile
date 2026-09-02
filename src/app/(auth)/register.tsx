@@ -1,91 +1,141 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ImageBackground, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { useRouter, Link } from 'expo-router';
+import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { registerUser, clearError } from '@/store/slices/authSlice';
 import { AuthInput } from '@/components/auth/AuthInput';
-import { CloseButton } from '@/components/auth/CloseButton';
-import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
+import { Btn, Hazard, IconBtn } from '@/components/canvas';
+import { Ghost } from '@/components/states';
+import { Icon } from '@/components/icons';
 
-const HERO = 'https://images.unsplash.com/photo-1613918431703-aa50889e3be9?auto=format&fit=crop&w=900&q=80';
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Register() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { isLoading, error, registrationStep } = useAppSelector((s) => s.auth);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  // Onboarding captures the name on its own screen; arriving straight from
+  // login it is blank, so the field is always shown rather than branched.
+  const onboardingName = useAppSelector((s) => s.onboarding.fullName);
+  const [fullName, setFullName] = useState(onboardingName || '');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     if (registrationStep === 2) router.replace('/(auth)/verify-otp');
   }, [registrationStep, router]);
 
+  const [firstName, ...restName] = fullName.trim().split(/\s+/);
+  const lastName = restName.join(' ');
+  const emailOk = EMAIL.test(email);
+  const ready = !!firstName && !!lastName && emailOk && phone.replace(/\D/g, '').length >= 10 && agreed;
+
+  const submit = () =>
+    dispatch(registerUser({ data: { firstName, lastName, email, phone: phone.replace(/\s/g, '') } }));
+
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-ink">
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={{ height: 280 }} className="w-full justify-between">
-          <ImageBackground source={{ uri: HERO }} className="absolute inset-0" style={{ backgroundColor: '#111111' }} />
-          <LinearGradient
-            colors={['rgba(17,17,17,0.55)', 'rgba(17,17,17,0.1)', 'rgba(17,17,17,0.85)', '#111111']}
-            locations={[0, 0.4, 0.82, 1]}
-            style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-          />
-          <SafeAreaView edges={['top']} className="px-6">
-            <View className="mt-4 flex-row items-center justify-between">
-              <Text className="font-oswald text-3xl uppercase tracking-wide text-brand">Kria</Text>
-              <CloseButton />
-            </View>
-          </SafeAreaView>
-          <View className="px-6 pb-2">
-            <Text className="font-oswald uppercase text-white" style={{ fontSize: 44, lineHeight: 48, paddingTop: 4 }}>Join the{'\n'}league.</Text>
-            <Text className="mt-2 font-montserrat text-sm text-gray-300">Create your player account.</Text>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>
+        <IconBtn icon="chevron-left" label="Go back" onPress={() => router.back()} />
+        <View style={{ flex: 1 }} />
+        <Pressable accessibilityRole="button" onPress={() => router.replace('/(auth)/login')} hitSlop={10}>
+          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, color: '#7d7d7d' }}>
+            HAVE AN ACCOUNT? <Text style={{ color: '#F97316' }}>SIGN IN</Text>
+          </Text>
+        </Pressable>
+      </View>
+
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Ghost text="Join" size={210} style={{ right: -42, bottom: 130 }} />
+
+          <View style={{ height: 5, width: 56, marginBottom: 16, overflow: 'hidden' }}>
+            <Hazard />
           </View>
-        </View>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 42, lineHeight: 37, color: '#fff' }}>
+            Create your{'\n'}account
+          </Text>
+          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
+            We send a 6-digit code to verify it. No password yet — you set that next.
+          </Text>
 
-        <View className="px-6 pt-7">
-          <View className="flex-row gap-3">
-            <View className="flex-1">
-              <AuthInput label="First name" value={firstName} onChangeText={setFirstName} />
-            </View>
-            <View className="flex-1">
-              <AuthInput label="Last name" value={lastName} onChangeText={setLastName} />
-            </View>
+          <View style={{ paddingTop: 26 }}>
+            <AuthInput label="Full name" icon="person" placeholder="Your name" value={fullName} onChangeText={setFullName} />
+
+            <AuthInput
+              label="Email"
+              icon="mail"
+              placeholder="you@email.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
+              right={emailOk ? <Icon name="check" size={16} color="#16C46A" strokeWidth={2.8} /> : undefined}
+            />
+            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#7d7d7d', marginTop: -10, marginBottom: 14 }}>
+              THIS IS WHERE RECEIPTS AND MATCH ALERTS GO
+            </Text>
+
+            <AuthInput
+              label="Phone"
+              placeholder="98450 12345"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+              icon="phone"
+            />
+
+            {/* Consent, not a pre-ticked trap. */}
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: agreed }}
+              accessibilityLabel="Agree to the terms and privacy policy"
+              onPress={() => setAgreed((a) => !a)}
+              hitSlop={8}
+              style={{ flexDirection: 'row', gap: 11, alignItems: 'flex-start', minHeight: 44 }}
+            >
+              <View
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 3,
+                  marginTop: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: agreed ? '#F97316' : 'transparent',
+                  ...(agreed ? null : { borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.22)' }),
+                }}
+              >
+                {agreed ? <Icon name="check" size={13} color="#0B0B0B" strokeWidth={3.4} /> : null}
+              </View>
+              <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 11, lineHeight: 16, color: '#737373' }}>
+                I agree to the <Text style={{ color: '#F97316' }}>terms</Text> and{' '}
+                <Text style={{ color: '#F97316' }}>privacy policy</Text>. Organizers of tournaments you enter can see your
+                name, city and record.
+              </Text>
+            </Pressable>
+
+            {error ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 }}>
+                <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
+                <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+                  {error}
+                </Text>
+              </View>
+            ) : null}
           </View>
-          <AuthInput
-            label="Email"
-            placeholder="you@email.com"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
-          />
-          <AuthInput label="Phone number" placeholder="Your number" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-          {error ? (
-            <Text className="mb-3 font-montserrat text-sm text-red-400">{error}</Text>
-          ) : null}
-
-          <OnboardingButton
-            label="Continue"
-            loading={isLoading}
-            onPress={() => dispatch(registerUser({ data: { firstName, lastName, email, phone } }))}
-          />
-
-          <View className="mt-8 items-center border-t border-white/10 pt-5">
-            <Link href="/(auth)/login" className="font-montserrat text-sm text-[#aaa]">
-              Already have an account? <Text className="font-medium text-white">Log in</Text>
-            </Link>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 26 }}>
+        <Btn label="Send me a code" arrow busy={isLoading} disabled={!ready} onPress={submit} />
+      </View>
+    </SafeAreaView>
   );
 }

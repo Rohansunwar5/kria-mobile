@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Switch, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
-import { Icon } from '@/components/icons';
+import { Icon, type IconName } from '@/components/icons';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { ErrorBlock } from '@/components/states';
 import { useAppSelector } from '@/store/hooks';
-import { changePassword, sendContactMessage, registerFcmToken, unregisterFcmToken } from '@/api/settings';
+import { sendContactMessage, registerFcmToken, unregisterFcmToken } from '@/api/settings';
 import { getPushToken } from '@/lib/pushToken';
 
 const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
@@ -19,6 +19,38 @@ function Section({ title, children }: { title: string; children: React.ReactNode
         {children}
       </View>
     </View>
+  );
+}
+
+function Row({
+  icon,
+  title,
+  detail,
+  onPress,
+}: {
+  icon: IconName;
+  title: string;
+  detail?: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={onPress}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 13, paddingVertical: 11, minHeight: 52 }}
+    >
+      <Icon name={icon} size={17} color="#F97316" strokeWidth={1.9} />
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 13, color: '#fff' }}>{title}</Text>
+        {detail ? (
+          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+            {detail}
+          </Text>
+        ) : null}
+      </View>
+      <Icon name="chevron-right" size={15} color="#7d7d7d" strokeWidth={2.6} />
+    </Pressable>
   );
 }
 
@@ -58,36 +90,12 @@ export default function Settings() {
   const router = useRouter();
   const user = useAppSelector((s) => s.auth.user);
 
-  const [current, setCurrent] = useState('');
-  const [next, setNext] = useState('');
-  const [pwBusy, setPwBusy] = useState(false);
-  const [pwNote, setPwNote] = useState<{ text: string; tone: 'ok' | 'bad' } | null>(null);
-
   const [push, setPush] = useState(true);
   const [pushNote, setPushNote] = useState<string | null>(null);
 
   const [message, setMessage] = useState('');
   const [msgBusy, setMsgBusy] = useState(false);
   const [msgNote, setMsgNote] = useState<{ text: string; tone: 'ok' | 'bad' } | null>(null);
-
-  const submitPassword = async () => {
-    setPwNote(null);
-    if (next.length < 6) {
-      setPwNote({ text: 'Pick a new password of at least 6 characters.', tone: 'bad' });
-      return;
-    }
-    setPwBusy(true);
-    try {
-      await changePassword(current, next);
-      setCurrent('');
-      setNext('');
-      setPwNote({ text: 'Password changed.', tone: 'ok' });
-    } catch (e: any) {
-      setPwNote({ text: e.message, tone: 'bad' });
-    } finally {
-      setPwBusy(false);
-    }
-  };
 
   const togglePush = async (on: boolean) => {
     setPush(on);
@@ -171,19 +179,15 @@ export default function Settings() {
             ) : null}
           </Section>
 
-          <Section title="Password">
-            <View style={{ padding: 13 }}>
-              <AuthInput
-                label="Current password"
-                value={current}
-                onChangeText={setCurrent}
-                secureToggle
-                autoCapitalize="none"
-              />
-              <AuthInput label="New password" value={next} onChangeText={setNext} secureToggle autoCapitalize="none" />
-              <Button label="Change password" onPress={submitPassword} busy={pwBusy} disabled={!current || !next} />
-              {pwNote ? <Note text={pwNote.text} tone={pwNote.tone} /> : null}
-            </View>
+          {/* Security lives on its own screen — ChangePassword.dc.html has a
+              strength meter and rule list that will not fit in a settings row. */}
+          <Section title="Security">
+            <Row
+              icon="lock"
+              title="Change password"
+              detail="Other devices are signed out"
+              onPress={() => router.push('/profile/change-password')}
+            />
           </Section>
 
           <Section title="Get help">

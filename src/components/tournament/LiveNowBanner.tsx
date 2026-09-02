@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { getTournamentMatches, LiveMatchSummary } from '@/api/cricketMatch';
 import { LiveMatchCard } from '@/components/cricket/LiveMatchCard';
+import { Lbl } from '@/components/canvas';
 
 export function LiveNowBanner({ tournamentId, sport }: { tournamentId: string; sport?: string }) {
   const [matches, setMatches] = useState<LiveMatchSummary[]>([]);
@@ -28,10 +29,10 @@ export function LiveNowBanner({ tournamentId, sport }: { tournamentId: string; s
   if (!loaded || matches.length === 0) return null;
 
   return (
-    <View className="gap-3 px-4 pt-4">
-      <View className="flex-row items-center gap-2">
-        <View className="h-1.5 w-1.5 rounded-full bg-red-500" />
-        <Text className="font-montserrat text-[10px] font-bold uppercase tracking-widest text-red-400">Live now</Text>
+    <View style={{ gap: 10, paddingHorizontal: 16, paddingTop: 16 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ width: 6, height: 6, borderRadius: 999, backgroundColor: '#F97316' }} />
+        <Lbl style={{ color: '#F97316', letterSpacing: 0.22 * 9 }}>Live now</Lbl>
       </View>
       {matches.map((m) => <LiveMatchCard key={m._id} match={m} />)}
     </View>

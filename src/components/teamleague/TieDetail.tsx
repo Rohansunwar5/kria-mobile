@@ -1,20 +1,35 @@
 import { View, Text, Pressable } from 'react-native';
 import { Tie, SubMatch, Lineup } from '@/api/teamLeague';
 import { tieSubScore, subMatchView } from '@/lib/teamLeagueView';
+import { InitialsAvatar } from '@/components/InitialsAvatar';
+import { Tag } from '@/components/StatusPill';
+import { Lbl } from '@/components/canvas';
+import { Icon } from '@/components/icons';
+
+// TeamLeague.dc.html's tie block: two squad squares either side of a brand VS,
+// then the lineup as one tagged row per rubber.
 
 type Slot = { slotNumber: number; label: string };
 
-function TeamCol({ name, winner, dim }: { name: string; winner: boolean; dim: boolean }) {
+function Block({ children }: { children: React.ReactNode }) {
   return (
-    <View className={`flex-1 items-center justify-center gap-1 px-4 py-6 ${winner ? 'bg-emerald-500/8' : ''}`}>
-      {winner && <Text className="text-base">🏆</Text>}
-      <Text className={`text-center font-oswald text-lg font-bold ${winner ? 'text-emerald-300' : dim ? 'text-white/40' : 'text-white'}`} numberOfLines={2}>{name}</Text>
-      {winner && <Text className="font-montserrat text-[9px] font-bold uppercase tracking-widest text-emerald-500">Winner</Text>}
+    <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden' }}>
+      {children}
     </View>
   );
 }
 
-export function TieDetail({ tie, subMatches, lineups, slots, onBack }: {
+function Divide() {
+  return <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.10)' }} />;
+}
+
+export function TieDetail({
+  tie,
+  subMatches,
+  lineups,
+  slots,
+  onBack,
+}: {
   tie: Tie;
   subMatches: SubMatch[];
   lineups: Lineup[];
@@ -33,94 +48,118 @@ export function TieDetail({ tie, subMatches, lineups, slots, onBack }: {
   const doneCount = subMatches.filter((s) => s.status === 'completed').length;
 
   return (
-    <View className="gap-5">
-      <Pressable onPress={onBack} className="self-start">
-        <Text className="font-montserrat text-sm text-gray-400">‹ Back to ties</Text>
+    <View style={{ gap: 16 }}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Back to ties" onPress={onBack} hitSlop={10} style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 }}>
+        <Icon name="chevron-left" size={13} color="#7d7d7d" strokeWidth={2.4} />
+        <Lbl style={{ letterSpacing: 0.12 * 9 }}>Back to ties</Lbl>
       </Pressable>
 
-      {/* Scoreboard */}
-      <View className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-        <View className="flex-row items-stretch">
-          <TeamCol name={team1Name} winner={tie.winnerId === team1Id} dim={completed} />
-          <View className="min-w-[88px] items-center justify-center border-x border-white/5 px-4 py-6">
-            {showScore ? (
-              <>
-                <View className="flex-row items-baseline gap-2">
-                  <Text className={`font-oswald text-3xl font-black ${tie.winnerId === team1Id ? 'text-emerald-400' : 'text-white/40'}`}>{t1}</Text>
-                  <Text className="text-gray-600">—</Text>
-                  <Text className={`font-oswald text-3xl font-black ${tie.winnerId === team2Id ? 'text-emerald-400' : 'text-white/40'}`}>{t2}</Text>
-                </View>
-                <Text className="mt-1 font-montserrat text-[9px] uppercase tracking-widest text-gray-600">sub-matches</Text>
-              </>
-            ) : completed ? (
-              <Text className="font-montserrat text-[9px] font-bold uppercase tracking-widest text-emerald-400">Completed</Text>
-            ) : (
-              <Text className="font-montserrat text-[9px] font-bold uppercase tracking-widest text-blue-400">In progress</Text>
-            )}
+      <Block>
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12 }}>
+          <View style={{ alignItems: 'center', width: 74 }}>
+            <InitialsAvatar name={team1Name} size={34} color={tie.winnerId === team1Id ? '#F97316' : '#3f3f46'} />
+            <Text numberOfLines={2} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 10, textAlign: 'center', color: tie.winnerId === team1Id ? '#fff' : '#a3a3a3', marginTop: 6 }}>
+              {team1Name}
+            </Text>
           </View>
-          <TeamCol name={team2Name} winner={tie.winnerId === team2Id} dim={completed} />
-        </View>
-      </View>
 
-      {/* Lineups */}
-      {lineups.length > 0 && (
-        <View className="gap-2">
-          <Text className="font-montserrat text-[10px] font-bold uppercase tracking-widest text-gray-500">Lineups</Text>
-          {lineups.map((lu) => (
-            <View key={lu._id} className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <Text className="mb-3 font-montserrat text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                {lu.teamId === team1Id ? team1Name : team2Name}
-              </Text>
-              <View className="gap-1.5">
-                {(lu.assignments || []).map((a) => (
-                  <View key={a.slotNumber} className="flex-row items-center justify-between gap-3 rounded-lg bg-white/5 px-3 py-1.5">
-                    <Text className="font-montserrat text-[10px] text-gray-500">{labelFor(a.slotNumber)}</Text>
-                    <Text className="flex-1 text-right font-montserrat text-sm font-medium text-white" numberOfLines={1}>{a.playerNames?.join(' & ') || 'TBD'}</Text>
-                  </View>
-                ))}
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            {showScore ? (
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, color: tie.winnerId === team1Id ? '#F97316' : '#a3a3a3' }}>{t1}</Text>
+                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 15, color: '#5c5c5c' }}>—</Text>
+                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, color: tie.winnerId === team2Id ? '#F97316' : '#a3a3a3' }}>{t2}</Text>
               </View>
+            ) : (
+              <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, lineHeight: 18, color: '#F97316' }}>VS</Text>
+            )}
+            <Lbl style={{ letterSpacing: 0.1 * 9, marginTop: 5 }}>
+              {showScore ? 'Rubbers won' : completed ? 'Completed' : 'In progress'}
+            </Lbl>
+          </View>
+
+          <View style={{ alignItems: 'center', width: 74 }}>
+            <InitialsAvatar name={team2Name} size={34} color={tie.winnerId === team2Id ? '#F97316' : '#3f3f46'} />
+            <Text numberOfLines={2} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 10, textAlign: 'center', color: tie.winnerId === team2Id ? '#fff' : '#a3a3a3', marginTop: 6 }}>
+              {team2Name}
+            </Text>
+          </View>
+        </View>
+
+        {subMatches.length > 0 ? (
+          <>
+            <Divide />
+            <View style={{ paddingHorizontal: 14, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.03)' }}>
+              <Lbl style={{ letterSpacing: 0.12 * 9 }}>
+                {`${doneCount}/${subMatches.length} rubbers played`}
+              </Lbl>
             </View>
+          </>
+        ) : null}
+      </Block>
+
+      {lineups.length > 0 ? (
+        <View style={{ gap: 8 }}>
+          <Lbl>Lineups</Lbl>
+          {lineups.map((lu) => (
+            <Block key={lu._id}>
+              <View style={{ paddingHorizontal: 13, paddingVertical: 9, backgroundColor: 'rgba(255,255,255,0.04)' }}>
+                <Lbl style={{ letterSpacing: 0.12 * 9 }}>{lu.teamId === team1Id ? team1Name : team2Name}</Lbl>
+              </View>
+              {(lu.assignments || []).map((a) => (
+                <View key={a.slotNumber} style={{ flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 13, paddingVertical: 8, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.06)' }}>
+                  <View style={{ width: 46 }}>
+                    <Tag label={labelFor(a.slotNumber)} variant="up" />
+                  </View>
+                  <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#d4d4d4' }}>
+                    {a.playerNames?.join(' / ') || 'Not submitted yet'}
+                  </Text>
+                </View>
+              ))}
+            </Block>
           ))}
         </View>
-      )}
+      ) : null}
 
-      {/* Sub-matches */}
-      <View className="gap-2">
-        <Text className="font-montserrat text-[10px] font-bold uppercase tracking-widest text-gray-500">
-          Sub-Matches{subMatches.length > 0 ? `  (${doneCount}/${subMatches.length} done)` : ''}
-        </Text>
+      <View style={{ gap: 8 }}>
+        <Lbl>Rubbers</Lbl>
         {subMatches.length === 0 ? (
-          <Text className="py-4 text-center font-montserrat text-sm text-gray-600">No sub-matches yet.</Text>
+          <Block>
+            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'center', paddingVertical: 22 }}>
+              No rubbers yet
+            </Text>
+          </Block>
         ) : (
           subMatches.map((sm) => {
             const v = subMatchView(sm);
-            const label = labelFor(sm.subMatchSlotNumber, sm.slotLabel);
             const p1Name = sm.player1?.name || team1Name;
             const p2Name = sm.player2?.name || team2Name;
             return (
-              <View key={sm._id} className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                <View className="flex-row items-center justify-between border-b border-white/5 bg-black/20 px-4 py-1.5">
-                  <Text className="font-montserrat text-[10px] text-gray-500">{label}</Text>
-                  <Text className={`font-montserrat text-[9px] font-bold uppercase tracking-wider ${v.done ? 'text-emerald-400' : 'text-gray-600'}`}>{v.done ? 'Done' : 'Upcoming'}</Text>
+              <Block key={sm._id}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 13, paddingVertical: 7, backgroundColor: 'rgba(255,255,255,0.04)' }}>
+                  <Lbl style={{ letterSpacing: 0.12 * 9 }}>{labelFor(sm.subMatchSlotNumber, sm.slotLabel)}</Lbl>
+                  <Tag label={v.done ? 'Done' : 'Upcoming'} variant={v.done ? 'open' : 'end'} />
                 </View>
-                <View className="flex-row items-stretch">
-                  <View className={`flex-1 items-end justify-center px-4 py-3 ${v.p1Wins ? 'bg-emerald-500/5' : ''}`}>
-                    <Text className={`text-right font-montserrat text-sm ${v.p1Wins ? 'font-bold text-emerald-300' : v.done ? 'text-white/40' : 'text-white/80'}`} numberOfLines={2}>{p1Name}</Text>
-                  </View>
-                  <View className="min-w-[80px] items-center justify-center border-x border-white/5 px-3 py-2">
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 13, paddingVertical: 10, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.06)' }}>
+                  <Text numberOfLines={2} style={{ flex: 1, textAlign: 'right', paddingRight: 10, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: v.p1Wins ? '#fff' : v.done ? '#7d7d7d' : '#d4d4d4' }}>
+                    {p1Name}
+                  </Text>
+                  <View style={{ minWidth: 62, alignItems: 'center' }}>
                     {v.gameScores.length > 0 ? (
-                      <View className="gap-0.5">
-                        {v.gameScores.map((gs, gi) => <Text key={gi} className="text-center font-montserrat text-xs font-bold text-gray-300">{gs}</Text>)}
-                      </View>
+                      v.gameScores.map((gs, gi) => (
+                        <Text key={gi} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: '#d4d4d4' }}>
+                          {gs}
+                        </Text>
+                      ))
                     ) : (
-                      <Text className="font-montserrat text-[9px] font-bold uppercase tracking-wider text-gray-700">vs</Text>
+                      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 13, color: '#5c5c5c' }}>VS</Text>
                     )}
                   </View>
-                  <View className={`flex-1 items-start justify-center px-4 py-3 ${v.p2Wins ? 'bg-emerald-500/5' : ''}`}>
-                    <Text className={`font-montserrat text-sm ${v.p2Wins ? 'font-bold text-emerald-300' : v.done ? 'text-white/40' : 'text-white/80'}`} numberOfLines={2}>{p2Name}</Text>
-                  </View>
+                  <Text numberOfLines={2} style={{ flex: 1, paddingLeft: 10, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: v.p2Wins ? '#fff' : v.done ? '#7d7d7d' : '#d4d4d4' }}>
+                    {p2Name}
+                  </Text>
                 </View>
-              </View>
+              </Block>
             );
           })
         )}

@@ -1,20 +1,36 @@
 import { useState } from 'react';
-import { View, Text, Pressable, ImageBackground, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginUser, requestLoginOtp, verifyLoginOtp, clearError } from '@/store/slices/authSlice';
 import { AuthInput } from '@/components/auth/AuthInput';
-import { CloseButton } from '@/components/auth/CloseButton';
-import { OnboardingButton } from '@/components/onboarding/OnboardingButton';
+import { Btn, Hairlines, Lbl } from '@/components/canvas';
+import { Ghost } from '@/components/states';
+import { Icon } from '@/components/icons';
 
 type Mode = 'password' | 'otp';
 
-const HERO = 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=900&q=80';
+// The artboard's atmosphere is a radial glow at 78% 6%; RN has no radial
+// gradient, so this is the nearest diagonal linear fade. Everything else —
+// hairlines, the ghost K, the method switch — is drawn as designed.
+function Method({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: on }}
+      onPress={onPress}
+      style={{ flex: 1, paddingVertical: 12, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? '#F97316' : 'transparent' }}
+    >
+      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 13, color: on ? '#0B0B0B' : '#7d7d7d' }}>{label}</Text>
+    </Pressable>
+  );
+}
 
 export default function Login() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { isLoading, error } = useAppSelector((s) => s.auth);
   const [mode, setMode] = useState<Mode>('password');
   const [email, setEmail] = useState('');
@@ -29,93 +45,108 @@ export default function Login() {
   };
   const submitOtp = () => dispatch(verifyLoginOtp({ data: { email, otp } }));
 
-  const ctaLabel = mode === 'password' ? 'Log in' : otpRequested ? 'Verify OTP' : 'Send OTP';
+  const ctaLabel = mode === 'password' ? 'Sign in' : otpRequested ? 'Verify code' : 'Send me a code';
   const onCta = mode === 'password' ? submitPassword : otpRequested ? submitOtp : requestOtp;
+  const canSubmit = mode === 'password' ? !!email && !!password : otpRequested ? otp.length === 6 : !!email;
+
+  const switchMode = (next: Mode) => {
+    setMode(next);
+    setOtpRequested(false);
+    dispatch(clearError());
+  };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-ink">
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Hero: headline lives INSIDE the image over a deep gradient that melts into ink. */}
-        <View style={{ height: 320 }} className="w-full justify-between">
-          <ImageBackground source={{ uri: HERO }} className="absolute inset-0" style={{ backgroundColor: '#111111' }} />
-          <LinearGradient
-            colors={['rgba(17,17,17,0.55)', 'rgba(17,17,17,0.1)', 'rgba(17,17,17,0.85)', '#111111']}
-            locations={[0, 0.4, 0.82, 1]}
-            style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-          />
-          <SafeAreaView edges={['top']} className="px-6">
-            <View className="mt-4 flex-row items-center justify-between">
-              <Text className="font-oswald text-3xl uppercase tracking-wide text-brand">Kria</Text>
-              <CloseButton />
-            </View>
-          </SafeAreaView>
-          <View className="px-6 pb-2">
-            <Text className="font-oswald uppercase text-white" style={{ fontSize: 44, lineHeight: 48, paddingTop: 4 }}>Welcome{'\n'}back.</Text>
-            <Text className="mt-2 font-montserrat text-sm text-gray-300">Pick up where you left off.</Text>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
+      <LinearGradient
+        colors={['rgba(249,115,22,0.16)', 'rgba(11,11,11,0)']}
+        start={{ x: 0.9, y: 0 }}
+        end={{ x: 0.25, y: 0.55 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <Hairlines />
+      <Ghost text="K" size={270} style={{ left: -44, top: 150 }} />
+
+      <View style={{ paddingHorizontal: 20, paddingTop: 16 }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 24, color: '#fff' }}>Kria</Text>
+        <Lbl style={{ color: '#F97316', letterSpacing: 0.3 * 9, marginTop: 4 }}>Player</Lbl>
+      </View>
+
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 44, lineHeight: 38, color: '#fff' }}>
+            Welcome{'\n'}back.
+          </Text>
+
+          <View style={{ flexDirection: 'row', marginTop: 26, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 5, overflow: 'hidden' }}>
+            <Method label="Password" on={mode === 'password'} onPress={() => switchMode('password')} />
+            <View style={{ width: 1.5, backgroundColor: 'rgba(255,255,255,0.14)' }} />
+            <Method label="Email code" on={mode === 'otp'} onPress={() => switchMode('otp')} />
           </View>
-        </View>
 
-        {/* Form */}
-        <View className="px-6 pt-7">
-          <AuthInput
-            label="Email"
-            placeholder="you@email.com"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
-          />
-
-          {mode === 'password' ? (
+          <View style={{ paddingTop: 20 }}>
             <AuthInput
-              label="Password"
-              placeholder="Your password"
-              secureToggle
-              value={password}
-              onChangeText={setPassword}
+              label="Email"
+              icon="mail"
+              placeholder="you@email.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
             />
-          ) : null}
 
-          {mode === 'otp' && otpRequested ? (
-            <AuthInput
-              label="OTP"
-              placeholder="6-digit code"
-              keyboardType="number-pad"
-              value={otp}
-              onChangeText={setOtp}
-            />
-          ) : null}
+            {mode === 'password' ? (
+              <AuthInput
+                label="Password"
+                icon="lock"
+                secureToggle
+                autoCapitalize="none"
+                value={password}
+                onChangeText={(t) => { setPassword(t); dispatch(clearError()); }}
+                labelRight={
+                  <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/forgot-password')} hitSlop={12}>
+                    <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#F97316' }}>FORGOT?</Text>
+                  </Pressable>
+                }
+              />
+            ) : null}
 
-          {error ? (
-            <Text className="mb-3 font-montserrat text-sm text-red-400">{error}</Text>
-          ) : null}
+            {mode === 'otp' && otpRequested ? (
+              <AuthInput
+                label="Code"
+                icon="lock"
+                placeholder="6-digit code"
+                keyboardType="number-pad"
+                maxLength={6}
+                value={otp}
+                onChangeText={(t) => { setOtp(t); dispatch(clearError()); }}
+              />
+            ) : null}
 
-          <OnboardingButton label={ctaLabel} loading={isLoading} onPress={onCta} />
-
-          <Pressable
-            className="mt-5 items-center"
-            onPress={() => {
-              setMode((m) => (m === 'password' ? 'otp' : 'password'));
-              setOtpRequested(false);
-              dispatch(clearError());
-            }}
-            hitSlop={8}
-          >
-            <Text className="font-montserrat text-sm font-medium text-brand">
-              {mode === 'password' ? 'Log in with OTP instead' : 'Use password instead'}
-            </Text>
-          </Pressable>
-
-          <View className="mt-8 flex-row justify-between border-t border-white/10 pt-5">
-            <Link href="/(auth)/forgot-password" className="font-montserrat text-sm text-[#aaa]">Forgot password?</Link>
-            <Link href="/(auth)/register" className="font-montserrat text-sm font-medium text-white">Create account</Link>
+            {/* Failure stays scoped to the form, in the design's mono red. */}
+            {error ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 11 }}>
+                <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
+                <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+                  {error}
+                </Text>
+              </View>
+            ) : null}
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 26 }}>
+        <Btn label={ctaLabel} arrow busy={isLoading} disabled={!canSubmit} onPress={onCta} style={{ marginBottom: 16 }} />
+        <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/register')} hitSlop={10} style={{ alignItems: 'center' }}>
+          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
+            NEW HERE? <Text style={{ color: '#F97316' }}>CREATE AN ACCOUNT</Text>
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }

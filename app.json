@@ -42,6 +42,8 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "extra": {}
+    "extra": {
+      "apiBaseUrl": "http://localhost:4010"
+    }
   }
 }

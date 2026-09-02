@@ -237,6 +237,18 @@ const ICONS: Record<string, IconDef> = {
       'M4.5 4.5 A10.6 10.6 0 0 0 4.5 19.5', 'M19.5 4.5 A10.6 10.6 0 0 1 19.5 19.5',
     ],
   },
+  /** Envelope, lock's partner on the auth screens. */
+  mail: { paths: ['M3 5.5 H21 V18.5 H3 Z', 'M3 5.5 L12 12.5 L21 5.5'] },
+  phone: { paths: ['M7 2.5 H17 V21.5 H7 Z', 'M10.5 19 H13.5'] },
+  /** Camera — the photo affordance on onboarding and edit-profile. */
+  camera: {
+    paths: [
+      'M3.5 7.5 H7.5 L9 5 H15 L16.5 7.5 H20.5 V20.5 H3.5 Z',
+      'M12 10.5 A3.5 3.5 0 1 1 12 17.5 A3.5 3.5 0 0 1 12 10.5 Z',
+    ],
+  },
+  /** Pencil — the badge on the avatar picker. */
+  edit: { paths: ['M4 20 H8.5 L19 9.5 L16 6.5 L5.5 17 Z'] },
 };
 
 export type IconName = keyof typeof ICONS;

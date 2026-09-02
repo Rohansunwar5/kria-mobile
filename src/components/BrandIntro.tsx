@@ -10,10 +10,11 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
+import { Hazard } from '@/components/canvas';
 
 // One-time app-open brand reveal: ink screen, KRIA wordmark scales/fades in,
-// an orange accent bar sweeps across, holds briefly, then the whole overlay
-// fades out and hands off to the app.
+// a hazard bar sweeps across, holds briefly, then the whole overlay fades out
+// and hands off to the app.
 export function BrandIntro({ onDone }: { onDone: () => void }) {
   const logo = useSharedValue(0); // 0 → 1 logo reveal
   const sweep = useSharedValue(0); // 0 → 1 accent bar sweep
@@ -52,15 +53,17 @@ export function BrandIntro({ onDone }: { onDone: () => void }) {
     <Animated.View
       pointerEvents="none"
       style={[
-        { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#111111', alignItems: 'center', justifyContent: 'center' },
+        { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0B0B0B', alignItems: 'center', justifyContent: 'center' },
         overlayStyle,
       ]}
     >
       <Animated.View style={logoStyle}>
-        <Text style={{ fontFamily: 'Oswald_500Medium', fontSize: 64, letterSpacing: 6, color: '#FFFFFF', textTransform: 'uppercase' }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 64, lineHeight: 58, letterSpacing: 0.01 * 64, color: '#FFFFFF', textTransform: 'uppercase' }}>
           Kria
         </Text>
-        <Animated.View style={[{ height: 4, borderRadius: 2, backgroundColor: '#F97316', marginTop: 12, alignSelf: 'center' }, sweepStyle]} />
+        <Animated.View style={[{ height: 5, marginTop: 12, alignSelf: 'center', overflow: 'hidden' }, sweepStyle]}>
+          <Hazard />
+        </Animated.View>
       </Animated.View>
     </Animated.View>
   );

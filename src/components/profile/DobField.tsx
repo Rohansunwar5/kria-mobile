@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Icon } from '@/components/icons';
 
 // Emits an ISO YYYY-MM-DD string; `value` is that same string or ''.
 export function DobField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -17,24 +18,31 @@ export function DobField({ value, onChange }: { value: string; onChange: (v: str
   };
 
   return (
-    <View className="gap-1.5">
-      <Text className="font-montserrat text-xs uppercase tracking-wide text-gray-500">Date of Birth</Text>
+    <View>
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Date of birth"
         onPress={() => setShow(true)}
-        className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3"
+        style={{
+          height: 52,
+          borderRadius: 5,
+          backgroundColor: 'rgba(255,255,255,0.06)',
+          borderWidth: 1.5,
+          borderColor: 'rgba(255,255,255,0.14)',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 9,
+          paddingHorizontal: 13,
+        }}
       >
-        <Text className="font-montserrat text-white">
-          {value ? parseLocal(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Select date'}
+        <Icon name="calendar" size={15} color="#7d7d7d" strokeWidth={2} />
+        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 14, color: value ? '#fff' : '#7d7d7d' }}>
+          {value
+            ? parseLocal(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
+            : 'SELECT'}
         </Text>
       </Pressable>
-      {show && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          maximumDate={new Date()}
-          onChange={handle}
-        />
-      )}
+      {show && <DateTimePicker value={date} mode="date" maximumDate={new Date()} onChange={handle} />}
     </View>
   );
 }

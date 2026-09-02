@@ -3,10 +3,15 @@ import API from './axios';
 export interface Invoice {
   _id: string;
   amount: number;
+  /** created | paid | failed | refunded */
   status: string;
   razorpayOrderId?: string;
   createdAt: string;
-  tournament?: { name: string };
+  tournamentId?: string;
+  categoryId?: string;
+  baseAmount?: number;
+  feeBreakdown?: { razorpayFee: number; platformFee: number; gst: number };
+  tournament?: { name: string; sport?: string };
   category?: { name: string };
 }
 

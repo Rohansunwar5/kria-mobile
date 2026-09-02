@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, View, Text } from 'react-native';
+import { Hairlines, Hazard, Lbl } from '@/components/canvas';
+import { Ghost } from '@/components/states';
 
 interface Props {
   playerName: string;
@@ -22,19 +24,38 @@ export function SoldCelebration({ playerName, teamName, teamColor, soldPrice }: 
   }, [scale, opacity]);
 
   return (
-    <View className="flex-1 items-center justify-center bg-ink px-8">
-      <Animated.View style={{ transform: [{ scale }], opacity }} className="items-center gap-4">
-        <Text className="font-oswald text-xs uppercase tracking-[0.3em] text-gray-500">Sold To</Text>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0B0B0B', paddingHorizontal: 26, overflow: 'hidden' }}>
+      <Hairlines />
+      <Ghost text="Sold" size={230} style={{ left: -30 }} />
+
+      <Animated.View style={{ transform: [{ scale }], opacity, alignItems: 'center' }}>
+        <Lbl style={{ letterSpacing: 0.3 * 9 }}>Sold to</Lbl>
         <Text
-          className="text-center font-oswald text-5xl font-extrabold uppercase"
-          style={{ color: teamColor || '#F97316' }}
+          style={{
+            fontFamily: 'Anton_400Regular',
+            textTransform: 'uppercase',
+            fontSize: 46,
+            lineHeight: 41,
+            textAlign: 'center',
+            marginTop: 12,
+            color: teamColor || '#F97316',
+          }}
         >
           {teamName}
         </Text>
-        <View className="h-1 w-16 rounded-full bg-brand" />
-        <Text className="text-center font-oswald text-2xl font-bold uppercase text-gray-200">{playerName}</Text>
-        <View className="mt-2 rounded-full border-2 border-emerald-400/30 bg-emerald-400/10 px-8 py-3">
-          <Text className="font-oswald text-4xl font-extrabold text-emerald-400">₹{soldPrice.toLocaleString()}</Text>
+
+        <View style={{ height: 5, width: 72, marginVertical: 18, overflow: 'hidden' }}>
+          <Hazard />
+        </View>
+
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 24, lineHeight: 22, color: '#d4d4d4', textAlign: 'center' }}>
+          {playerName}
+        </Text>
+
+        <View style={{ marginTop: 20, backgroundColor: '#F97316', borderRadius: 6, paddingHorizontal: 22, paddingVertical: 12 }}>
+          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 32, color: '#0B0B0B' }}>
+            ₹{soldPrice.toLocaleString('en-IN')}
+          </Text>
         </View>
       </Animated.View>
     </View>

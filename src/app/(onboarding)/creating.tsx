@@ -4,9 +4,11 @@ import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updateProfile, endOnboardingHandoff } from '@/store/slices/authSlice';
+import { updateProfile, uploadPlayerProfileImage, endOnboardingHandoff } from '@/store/slices/authSlice';
 import { setOnboardingComplete } from '@/lib/onboardingStorage';
 import { ProgressStep } from '@/components/onboarding/ProgressStep';
+import { Ghost } from '@/components/states';
+import { Hairlines, Kick } from '@/components/canvas';
 
 const STEPS = ['Profile Created', 'Player Profile Ready', 'Tournament Feed Ready', 'Rankings Enabled'];
 
@@ -42,6 +44,17 @@ export default function Creating() {
       } catch {
         // ignore — onboarding still completes
       }
+      // The photo was picked before the account existed, so this is the first
+      // chance to attach it. Also best-effort.
+      if (onboarding.photoUri) {
+        try {
+          await dispatch(
+            uploadPlayerProfileImage({ uri: onboarding.photoUri, name: 'avatar.jpg', type: 'image/jpeg' })
+          ).unwrap();
+        } catch {
+          // ignore
+        }
+      }
     };
     persist();
     setOnboardingComplete().catch(() => {});
@@ -63,9 +76,14 @@ export default function Creating() {
   }, [dispatch, router]);
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-ink px-6">
-      <View className="flex-1 justify-center">
-        <Text className="mb-10 font-oswald text-4xl uppercase text-white">Setting up your profile</Text>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
+      <Hairlines />
+      <Ghost text="Card" size={200} style={{ right: -34, bottom: 130 }} />
+      <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 24 }}>
+        <Kick style={{ letterSpacing: 0.26 * 9 }}>Almost there</Kick>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 35, color: '#fff', marginTop: 12, marginBottom: 28 }}>
+          Cutting your{'\n'}player card
+        </Text>
         {STEPS.map((label, i) => (
           <ProgressStep key={label} label={label} done={i < done} />
         ))}

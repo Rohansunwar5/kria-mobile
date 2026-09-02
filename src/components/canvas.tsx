@@ -1,4 +1,5 @@
-import { View, Text, Pressable, ViewStyle } from 'react-native';
+import { View, Text, Pressable, ViewStyle, TextStyle } from 'react-native';
+import { Icon, type IconName } from '@/components/icons';
 
 // Texture and control primitives from _head.html that aren't states or tags.
 // The CSS originals are repeating-linear-gradients; RN has no repeating
@@ -61,6 +62,7 @@ export function Chip({
   label,
   selected,
   variant = 'brand',
+  tone,
   onPress,
   icon,
   style,
@@ -69,6 +71,8 @@ export function Chip({
   selected?: boolean;
   /** `auction` is the magenta "you" chip. */
   variant?: 'brand' | 'auction';
+  /** Keyline + label colour when unselected — the artboard's red Retry chip. */
+  tone?: string;
   onPress?: () => void;
   icon?: React.ReactNode;
   style?: ViewStyle;
@@ -77,7 +81,7 @@ export function Chip({
     ? variant === 'auction'
       ? { bg: '#FA4C93', fg: '#240614' }
       : { bg: '#F97316', fg: '#0B0B0B' }
-    : { bg: 'transparent', fg: '#bdbdbd' };
+    : { bg: 'transparent', fg: tone ?? '#bdbdbd' };
 
   const body = (
     <View
@@ -90,7 +94,7 @@ export function Chip({
           paddingVertical: 7,
           borderRadius: 3,
           backgroundColor: on.bg,
-          ...(selected ? null : { borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.16)' }),
+          ...(selected ? null : { borderWidth: 1.5, borderColor: tone ?? 'rgba(255,255,255,0.16)' }),
           ...(onPress ? { minHeight: 44, justifyContent: 'center' } : null), // hit target
         },
         style as any,
@@ -121,5 +125,154 @@ export function Chip({
     >
       {body}
     </Pressable>
+  );
+}
+
+/** `.lbl` — mono 9px caps, the field/section label used on every screen. */
+export function Lbl({ children, style }: { children: React.ReactNode; style?: TextStyle }) {
+  return (
+    <Text style={[{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d' }, style as any]}>
+      {children}
+    </Text>
+  );
+}
+
+/** `.kick` — same shape as `.lbl` but brand-coloured and wider tracked. */
+export function Kick({ children, style }: { children: React.ReactNode; style?: TextStyle }) {
+  return (
+    <Text style={[{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }, style as any]}>
+      {children}
+    </Text>
+  );
+}
+
+/** `.btnx` (primary) and `.btnk` (keyline). Disabled is the artboard's
+ *  translucent-brand state, not a grey box. */
+export function Btn({
+  label,
+  onPress,
+  variant = 'primary',
+  disabled,
+  busy,
+  arrow,
+  height,
+  style,
+}: {
+  label: string;
+  onPress?: () => void;
+  variant?: 'primary' | 'ghost';
+  disabled?: boolean;
+  busy?: boolean;
+  arrow?: boolean;
+  height?: number;
+  style?: ViewStyle;
+}) {
+  const off = !!(disabled || busy);
+  const ghost = variant === 'ghost';
+  const fg = ghost ? '#fff' : off ? 'rgba(11,11,11,0.55)' : '#0B0B0B';
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: off }}
+      disabled={off}
+      onPress={onPress}
+      style={[
+        {
+          height: height ?? 54,
+          borderRadius: 5,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 9,
+          backgroundColor: ghost ? 'transparent' : off ? 'rgba(249,115,22,0.35)' : '#F97316',
+          ...(ghost ? { borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.22)' } : null),
+        },
+        style as any,
+      ]}
+    >
+      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: ghost ? 15 : 17, letterSpacing: 0.04 * 17, color: fg }}>
+        {busy ? 'Working…' : label}
+      </Text>
+      {arrow && !busy ? <Icon name="arrow-right" size={19} color={fg} strokeWidth={2.8} /> : null}
+    </Pressable>
+  );
+}
+
+/** `.iconbtn` — 38px square, 44px hit target via hitSlop. */
+export function IconBtn({
+  icon,
+  onPress,
+  label,
+  size = 19,
+}: {
+  icon: IconName;
+  onPress?: () => void;
+  label: string;
+  size?: number;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      hitSlop={8}
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: 4,
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255,255,255,0.12)',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Icon name={icon} size={size} color="#fff" strokeWidth={2.3} />
+    </Pressable>
+  );
+}
+
+/** `.hdr` — back button, Anton title, optional subtitle and right slot. */
+export function ScreenHeader({
+  title,
+  subtitle,
+  onBack,
+  right,
+  border = true,
+}: {
+  title?: string;
+  subtitle?: string;
+  onBack?: () => void;
+  right?: React.ReactNode;
+  border?: boolean;
+}) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        paddingBottom: 12,
+        ...(border ? { borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' } : null),
+      }}
+    >
+      {onBack ? <IconBtn icon="chevron-left" label="Go back" onPress={onBack} /> : null}
+      <View style={{ flex: 1 }}>
+        {title ? (
+          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: subtitle ? 17 : 18, lineHeight: subtitle ? 16 : 20, color: '#fff' }}>
+            {title}
+          </Text>
+        ) : null}
+        {subtitle ? (
+          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+      {right}
+    </View>
   );
 }
