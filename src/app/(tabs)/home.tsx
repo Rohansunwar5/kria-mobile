@@ -1,30 +1,41 @@
 import { useEffect, useState } from 'react';
-import { View, Text, FlatList, Pressable, Modal, ActivityIndicator, Image } from 'react-native';
+import { View, Text, FlatList, Pressable, Image, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
+import { Icon } from '@/components/icons';
 import { TournamentCard } from '@/components/TournamentCard';
 import { FeaturedTournament } from '@/components/home/FeaturedTournament';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
+import { Tag } from '@/components/StatusPill';
+import { Chip, Hazard } from '@/components/canvas';
+import { Skeleton, EmptyState, ErrorBlock } from '@/components/states';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPublicTournaments } from '@/store/slices/tournamentSlice';
 import { CITIES, SPORTS } from '@/lib/tournamentConstants';
 
+const SPORT_CHIPS = SPORTS.filter((s) => s !== 'All');
+
 export default function Home() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { publicTournaments, isLoading } = useAppSelector((s) => s.tournament);
+  const { publicTournaments, isLoading, error } = useAppSelector((s) => s.tournament);
   const user = useAppSelector((s) => s.auth.user);
   const [sport, setSport] = useState('All');
   const [city, setCity] = useState('All');
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [cityOpen, setCityOpen] = useState(false);
+
+  const load = () =>
+    dispatch(
+      fetchPublicTournaments({
+        limit: 20,
+        sport: sport !== 'All' ? sport : undefined,
+        city: city !== 'All' ? city : undefined,
+      })
+    );
 
   useEffect(() => {
-    dispatch(fetchPublicTournaments({
-      limit: 20,
-      sport: sport !== 'All' ? sport : undefined,
-      city: city !== 'All' ? city : undefined,
-    }));
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, sport, city]);
 
   const visible = publicTournaments.filter((t) => t.status !== 'draft' && t.isActive !== false);
@@ -36,119 +47,152 @@ export default function Home() {
   const rest = featured ? visible.filter((t) => t._id !== featured._id) : visible;
   const filtersActive = sport !== 'All' || city !== 'All';
   const firstName = user?.firstName || 'Player';
+  const stale = isLoading && visible.length > 0;
 
   const open = (id: string) => router.push({ pathname: '/tournament/[id]', params: { id } });
 
-  const Header = (
+  // Masthead renders from cached auth state, so it survives every load and
+  // every error — the whole point of the Patterns sheet.
+  const Masthead = (
     <View>
-      {/* Greeting */}
-      <View className="flex-row items-center justify-between px-5 pb-5 pt-1">
-        <View className="flex-1">
-          <Text className="font-montserrat text-sm text-gray-400">Welcome back,</Text>
-          <Text className="font-oswald uppercase text-white" style={{ fontSize: 28, lineHeight: 32, paddingTop: 2 }}>
-            {firstName}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 2, paddingBottom: 12 }}>
+        <View>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 28, color: '#fff' }}>
+            Kria
+          </Text>
+          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.26 * 9, textTransform: 'uppercase', color: '#F97316', marginTop: 3 }}>
+            Player
           </Text>
         </View>
-        <Pressable onPress={() => router.push('/(tabs)/profile')} accessibilityLabel="Profile">
-          <View className="h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-brand bg-black">
-            {user?.profileImage ? (
-              <Image source={{ uri: user.profileImage }} className="h-full w-full" />
-            ) : (
-              <InitialsAvatar name={firstName} size={40} />
-            )}
-          </View>
+        <View style={{ flex: 1 }} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Profile"
+          onPress={() => router.push('/(tabs)/profile')}
+          hitSlop={6}
+        >
+          {user?.profileImage ? (
+            <Image source={{ uri: user.profileImage }} style={{ width: 38, height: 38, borderRadius: 4 }} />
+          ) : (
+            <InitialsAvatar name={firstName} size={38} />
+          )}
         </Pressable>
       </View>
+      <Hazard />
+    </View>
+  );
 
-      {/* Featured hero */}
+  const Header = (
+    <View>
       {featured ? (
-        <View className="px-5">
-          <View className="mb-2 flex-row items-center gap-2">
-            <Ionicons name="flame" size={15} color="#F97316" />
-            <Text className="font-oswald text-xs uppercase tracking-[3px] text-brand">Featured</Text>
+        <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 9 }}>
+            {featured.status === 'ongoing' ? <Tag label="Live now" variant="live" dot /> : null}
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+              {featured.sport?.replace('_', ' ')}
+            </Text>
           </View>
           <FeaturedTournament tournament={featured} onPress={() => open(featured._id)} />
         </View>
       ) : null}
 
-      {/* Section header + filter */}
-      <View className="flex-row items-center justify-between px-5 pb-3 pt-6">
-        <Text className="font-oswald text-xl uppercase text-white">Browse tournaments</Text>
-        <Pressable
-          onPress={() => setFilterOpen(true)}
-          className={`flex-row items-center gap-1.5 rounded-full border px-3.5 py-2 ${filtersActive ? 'border-brand bg-brand/15' : 'border-white/15'}`}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 16, paddingTop: 18 }}>
+        {SPORT_CHIPS.map((s) => (
+          <Chip key={s} label={s} selected={sport === s} onPress={() => setSport(sport === s ? 'All' : s)} />
+        ))}
+        <View style={{ flex: 1 }} />
+        <Chip
+          label={city === 'All' ? 'City' : city.slice(0, 3)}
+          selected={city !== 'All'}
+          onPress={() => setCityOpen((o) => !o)}
+          icon={<Icon name="filter" size={12} color={city !== 'All' ? '#0B0B0B' : '#bdbdbd'} />}
+        />
+      </View>
+
+      {cityOpen ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 7, paddingHorizontal: 16, paddingTop: 10 }}
         >
-          <Ionicons name="options-outline" size={15} color={filtersActive ? '#F97316' : '#fff'} />
-          <Text className={`font-montserrat text-xs ${filtersActive ? 'text-brand' : 'text-white'}`}>
-            {filtersActive ? `${city} · ${sport}` : 'Filter'}
-          </Text>
-        </Pressable>
+          {CITIES.map((c) => (
+            <Chip
+              key={c}
+              label={c}
+              selected={city === c}
+              onPress={() => {
+                setCity(c);
+                setCityOpen(false);
+              }}
+            />
+          ))}
+        </ScrollView>
+      ) : null}
+
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10 }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 20, color: '#fff' }}>
+          Open for entry
+        </Text>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: '#F97316' }}>
+          {String(rest.length).padStart(2, '0')}
+        </Text>
       </View>
     </View>
   );
 
+  // First load with nothing cached: skeleton shapes matching the real card
+  // geometry, under a masthead that never blanks.
+  if (isLoading && visible.length === 0) {
+    return (
+      <Screen>
+        {Masthead}
+        <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
+          <Skeleton h={10} w={88} line style={{ marginBottom: 10 }} />
+          <Skeleton h={222} />
+          <Skeleton h={13} w={150} line style={{ marginTop: 16, marginBottom: 10 }} />
+          <Skeleton h={148} />
+        </View>
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
-      {isLoading ? (
-        <View className="flex-1 items-center justify-center"><ActivityIndicator color="#F97316" size="large" /></View>
+      {Masthead}
+      {error && visible.length === 0 ? (
+        <View style={{ padding: 16 }}>
+          <ErrorBlock
+            label="Events unavailable"
+            message="The tournament list did not load. Your profile and past entries still work."
+            onRetry={load}
+          />
+        </View>
       ) : (
         <FlatList
           data={rest}
           keyExtractor={(t) => t._id}
           ListHeaderComponent={Header}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 110 }}
-          renderItem={({ item }) => <TournamentCard tournament={item} onPress={() => open(item._id)} />}
+          style={stale ? { opacity: 0.5 } : undefined}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 110 }}
+          renderItem={({ item, index }) => (
+            <TournamentCard tournament={item} index={index + 1} onPress={() => open(item._id)} />
+          )}
           ListEmptyComponent={
-            <View className="mt-16 items-center px-8">
-              <Ionicons name="trophy-outline" size={48} color="#3a3a3a" />
-              <Text className="mt-4 text-center font-oswald text-lg uppercase text-white">No tournaments yet</Text>
-              <Text className="mt-1 text-center font-montserrat text-sm text-gray-500">
-                {filtersActive ? 'Try clearing your filters.' : 'Check back soon for new tournaments.'}
-              </Text>
-              {filtersActive ? (
-                <Pressable onPress={() => { setSport('All'); setCity('All'); }} className="mt-4 rounded-full bg-brand px-5 py-2.5">
-                  <Text className="font-montserrat text-sm font-semibold text-white">Clear filters</Text>
-                </Pressable>
-              ) : null}
-            </View>
+            <EmptyState
+              ghost="0"
+              icon="trophy"
+              title={filtersActive ? 'Nothing matches' : 'No events yet'}
+              message={
+                filtersActive
+                  ? 'No tournaments match this sport and city. Clear the filters to see everything that is open.'
+                  : 'New tournaments land here as organisers open entry. Check back soon.'
+              }
+              cta={filtersActive ? 'Clear filters' : undefined}
+              onCta={filtersActive ? () => { setSport('All'); setCity('All'); } : undefined}
+            />
           }
         />
       )}
-
-      <Modal visible={filterOpen} transparent animationType="slide" onRequestClose={() => setFilterOpen(false)}>
-        <Pressable className="flex-1 justify-end bg-black/60" onPress={() => setFilterOpen(false)}>
-          <Pressable className="rounded-t-3xl border-t border-white/10 bg-ink p-6" onPress={(e) => e.stopPropagation()}>
-            <View className="mb-5 flex-row items-center justify-between">
-              <Text className="font-oswald text-2xl uppercase text-white">Filters</Text>
-              <Pressable onPress={() => setFilterOpen(false)} hitSlop={10}>
-                <Ionicons name="close" size={24} color="#888" />
-              </Pressable>
-            </View>
-
-            <Text className="mb-2 font-montserrat text-xs uppercase tracking-widest text-gray-400">Where</Text>
-            <View className="mb-6 flex-row flex-wrap gap-2">
-              {CITIES.map((c) => (
-                <Pressable key={c} onPress={() => setCity(c)} className={`rounded-full border px-4 py-2 ${city === c ? 'border-brand bg-brand' : 'border-white/15'}`}>
-                  <Text className={`font-montserrat text-sm ${city === c ? 'text-white' : 'text-gray-300'}`}>{c}</Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <Text className="mb-2 font-montserrat text-xs uppercase tracking-widest text-gray-400">Sport</Text>
-            <View className="mb-8 flex-row flex-wrap gap-2">
-              {SPORTS.map((s) => (
-                <Pressable key={s} onPress={() => setSport(s)} className={`rounded-full border px-4 py-2 ${sport === s ? 'border-brand bg-brand' : 'border-white/15'}`}>
-                  <Text className={`font-montserrat text-sm capitalize ${sport === s ? 'text-white' : 'text-gray-300'}`}>{s}</Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <Pressable onPress={() => setFilterOpen(false)} className="items-center rounded-xl bg-brand py-3.5">
-              <Text className="font-montserrat font-semibold text-white">Show results</Text>
-            </Pressable>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </Screen>
   );
 }

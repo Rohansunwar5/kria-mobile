@@ -20,7 +20,7 @@ export default function History() {
       {historyLoading && tournamentHistory.length === 0 ? (
         <View className="flex-1 items-center justify-center"><ActivityIndicator color="#F97316" /></View>
       ) : tournamentHistory.length === 0 ? (
-        <View className="p-5"><EmptyState ghost="0" icon="time-outline" title="No history yet" message="Tournaments you have played land here with your results and awards." cta="Browse events" onCta={() => router.push('/(tabs)/home')} /></View>
+        <View className="p-5"><EmptyState ghost="0" icon="clock" title="No history yet" message="Tournaments you have played land here with your results and awards." cta="Browse events" onCta={() => router.push('/(tabs)/home')} /></View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
           {tournamentHistory.map((entry) => <HistoryCard key={entry._id} entry={entry} />)}

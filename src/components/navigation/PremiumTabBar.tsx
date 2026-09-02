@@ -1,13 +1,11 @@
 import { View, Pressable, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon, type IconName } from '@/components/icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-type IoniconName = keyof typeof Ionicons.glyphMap;
-
-const ICONS: Record<string, { active: IoniconName; inactive: IoniconName; label: string }> = {
-  home: { active: 'trophy', inactive: 'trophy-outline', label: 'Events' },
-  profile: { active: 'person', inactive: 'person-outline', label: 'Me' },
+const ICONS: Record<string, { icon: IconName; label: string }> = {
+  home: { icon: 'trophy', label: 'Events' },
+  profile: { icon: 'person', label: 'Me' },
 };
 
 const INACTIVE = 'rgba(11,11,11,0.62)';
@@ -65,11 +63,7 @@ export function PremiumTabBar({ state, navigation }: BottomTabBarProps) {
               backgroundColor: focused ? '#0B0B0B' : 'transparent',
             }}
           >
-            <Ionicons
-              name={focused ? meta.active : meta.inactive}
-              size={17}
-              color={focused ? '#FFFFFF' : INACTIVE}
-            />
+            <Icon name={meta.icon} size={17} color={focused ? '#FFFFFF' : INACTIVE} filled={focused} />
             <Text
               style={{
                 fontFamily: 'Anton_400Regular',

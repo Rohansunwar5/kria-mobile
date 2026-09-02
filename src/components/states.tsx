@@ -2,13 +2,12 @@ import { useEffect } from 'react';
 import { View, Text, Pressable, ViewStyle } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon, type IconName } from '@/components/icons';
 
 // The four patterns from Patterns.dc.html. Every screen used to do
 // `if (loading) return <ActivityIndicator />`, which blanks header, hero and
 // nav then snaps back. These keep the chrome in place so nothing jumps.
 
-type IoniconName = keyof typeof Ionicons.glyphMap;
 
 /** Low-opacity oversized display type. RN has no text stroke, so this is
  *  .ghostfill from the canvas, not .ghost. */
@@ -67,14 +66,14 @@ export function EmptyState({
   message,
   cta,
   onCta,
-  icon = 'document-text-outline',
+  icon = 'document',
   ghost,
 }: {
   title: string;
   message: string;
   cta?: string;
   onCta?: () => void;
-  icon?: IoniconName;
+  icon?: IconName;
   ghost?: string;
 }) {
   return (
@@ -92,7 +91,7 @@ export function EmptyState({
           justifyContent: 'center',
         }}
       >
-        <Ionicons name={icon} size={26} color="#5c5c5c" />
+        <Icon name={icon} size={26} color="#5c5c5c" strokeWidth={1.9} />
       </View>
       <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 23, color: '#fff', marginTop: 14 }}>
         {title}
@@ -160,7 +159,7 @@ export function ErrorBlock({
               borderColor: '#FF4438',
             }}
           >
-            <Ionicons name="refresh" size={12} color="#FF4438" />
+            <Icon name="refresh" size={12} color="#FF4438" strokeWidth={2.4} />
             <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#FF4438' }}>
               Retry
             </Text>

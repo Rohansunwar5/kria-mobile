@@ -1,56 +1,96 @@
-import { View, Text, Pressable, ImageBackground } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, Pressable } from 'react-native';
 import type { Tournament } from '@/store/slices/tournamentSlice';
-import { StatusPill } from '@/components/StatusPill';
+import { Icon } from '@/components/icons';
+import { Hairlines } from '@/components/canvas';
+import { Ghost } from '@/components/states';
 import { formatShortDate } from '@/lib/format';
 
-const FALLBACK = 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1200&auto=format&fit=crop';
+function initials(name: string) {
+  return name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+}
 
+// The featured block from Main.dc.html: hairline texture, ghost monogram,
+// Anton title, a three-cell data strip, and a solid orange CTA bar.
 export function FeaturedTournament({ tournament, onPress }: { tournament: Tournament; onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} className="overflow-hidden rounded-3xl border border-white/10">
-      <ImageBackground
-        source={{ uri: tournament.bannerImage || FALLBACK }}
-        style={{ height: 230, backgroundColor: '#161616' }}
-        resizeMode="cover"
-      >
-        <LinearGradient
-          colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.1)', 'rgba(17,17,17,0.95)']}
-          locations={[0, 0.45, 1]}
-          style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-        />
-        <View className="flex-1 justify-between p-4">
-          <View className="flex-row items-start justify-between">
-            <StatusPill status={tournament.status} />
-            <View className="rounded-full border border-white/10 bg-black/50 px-2.5 py-1">
-              <Text className="font-montserrat text-[10px] font-bold uppercase text-white/80">
-                {tournament.sport?.replace('_', ' ')}
-              </Text>
-            </View>
-          </View>
+  const live = tournament.status === 'ongoing';
+  const cells = [
+    { label: 'Players', value: String(tournament.registeredPlayersCount ?? 0), big: true },
+    { label: 'Teams', value: `${tournament.teamsCount ?? 0}/${tournament.settings?.maxTeams || '∞'}`, big: true },
+    {
+      label: 'Dates',
+      value: `${formatShortDate(tournament.startDate)}–${formatShortDate(tournament.endDate)}`,
+      big: false,
+    },
+  ];
 
-          <View>
-            <Text numberOfLines={2} className="font-oswald uppercase text-white" style={{ fontSize: 26, lineHeight: 28, paddingTop: 2 }}>
-              {tournament.name}
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        backgroundColor: '#151515',
+        borderWidth: 1.5,
+        borderColor: live ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.14)',
+        borderRadius: 6,
+        overflow: 'hidden',
+      }}
+    >
+      <Hairlines />
+      <Ghost text={initials(tournament.name)} size={96} style={{ right: -8, bottom: -16 }} />
+
+      <View style={{ paddingHorizontal: 16, paddingTop: 15 }}>
+        <Text
+          numberOfLines={2}
+          style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 34, lineHeight: 31, color: '#fff' }}
+        >
+          {tournament.name}
+        </Text>
+        <Text
+          numberOfLines={1}
+          style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 10 }}
+        >
+          {[tournament.venue?.name, tournament.venue?.city].filter(Boolean).join(' · ') || 'Venue TBD'}
+        </Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', marginTop: 14, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)' }}>
+        {cells.map((c, i) => (
+          <View
+            key={c.label}
+            style={{
+              flex: 1,
+              paddingHorizontal: 12,
+              paddingVertical: 9,
+              ...(i < cells.length - 1 ? { borderRightWidth: 1.5, borderRightColor: 'rgba(255,255,255,0.10)' } : null),
+            }}
+          >
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+              {c.label}
             </Text>
-            <View className="mt-2 flex-row items-center gap-4">
-              <View className="flex-row items-center gap-1.5">
-                <Ionicons name="location-outline" size={14} color="#F97316" />
-                <Text className="font-montserrat text-xs text-gray-200">{tournament.venue?.city || 'TBD'}</Text>
-              </View>
-              <View className="flex-row items-center gap-1.5">
-                <Ionicons name="calendar-outline" size={14} color="#F97316" />
-                <Text className="font-montserrat text-xs text-gray-200">{formatShortDate(tournament.startDate)}</Text>
-              </View>
-              <View className="flex-row items-center gap-1.5">
-                <Ionicons name="people-outline" size={14} color="#F97316" />
-                <Text className="font-montserrat text-xs text-gray-200">{tournament.registeredPlayersCount ?? 0}</Text>
-              </View>
-            </View>
+            <Text
+              numberOfLines={1}
+              style={{ fontFamily: 'SpaceMono_700Bold', fontSize: c.big ? 17 : 13, color: '#fff', marginTop: c.big ? 2 : 4 }}
+            >
+              {c.value}
+            </Text>
           </View>
-        </View>
-      </ImageBackground>
+        ))}
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: '#F97316',
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+        }}
+      >
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, color: '#0B0B0B' }}>
+          {live ? 'Watch the broadcast' : 'View tournament'}
+        </Text>
+        <Icon name="arrow-right" size={19} color="#0B0B0B" strokeWidth={2.6} />
+      </View>
     </Pressable>
   );
 }
