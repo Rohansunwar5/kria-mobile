@@ -18,12 +18,20 @@ export function DrawTab({
   tournamentId,
   categories,
   isLoading,
+  sport,
 }: {
   tournamentId: string;
   categories: Category[];
   isLoading: boolean;
+  /** Cricket has its own charts with seven sort keys; everything else uses the
+   *  points-based standings. */
+  sport?: string;
 }) {
   const router = useRouter();
+  const standingsFor = (categoryId: string) =>
+    sport === 'cricket'
+      ? { pathname: '/cricket/leaderboard/[categoryId]' as const, params: { categoryId } }
+      : { pathname: '/leaderboard/[categoryId]' as const, params: { categoryId } };
 
   if (isLoading && categories.length === 0) {
     return (
@@ -92,7 +100,7 @@ export function DrawTab({
           {/* Standings stand alone: they stay readable after the draw is done. */}
           {disabled ? null : (
             <Pressable
-              onPress={() => router.push({ pathname: '/leaderboard/[categoryId]', params: { categoryId: cat._id } })}
+              onPress={() => router.push(standingsFor(cat._id))}
               accessibilityRole="button"
               accessibilityLabel={`${cat.name} standings`}
               style={{

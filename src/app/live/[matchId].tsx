@@ -188,7 +188,7 @@ function CricketView({ matchId }: { matchId: string }) {
         ) : (
           <>
             <AtTheCrease live={live} innings={currentInnings === 1 ? scorecard?.innings1 ?? null : scorecard?.innings2 ?? null} />
-            <RecentOvers innings={currentInnings === 1 ? scorecard?.innings1 ?? null : scorecard?.innings2 ?? null} />
+            <RecentOvers innings={currentInnings === 1 ? scorecard?.innings1 ?? null : scorecard?.innings2 ?? null} matchId={matchId} />
             <ScorecardTabs
               innings1={scorecard?.innings1 ?? null}
               innings2={scorecard?.innings2 ?? null}

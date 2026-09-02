@@ -2,78 +2,92 @@ import { View, Text } from 'react-native';
 import { CricketMatch, LiveState } from '@/api/cricketMatch';
 import { oversDisplay, currentRunRate, requiredRunRate, chaseLine } from '@/lib/cricketView';
 import { Tag } from '@/components/StatusPill';
+import { Hairlines } from '@/components/canvas';
+import { Ghost } from '@/components/states';
+
+const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 export function HeroScore({ match, live, completed }: { match: CricketMatch; live: LiveState | null; completed: boolean }) {
   const maxOvers = match.matchConfig?.maxOvers;
   const team1 = match.teams?.team1Name || 'Team 1';
   const team2 = match.teams?.team2Name || 'Team 2';
-  const winnerName = String(match.winnerId) === String(match.teams?.team1Id) ? team1
-    : String(match.winnerId) === String(match.teams?.team2Id) ? team2 : null;
+  const winnerName =
+    String(match.winnerId) === String(match.teams?.team1Id)
+      ? team1
+      : String(match.winnerId) === String(match.teams?.team2Id)
+        ? team2
+        : null;
 
   const crr = currentRunRate(live);
   const rrr = requiredRunRate(live, maxOvers);
   const chase = chaseLine(live, maxOvers);
 
   return (
-    <View className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-      <View className="flex-row items-center justify-between border-b border-white/5 bg-black/20 px-4 py-2.5">
-        <Text className="flex-1 font-montserrat text-xs font-bold uppercase tracking-widest text-gray-400" numberOfLines={1}>
-          {team1} <Text className="text-brand">vs</Text> {team2}
+    <View
+      style={{
+        backgroundColor: '#151515',
+        borderWidth: 1.5,
+        borderColor: live && !completed ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.14)',
+        borderRadius: 6,
+        overflow: 'hidden',
+      }}
+    >
+      <Hairlines />
+      {live ? <Ghost text={`I${live.currentInnings}`} size={120} style={{ right: -10, bottom: -20 }} /> : null}
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.04)' }}>
+        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#a3a3a3' }}>
+          {team1} v {team2}
         </Text>
-        {completed ? (
-          <View className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1">
-            <Text className="font-oswald text-xs font-bold uppercase tracking-wider text-emerald-400">Full Time</Text>
-          </View>
-        ) : live ? (
-          <Tag label="Live" variant="live" dot />
-        ) : null}
+        {completed ? <Tag label="Full time" variant="open" /> : live ? <Tag label="Live" variant="live" dot /> : null}
       </View>
 
-      <View className="p-5 gap-3">
-        {live ? (
-          <>
-            <View className="flex-row items-end justify-between">
-              <Text className="font-oswald text-6xl font-black leading-none text-white">
-                {live.runs}<Text className="text-brand">/</Text><Text className="text-4xl">{live.wickets}</Text>
-              </Text>
-              <View className="items-end">
-                <Text className="font-montserrat text-xs uppercase tracking-widest text-gray-500">
-                  Innings {live.currentInnings}
-                </Text>
-                <Text className="font-oswald text-lg font-bold text-gray-300">{oversDisplay(live)} ov</Text>
-              </View>
-            </View>
-
-            {chase && (
-              <Text className="font-montserrat text-sm font-semibold text-brand">{chase}</Text>
-            )}
-
-            <View className="flex-row gap-6">
-              <View>
-                <Text className="font-montserrat text-[10px] uppercase tracking-widest text-gray-500">CRR</Text>
-                <Text className="font-oswald text-xl font-bold text-white">{crr.toFixed(2)}</Text>
-              </View>
-              {rrr != null && (
-                <View>
-                  <Text className="font-montserrat text-[10px] uppercase tracking-widest text-gray-500">RRR</Text>
-                  <Text className="font-oswald text-xl font-bold text-white">{rrr.toFixed(2)}</Text>
-                </View>
-              )}
-            </View>
-          </>
-        ) : (
-          <Text className="py-6 text-center font-oswald text-xl font-bold text-gray-500">Match not started</Text>
-        )}
-
-        {completed && (
-          <View className="mt-1 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3">
-            <Text className="font-montserrat text-sm font-bold text-emerald-400">
-              {winnerName ? `${winnerName} won` : 'Match complete'}
-              {match.result?.marginOfVictory ? ` · ${match.result.marginOfVictory}` : ''}
+      {live ? (
+        <View style={{ paddingHorizontal: 16, paddingVertical: 14 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 46, lineHeight: 42, color: '#fff' }}>
+              {live.runs}
+              <Text style={{ color: '#F97316' }}>/</Text>
+              <Text style={{ fontSize: 32 }}>{live.wickets}</Text>
             </Text>
+            <View style={{ alignItems: 'flex-end', paddingBottom: 4 }}>
+              <Text style={LBL}>Overs</Text>
+              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>
+                {oversDisplay(live)}
+                {maxOvers ? <Text style={{ color: '#7d7d7d' }}>/{maxOvers}</Text> : null}
+              </Text>
+            </View>
           </View>
-        )}
-      </View>
+
+          {chase ? <Text style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 13, color: '#F97316', marginTop: 10 }}>{chase}</Text> : null}
+
+          <View style={{ flexDirection: 'row', gap: 24, marginTop: 12 }}>
+            <View>
+              <Text style={LBL}>CRR</Text>
+              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>{crr.toFixed(2)}</Text>
+            </View>
+            {rrr != null ? (
+              <View>
+                <Text style={LBL}>RRR</Text>
+                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#FA4C93', marginTop: 3 }}>{rrr.toFixed(2)}</Text>
+              </View>
+            ) : null}
+          </View>
+        </View>
+      ) : (
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, color: '#7d7d7d', textAlign: 'center', paddingVertical: 26 }}>
+          Not started
+        </Text>
+      )}
+
+      {completed ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 11, backgroundColor: '#16C46A' }}>
+          <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, color: '#06240F' }}>
+            {winnerName ? `${winnerName} won` : 'Match complete'}
+            {match.result?.marginOfVictory ? ` · ${match.result.marginOfVictory}` : ''}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }

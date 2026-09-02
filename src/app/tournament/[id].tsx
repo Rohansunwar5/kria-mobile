@@ -125,7 +125,7 @@ export default function TournamentDetail() {
         ) : null}
 
         {activeTab === 'draw' && id ? (
-          <DrawTab tournamentId={id} categories={categories} isLoading={isRegLoading} />
+          <DrawTab tournamentId={id} categories={categories} isLoading={isRegLoading} sport={tournament.sport} />
         ) : null}
 
         {activeTab === 'teams' ? <TeamsTab myTeam={myTeam} /> : null}
