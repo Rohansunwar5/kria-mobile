@@ -1,22 +1,23 @@
 import Constants from 'expo-constants';
 
-const fromExtra = (Constants.expoConfig?.extra as any)?.apiBaseUrl as
-  | string
-  | undefined;
+// Where the API lives. Resolution order, highest first:
+//
+//   1. EXPO_PUBLIC_API_BASE_URL  — inlined into the bundle at build time.
+//      This is how a production build points at the real API.
+//   2. app.json  expo.extra.apiBaseUrl
+//   3. http://localhost:4010     — the local server.
+//
+// Deliberately does NOT branch on __DEV__. It used to, and `expo start --no-dev`
+// silently flipped the app to production and hit the live API from a local dev
+// server. A build mode should never decide which backend you talk to.
+//
+// ponytail: localhost is the default because that is what local work needs.
+// SHIPPING A RELEASE BUILD REQUIRES SETTING EXPO_PUBLIC_API_BASE_URL, or the
+// app will point at a server that is not there.
 
-// The host Metro/Expo Go is being served from, e.g. "192.168.1.21:8081".
-// On a physical device this is the dev machine's LAN IP, so the backend is
-// reachable at that same host on the API port (localhost would point at the
-// phone itself). Strip the Metro port and use the backend port.
-const devHost = Constants.expoConfig?.hostUri?.split(':')[0];
+const fromEnv = process.env.EXPO_PUBLIC_API_BASE_URL;
+const fromExtra = (Constants.expoConfig?.extra as { apiBaseUrl?: string } | undefined)?.apiBaseUrl;
 
-// Order: explicit app.json extra > Expo dev host > __DEV__ localhost > prod.
-export const API_BASE_URL =
-  fromExtra ||
-  (__DEV__ && devHost
-    ? `http://${devHost}:4010`
-    : __DEV__
-      ? 'http://localhost:4010'
-      : 'https://api.kria.club');
+export const API_BASE_URL = fromEnv || fromExtra || 'http://localhost:4010';
 
 export const SOCKET_URL = API_BASE_URL;

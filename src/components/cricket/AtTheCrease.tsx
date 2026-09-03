@@ -33,7 +33,10 @@ export function AtTheCrease({ live, innings }: { live: LiveState | null; innings
   const striker = batterLine(innings, live.strikerId);
   const nonStriker = batterLine(innings, live.nonStrikerId);
   const bowler = bowlerLine(innings, live.currentBowlerId);
-  const e = live.extras;
+  // The split comes from the scorecard, not `live.extras` — the two disagreed
+  // on screen (live counts wide events, the scorecard counts wide runs), and
+  // the batting card's footer total is derived from the same object as this.
+  const e = innings?.totals.extras;
   if (!striker && !nonStriker && !bowler) return null;
 
   return (
@@ -52,7 +55,7 @@ export function AtTheCrease({ live, innings }: { live: LiveState | null; innings
           <>
             <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} />
             <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', paddingHorizontal: 13, paddingVertical: 9 }}>
-              Extras · wd {e.wides} · nb {e.noBalls} · b {e.byes} · lb {e.legByes}
+              Extras {e.total} · wd {e.wides} · nb {e.noBalls} · b {e.byes} · lb {e.legByes}
             </Text>
           </>
         ) : null}

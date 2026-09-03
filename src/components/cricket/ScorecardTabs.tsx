@@ -3,16 +3,19 @@ import { View, Text } from 'react-native';
 import { InningsScorecard, LiveState } from '@/api/cricketMatch';
 import { dismissalLine } from '@/lib/cricketView';
 import { Chip, Lbl } from '@/components/canvas';
+import { FallOfWickets } from '@/components/cricket/LivePanels';
+import { PartnershipsList } from '@/components/cricket/CricketCharts';
 
 // CricketLive.dc.html's scorecard: a `.blk` with a tinted header row, hairline
 // dividers, mono numerals right-aligned in fixed columns. Innings and section
 // are both chip switches — no underlined web tabs.
 
-type SubTab = 'batting' | 'bowling' | 'fow';
+type SubTab = 'batting' | 'bowling' | 'fow' | 'stands';
 const SUBS: { key: SubTab; label: string }[] = [
   { key: 'batting', label: 'Batting' },
   { key: 'bowling', label: 'Bowling' },
-  { key: 'fow', label: 'FoW' },
+  { key: 'fow', label: 'Wickets' },
+  { key: 'stands', label: 'Stands' },
 ];
 
 const NUM = { fontFamily: 'SpaceMono_400Regular' as const, fontSize: 12, textAlign: 'right' as const };
@@ -123,31 +126,14 @@ function BowlingTable({ innings, live }: { innings: InningsScorecard; live: Live
   );
 }
 
-function FallOfWickets({ innings }: { innings: InningsScorecard }) {
-  if (innings.fallOfWickets.length === 0) {
-    return (
-      <Block>
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'center', paddingVertical: 22 }}>
-          No wickets have fallen
-        </Text>
-      </Block>
-    );
-  }
+/** The wickets and stands tables live in LivePanels/CricketCharts so the live
+ *  panel can use them too; both return null when empty, hence this stand-in. */
+function Nothing({ text }: { text: string }) {
   return (
     <Block>
-      <Head first="Wicket" cols={[{ label: 'Score', w: 56 }, { label: 'Ov', w: 44 }]} />
-      {innings.fallOfWickets.map((w) => (
-        <Row key={w.wicketNumber}>
-          <View style={{ flex: 1, paddingRight: 6 }}>
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#d4d4d4' }}>{w.batterName}</Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.06 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
-              {w.dismissalLine}
-            </Text>
-          </View>
-          <Text style={{ ...NUM_BOLD, width: 56, color: '#fff' }}>{w.score}</Text>
-          <Text style={{ ...NUM, width: 44, color: '#a3a3a3' }}>{w.overs}</Text>
-        </Row>
-      ))}
+      <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'center', paddingVertical: 22 }}>
+        {text}
+      </Text>
     </Block>
   );
 }
@@ -190,7 +176,16 @@ export function ScorecardTabs({
 
       {sub === 'batting' ? <BattingTable innings={innings} live={liveFor} /> : null}
       {sub === 'bowling' ? <BowlingTable innings={innings} live={liveFor} /> : null}
-      {sub === 'fow' ? <FallOfWickets innings={innings} /> : null}
+      {sub === 'fow'
+        ? innings.fallOfWickets.length > 0
+          ? <FallOfWickets innings={innings} />
+          : <Nothing text="No wickets have fallen" />
+        : null}
+      {sub === 'stands'
+        ? (innings.partnerships ?? []).length > 0
+          ? <PartnershipsList innings={innings} />
+          : <Nothing text="No stands recorded yet" />
+        : null}
     </View>
   );
 }

@@ -2,6 +2,10 @@ import API from './axios';
 
 const unwrap = (res: any) => res.data?.data?.data || res.data?.data;
 
+/** `cricketLiveState.matchStatus` — the client used to test only for
+ *  'completed', which left innings breaks looking like a frozen scoreboard. */
+export type MatchStatus = 'awaiting_start' | 'innings1' | 'innings_break' | 'innings2' | 'completed';
+
 export interface LiveState {
   runs: number;
   wickets: number;
@@ -10,16 +14,27 @@ export interface LiveState {
   currentInnings: 1 | 2;
   target?: number;
   battingTeamId?: string;
+  bowlingTeamId?: string;
   strikerId?: string;
   nonStrikerId?: string;
   currentBowlerId?: string;
   extras?: { wides: number; noBalls: number; byes: number; legByes: number };
-  matchStatus?: string;
+  matchStatus?: MatchStatus;
+  /** First-innings score, so a chase can show `167/8 (20.0)` rather than
+   *  reverse-engineering it from `target`. */
+  innings1Summary?: { runs: number; wickets: number; completedOvers: number; ballsInCurrentOver: number };
+  /** The scoreboard has legitimately stopped — say so instead of looking stale. */
+  nextBatsmanNeeded?: boolean;
+  nextBowlerNeeded?: boolean;
+  /** { [registrationId]: { completedOvers, ballsInCurrentOver } } */
+  bowlerStats?: Record<string, { completedOvers?: number; ballsInCurrentOver?: number }>;
 }
 
 export interface Dismissal {
   type: string;
+  bowlerId?: string;
   bowlerName?: string;
+  fielderId?: string;
   fielderName?: string;
 }
 
@@ -51,8 +66,34 @@ export interface FallOfWicket {
   wicketNumber: number;
   score: number;
   overs: string;
+  batterId?: string;
   batterName: string;
   dismissalLine: string;
+  /** The stand that this wicket ended. */
+  partnershipRuns: number;
+  partnershipBalls: number;
+}
+
+/** The pair currently at the crease, straight from the server. */
+export interface PartnershipInfo {
+  strikerId: string;
+  strikerName: string;
+  nonStrikerId: string;
+  nonStrikerName: string;
+  runs: number;
+  balls: number;
+}
+
+/** Every stand in the innings, `unbroken` marking the one still going. */
+export interface PartnershipRecord {
+  wicketNumber: number;
+  batter1Id: string;
+  batter1Name: string;
+  batter2Id: string;
+  batter2Name: string;
+  runs: number;
+  balls: number;
+  unbroken: boolean;
 }
 
 export interface InningsScorecard {
@@ -65,7 +106,9 @@ export interface InningsScorecard {
   battingCard: BatterEntry[];
   bowlingCard: BowlerEntry[];
   oversTimeline: OverSummary[];
+  currentPartnership: PartnershipInfo | null;
   fallOfWickets: FallOfWicket[];
+  partnerships: PartnershipRecord[];
 }
 
 export interface Scorecard {
@@ -73,11 +116,29 @@ export interface Scorecard {
   innings2: InningsScorecard | null;
 }
 
+export interface PlayerSlot { registrationId: string; playerId?: string; name?: string }
+
+export interface TeamLineup {
+  teamId: string;
+  startingXI: PlayerSlot[];
+  reserves: PlayerSlot[];
+  lineupSet: boolean;
+}
+
+export interface CricketSetup {
+  toss?: { winnerTeamId?: string; decision?: 'bat' | 'bowl'; recorded?: boolean };
+  team1Lineup?: TeamLineup;
+  team2Lineup?: TeamLineup;
+  setupComplete?: boolean;
+}
+
 export interface CricketMatch {
   _id: string;
   tournamentId: string;
+  bracketRound?: string;
+  matchNumber?: number;
   teams: { team1Id: string; team2Id: string; team1Name: string; team2Name: string };
-  cricketSetup?: any;
+  cricketSetup?: CricketSetup;
   matchConfig?: { maxOvers?: number };
   status: string;
   winnerId?: string;
@@ -105,6 +166,24 @@ export async function getLiveState(matchId: string): Promise<LiveState | null> {
 export async function getScorecard(matchId: string): Promise<Scorecard> {
   const res = await API.get(`/sports/cricket/match/${matchId}/scorecard`);
   return unwrap(res) || { innings1: null, innings2: null };
+}
+
+/** Team colours and logos for a tournament, keyed by team id. Non-critical —
+ *  an empty map just means the neutral treatment everywhere. */
+export interface TeamBrand { name: string; logo?: string; primaryColor?: string }
+
+export async function getTeamBrands(tournamentId: string): Promise<Record<string, TeamBrand>> {
+  try {
+    const res = await API.get(`/tournaments/${tournamentId}/teams`);
+    const teams = unwrap(res) || [];
+    const map: Record<string, TeamBrand> = {};
+    (teams as any[]).forEach((t) => {
+      map[String(t._id)] = { name: t.name, logo: t.logo, primaryColor: t.primaryColor };
+    });
+    return map;
+  } catch {
+    return {};
+  }
 }
 
 export async function getTournamentMatches(tournamentId: string): Promise<LiveMatchSummary[]> {

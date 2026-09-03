@@ -1,13 +1,28 @@
 import { View, Text } from 'react-native';
-import { CricketMatch, LiveState } from '@/api/cricketMatch';
-import { oversDisplay, currentRunRate, requiredRunRate, chaseLine } from '@/lib/cricketView';
-import { Tag } from '@/components/StatusPill';
+import { CricketMatch, InningsScorecard, LiveState, TeamBrand } from '@/api/cricketMatch';
+import { oversDisplay, currentRunRate, chaseLine } from '@/lib/cricketView';
+import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hairlines } from '@/components/canvas';
 import { Ghost } from '@/components/states';
 
 const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
-export function HeroScore({ match, live, completed }: { match: CricketMatch; live: LiveState | null; completed: boolean }) {
+// The band used to repeat the fixture and the Live tag that the screen header
+// already carries. It now names the side that is batting, which is the one
+// thing the header cannot say.
+export function HeroScore({
+  match,
+  live,
+  innings,
+  completed,
+  brands = {},
+}: {
+  match: CricketMatch;
+  live: LiveState | null;
+  innings: InningsScorecard | null;
+  completed: boolean;
+  brands?: Record<string, TeamBrand>;
+}) {
   const maxOvers = match.matchConfig?.maxOvers;
   const team1 = match.teams?.team1Name || 'Team 1';
   const team2 = match.teams?.team2Name || 'Team 2';
@@ -19,8 +34,10 @@ export function HeroScore({ match, live, completed }: { match: CricketMatch; liv
         : null;
 
   const crr = currentRunRate(live);
-  const rrr = requiredRunRate(live, maxOvers);
   const chase = chaseLine(live, maxOvers);
+  const battingName = innings?.battingTeamName;
+  const bowlingName = innings?.bowlingTeamName;
+  const brand = brands[String(innings?.battingTeamId ?? live?.battingTeamId ?? '')];
 
   return (
     <View
@@ -35,11 +52,23 @@ export function HeroScore({ match, live, completed }: { match: CricketMatch; liv
       <Hairlines />
       {live ? <Ghost text={`I${live.currentInnings}`} size={120} style={{ right: -10, bottom: -20 }} /> : null}
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.04)' }}>
-        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#a3a3a3' }}>
-          {team1} v {team2}
-        </Text>
-        {completed ? <Tag label="Full time" variant="open" /> : live ? <Tag label="Live" variant="live" dot /> : null}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.04)' }}>
+        <InitialsAvatar name={battingName || team1} size={22} color={brand?.primaryColor || '#3f3f46'} />
+        <View style={{ flex: 1 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 14, color: '#fff' }}>
+            {battingName ? `${battingName} batting` : `${team1} v ${team2}`}
+          </Text>
+          {bowlingName ? (
+            <Text numberOfLines={1} style={{ ...LBL, letterSpacing: 0.1 * 9, marginTop: 3 }}>
+              {`v ${bowlingName}`}
+            </Text>
+          ) : null}
+        </View>
+        {live ? (
+          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>
+            {`INN ${live.currentInnings}`}
+          </Text>
+        ) : null}
       </View>
 
       {live ? (
@@ -66,11 +95,24 @@ export function HeroScore({ match, live, completed }: { match: CricketMatch; liv
               <Text style={LBL}>CRR</Text>
               <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>{crr.toFixed(2)}</Text>
             </View>
-            {rrr != null ? (
-              <View>
-                <Text style={LBL}>RRR</Text>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#FA4C93', marginTop: 3 }}>{rrr.toFixed(2)}</Text>
-              </View>
+            {innings ? (
+              <>
+                <View>
+                  <Text style={LBL}>Extras</Text>
+                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>
+                    {innings.totals.extras.total}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={LBL}>Boundaries</Text>
+                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>
+                    {innings.battingCard.reduce((s, b) => s + b.fours, 0)}
+                    <Text style={{ fontSize: 12, color: '#7d7d7d' }}>x4 </Text>
+                    {innings.battingCard.reduce((s, b) => s + b.sixes, 0)}
+                    <Text style={{ fontSize: 12, color: '#7d7d7d' }}>x6</Text>
+                  </Text>
+                </View>
+              </>
             ) : null}
           </View>
         </View>

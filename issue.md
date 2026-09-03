@@ -1,102 +1,95 @@
 # Open issues
 
-## 1. Cricket live screen repeats its own header — 2026-09-02
+## 1. Cricket live screen repeats its own header — FIXED 2026-09-02
 
-`src/app/live/[matchId].tsx` renders `<Header title={`${team1} v ${team2}`} live />`, and the
-`HeroScore` block directly beneath it renders the *same* `team1 v team2` line with the *same*
-`Live` tag in its own band. On a real match the screen reads:
+`src/app/live/[matchId].tsx` rendered `<Header title={team1 v team2} live />` and `HeroScore`
+repeated the identical line and `Live` tag in its own band directly beneath it — two titles, two
+live tags, ~40px saying nothing.
 
-```
-‹  GOLD COAST TITANS V BLAZING WILLOW            ● LIVE
-   ┌──────────────────────────────────────────────────┐
-   │ GOLD COAST TITANS V BLAZING WILLOW      ● LIVE   │
-   │ 14/0                              OVERS 2.0/12   │
-```
+**Fixed.** The header owns the fixture and the live tag, and gained a subtitle
+(`bracketRound · Match N · 12 ov`). `HeroScore`'s band now names the side that is **batting**
+(`Titans batting` / `v Willow`) with its kit colour and the innings number — the one thing the
+header cannot say. Issue 3 went with it.
 
-Two titles, two live tags, ~40px of vertical space spent saying nothing.
+## 2. The two extras figures on screen disagree — FIXED (client side) 2026-09-02
 
-**Fix.** Pick one owner for the match identity. `CricketLive.dc.html` puts the fixture in the
-header (`Match 12 · Group B · T20` as the subtitle, `● Live` tag on the right) and gives the hero
-band to the *batting side* — `HeroScore`'s band should say who is batting, not repeat the fixture.
-So:
+`At the crease` printed `EXTRAS · WD 1 · NB 0 · B 0 · LB 0` (=1) while the batting card footer
+printed `EXTRAS 2`. They came from different objects: `live.extras` vs
+`innings.totals.extras.total`.
 
-- Header: `title` = `team1 v team2`, `sub` = round/match number (`match.bracketRound`,
-  `match.matchNumber`), keep the `Live` tag. The badminton branch already passes a `sub`; the
-  cricket branch passes none.
-- `HeroScore` band: replace `{team1} v {team2}` with the batting team and the innings —
-  `scorecard.innings{N}.battingTeamName` + `I1`/`I2`. Drop the duplicated `Live` tag; keep
-  `Full time` on completion, since that is state the header does not carry.
-
-## 2. The two extras figures on screen disagree
-
-Same screenshot: `At the crease` prints `EXTRAS · WD 1 · NB 0 · B 0 · LB 0` (total 1) while the
-batting table's footer prints `EXTRAS 2`. Recent balls show one `wd+1`, so 2 looks correct — a
-wide plus a run off it.
-
-The two come from different places: `AtTheCrease` reads `live.extras` (`cricketLiveState.extras`),
-the table reads `innings.totals.extras.total`. Likely `cricketLiveState.extras.wides` counts wide
-*events* and the scorecard total counts wide *runs*. **Server-side question first** — confirm which
-is intended before touching the client. Whatever the answer, one screen must not print two totals
+**Fixed on the client** by making `AtTheCrease` read the split from `innings.totals.extras` — the
+same object the footer total comes from — so the screen can no longer print two different totals
 for the same thing.
 
-## 3. Nobody can tell who is batting
+**Still open server-side:** `cricketLiveState.extras.wides` appears to count wide *events* while
+the scorecard counts wide *runs* (one `wd+1` produced 1 vs 2). Worth confirming which is intended.
+Nothing on the client reads `live.extras` any more, so this is no longer user-visible.
 
-`battingTeamName` and `bowlingTeamName` come down on every innings in the scorecard payload and are
-rendered in exactly one place in the app — `src/app/cricket/[matchId]/balls.tsx:135`. The live
-screen never says which of the two teams the `14/0` belongs to. Folded into issue 1's fix.
+## 3. Nobody can tell who is batting — FIXED 2026-09-02
+
+Folded into issue 1: `battingTeamName` / `bowlingTeamName` now drive the hero band.
 
 ---
 
-# Cricket live: data we already fetch and never show
+# Cricket live: data parity with the web client — DONE 2026-09-02
 
-The live screen calls three endpoints and renders a fraction of what comes back. Nothing below
-needs a new endpoint or a new socket event.
+`client/src/sports/cricket/pages/public/CricketLiveScoreboard.tsx` (1936 lines) was rendering far
+more of the same payload than mobile was. Mobile now shows all of it, in the design-canvas
+language rather than the web app's blue/gold stadium theme.
 
-## Already in the client's types, unrendered on this screen
+## Types that were missing
 
-| Field | What it gives us |
+`src/api/cricketMatch.ts` now declares what the server actually returns:
+
+- `InningsScorecard.currentPartnership` (`PartnershipInfo`) and `.partnerships`
+  (`PartnershipRecord[]`) — neither existed.
+- `FallOfWicket.batterId`, `.partnershipRuns`, `.partnershipBalls`.
+- `Dismissal.bowlerId`, `.fielderId`.
+- `LiveState.bowlingTeamId`, `.innings1Summary`, `.nextBatsmanNeeded`, `.nextBowlerNeeded`,
+  `.bowlerStats`, and `matchStatus` as a proper `MatchStatus` union.
+- `CricketSetup` / `TeamLineup` / `PlayerSlot` — `cricketSetup` was typed `any` and never read.
+- `getTeamBrands(tournamentId)` for team colours off `GET /tournaments/:id/teams`.
+
+## Screen structure
+
+The live screen is now section-chipped rather than one endless scroll — this is the interaction
+the phone needs, where the web client relies on a two-column sticky layout:
+
+| Section | Contents |
 |---|---|
-| `InningsScorecard.battingTeamName` / `bowlingTeamName` | who is batting (issue 3) |
-| `InningsScorecard.oversTimeline` | full per-over `{runs, wickets, balls}`. `recentBalls()` uses the last 3 overs only — the rest is a ready-made over-by-over strip or manhattan |
-| `InningsScorecard.fallOfWickets` | buried in the FoW tab. `Last wicket: 3-42 (7.2)` belongs in the hero, and the **current partnership** is `runs − lastWicket.score` off `(balls since)` |
-| `totals.extras` breakdown | shown as one number in the table footer while `At the crease` shows the split — pick one place |
+| always on | header, toss line, hero (batting side, score, overs, chase, CRR, extras, boundaries), match-state banner |
+| **Live** | at the crease, current partnership, CRR/RRR/balls-left/projection, 1st-innings reference, recent balls (→ ball-by-ball), over-by-over rows |
+| **Scorecard** | innings switch + Batting / Bowling / Wickets / Stands |
+| **Charts** | runs per over (manhattan), worm, ball outcomes |
+| **Squads** | both XIs, reserves, yet-to-bat |
+| **Summary** | result, both innings, top score / best bowling / biggest stand (default section once complete) |
 
-## In the server payload but not even declared in `src/api/cricketMatch.ts`
+Sections only appear when their data exists, so an unstarted match still shows a single clean
+screen.
 
-From `cricketLiveState` (`server/src/models/match.model.ts:82`):
+## New pure logic (all unit-tested in `__tests__/cricketLiveView.test.ts`)
 
-| Field | What it gives us |
-|---|---|
-| `innings1Summary` `{runs, wickets, completedOvers, ballsInCurrentOver}` | the first-innings score during a chase. `chaseLine()` currently reverse-engineers this from `target` alone, so it cannot show `167/8 (20.0)` |
-| `matchStatus: 'innings_break'` | the client only tests for `'completed'`. At the break the screen shows a frozen innings-1 scoreboard with no explanation — this is exactly what `EmptyState`/`StaleBanner` are for |
-| `nextBatsmanNeeded` / `nextBowlerNeeded` | "waiting for the next batter" instead of a scoreboard that has silently stopped moving |
-| `bowlingTeamId` | pairs with `battingTeamId`, which is declared but unused |
-| `bowlerStats` (per-bowler over tracking) | overs remaining per bowler |
+`ballsRemaining`, `projectedScore`, `strikeRate`, `tossLine`, `matchStateNote`, `manhattanBars`,
+`wormSeries`, `runDistribution`, `matchSummary`, `yetToBat` — added to `src/lib/cricketView.ts`.
 
-From `cricketSetup` (`match.model.ts:149`) — typed `cricketSetup?: any` in the client and never
-read:
+## Deliberately not ported
 
-| Field | What it gives us |
-|---|---|
-| `toss.winnerTeamId` + `toss.decision` | "Titans won the toss and chose to bat" — the first thing anyone opening a live match wants |
-| `team1Lineup.startingXI` / `team2Lineup.startingXI` | the XIs, and **yet to bat** = `startingXI` minus everyone in `battingCard` |
-| `reserves`, `lineupSet`, `setupComplete` | whether the match is actually ready |
+- **Broadcast mode** (`BroadcastMode` / `BroadcastHeroSlide` / `MatchSummarySlide`, ~350 lines) — a
+  full-screen auto-advancing TV slideshow for a venue screen. Wrong shape for a phone held in one
+  hand; the phone equivalent is the Summary section.
+- **Wagon wheel** — the web client ships a placeholder that explains itself: the scorer's ball-entry
+  pad does not capture shot direction, so there is no data. Nothing to render until it does.
+- **Team logos** — `getTeamBrands` returns `logo`, but the canvas uses square initials avatars
+  (`InitialsAvatar`) throughout, so only `primaryColor` is used. Wire logos in if the design ever
+  calls for them.
 
-## Derivable from the above, no new data at all
+---
 
-- **Partnership** — current pair's runs and balls, from `fallOfWickets` + live score.
-- **Projected score** — `runs + CRR × overs remaining`.
-- **Balls remaining** — `maxOvers × 6 − legal balls`, already needed for RRR.
-- **Innings boundary count** — sum `fours`/`sixes` across `battingCard`.
-- **Dot-ball count / %** — from `oversTimeline`.
-- **Milestones** — a `50`/`100` tag on a batter, off `battingCard.runs`.
-- **Best figures so far** — top of `bowlingCard` by wickets.
+# Still open
 
-## Suggested order
-
-Toss line and batting-team identity first (cheapest, highest value, kills issue 1 and 3 together),
-then `innings1Summary` into `chaseLine`, then partnership + last wicket in the hero, then the
-`innings_break` / `nextBatsmanNeeded` states, then yet-to-bat, then the over-by-over strip.
-
-Nothing here changes the design language — every item lands in an existing `.blk`, `.lbl` or `.tag`
-from `docs/design-canvas/body-CricketLive.html`.
+- **Extras semantics server-side** — see issue 2 above.
+- **Cricket leaderboard economy sort** — `sortMetric` labels economy "best economy" (lower better),
+  but ordering is the server's. If the API sorts economy descending, the leader chip reads wrong.
+  Needs live cricket data to confirm.
+- **`bowlerStats`** is now typed but unused. It carries per-bowler over tracking, which would let
+  the bowling card show overs remaining per bowler under a spell limit.
