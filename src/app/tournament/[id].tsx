@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { View, ScrollView, Share } from 'react-native';
+import { View, Text, Pressable, Share } from 'react-native';
+import Animated, {
+  runOnJS,
+  useAnimatedReaction,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -14,6 +21,8 @@ import { TeamsTab } from '@/components/tournament/TeamsTab';
 import { InfoTab } from '@/components/tournament/InfoTab';
 import { LiveNowBanner } from '@/components/tournament/LiveNowBanner';
 import { Skeleton, ErrorBlock } from '@/components/states';
+import { Icon } from '@/components/icons';
+import { heroParallax } from '@/lib/motion';
 
 // Eight tabs collapsed to four. Draw absorbs auction + bracket + team league,
 // Info absorbs awards, Players folds into Teams.
@@ -36,6 +45,21 @@ export default function TournamentDetail() {
   const { teams, isLoading: isTeamsLoading } = useAppSelector((s) => s.team);
   const { user } = useAppSelector((s) => s.auth);
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
+
+  // Motion option D: the hero banner travels at 0.45x, the scrim deepens, and a
+  // compact bar takes over the title once the real one has scrolled away.
+  const scrollY = useSharedValue(0);
+  const [pinned, setPinned] = useState(false);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+  useAnimatedReaction(
+    () => scrollY.value > 145,
+    (v, prev) => {
+      if (prev !== null && v !== prev) runOnJS(setPinned)(v);
+    }
+  );
+  const barStyle = useAnimatedStyle(() => ({ opacity: heroParallax(scrollY.value).bar }));
 
   const load = () => {
     if (!id) return;
@@ -94,12 +118,18 @@ export default function TournamentDetail() {
 
   return (
     <Screen>
-      <ScrollView stickyHeaderIndices={[1]} contentContainerStyle={{ paddingBottom: 24 }}>
+      <Animated.ScrollView
+        stickyHeaderIndices={[1]}
+        contentContainerStyle={{ paddingBottom: 24 }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+      >
         {/* Hero + live banner are one child so the sticky tab bar stays at index 1 */}
         <View>
           <TournamentHero
             tournament={tournament}
             categoryCount={categories.length}
+            scrollY={scrollY}
             onBack={() => router.back()}
             onShare={share}
             onAnnouncements={() => router.push({ pathname: '/tournament/[id]/announcements', params: { id } })}
@@ -132,7 +162,38 @@ export default function TournamentDetail() {
         {activeTab === 'teams' ? <TeamsTab myTeam={myTeam} /> : null}
 
         {activeTab === 'info' ? <InfoTab tournament={tournament} awards={tournament.awards || []} /> : null}
-      </ScrollView>
+      </Animated.ScrollView>
+
+      <View
+        pointerEvents={pinned ? 'auto' : 'none'}
+        style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
+      >
+        <Animated.View style={barStyle}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            onPress={() => router.back()}
+            style={{
+              height: 52,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+              paddingHorizontal: 14,
+              backgroundColor: '#0B0B0B',
+              borderBottomWidth: 1.5,
+              borderBottomColor: 'rgba(255,255,255,0.12)',
+            }}
+          >
+            <Icon name="chevron-left" size={17} color="#fff" strokeWidth={2.2} />
+            <Text
+              numberOfLines={1}
+              style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: '#fff', flex: 1 }}
+            >
+              {tournament.name}
+            </Text>
+          </Pressable>
+        </Animated.View>
+      </View>
     </Screen>
   );
 }

@@ -1,8 +1,11 @@
 import { View, Text, Pressable } from 'react-native';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 import { Icon } from '@/components/icons';
 import { Hairlines } from '@/components/canvas';
 import { Ghost } from '@/components/states';
+import { TournamentArt } from '@/components/TournamentArt';
+import { useLandReveal, useRise, usePress } from '@/lib/motion';
 import { formatShortDate } from '@/lib/format';
 
 function initials(name: string) {
@@ -10,9 +13,16 @@ function initials(name: string) {
 }
 
 // The featured block from Main.dc.html: hairline texture, ghost monogram,
-// Anton title, a three-cell data strip, and a solid orange CTA bar.
+// Anton title, a three-cell data strip, and a solid orange CTA bar. The art
+// strip leads with the same land reveal as the list rows.
 export function FeaturedTournament({ tournament, onPress }: { tournament: Tournament; onPress: () => void }) {
   const live = tournament.status === 'ongoing';
+  const { sweep, wipe, rise, riseLate } = useLandReveal(`featured:${tournament._id}`);
+  const riseStyle = useRise(rise);
+  const riseLateStyle = useRise(riseLate);
+  const { press, onPressIn, onPressOut } = usePress();
+  const cardStyle = useAnimatedStyle(() => ({ transform: [{ scale: 1 - press.value * 0.015 }] }));
+
   const cells = [
     { label: 'Players', value: String(tournament.registeredPlayersCount ?? 0), big: true },
     { label: 'Teams', value: `${tournament.teamsCount ?? 0}/${tournament.settings?.maxTeams || '∞'}`, big: true },
@@ -24,73 +34,92 @@ export function FeaturedTournament({ tournament, onPress }: { tournament: Tourna
   ];
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        backgroundColor: '#151515',
-        borderWidth: 1.5,
-        borderColor: live ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.14)',
-        borderRadius: 6,
-        overflow: 'hidden',
-      }}
-    >
-      <Hairlines />
-      <Ghost text={initials(tournament.name)} size={96} style={{ right: -8, bottom: -16 }} />
-
-      <View style={{ paddingHorizontal: 16, paddingTop: 15 }}>
-        <Text
-          numberOfLines={2}
-          style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 34, lineHeight: 31, color: '#fff' }}
-        >
-          {tournament.name}
-        </Text>
-        <Text
-          numberOfLines={1}
-          style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 10 }}
-        >
-          {[tournament.venue?.name, tournament.venue?.city].filter(Boolean).join(' · ') || 'Venue TBD'}
-        </Text>
-      </View>
-
-      <View style={{ flexDirection: 'row', marginTop: 14, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)' }}>
-        {cells.map((c, i) => (
-          <View
-            key={c.label}
-            style={{
-              flex: 1,
-              paddingHorizontal: 12,
-              paddingVertical: 9,
-              ...(i < cells.length - 1 ? { borderRightWidth: 1.5, borderRightColor: 'rgba(255,255,255,0.10)' } : null),
-            }}
-          >
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
-              {c.label}
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={{ fontFamily: 'SpaceMono_700Bold', fontSize: c.big ? 17 : 13, color: '#fff', marginTop: c.big ? 2 : 4 }}
-            >
-              {c.value}
-            </Text>
-          </View>
-        ))}
-      </View>
-
-      <View
+    <Animated.View style={cardStyle}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '#F97316',
-          paddingHorizontal: 16,
-          paddingVertical: 12,
+          backgroundColor: '#151515',
+          borderWidth: 1.5,
+          borderColor: live ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.14)',
+          borderRadius: 6,
+          overflow: 'hidden',
         }}
       >
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, color: '#0B0B0B' }}>
-          {live ? 'Watch the broadcast' : 'View tournament'}
-        </Text>
-        <Icon name="arrow-right" size={19} color="#0B0B0B" strokeWidth={2.6} />
-      </View>
-    </Pressable>
+        <TournamentArt
+          uri={tournament.bannerImage}
+          seed={tournament._id}
+          height={132}
+          wipe={wipe}
+          sweep={sweep}
+          press={press}
+          drift
+          shimmer
+        />
+        <Hairlines />
+        <Ghost text={initials(tournament.name)} size={96} style={{ right: -8, bottom: -16 }} />
+
+        <Animated.View style={[{ paddingHorizontal: 16, paddingTop: 12 }, riseStyle]}>
+          <Text
+            numberOfLines={2}
+            style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 34, lineHeight: 31, color: '#fff' }}
+          >
+            {tournament.name}
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 10 }}
+          >
+            {[tournament.venue?.name, tournament.venue?.city].filter(Boolean).join(' · ') || 'Venue TBD'}
+          </Text>
+        </Animated.View>
+
+        <Animated.View
+          style={[
+            { flexDirection: 'row', marginTop: 14, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)' },
+            riseLateStyle,
+          ]}
+        >
+          {cells.map((c, i) => (
+            <View
+              key={c.label}
+              style={{
+                flex: 1,
+                paddingHorizontal: 12,
+                paddingVertical: 9,
+                ...(i < cells.length - 1 ? { borderRightWidth: 1.5, borderRightColor: 'rgba(255,255,255,0.10)' } : null),
+              }}
+            >
+              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+                {c.label}
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={{ fontFamily: 'SpaceMono_700Bold', fontSize: c.big ? 17 : 13, color: '#fff', marginTop: c.big ? 2 : 4 }}
+              >
+                {c.value}
+              </Text>
+            </View>
+          ))}
+        </Animated.View>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: '#F97316',
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+          }}
+        >
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, color: '#0B0B0B' }}>
+            {live ? 'Watch the broadcast' : 'View tournament'}
+          </Text>
+          <Icon name="arrow-right" size={19} color="#0B0B0B" strokeWidth={2.6} />
+        </View>
+      </Pressable>
+    </Animated.View>
   );
 }

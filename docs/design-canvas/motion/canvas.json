@@ -1,0 +1,28 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "Recommended spec", "is_interactive": true },
+    { "file": "Tokens.dc.html", "x": 490, "y": 0, "w": 620, "h": 844, "title": "Motion tokens" },
+    { "file": "LandReveal.dc.html", "x": 0, "y": 990, "w": 390, "h": 600, "title": "A · Land reveal" },
+    { "file": "KenBurns.dc.html", "x": 490, "y": 990, "w": 390, "h": 600, "title": "B · Ken Burns drift" },
+    { "file": "PressResponse.dc.html", "x": 980, "y": 990, "w": 390, "h": 600, "title": "C · Press response", "is_interactive": true },
+    { "file": "FallbackShimmer.dc.html", "x": 1470, "y": 990, "w": 390, "h": 600, "title": "E · Seeded shimmer" },
+    { "file": "HeroParallax.dc.html", "x": 1960, "y": 990, "w": 390, "h": 800, "title": "D · Hero parallax", "is_interactive": true }
+  ],
+  "annotations": [
+    {
+      "id": "verdict",
+      "x": 0,
+      "y": -320,
+      "w": 470,
+      "text": "THE ASK\nTournament art landed, but every tournament still feels like the same tournament.\n\nSHIPPED — A + C on cards, D on the detail hero.\nA (land reveal) is the one that answers the complaint: each row arrives as its own title card. C (press response) is the floor — free, and it makes the art feel attached to the row. D gives the detail screen depth, and a back button that survives scrolling.\n\nLive in src/lib/motion.ts, TournamentArt, TournamentCard, FeaturedTournament, TournamentHero and tournament/[id].tsx.\n\nB (Ken Burns) not built — detail hero only, if ever, never in the list.\nE (shimmer) not built — motion covering for missing data. Spend that effort on organiser banner upload instead."
+    },
+    {
+      "id": "options-row",
+      "x": 0,
+      "y": 900,
+      "w": 420,
+      "text": "FIVE OPTIONS, ONE AXIS EACH\nOne-shot · ambient · input-driven · scroll-driven · fallback-only.\nEvery card below is real geometry from TournamentCard.tsx and TournamentHero.tsx. Banner photos are CSS placeholders — the repo has no tournament photography yet."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

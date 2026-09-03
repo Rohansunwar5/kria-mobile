@@ -158,7 +158,40 @@ view — header, hero and nav — then snaps back. Replace that with:
 
 ---
 
-## 6. Accessibility & platform
+## 6. Motion
+
+Tokens live in [`src/lib/motion.ts`](src/lib/motion.ts); the options and the reasoning are the
+seven artboards in [`docs/design-canvas/motion/`](docs/design-canvas/motion/).
+
+| ms | Token | Job |
+|---|---|---|
+| 120 | `pressIn` | Finger-down. Deliberately faster than the release. |
+| 150 | focus | Input border and label colour. |
+| 180 | `pressOut` | Release settles slower than the press. |
+| 260 | `sweep` | Hazard bar scaling across a block. |
+| 350 | fade | Overlay in/out. |
+| 420 | `reveal` | Art wipe, and the type rising behind it. |
+| 650 | brand | Splash only. Never in a list. |
+| 850 | pulse | Skeleton breathing, reversing. |
+| 14000 | ambient | Ken Burns drift. One surface at a time, ever. |
+
+**Two curves, no more.** `Easing.out(Easing.cubic)` for anything that arrives or responds;
+`Easing.inOut(Easing.cubic)` for anything that loops or travels. No springs — overshoot fights
+hard edges and 1.5px borders, and softness is the one thing this system is not. Linear only ever
+reads as a progress bar.
+
+- **One moving thing per card.** Reveal, or drift, or shimmer — never two.
+- **Never animate the seeded art hue.** It is identity: the same tournament is the same colour on
+  its card and on its detail screen.
+- **Never animate height or layout in a list.** Only `opacity`, `transform` and `clipPath` — the
+  three the UI thread carries without a re-layout.
+- **Idle animation stops off-screen.** `cancelAnimation()` on blur and on viewability change.
+- **Honour reduce-motion.** Reveals become instant, ambient drift does not run. The design must be
+  complete with every animation off — and it is, because the art itself does the differentiating.
+
+---
+
+## 7. Accessibility & platform
 
 - **44px minimum hit target**, even where an artboard draws a control smaller.
 - **No fake chrome.** Never draw an iOS status bar or virtual keyboard — the real ones render on
@@ -169,7 +202,7 @@ view — header, hero and nav — then snaps back. Replace that with:
 
 ---
 
-## 7. Status
+## 8. Status
 
 | | |
 |---|---|

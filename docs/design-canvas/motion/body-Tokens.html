@@ -1,0 +1,97 @@
+<div class="sheet" style="width:620px;height:844px;display:flex;flex-direction:column">
+  <div class="sheetpad" style="flex:none;padding-bottom:14px">
+    <div class="kick">Kria player &middot; motion</div>
+    <div class="ant" style="font-size:32px;line-height:29px;margin-top:7px">Motion tokens</div>
+    <div class="note" style="margin-top:8px">Lifted from the durations and easings already shipping in <span class="mn" style="font-size:10px;color:#F97316">BrandIntro</span>, <span class="mn" style="font-size:10px;color:#F97316">AuthInput</span>, <span class="mn" style="font-size:10px;color:#F97316">states.tsx</span> and <span class="mn" style="font-size:10px;color:#F97316">entering.tsx</span> &mdash; DESIGN.md has no motion section yet, so this fills that gap rather than inventing a second vocabulary.</div>
+  </div>
+  <div class="hazard" style="height:5px;flex:none"></div>
+
+  <div style="padding:16px;display:flex;flex-direction:column;gap:16px;flex:1">
+    <!-- Duration ladder -->
+    <div>
+      <div class="ant" style="font-size:18px">Duration ladder</div>
+      <div class="blk" style="margin-top:9px;overflow:hidden">
+        <div style="display:flex;padding:8px 13px;border-bottom:1.5px solid rgba(255,255,255,0.10)">
+          <div class="lbl" style="width:78px">MS</div>
+          <div class="lbl" style="width:150px">Token</div>
+          <div class="lbl" style="flex:1">Where it is already used</div>
+        </div>
+        <div style="display:flex;padding:9px 13px;border-bottom:1.5px solid rgba(255,255,255,0.06)">
+          <div class="mn" style="width:78px;font-weight:700;font-size:14px;color:#F97316">120</div>
+          <div style="width:150px;font-size:12px;font-weight:700;color:#d4d4d4">press&nbsp;in</div>
+          <div class="note" style="flex:1">Finger-down. Faster than the release on purpose.</div>
+        </div>
+        <div style="display:flex;padding:9px 13px;border-bottom:1.5px solid rgba(255,255,255,0.06)">
+          <div class="mn" style="width:78px;font-weight:700;font-size:14px;color:#F97316">150</div>
+          <div style="width:150px;font-size:12px;font-weight:700;color:#d4d4d4">focus</div>
+          <div class="note" style="flex:1">Input border and label colour &mdash; <span class="mn" style="font-size:10px">AuthInput</span>.</div>
+        </div>
+        <div style="display:flex;padding:9px 13px;border-bottom:1.5px solid rgba(255,255,255,0.06)">
+          <div class="mn" style="width:78px;font-weight:700;font-size:14px;color:#F97316">180</div>
+          <div style="width:150px;font-size:12px;font-weight:700;color:#d4d4d4">press&nbsp;out</div>
+          <div class="note" style="flex:1">Release settles slower than the press.</div>
+        </div>
+        <div style="display:flex;padding:9px 13px;border-bottom:1.5px solid rgba(255,255,255,0.06)">
+          <div class="mn" style="width:78px;font-weight:700;font-size:14px;color:#F97316">260</div>
+          <div style="width:150px;font-size:12px;font-weight:700;color:#d4d4d4">sweep</div>
+          <div class="note" style="flex:1">Hazard bar scaling across a block.</div>
+        </div>
+        <div style="display:flex;padding:9px 13px;border-bottom:1.5px solid rgba(255,255,255,0.06)">
+          <div class="mn" style="width:78px;font-weight:700;font-size:14px;color:#F97316">350</div>
+          <div style="width:150px;font-size:12px;font-weight:700;color:#d4d4d4">fade</div>
+          <div class="note" style="flex:1">Overlay in/out &mdash; <span class="mn" style="font-size:10px">SoldCelebration</span>.</div>
+        </div>
+        <div style="display:flex;padding:9px 13px;border-bottom:1.5px solid rgba(255,255,255,0.06)">
+          <div class="mn" style="width:78px;font-weight:700;font-size:14px;color:#F97316">420</div>
+          <div style="width:150px;font-size:12px;font-weight:700;color:#d4d4d4">reveal</div>
+          <div class="note" style="flex:1">Art wipe and the type rising behind it.</div>
+        </div>
+        <div style="display:flex;padding:9px 13px;border-bottom:1.5px solid rgba(255,255,255,0.06)">
+          <div class="mn" style="width:78px;font-weight:700;font-size:14px;color:#F97316">650</div>
+          <div style="width:150px;font-size:12px;font-weight:700;color:#d4d4d4">brand</div>
+          <div class="note" style="flex:1">Splash only &mdash; <span class="mn" style="font-size:10px">BrandIntro</span>. Never in a list.</div>
+        </div>
+        <div style="display:flex;padding:9px 13px;border-bottom:1.5px solid rgba(255,255,255,0.06)">
+          <div class="mn" style="width:78px;font-weight:700;font-size:14px;color:#7d7d7d">850</div>
+          <div style="width:150px;font-size:12px;font-weight:700;color:#d4d4d4">pulse</div>
+          <div class="note" style="flex:1">Skeleton breathing, reversing &mdash; <span class="mn" style="font-size:10px">states.tsx</span>.</div>
+        </div>
+        <div style="display:flex;padding:9px 13px">
+          <div class="mn" style="width:78px;font-weight:700;font-size:14px;color:#7d7d7d">14000</div>
+          <div style="width:150px;font-size:12px;font-weight:700;color:#d4d4d4">ambient</div>
+          <div class="note" style="flex:1">Ken&nbsp;Burns drift. One surface at a time, ever.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Easing -->
+    <div>
+      <div class="ant" style="font-size:18px">Easing &mdash; two curves, no more</div>
+      <div style="display:flex;gap:12px;margin-top:9px">
+        <div class="blk2" style="flex:1;padding:12px 13px">
+          <div class="mn" style="font-size:11px;font-weight:700;color:#F97316">Easing.out(Easing.cubic)</div>
+          <div class="note" style="margin-top:6px">Anything that arrives or responds: reveals, presses, focus, fades. Fast off the mark, settles soft. CSS: <span class="mn" style="font-size:10px">cubic-bezier(0.16,1,0.3,1)</span>.</div>
+        </div>
+        <div class="blk2" style="flex:1;padding:12px 13px">
+          <div class="mn" style="font-size:11px;font-weight:700;color:#F97316">Easing.inOut(Easing.cubic)</div>
+          <div class="note" style="margin-top:6px">Anything that loops or travels: sweeps, drift, pulse. Symmetrical, so a reversing repeat has no seam.</div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:9px"><b>No springs, no linear.</b> Springs overshoot, and overshoot fights hard edges and 1.5px borders &mdash; the whole point of this system is that nothing is soft. Linear only ever reads as a progress bar.</div>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- Rules -->
+    <div>
+      <div class="ant" style="font-size:18px">Rules</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:9px">
+        <div class="note"><b>One moving thing per card.</b> Reveal, or drift, or shimmer &mdash; never two. A list where every row breathes is a list nobody can read.</div>
+        <div class="note"><b>Never animate the seeded hue.</b> It is identity, not decoration: the same tournament must be the same colour on the card and on its detail screen.</div>
+        <div class="note"><b>Never animate height or layout in a list.</b> Only <span class="mn" style="font-size:10px;color:#F97316">opacity</span>, <span class="mn" style="font-size:10px;color:#F97316">transform</span> and <span class="mn" style="font-size:10px;color:#F97316">clipPath</span> &mdash; the three the UI thread can carry without a re-layout.</div>
+        <div class="note"><b>Idle animation stops off-screen.</b> <span class="mn" style="font-size:10px;color:#F97316">cancelAnimation()</span> on blur and on viewability change, or the drift keeps costing battery behind a screen nobody is looking at.</div>
+        <div class="note"><b>Honour reduce-motion.</b> <span class="mn" style="font-size:10px;color:#F97316">AccessibilityInfo.isReduceMotionEnabled()</span>: reveals become instant, ambient drift does not run at all. The design must be complete with every animation off &mdash; and it is, because the seeded hue and the banner do the differentiating.</div>
+      </div>
+    </div>
+  </div>
+</div>

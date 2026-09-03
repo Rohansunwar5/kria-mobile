@@ -1,0 +1,65 @@
+<div class="sheet" style="width:390px;height:800px;display:flex;flex-direction:column">
+  <div class="sheetpad" style="flex:none">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <div class="optid">D</div>
+      <div class="ant" style="font-size:23px;line-height:21px">Hero parallax</div>
+    </div>
+    <div class="lbl" style="margin-top:7px;letter-spacing:0.18em">Scroll-driven &middot; detail screen only</div>
+  </div>
+  <div class="hazard" style="height:5px;flex:none"></div>
+
+  <!-- Live demo: scroll inside the phone window. -->
+  <div style="position:relative;height:430px;flex:none;border-bottom:1.5px solid rgba(255,255,255,0.14)">
+    <div onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:#0B0B0B">
+      <!-- Hero -->
+      <div class="art" style="height:262px">
+        <div class="photo" style="transform: translateY({{ m.artY }}px) scale({{ m.artScale }})"></div>
+        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 12%, rgba(11,11,11,0.42) 52%, #0B0B0B 96%);opacity:{{ m.scrim }}"></div>
+        <div style="position:absolute;left:16px;right:16px;bottom:12px">
+          <div style="display:flex;gap:7px;margin-bottom:9px">
+            <div class="tag t-live"><span style="width:5px;height:5px;background:#0B0B0B;border-radius:999px;display:inline-block"></span>Live now</div>
+            <div class="tag t-up">Badminton</div>
+          </div>
+          <div class="ant" style="font-size:40px;line-height:36px">Kria Smash Cup</div>
+          <div class="mn" style="font-size:10px;color:#a3a3a3;margin-top:9px;letter-spacing:0.06em">BANGALORE &middot; 02&ndash;07 SEP &middot; 4 CATEGORIES</div>
+        </div>
+      </div>
+      <!-- Something to scroll -->
+      <div style="display:flex;gap:0;border-bottom:1.5px solid rgba(255,255,255,0.12)">
+        <div class="ant" style="flex:1;text-align:center;padding:13px 0;font-size:14px;color:#F97316;box-shadow:inset 0 -2.5px 0 #F97316">Overview</div>
+        <div class="ant" style="flex:1;text-align:center;padding:13px 0;font-size:14px;color:#7d7d7d">Draw</div>
+        <div class="ant" style="flex:1;text-align:center;padding:13px 0;font-size:14px;color:#7d7d7d">Teams</div>
+        <div class="ant" style="flex:1;text-align:center;padding:13px 0;font-size:14px;color:#7d7d7d">Info</div>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+        <div class="blk2" style="padding:13px 14px">
+          <div class="lbl" style="letter-spacing:0.12em">Next on court</div>
+          <div class="ant" style="font-size:18px;margin-top:6px">Semi-final &middot; Court 2</div>
+        </div>
+        <div class="blk2" style="padding:13px 14px">
+          <div class="lbl" style="letter-spacing:0.12em">Entry closes</div>
+          <div class="mn" style="font-size:17px;font-weight:700;margin-top:5px">01 SEP &middot; 23:59</div>
+        </div>
+        <div class="blk2" style="padding:13px 14px;height:120px"></div>
+      </div>
+    </div>
+
+    <!-- Compact bar cross-fades in at 110–180px of scroll -->
+    <div style="position:absolute;left:0;right:0;top:0;height:52px;background:#0B0B0B;border-bottom:1.5px solid rgba(255,255,255,0.12);display:flex;align-items:center;gap:10px;padding:0 14px;opacity:{{ m.bar }};pointer-events:none">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+      <div class="ant" style="font-size:17px">Kria Smash Cup</div>
+    </div>
+    <div class="mn" style="position:absolute;right:8px;bottom:8px;font-size:9px;color:#F97316;letter-spacing:0.1em">SCROLL {{ m.pct }}%</div>
+  </div>
+
+  <div class="sheetpad" style="flex:1;display:flex;flex-direction:column;gap:11px">
+    <div class="note"><b>Why.</b> The banner gets seen at full size before the type takes it over, and the screen gains depth without anything moving on its own. It is the only option that rewards a good photo without running an idle animation.</div>
+    <div class="note"><b>Cost.</b> Detail screen only &mdash; it does nothing for the list, so it never ships alone. It needs the hero and tabs in one scroll view, which <span class="mn" style="font-size:10px;color:#F97316">tournament/[id].tsx</span> already is: <span class="mn" style="font-size:10px;color:#F97316">ScrollView</span> with a sticky tab bar, so no refactor after all. The new part is the compact bar, which also gives the detail screen a back button that survives scrolling.</div>
+    <div class="code"><b>art</b>    translateY  y &times; &minus;0.45      &lt;- driven, not timed
+<b>art</b>    scale       1 &rarr; 1.06 over 260
+<b>scrim</b>  opacity     0.40 &rarr; 0.94 over 180
+<b>bar</b>    opacity     0 &rarr; 1 over 110&ndash;180
+<i>useAnimatedScrollHandler + interpolate(CLAMP)</i>
+<i>runs on the UI thread &mdash; never setState per frame</i></div>
+  </div>
+</div>

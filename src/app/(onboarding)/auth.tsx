@@ -24,7 +24,11 @@ export default function OnboardingAuth() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const onboarding = useAppSelector((s) => s.onboarding);
-  const [name, setName] = useState(onboarding.fullName);
+  // Register needs firstName/lastName separately, so collect them separately.
+  // The store still holds one `fullName` — split it back on the way in.
+  const [firstIn, ...restIn] = onboarding.fullName.trim().split(/\s+/);
+  const [first, setFirst] = useState(firstIn || '');
+  const [last, setLast] = useState(restIn.join(' '));
   const [chosenSport, setChosenSport] = useState(onboarding.sport || 'badminton');
   const [photo, setPhoto] = useState<string | null>(onboarding.photoUri);
 
@@ -40,10 +44,10 @@ export default function OnboardingAuth() {
     if (!res.canceled) setPhoto(res.assets[0].uri);
   };
 
-  const ready = name.trim().split(/\s+/).filter(Boolean).length >= 2;
+  const ready = !!first.trim() && !!last.trim();
 
   const submit = () => {
-    dispatch(setProfileFields({ fullName: name.trim(), photoUri: photo }));
+    dispatch(setProfileFields({ fullName: `${first.trim()} ${last.trim()}`, photoUri: photo }));
     dispatch(setSport(chosenSport));
     dispatch(beginOnboardingHandoff());
     router.push('/(auth)/register');
@@ -52,9 +56,18 @@ export default function OnboardingAuth() {
   return (
     <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>
-        <IconBtn icon="chevron-left" label="Go back" onPress={() => router.back()} />
+        {/* Deep-linked straight here, there is nothing to pop — fall back to login. */}
+        <IconBtn
+          icon="chevron-left"
+          label="Go back"
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/(auth)/login'))}
+        />
         <View style={{ flex: 1 }} />
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>STEP 4 OF 4</Text>
+        <Pressable accessibilityRole="button" onPress={() => router.replace('/(auth)/login')} hitSlop={10}>
+          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, color: '#7d7d7d' }}>
+            HAVE AN ACCOUNT? <Text style={{ color: '#F97316' }}>SIGN IN</Text>
+          </Text>
+        </Pressable>
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -62,7 +75,11 @@ export default function OnboardingAuth() {
           <Ghost text="Name" size={200} style={{ right: -40, bottom: 0 }} />
 
           <View style={{ paddingTop: 8 }}>
-            <Kick style={{ letterSpacing: 0.26 * 9 }}>Almost there</Kick>
+            {/* Step counter moved off the header row — the sign-in escape hatch lives there now. */}
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
+              <Kick style={{ letterSpacing: 0.26 * 9 }}>Almost there</Kick>
+              <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>STEP 4 OF 4</Text>
+            </View>
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 35, color: '#fff', marginTop: 12 }}>
               Who&apos;s on{'\n'}the card?
             </Text>
@@ -106,7 +123,8 @@ export default function OnboardingAuth() {
           </View>
 
           <View style={{ paddingTop: 18 }}>
-            <AuthInput label="Full name" placeholder="First and last name" value={name} onChangeText={setName} />
+            <AuthInput label="First name" placeholder="First name" value={first} onChangeText={setFirst} />
+            <AuthInput label="Last name" placeholder="Last name" value={last} onChangeText={setLast} />
 
             <Lbl style={{ marginBottom: 6 }}>Your sport</Lbl>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>

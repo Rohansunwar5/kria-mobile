@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Text, Dimensions } from 'react-native';
+import { Text, Image, Dimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -58,6 +58,11 @@ export function BrandIntro({ onDone }: { onDone: () => void }) {
       ]}
     >
       <Animated.View style={logoStyle}>
+        <Image
+          source={require('../../assets/images/logo.png')}
+          resizeMode="contain"
+          style={{ width: 74, height: 65, alignSelf: 'center', marginBottom: 14 }}
+        />
         <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 64, lineHeight: 58, letterSpacing: 0.01 * 64, color: '#FFFFFF', textTransform: 'uppercase' }}>
           Kria
         </Text>

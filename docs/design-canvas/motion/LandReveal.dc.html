@@ -1,0 +1,209 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0B0B0B; font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #F97316; text-decoration: none; }
+    a:hover { color: #FA4C93; }
+
+    /* ---- Type layers ---- */
+    .ant { font-family: 'Anton', 'Arial Narrow', Haettenschweiler, Impact, sans-serif; text-transform: uppercase; font-weight: 400; letter-spacing: 0.01em; }
+    .mn { font-family: 'Space Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+    /* ---- Frame ---- */
+    .scr { width: 390px; height: 844px; background: #0B0B0B; color: #fff; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    .sheet { background: #0B0B0B; color: #fff; overflow: hidden; position: relative; }
+    .safe { height: 44px; flex: none; }
+
+    /* ---- Atmosphere ---- */
+    .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.16; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+    .dots { background-image: radial-gradient(rgba(255,255,255,0.16) 1px, transparent 1px); background-size: 9px 9px; }
+    .hazard { background-image: repeating-linear-gradient(115deg, rgba(249,115,22,0.9) 0 9px, transparent 9px 18px); }
+    .hairlines { background-image: repeating-linear-gradient(115deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 7px); }
+    .ghost { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.09); position: absolute; pointer-events: none; line-height: 0.78; }
+    .ghostfill { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; color: rgba(255,255,255,0.045); position: absolute; pointer-events: none; line-height: 0.78; }
+
+    /* ---- Blocks (hard-edged, heavy) ---- */
+    .blk { background: #151515; border: 1.5px solid rgba(255,255,255,0.14); border-radius: 6px; }
+    .blk2 { background: #1E1E1E; border: 1.5px solid rgba(255,255,255,0.10); border-radius: 6px; }
+    .blkb { background: #F97316; color: #0B0B0B; border-radius: 6px; }
+    .blkm { background: #FA4C93; color: #0B0B0B; border-radius: 6px; }
+    .edge { border-left: 4px solid #F97316; }
+    .divide { height: 1.5px; background: rgba(255,255,255,0.10); }
+
+    /* ---- Tags & pills ---- */
+    .tag { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; padding: 4px 7px; border-radius: 3px; display: inline-flex; align-items: center; gap: 5px; }
+    .t-live { background: #F97316; color: #0B0B0B; }
+    .t-open { background: #16C46A; color: #06240F; }
+    .t-mag { background: #FA4C93; color: #240614; }
+    .t-up { background: rgba(255,255,255,0.10); color: #d4d4d4; }
+    .t-end { background: rgba(255,255,255,0.06); color: #8a8a8a; }
+    .t-red { background: #FF4438; color: #2A0703; }
+    .t-out { background: transparent; color: #F97316; box-shadow: inset 0 0 0 1.5px #F97316; }
+
+    /* ---- Labels ---- */
+    .kick { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #F97316; }
+    .lbl { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #7d7d7d; }
+    .meta { font-size: 12px; color: #a3a3a3; }
+    .meta2 { font-size: 11px; color: #737373; }
+    .body { font-size: 13px; color: #d4d4d4; line-height: 19px; }
+
+    /* ---- Controls ---- */
+    .btnx { height: 54px; border-radius: 5px; background: #F97316; color: #0B0B0B; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 17px; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 9px; }
+    .btnk { height: 54px; border-radius: 5px; background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.22); color: #fff; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 15px; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .chip { border-radius: 3px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.16); padding: 7px 12px; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #bdbdbd; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .chip-on { background: #F97316; color: #0B0B0B; box-shadow: none; }
+    .chip-mag { background: #FA4C93; color: #240614; box-shadow: none; }
+    .iconbtn { width: 38px; height: 38px; border-radius: 4px; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; flex: none; }
+
+    /* ---- Header ---- */
+    .hdr { display: flex; align-items: center; gap: 12px; padding: 8px 16px 12px; border-bottom: 1.5px solid rgba(255,255,255,0.12); flex: none; position: relative; }
+
+    /* ---- Nav ---- */
+    .tabbar { position: absolute; left: 14px; right: 14px; bottom: 12px; display: flex; gap: 5px; padding: 5px; background: #F97316; border-radius: 7px; box-shadow: 0 10px 26px rgba(0,0,0,0.6); }
+    .tabitem { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 12px 0; border-radius: 4px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 13px; letter-spacing: 0.05em; color: rgba(11,11,11,0.62); }
+    .tabitem-on { background: #0B0B0B; color: #fff; }
+
+    /* ---- Identity ---- */
+    .avat { border-radius: 4px; background: #F97316; display: flex; align-items: center; justify-content: center; font-family: 'Anton', Impact, sans-serif; color: #0B0B0B; flex: none; }
+    .avatk { border-radius: 4px; background: rgba(255,255,255,0.09); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center; font-family: 'Anton', Impact, sans-serif; color: #d4d4d4; flex: none; }
+
+    /* ---- Rails ---- */
+    .rail { position: absolute; font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.22); writing-mode: vertical-rl; }
+    .apinote { font-family: 'Space Mono', monospace; font-size: 9px; color: #F97316; letter-spacing: 0.04em; }
+
+    /* ================= MOTION SPEC additions ================= */
+    /* Spec-sheet chrome (canvas-only; not part of the app) */
+    .sheetpad { padding: 14px 16px 12px; }
+    .optid { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.24em; color: #FA4C93; }
+    .rule { height: 1.5px; background: rgba(255,255,255,0.10); }
+    .note { font-size: 11px; line-height: 17px; color: #a3a3a3; }
+    .note b { color: #d4d4d4; font-weight: 700; }
+    .code { font-family: 'Space Mono', monospace; font-size: 10px; line-height: 16px; color: #F9A87A; background: #151515; border: 1.5px solid rgba(255,255,255,0.10); border-radius: 5px; padding: 10px 11px; white-space: pre; overflow-x: auto; }
+    .code i { color: #7d7d7d; font-style: normal; }
+    .code b { color: #F97316; font-weight: 400; }
+
+    /* Banner stand-in. No tournament photography exists in the repo yet, so
+       every "photo" here is drawn in CSS and labelled as a placeholder. */
+    .photo { position: absolute; inset: 0; background:
+        radial-gradient(120% 92% at 20% -12%, rgba(249,115,22,0.50) 0%, transparent 56%),
+        radial-gradient(86% 70% at 88% 18%, rgba(250,76,147,0.30) 0%, transparent 62%),
+        repeating-linear-gradient(97deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 34px),
+        linear-gradient(162deg, #1d2937 0%, #101825 54%, #090c11 100%); }
+    .vig { position: absolute; inset: 0; background: radial-gradient(120% 100% at 50% 30%, transparent 30%, rgba(11,11,11,0.55) 100%); }
+    /* Seeded fallback ground — hsl(hash(_id)) exactly as TournamentArt.tsx computes it */
+    .seed { position: absolute; inset: 0; background: hsl(214, 44%, 13%); }
+    .artfade { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, transparent 30%, #151515 100%); }
+    .art { position: relative; overflow: hidden; }
+
+    /* --- A · Land reveal ------------------------------------------------ */
+    /* One-shot in the app; looped here on a 4.6s cycle so it can be watched. */
+    @keyframes wipe { 0%,4% { clip-path: inset(0 0 100% 0); } 26%,100% { clip-path: inset(0 0 0 0); } }
+    @keyframes sweep { 0%,2% { transform: scaleX(0); } 16%,100% { transform: scaleX(1); } }
+    @keyframes rise { 0%,9% { opacity: 0; transform: translateY(10px); } 30%,100% { opacity: 1; transform: translateY(0); } }
+    .a-wipe { animation: wipe 4600ms cubic-bezier(0.16,1,0.3,1) infinite; }
+    .a-sweep { transform-origin: left center; animation: sweep 4600ms cubic-bezier(0.16,1,0.3,1) infinite; }
+    .a-rise { animation: rise 4600ms cubic-bezier(0.16,1,0.3,1) infinite; }
+    .a-rise-2 { animation: rise 4600ms cubic-bezier(0.16,1,0.3,1) infinite; animation-delay: 90ms; }
+    .a-rise-3 { animation: rise 4600ms cubic-bezier(0.16,1,0.3,1) infinite; animation-delay: 170ms; }
+    .stag-2 > * { animation-delay: 70ms; }
+    .stag-3 > * { animation-delay: 140ms; }
+
+    /* --- B · Ken Burns drift -------------------------------------------- */
+    @keyframes kb { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.09) translate(-2.2%, -1.4%); } }
+    .b-kb { animation: kb 14s ease-in-out infinite alternate; }
+
+    /* --- C · Press response (real :active, not a loop) ------------------- */
+    .c-card { transition: transform 180ms cubic-bezier(0.16,1,0.3,1), border-left-width 180ms cubic-bezier(0.16,1,0.3,1); cursor: pointer; }
+    .c-card:active { transform: scale(0.985); border-left-width: 7px; transition-duration: 120ms; }
+    .c-art { transition: transform 180ms cubic-bezier(0.16,1,0.3,1); }
+    .c-card:active .c-art { transform: scale(1.035); transition-duration: 120ms; }
+    .c-scrim { position: absolute; inset: 0; background: rgba(249,115,22,0.16); opacity: 0; transition: opacity 180ms ease-out; }
+    .c-card:active .c-scrim { opacity: 1; transition-duration: 120ms; }
+
+    /* --- E · Seeded shimmer (fallback grounds only) ---------------------- */
+    @keyframes shim { 0% { transform: translateX(-120%); } 26% { transform: translateX(120%); } 100% { transform: translateX(120%); } }
+    .e-shim { position: absolute; top: -40%; bottom: -40%; width: 60%; background: repeating-linear-gradient(115deg, rgba(255,255,255,0.07) 0 1px, transparent 1px 7px); animation: shim 5500ms ease-in-out infinite; }
+    @keyframes markpulse { 0%,100% { opacity: 0.30; } 26% { opacity: 0.40; } }
+    .e-mark { animation: markpulse 5500ms ease-in-out infinite; }
+  </style>
+</helmet>
+
+<div class="sheet" style="width:390px;height:600px;display:flex;flex-direction:column">
+  <div class="sheetpad" style="flex:none">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <div class="optid">A</div>
+      <div class="ant" style="font-size:23px;line-height:21px">Land reveal</div>
+    </div>
+    <div class="lbl" style="margin-top:7px;letter-spacing:0.18em">One-shot &middot; fires when data lands</div>
+  </div>
+  <div class="hazard" style="height:5px;flex:none"></div>
+
+  <!-- Live demo: three cards, 70ms apart. One-shot in the app; looped here. -->
+  <div style="padding:16px 16px 4px;flex:none">
+    <div class="blk edge" style="overflow:hidden;position:relative;margin-bottom:12px">
+      <div class="art a-wipe" style="height:76px">
+        <div class="photo"></div>
+        <div class="vig"></div>
+        <div class="artfade" style="height:46px"></div>
+        <div class="hazard a-sweep" style="position:absolute;left:0;right:0;bottom:0;height:5px"></div>
+      </div>
+      <div class="ghostfill" style="font-size:72px;right:4px;top:-6px">01</div>
+      <div style="padding:10px 14px 0;position:relative">
+        <div class="a-rise" style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
+          <div class="tag t-open">Open</div>
+          <div class="tag t-up">Badminton</div>
+        </div>
+        <div class="ant a-rise-2" style="font-size:23px;line-height:21px">Kria Smash Cup</div>
+        <div class="mn a-rise-3" style="font-size:10px;color:#a3a3a3;margin-top:8px;letter-spacing:0.06em">BANGALORE &middot; 96 PLAYERS &middot; 8/8 TEAMS</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;margin-top:12px;border-top:1.5px solid rgba(255,255,255,0.10);position:relative">
+        <div>
+          <div class="lbl" style="letter-spacing:0.12em">Entry</div>
+          <div class="mn" style="font-size:16px;font-weight:700;color:#16C46A;margin-top:2px">&#8377;750</div>
+        </div>
+        <div class="chip chip-mag">Enter now</div>
+      </div>
+    </div>
+
+    <div class="blk edge stag-2" style="overflow:hidden;position:relative;margin-bottom:12px">
+      <div class="art a-wipe" style="height:76px;animation-delay:70ms">
+        <div class="seed" style="background:hsl(38, 44%, 13%)"></div>
+        <img src="logo.png" alt="" style="position:absolute;left:50%;top:14px;width:47px;height:47px;margin-left:-23px;opacity:0.30;object-fit:contain">
+        <div class="artfade" style="height:46px"></div>
+        <div class="hazard a-sweep" style="position:absolute;left:0;right:0;bottom:0;height:5px;animation-delay:70ms"></div>
+      </div>
+      <div class="ghostfill" style="font-size:72px;right:4px;top:-6px">02</div>
+      <div style="padding:10px 14px 0;position:relative">
+        <div class="a-rise" style="display:flex;align-items:center;gap:7px;margin-bottom:8px;animation-delay:70ms">
+          <div class="tag t-open">Open</div>
+          <div class="tag t-up">Cricket</div>
+        </div>
+        <div class="ant a-rise-2" style="font-size:23px;line-height:21px;animation-delay:160ms">Monsoon Premier League</div>
+      </div>
+      <div style="height:14px"></div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+  <div class="sheetpad" style="flex:1;display:flex;flex-direction:column;gap:11px">
+    <div class="note"><b>Why.</b> It is the <span class="mn" style="font-size:10px;color:#F97316">BrandIntro</span> sweep again &mdash; 115&deg; hazard bar leading a wipe &mdash; so every tournament arrives as its own broadcast title card. Answers &ldquo;these all feel the same&rdquo; the hardest of the five.</div>
+    <div class="note"><b>Cost.</b> Zero once played. But <span class="mn" style="font-size:10px;color:#F97316">FlatList</span> recycles rows, so it re-fires on scroll unless you keep a played-ids set. Cap the stagger at 3 cards; past that the list feels slow.</div>
+    <div class="code"><b>wipe</b>   clipPath inset 100%&rarr;0   420ms  out.cubic
+<b>sweep</b>  scaleX 0&rarr;1            260ms  out.cubic   &minus;60ms
+<b>rise</b>   translateY 10&rarr;0 + fade 380ms  out.cubic   +120ms
+<i>stagger 70ms per card, first 3 rows only</i></div>
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>

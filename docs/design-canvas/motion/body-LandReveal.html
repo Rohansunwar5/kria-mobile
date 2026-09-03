@@ -1,0 +1,66 @@
+<div class="sheet" style="width:390px;height:600px;display:flex;flex-direction:column">
+  <div class="sheetpad" style="flex:none">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <div class="optid">A</div>
+      <div class="ant" style="font-size:23px;line-height:21px">Land reveal</div>
+    </div>
+    <div class="lbl" style="margin-top:7px;letter-spacing:0.18em">One-shot &middot; fires when data lands</div>
+  </div>
+  <div class="hazard" style="height:5px;flex:none"></div>
+
+  <!-- Live demo: three cards, 70ms apart. One-shot in the app; looped here. -->
+  <div style="padding:16px 16px 4px;flex:none">
+    <div class="blk edge" style="overflow:hidden;position:relative;margin-bottom:12px">
+      <div class="art a-wipe" style="height:76px">
+        <div class="photo"></div>
+        <div class="vig"></div>
+        <div class="artfade" style="height:46px"></div>
+        <div class="hazard a-sweep" style="position:absolute;left:0;right:0;bottom:0;height:5px"></div>
+      </div>
+      <div class="ghostfill" style="font-size:72px;right:4px;top:-6px">01</div>
+      <div style="padding:10px 14px 0;position:relative">
+        <div class="a-rise" style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
+          <div class="tag t-open">Open</div>
+          <div class="tag t-up">Badminton</div>
+        </div>
+        <div class="ant a-rise-2" style="font-size:23px;line-height:21px">Kria Smash Cup</div>
+        <div class="mn a-rise-3" style="font-size:10px;color:#a3a3a3;margin-top:8px;letter-spacing:0.06em">BANGALORE &middot; 96 PLAYERS &middot; 8/8 TEAMS</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;margin-top:12px;border-top:1.5px solid rgba(255,255,255,0.10);position:relative">
+        <div>
+          <div class="lbl" style="letter-spacing:0.12em">Entry</div>
+          <div class="mn" style="font-size:16px;font-weight:700;color:#16C46A;margin-top:2px">&#8377;750</div>
+        </div>
+        <div class="chip chip-mag">Enter now</div>
+      </div>
+    </div>
+
+    <div class="blk edge stag-2" style="overflow:hidden;position:relative;margin-bottom:12px">
+      <div class="art a-wipe" style="height:76px;animation-delay:70ms">
+        <div class="seed" style="background:hsl(38, 44%, 13%)"></div>
+        <img src="logo.png" alt="" style="position:absolute;left:50%;top:14px;width:47px;height:47px;margin-left:-23px;opacity:0.30;object-fit:contain">
+        <div class="artfade" style="height:46px"></div>
+        <div class="hazard a-sweep" style="position:absolute;left:0;right:0;bottom:0;height:5px;animation-delay:70ms"></div>
+      </div>
+      <div class="ghostfill" style="font-size:72px;right:4px;top:-6px">02</div>
+      <div style="padding:10px 14px 0;position:relative">
+        <div class="a-rise" style="display:flex;align-items:center;gap:7px;margin-bottom:8px;animation-delay:70ms">
+          <div class="tag t-open">Open</div>
+          <div class="tag t-up">Cricket</div>
+        </div>
+        <div class="ant a-rise-2" style="font-size:23px;line-height:21px;animation-delay:160ms">Monsoon Premier League</div>
+      </div>
+      <div style="height:14px"></div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+  <div class="sheetpad" style="flex:1;display:flex;flex-direction:column;gap:11px">
+    <div class="note"><b>Why.</b> It is the <span class="mn" style="font-size:10px;color:#F97316">BrandIntro</span> sweep again &mdash; 115&deg; hazard bar leading a wipe &mdash; so every tournament arrives as its own broadcast title card. Answers &ldquo;these all feel the same&rdquo; the hardest of the five.</div>
+    <div class="note"><b>Cost.</b> Zero once played. But <span class="mn" style="font-size:10px;color:#F97316">FlatList</span> recycles rows, so it re-fires on scroll unless you keep a played-ids set. Cap the stagger at 3 cards; past that the list feels slow.</div>
+    <div class="code"><b>wipe</b>   clipPath inset 100%&rarr;0   420ms  out.cubic
+<b>sweep</b>  scaleX 0&rarr;1            260ms  out.cubic   &minus;60ms
+<b>rise</b>   translateY 10&rarr;0 + fade 380ms  out.cubic   +120ms
+<i>stagger 70ms per card, first 3 rows only</i></div>
+  </div>
+</div>

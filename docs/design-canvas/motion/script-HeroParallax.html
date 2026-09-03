@@ -1,0 +1,24 @@
+<script data-dc-script data-props='{"$preview":{"width":390,"height":800}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { y: 0 };
+  }
+
+  renderVals() {
+    const y = this.state.y;
+    const k = Math.min(1, y / 180);
+    const barK = Math.min(1, Math.max(0, (y - 110) / 70));
+    return {
+      m: {
+        artY: (-y * 0.45).toFixed(1),
+        artScale: (1 + 0.06 * Math.min(1, y / 260)).toFixed(4),
+        scrim: (0.4 + 0.54 * k).toFixed(3),
+        bar: barK.toFixed(3),
+        pct: Math.round(k * 100),
+      },
+      onScroll: (e) => this.setState({ y: e.target.scrollTop }),
+    };
+  }
+}
+</script>

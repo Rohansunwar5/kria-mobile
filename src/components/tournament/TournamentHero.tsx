@@ -1,4 +1,6 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, type SharedValue } from 'react-native-reanimated';
+import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Tournament } from '@/store/slices/tournamentSlice';
@@ -6,6 +8,7 @@ import { StatusPill, Tag } from '@/components/StatusPill';
 import { Icon, type IconName } from '@/components/icons';
 import { Hairlines } from '@/components/canvas';
 import { Ghost } from '@/components/states';
+import { heroParallax, useDrift } from '@/lib/motion';
 import { formatShortDate } from '@/lib/format';
 
 function IconButton({ name, label, onPress }: { name: IconName; label: string; onPress?: () => void }) {
@@ -36,21 +39,43 @@ function monogram(name: string) {
   return (word.find((w) => w.length > 3) || word[0] || 'KRIA').toUpperCase();
 }
 
-// TournamentDetail.dc.html: no banner photo — hairline texture, an oversized
-// ghost word, and the name in Anton carry the hero.
+// TournamentDetail.dc.html: the organiser's banner when there is one, behind the
+// gradient; otherwise hairline texture and an oversized ghost word carry the hero.
+// `scrollY` drives the parallax (motion option D) — the banner travels at 0.45x
+// and the scrim deepens as the tabs come up over it.
 export function TournamentHero({
   tournament,
   categoryCount,
+  scrollY,
   onBack,
   onShare,
   onAnnouncements,
 }: {
   tournament: Tournament;
   categoryCount?: number;
+  scrollY?: SharedValue<number>;
   onBack: () => void;
   onShare?: () => void;
   onAnnouncements?: () => void;
 }) {
+  const rest = useSharedValue(0);
+  const y = scrollY ?? rest;
+  // Option B lives here and on the featured card only — the two surfaces big
+  // enough to earn a permanent animation.
+  const focused = useIsFocused();
+  const kb = useDrift(!!tournament.bannerImage && focused);
+  const artStyle = useAnimatedStyle(() => {
+    const p = heroParallax(y.value);
+    const d = kb.value;
+    return {
+      transform: [
+        { translateX: -d * 8.6 },
+        { translateY: p.artY - d * 3.7 },
+        { scale: p.artScale * (1 + d * 0.09) },
+      ],
+    };
+  });
+  const deepenStyle = useAnimatedStyle(() => ({ opacity: heroParallax(y.value).deepen }));
   const meta = [
     tournament.venue?.city,
     `${formatShortDate(tournament.startDate)}–${formatShortDate(tournament.endDate)}`,
@@ -61,12 +86,23 @@ export function TournamentHero({
 
   return (
     <View style={{ height: 262, backgroundColor: '#0B0B0B', overflow: 'hidden' }}>
+      {tournament.bannerImage ? (
+        <Animated.View style={[{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }, artStyle]}>
+          <Image source={{ uri: tournament.bannerImage }} resizeMode="cover" style={{ width: '100%', height: '100%' }} />
+        </Animated.View>
+      ) : null}
       <Hairlines />
-      <Ghost text={monogram(tournament.name)} size={170} style={{ left: -16, top: 44 }} />
+      {tournament.bannerImage ? null : (
+        <Ghost text={monogram(tournament.name)} size={170} style={{ left: -16, top: 44 }} />
+      )}
       <LinearGradient
         colors={['transparent', 'rgba(11,11,11,0.4)', '#0B0B0B']}
         locations={[0.15, 0.5, 0.94]}
         style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+      />
+      <Animated.View
+        pointerEvents="none"
+        style={[{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: '#0B0B0B' }, deepenStyle]}
       />
 
       <SafeAreaView edges={['top']} style={{ position: 'absolute', left: 0, right: 0, top: 0 }}>

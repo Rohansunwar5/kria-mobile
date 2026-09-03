@@ -1,0 +1,55 @@
+<div class="sheet" style="width:390px;height:600px;display:flex;flex-direction:column">
+  <div class="sheetpad" style="flex:none">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <div class="optid">B</div>
+      <div class="ant" style="font-size:23px;line-height:21px">Ken Burns drift</div>
+    </div>
+    <div class="lbl" style="margin-top:7px;letter-spacing:0.18em">Ambient &middot; runs forever</div>
+  </div>
+  <div class="hazard" style="height:5px;flex:none"></div>
+
+  <div style="padding:16px 16px 4px;flex:none">
+    <div class="blk" style="overflow:hidden;position:relative;border-color:rgba(249,115,22,0.5);margin-bottom:12px">
+      <div class="art" style="height:132px">
+        <div class="photo b-kb"></div>
+        <div class="vig"></div>
+        <div class="artfade" style="height:80px"></div>
+      </div>
+      <div class="hairlines" style="position:absolute;inset:0"></div>
+      <div class="ghostfill" style="font-size:96px;right:-8px;bottom:-16px">KS</div>
+      <div style="padding:12px 16px 0;position:relative">
+        <div class="ant" style="font-size:34px;line-height:31px">Kria Smash Cup</div>
+        <div class="mn" style="font-size:10px;color:#a3a3a3;margin-top:10px;letter-spacing:0.06em">KORAMANGALA INDOOR &middot; BANGALORE</div>
+      </div>
+      <div style="display:flex;margin-top:14px;position:relative;border-top:1.5px solid rgba(255,255,255,0.10)">
+        <div style="flex:1;padding:9px 12px;border-right:1.5px solid rgba(255,255,255,0.10)">
+          <div class="lbl" style="letter-spacing:0.12em">Players</div>
+          <div class="mn" style="font-size:17px;font-weight:700;margin-top:2px">96</div>
+        </div>
+        <div style="flex:1;padding:9px 12px;border-right:1.5px solid rgba(255,255,255,0.10)">
+          <div class="lbl" style="letter-spacing:0.12em">Teams</div>
+          <div class="mn" style="font-size:17px;font-weight:700;margin-top:2px">8/8</div>
+        </div>
+        <div style="flex:1;padding:9px 12px">
+          <div class="lbl" style="letter-spacing:0.12em">Dates</div>
+          <div class="mn" style="font-size:13px;font-weight:700;margin-top:4px">02&ndash;07 SEP</div>
+        </div>
+      </div>
+      <div class="blkb" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:0;position:relative">
+        <span class="ant" style="font-size:16px">Watch the broadcast</span>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0B0B0B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg>
+      </div>
+    </div>
+    <div class="mn" style="font-size:9px;color:#7d7d7d;letter-spacing:0.14em;text-transform:uppercase">Watch for ~8s &mdash; the drift is deliberately below notice</div>
+  </div>
+
+  <div class="rule"></div>
+  <div class="sheetpad" style="flex:1;display:flex;flex-direction:column;gap:11px">
+    <div class="note"><b>Why.</b> A still frame starts reading as a live feed. Costs three lines and it is the one option that makes a real banner photo feel worth uploading &mdash; which is the actual fix for same-y tournaments.</div>
+    <div class="note"><b>Cost.</b> It never stops. On a scrolling list that is a battery draw and a second thing moving under your thumb. Defensible on the <b>featured card and the detail hero only</b>, paused when off-screen, and never on a fallback ground &mdash; drifting a centred logo just looks broken.</div>
+    <div class="code"><b>scale</b>      1 &rarr; 1.09        14s  inOut.cubic
+<b>translate</b>  0 &rarr; &minus;2.2%, &minus;1.4%  14s  inOut.cubic
+<i>withRepeat(&hellip;, &minus;1, true) &mdash; reversing, no seam</i>
+<i>cancelAnimation() on blur / off-screen</i></div>
+  </div>
+</div>
