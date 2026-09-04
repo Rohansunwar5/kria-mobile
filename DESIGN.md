@@ -180,12 +180,14 @@ seven artboards in [`docs/design-canvas/motion/`](docs/design-canvas/motion/).
 hard edges and 1.5px borders, and softness is the one thing this system is not. Linear only ever
 reads as a progress bar.
 
-- **One moving thing per card.** Reveal, or drift, or shimmer — never two.
+- **One idle animation per card.** A card with a banner drifts; a card without one shimmers; never
+  both. The land reveal is one-shot, so it does not count against that.
 - **Never animate the seeded art hue.** It is identity: the same tournament is the same colour on
   its card and on its detail screen.
 - **Never animate height or layout in a list.** Only `opacity`, `transform` and `clipPath` — the
   three the UI thread carries without a re-layout.
-- **Idle animation stops off-screen.** `cancelAnimation()` on blur and on viewability change.
+- **Idle animation stops off-screen.** `cancelAnimation()` on screen blur (`useIsFocused`); rows
+  outside the FlatList window are unmounted, so they stop on their own.
 - **Honour reduce-motion.** Reveals become instant, ambient drift does not run. The design must be
   complete with every animation off — and it is, because the art itself does the differentiating.
 

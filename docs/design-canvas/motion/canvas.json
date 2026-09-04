@@ -1,6 +1,6 @@
 {
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "Recommended spec", "is_interactive": true },
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "Shipped spec", "is_interactive": true },
     { "file": "Tokens.dc.html", "x": 490, "y": 0, "w": 620, "h": 844, "title": "Motion tokens" },
     { "file": "LandReveal.dc.html", "x": 0, "y": 990, "w": 390, "h": 600, "title": "A · Land reveal" },
     { "file": "KenBurns.dc.html", "x": 490, "y": 990, "w": 390, "h": 600, "title": "B · Ken Burns drift" },
@@ -12,9 +12,9 @@
     {
       "id": "verdict",
       "x": 0,
-      "y": -320,
+      "y": -360,
       "w": 470,
-      "text": "THE ASK\nTournament art landed, but every tournament still feels like the same tournament.\n\nSHIPPED — A + C on cards, D on the detail hero.\nA (land reveal) is the one that answers the complaint: each row arrives as its own title card. C (press response) is the floor — free, and it makes the art feel attached to the row. D gives the detail screen depth, and a back button that survives scrolling.\n\nLive in src/lib/motion.ts, TournamentArt, TournamentCard, FeaturedTournament, TournamentHero and tournament/[id].tsx.\n\nB (Ken Burns) not built — detail hero only, if ever, never in the list.\nE (shimmer) not built — motion covering for missing data. Spend that effort on organiser banner upload instead."
+      "text": "THE ASK\nTournament art landed, but every tournament still feels like the same tournament.\n\nALL FIVE SHIPPED, each scoped to where it earns its cost:\n\nA  land reveal — every card and the featured block, one-shot, 70ms stagger for the first three rows\nC  press response — every card\nD  hero parallax — the detail screen, plus a compact bar that gives it a back button that survives scrolling\nB  Ken Burns — featured card and detail hero ONLY, banners only, never a list row\nE  seeded shimmer — banner-less grounds only, as one skewed gradient band rather than a 200-view hairline field\n\nB and E stop on screen blur. Everything stops under reduce-motion, and the design is complete with all of it off.\n\nLive in src/lib/motion.ts, TournamentArt, TournamentCard, FeaturedTournament, TournamentHero and tournament/[id].tsx. Tokens are also written up in DESIGN.md §6."
     },
     {
       "id": "options-row",

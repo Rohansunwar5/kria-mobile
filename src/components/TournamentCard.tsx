@@ -9,7 +9,8 @@ import { formatShortDate } from '@/lib/format';
 
 // The "Open for entry" block from Main.dc.html: flat panel, 4px brand edge,
 // ghost index — led by the tournament's own art strip, which wipes in behind a
-// hazard sweep when the row lands (motion option A) and answers the press (C).
+// hazard sweep when the row lands (A), drifts while you read it (B), sweeps
+// when it has no banner (E), and answers the press (C).
 export function TournamentCard({
   tournament,
   onPress,
@@ -26,6 +27,7 @@ export function TournamentCard({
   const riseLateStyle = useRise(riseLate);
   const { press, onPressIn, onPressOut } = usePress();
   const cardStyle = useAnimatedStyle(() => ({ transform: [{ scale: 1 - press.value * 0.015 }] }));
+  const edgeStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: press.value * 0.75 }] }));
 
   const meta = [
     tournament.venue?.city,
@@ -59,6 +61,7 @@ export function TournamentCard({
           wipe={wipe}
           sweep={sweep}
           press={press}
+          drift
           shimmer
           index={(index ?? 1) - 1}
         />
@@ -109,6 +112,14 @@ export function TournamentCard({
           )}
           <Tag label={tournament.status === 'registration_open' ? 'Enter now' : 'View'} variant="auction" />
         </Animated.View>
+
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: '#F97316', transformOrigin: 'left' },
+            edgeStyle,
+          ]}
+        />
       </Pressable>
     </Animated.View>
   );

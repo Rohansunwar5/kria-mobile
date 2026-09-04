@@ -55,8 +55,9 @@
 
   <div class="rule"></div>
   <div class="sheetpad" style="flex:1;display:flex;flex-direction:column;gap:11px">
-    <div class="note"><b>Why.</b> The 115&deg; hairline band is already in the system, so the empty ground gets texture from the family it belongs to rather than a new effect. Three cards, three hues, three offsets: the strip reads as alive without any two looking alike.</div>
-    <div class="note"><b>Cost.</b> This is motion standing in for missing data. It runs on every card in the list forever, and it makes the absent banner more conspicuous, not less. <b>Recommend skipping it</b> and spending the same effort on organiser banner upload &mdash; the hue seeding alone already differentiates these grounds.</div>
+    <div class="note"><b>Why.</b> The 115&deg; band is already in the system, so the empty ground gets texture from the family it belongs to rather than a new effect. Three cards, three hues, three offsets: the strip reads as alive without any two looking alike.</div>
+    <div class="note"><b>Cost.</b> This is motion standing in for missing data. It runs on every banner-less card forever, and it makes the absent banner more conspicuous, not less. The hue seeding alone already differentiates these grounds, so organiser banner upload is still the better spend.</div>
+    <div class="note"><b>Shipped as one skewed gradient band, not a hairline field.</b> The CSS version here is a repeating gradient; in React Native that means 200 clipped views per card, which is unacceptable in a list. One skewed <span class="mn" style="font-size:10px;color:#F97316">LinearGradient</span> at the same 115&deg; carries it for a single view. Banner-less grounds only, and it stops on screen blur.</div>
     <div class="code"><b>band</b>  translateX &minus;120% &rarr; 120%  1.4s pass
 <b>mark</b>  opacity 0.30 &rarr; 0.40 &rarr; 0.30
 <i>5.5s cycle, per-card offset = index &times; 1200ms</i>

@@ -198,9 +198,10 @@
   <div class="sheetpad" style="flex:1;display:flex;flex-direction:column;gap:11px">
     <div class="note"><b>Why.</b> The card, its art and its brand edge move as one object, so the whole row reads as a physical thing you pushed rather than a link you tapped. Works on banner-less cards too, and idles at zero.</div>
     <div class="note"><b>Cost.</b> Invisible until touched &mdash; on its own it does nothing for the &ldquo;every tournament looks alike&rdquo; complaint. This is the floor, not the answer.</div>
-    <div class="note"><b>Shipped without the edge growth.</b> Animating <span class="mn" style="font-size:10px;color:#F97316">borderLeftWidth</span> is a layout property, and the rules sheet says no layout animation inside a list. Card scale, art scale and scrim carry the press on their own.</div>
+    <div class="note"><b>The edge growth is a scaled overlay, not a border.</b> Animating <span class="mn" style="font-size:10px;color:#F97316">borderLeftWidth</span> would re-layout the row. A 3px bar sitting just inside the static 4px border, scaled from 0 on press, reads as 4&nbsp;&rarr;&nbsp;7px for the cost of one transform.</div>
     <div class="code"><b>card</b>   scale 1 &rarr; 0.985     in 120ms / out 180ms
 <b>art</b>    scale 1 &rarr; 1.035     in 120ms / out 180ms
+<b>edge</b>   scaleX 0 &rarr; 1 (4&rarr;7px)  in 120ms / out 180ms
 <b>scrim</b>  brand @ 16% fade in    in 120ms / out 180ms
 <i>Pressable onPressIn/onPressOut + withTiming(out.cubic)</i></div>
   </div>
