@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, ScrollView, Pressable, RefreshControl, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
@@ -8,7 +9,7 @@ import { Hairlines } from '@/components/canvas';
 import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
 import { useAppSelector } from '@/store/hooks';
 import { getTeam, getTeamRoster, type Team, type RosterPlayer } from '@/api/profileApi';
-import { purseHealth, shortMoney } from '@/lib/auctionView';
+import { purseHealth, shortMoney, teamSpent } from '@/lib/auctionView';
 
 const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
@@ -57,7 +58,7 @@ export default function TeamDetail() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Go back"
-        onPress={() => router.back()}
+        onPress={() => goBack(router)}
         hitSlop={8}
         style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
       >
@@ -94,7 +95,7 @@ export default function TeamDetail() {
     );
   }
 
-  const spent = team.totalSpent ?? 0;
+  const spent = teamSpent(team);
 
   return (
     <Screen>
@@ -104,11 +105,9 @@ export default function TeamDetail() {
           <Hairlines />
           <Ghost text={initials(team.name)} size={150} style={{ right: -24, top: -10 }} />
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14 }}>
-            <View style={{ width: 64, height: 64, borderRadius: 4, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 24, color: '#fff' }}>{initials(team.name)}</Text>
-            </View>
+            <InitialsAvatar name={team.name} logo={team.logo} size={64} color={color} />
             <View style={{ flex: 1, paddingBottom: 3 }}>
-              <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 28, lineHeight: 25, color: '#fff' }}>
+              <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 28, lineHeight: 34, color: '#fff' }}>
                 {team.name}
               </Text>
               <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 6 }}>

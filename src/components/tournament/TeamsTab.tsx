@@ -17,10 +17,6 @@ interface RosterPlayer {
   status: string;
 }
 
-function initials(name: string) {
-  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-}
-
 // Teams absorbs the old Players tab: every player in this tournament is on a
 // roster, so the roster is the player list.
 export function TeamsTab({ myTeam }: { myTeam: Team | null | undefined }) {
@@ -103,11 +99,9 @@ export function TeamsTab({ myTeam }: { myTeam: Team | null | undefined }) {
               accessibilityState={{ expanded: isOpen }}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 13, paddingVertical: 12, minHeight: 44 }}
             >
-              <View style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 14, color: '#fff' }}>{initials(team.name)}</Text>
-              </View>
+              <InitialsAvatar name={team.name} logo={team.logo} size={38} color={color} />
               <View style={{ flex: 1 }}>
-                <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: '#fff' }}>
+                <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>
                   {team.name}
                 </Text>
                 <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 4 }}>

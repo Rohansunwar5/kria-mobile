@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { HistoryCard } from '@/components/profile/HistoryCard';
 import { Chip, Lbl, ScreenHeader } from '@/components/canvas';
@@ -87,7 +88,7 @@ export default function History() {
     <Screen>
       <ScreenHeader
         title="History"
-        onBack={() => router.back()}
+        onBack={() => goBack(router)}
         right={
           <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
             {String(tournamentHistory.length).padStart(2, '0')}

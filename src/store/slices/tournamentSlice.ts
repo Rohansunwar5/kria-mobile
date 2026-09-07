@@ -8,6 +8,9 @@ export interface Tournament {
     name: string;
     description?: string;
     sport: string;
+    /** Multisport tournaments list every sport here; `sport` above is the
+     *  legacy single field and defaults to badminton. */
+    sports?: string[];
     bannerImage?: string;
     startDate: string;
     endDate: string;

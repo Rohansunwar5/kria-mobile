@@ -93,7 +93,7 @@ export function EmptyState({
       >
         <Icon name={icon} size={26} color="#5c5c5c" strokeWidth={1.9} />
       </View>
-      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 23, color: '#fff', marginTop: 14 }}>
+      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 32, color: '#fff', marginTop: 14 }}>
         {title}
       </Text>
       <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4', marginTop: 9 }}>

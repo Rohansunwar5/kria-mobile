@@ -63,7 +63,7 @@ export function FeaturedTournament({ tournament, onPress }: { tournament: Tourna
         <Animated.View style={[{ paddingHorizontal: 16, paddingTop: 12 }, riseStyle]}>
           <Text
             numberOfLines={2}
-            style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 34, lineHeight: 31, color: '#fff' }}
+            style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 34, lineHeight: 41, color: '#fff' }}
           >
             {tournament.name}
           </Text>

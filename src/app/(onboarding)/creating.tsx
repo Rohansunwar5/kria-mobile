@@ -81,7 +81,7 @@ export default function Creating() {
       <Ghost text="Card" size={200} style={{ right: -34, bottom: 130 }} />
       <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 24 }}>
         <Kick style={{ letterSpacing: 0.26 * 9 }}>Almost there</Kick>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 35, color: '#fff', marginTop: 12, marginBottom: 28 }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 48, color: '#fff', marginTop: 12, marginBottom: 28 }}>
           Cutting your{'\n'}player card
         </Text>
         {STEPS.map((label, i) => (

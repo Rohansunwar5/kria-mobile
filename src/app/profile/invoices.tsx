@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { InvoiceCard } from '@/components/profile/InvoiceCard';
 import { Chip, Hairlines, ScreenHeader } from '@/components/canvas';
@@ -69,7 +70,7 @@ export default function Invoices() {
 
   return (
     <Screen>
-      <ScreenHeader title="Payments" onBack={() => router.back()} />
+      <ScreenHeader title="Payments" onBack={() => goBack(router)} />
 
       {/* Total paid is a slab, not a footer. */}
       <View style={{ backgroundColor: '#F97316', overflow: 'hidden' }}>

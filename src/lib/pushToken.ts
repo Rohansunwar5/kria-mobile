@@ -1,4 +1,3 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 /**
@@ -11,6 +10,13 @@ import { Platform } from 'react-native';
  */
 export async function getPushToken(): Promise<string | null> {
   try {
+    // Required lazily on purpose. Expo Go dropped Android remote push in SDK 53,
+    // and the module throws at IMPORT time there — a top-level import took down
+    // every screen that pulled this file in, before the catch below could turn it
+    // into an honest "not available".
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Notifications = require('expo-notifications') as typeof import('expo-notifications');
+
     const existing = await Notifications.getPermissionsAsync();
     let status = existing.status;
     if (status !== 'granted') {

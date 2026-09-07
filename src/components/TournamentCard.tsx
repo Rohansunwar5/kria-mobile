@@ -74,7 +74,7 @@ export function TournamentCard({
           </View>
           <Text
             numberOfLines={2}
-            style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 23, lineHeight: 21, color: '#fff' }}
+            style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 23, lineHeight: 28, color: '#fff' }}
           >
             {tournament.name}
           </Text>

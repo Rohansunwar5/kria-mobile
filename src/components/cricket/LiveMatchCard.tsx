@@ -34,7 +34,7 @@ export function LiveMatchCard({ match }: { match: LiveMatchSummary }) {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingTop: 11 }}>
-        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 15, color: '#fff' }}>
+        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: '#fff' }}>
           {t1} v {t2}
         </Text>
         <Tag label="Live" variant="live" dot />

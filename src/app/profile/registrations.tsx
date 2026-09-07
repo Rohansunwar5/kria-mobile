@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
 import { RegistrationCard } from '@/components/profile/RegistrationCard';
@@ -31,7 +32,7 @@ export default function Registrations() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Go back"
-        onPress={() => router.back()}
+        onPress={() => goBack(router)}
         hitSlop={8}
         style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
       >

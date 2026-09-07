@@ -193,10 +193,17 @@ export async function getTournamentMatches(tournamentId: string): Promise<LiveMa
 
 // Resolve a match's sport via the GENERIC endpoints (the cricket match endpoint
 // 404s for non-cricket matches — exactly the case the route's guard must catch).
+//
+// The CATEGORY owns the sport. `tournament.sport` is a legacy single field that
+// defaults to badminton, so in a multisport tournament it sent every cricket
+// match to the badminton scoreboard, which 404s.
 export async function resolveMatchSport(matchId: string): Promise<string | null> {
-  const matchRes = await API.get(`/matches/${matchId}`);
-  const tournamentId = unwrap(matchRes)?.tournamentId;
-  if (!tournamentId) return null;
-  const tRes = await API.get(`/tournament/${tournamentId}`);
+  const match = unwrap(await API.get(`/matches/${matchId}`));
+  if (match?.categoryId) {
+    const category = unwrap(await API.get(`/categories/${match.categoryId}`));
+    if (category?.sport) return category.sport;
+  }
+  if (!match?.tournamentId) return null;
+  const tRes = await API.get(`/tournament/${match.tournamentId}`);
   return unwrap(tRes)?.sport ?? null;
 }

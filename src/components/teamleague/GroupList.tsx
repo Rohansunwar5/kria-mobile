@@ -46,7 +46,7 @@ export function GroupList({ groups, standings, onSelect }: {
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 15, color: '#fff' }}>
+              <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 20, color: '#fff' }}>
                 {g.groupName}
               </Text>
               <Icon name="chevron-right" size={15} color="#7d7d7d" />

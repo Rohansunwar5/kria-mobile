@@ -53,9 +53,9 @@ export function HeroScore({
       {live ? <Ghost text={`I${live.currentInnings}`} size={120} style={{ right: -10, bottom: -20 }} /> : null}
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.04)' }}>
-        <InitialsAvatar name={battingName || team1} size={22} color={brand?.primaryColor || '#3f3f46'} />
+        <InitialsAvatar name={battingName || team1} logo={brand?.logo} size={22} color={brand?.primaryColor || '#3f3f46'} />
         <View style={{ flex: 1 }}>
-          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 14, color: '#fff' }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 17, color: '#fff' }}>
             {battingName ? `${battingName} batting` : `${team1} v ${team2}`}
           </Text>
           {bowlingName ? (

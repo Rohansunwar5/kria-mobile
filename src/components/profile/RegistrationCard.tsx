@@ -50,7 +50,7 @@ export function RegistrationCard({ reg, onWithdraw }: { reg: Registration; onWit
           <Tag label={status.label} variant={status.variant} />
           {pay ? <Tag label={pay.label} variant={pay.variant} /> : null}
         </View>
-        <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 19, lineHeight: 18, color: '#fff' }}>
+        <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 19, lineHeight: 23, color: '#fff' }}>
           {reg.tournamentDetails?.name || 'Tournament'}
         </Text>
         <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 6 }}>

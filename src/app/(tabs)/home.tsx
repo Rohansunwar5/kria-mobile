@@ -58,7 +58,7 @@ export default function Home() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 2, paddingBottom: 12 }}>
         <Image source={require('../../../assets/images/logo.png')} resizeMode="contain" style={{ width: 40, height: 35 }} />
         <View>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 28, color: '#fff' }}>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 36, color: '#fff' }}>
             Kria
           </Text>
           <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.26 * 9, textTransform: 'uppercase', color: '#F97316', marginTop: 3 }}>
@@ -131,7 +131,7 @@ export default function Home() {
       ) : null}
 
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 20, color: '#fff' }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#fff' }}>
           Open for entry
         </Text>
         <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: '#F97316' }}>

@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, Image } from 'react-native';
 
 function isLight(hex: string) {
   const h = hex.replace('#', '');
@@ -8,17 +8,37 @@ function isLight(hex: string) {
 }
 
 // Squares now, 4px radius — players and teams alike. Anton, solid fill.
+// A real crest beats initials whenever one exists.
 export function InitialsAvatar({
   name,
   size = 40,
   color = '#F97316',
   neutral,
+  logo,
 }: {
   name?: string;
   size?: number;
   color?: string;
   neutral?: boolean;
+  /** Team crest or player photo. Falls back to initials when absent or blank. */
+  logo?: string;
 }) {
+  if (logo?.trim()) {
+    return (
+      <Image
+        accessibilityLabel={name}
+        source={{ uri: logo.trim() }}
+        resizeMode="cover"
+        style={{
+          width: size,
+          height: size,
+          borderRadius: 4,
+          backgroundColor: 'rgba(255,255,255,0.06)',
+        }}
+      />
+    );
+  }
+
   const initials = (name || '?').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   // 52→19, 38→14, 34→12 on the canvas.
   const fontSize = Math.round(size * 0.37);

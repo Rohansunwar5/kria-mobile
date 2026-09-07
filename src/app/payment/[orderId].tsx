@@ -123,7 +123,7 @@ export default function PaymentStatus() {
           <View style={{ width: 64, height: 64, borderRadius: 5, backgroundColor: skin.color, alignItems: 'center', justifyContent: 'center' }}>
             <Icon name={skin.icon} size={34} color={skin.ink} strokeWidth={2.8} />
           </View>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 36, lineHeight: 32, color: '#fff', marginTop: 16 }}>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 36, lineHeight: 44, color: '#fff', marginTop: 16 }}>
             {verdict.title}
           </Text>
           <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>

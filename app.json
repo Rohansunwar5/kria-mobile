@@ -43,7 +43,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiBaseUrl": "http://localhost:4010"
+      "apiBaseUrl": "https://api.kria.club"
     }
   }
 }

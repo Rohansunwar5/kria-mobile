@@ -15,7 +15,9 @@ export interface Category {
     maxRegistrations?: number;
     isPaidRegistration: boolean;
     registrationFee: number;
-    status: 'draft' | 'registration_open' | 'registration_closed' | 'auction_in_progress' | 'ongoing' | 'completed';
+    // Server enum: ICategoryStatus in server/src/models/category.model.ts. NOT the
+    // tournament enum — a category never says 'registration_open'.
+    status: 'setup' | 'registration' | 'auction' | 'groups_configured' | 'bracket_configured' | 'ongoing' | 'completed';
     bracketType?: 'knockout' | 'round_robin' | 'group_knockout' | 'league' | 'hybrid' | 'team_league';
     teamLeagueConfig?: {
         subTeamSlots: { slotNumber: number; matchType: string; label: string }[];
@@ -26,6 +28,9 @@ export interface Category {
         pointsForDraw?: number;
     };
     matchFormat?: string;
+    /** A category carries its own sport — in a multisport tournament this, not
+     *  `tournament.sport`, decides which scoreboard and leaderboard apply. */
+    sport?: string;
     isActive: boolean;
 }
 

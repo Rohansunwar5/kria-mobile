@@ -76,7 +76,7 @@ export default function WelcomeDone() {
           </View>
 
           <View style={{ alignItems: 'center', paddingTop: 24 }}>
-            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 32, lineHeight: 28, color: '#fff', textAlign: 'center' }}>
+            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 32, lineHeight: 39, color: '#fff', textAlign: 'center' }}>
               You&apos;re in,{'\n'}{firstName}.
             </Text>
             <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 11, maxWidth: 280, textAlign: 'center' }}>

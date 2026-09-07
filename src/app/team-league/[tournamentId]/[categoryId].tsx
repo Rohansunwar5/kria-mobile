@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { useAppSelector } from '@/store/hooks';
 import { useTeamLeague } from '@/lib/useTeamLeague';
 import { detectChampion } from '@/lib/teamLeagueView';
@@ -29,7 +30,7 @@ function Header({ onBack, sub }: { onBack: () => void; sub?: string }) {
         <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
       </Pressable>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: '#fff' }}>Team league</Text>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Team league</Text>
         {sub ? (
           <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
             {sub}
@@ -104,7 +105,7 @@ export default function TeamLeagueScreen() {
     setRefreshing(false);
   }, [reload, selectedTie]);
 
-  const back = () => router.back();
+  const back = () => goBack(router);
   const refresh = <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#F97316" />;
 
   if (loading) {

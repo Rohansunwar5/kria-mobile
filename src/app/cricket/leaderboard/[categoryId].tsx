@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
 import { Chip } from '@/components/canvas';
@@ -56,14 +57,14 @@ export default function CricketLeaderboard() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Go back"
-        onPress={() => router.back()}
+        onPress={() => goBack(router)}
         hitSlop={8}
         style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
       >
         <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
       </Pressable>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: '#fff' }}>Category charts</Text>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Category charts</Text>
         <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
           {[currentTournament?.name, category?.name].filter(Boolean).join(' · ')}
         </Text>
@@ -142,7 +143,7 @@ export default function CricketLeaderboard() {
             <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.16 * 8, color: 'rgba(11,11,11,0.7)' }}>
               {top.headline.toUpperCase()}
             </Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 24, lineHeight: 22, color: '#0B0B0B', marginTop: 3 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 24, lineHeight: 29, color: '#0B0B0B', marginTop: 3 }}>
               {leader.playerName}
             </Text>
             <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: 'rgba(11,11,11,0.72)', marginTop: 4 }}>

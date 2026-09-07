@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { verifyOtp, clearError } from '@/store/slices/authSlice';
@@ -101,7 +102,7 @@ export default function VerifyOtp() {
   return (
     <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>
-        <IconBtn icon="chevron-left" label="Go back" onPress={() => router.back()} />
+        <IconBtn icon="chevron-left" label="Go back" onPress={() => goBack(router)} />
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -115,7 +116,7 @@ export default function VerifyOtp() {
           <View style={{ height: 5, width: 56, marginBottom: 16, overflow: 'hidden' }}>
             <Hazard />
           </View>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 42, lineHeight: 37, color: '#fff' }}>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 42, lineHeight: 51, color: '#fff' }}>
             Check your{'\n'}inbox
           </Text>
           <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
@@ -165,7 +166,7 @@ export default function VerifyOtp() {
               the code is verified.
             </Text>
             <View style={{ alignSelf: 'flex-start', marginTop: 11 }}>
-              <Chip label="Change email" onPress={() => router.back()} />
+              <Chip label="Change email" onPress={() => goBack(router)} />
             </View>
           </View>
         </ScrollView>

@@ -30,7 +30,7 @@ export function BidHistoryList({ bids, teams }: { bids: AuctionBid[]; teams: Auc
                   backgroundColor: latest ? 'rgba(249,115,22,0.10)' : 'transparent',
                 }}
               >
-                <InitialsAvatar name={team?.name || bid.teamName} size={22} color={team?.primaryColor || '#F97316'} />
+                <InitialsAvatar name={team?.name || bid.teamName} logo={team?.logo} size={22} color={team?.primaryColor || '#F97316'} />
                 <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: latest ? '#fff' : '#d4d4d4' }}>
                   {team?.name || bid.teamName}
                 </Text>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Switch, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { Icon, type IconName } from '@/components/icons';
 import { AuthInput } from '@/components/auth/AuthInput';
@@ -42,7 +43,7 @@ function Row({
     >
       <Icon name={icon} size={17} color="#F97316" strokeWidth={1.9} />
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 13, color: '#fff' }}>{title}</Text>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 17, color: '#fff' }}>{title}</Text>
         {detail ? (
           <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
             {detail}
@@ -146,7 +147,7 @@ export default function Settings() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
-          onPress={() => router.back()}
+          onPress={() => goBack(router)}
           hitSlop={8}
           style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
         >

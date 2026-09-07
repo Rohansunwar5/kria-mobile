@@ -47,7 +47,7 @@ function SideRow({
     >
       <InitialsAvatar name={name} size={40} neutral={!isServing} />
       <View style={{ flex: 1 }}>
-        <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, lineHeight: 19, color: isServing ? '#fff' : '#d4d4d4' }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, lineHeight: 24, color: isServing ? '#fff' : '#d4d4d4' }}>
           {name}
         </Text>
         {serving === null ? null : (

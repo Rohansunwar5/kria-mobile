@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
 import { StatusPill } from '@/components/StatusPill';
@@ -69,7 +70,7 @@ export default function CategoryRegister() {
   const cap = category?.maxRegistrations || category?.maxParticipants || 0;
   const filled = categoryRegistrations.filter((r) => r.categoryId === categoryId).length;
   const slots = slotPressure(filled, cap);
-  const open = category?.status === 'registration_open';
+  const open = category?.status === 'registration';
 
   const age = computeAge(user?.dateOfBirth);
   const profileReady = !!user?.gender && !!user?.dateOfBirth;
@@ -126,14 +127,14 @@ export default function CategoryRegister() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Go back"
-        onPress={() => router.back()}
+        onPress={() => goBack(router)}
         hitSlop={8}
         style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
       >
         <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
       </Pressable>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: '#fff' }}>Category</Text>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Category</Text>
         <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
           {currentTournament?.name || ' '}
         </Text>
@@ -177,7 +178,7 @@ export default function CategoryRegister() {
           <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }}>
             {[currentTournament?.sport, category.bracketType?.replace('_', ' ')].filter(Boolean).join(' · ')}
           </Text>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 38, lineHeight: 34, color: '#fff', marginTop: 8 }}>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 38, lineHeight: 46, color: '#fff', marginTop: 8 }}>
             {category.name}
           </Text>
         </View>

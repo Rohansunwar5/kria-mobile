@@ -35,7 +35,7 @@ function CompetitorRow({
       {dim ? (
         <View style={{ width: 30, height: 30, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.06)' }} />
       ) : (
-        <InitialsAvatar name={c.name} size={30} neutral={side === 2 && !c.isWinner} />
+        <InitialsAvatar name={c.name} logo={c.logo} size={30} neutral={side === 2 && !c.isWinner} />
       )}
       <View style={{ flex: 1 }}>
         <Text

@@ -43,14 +43,30 @@ describe('cricketMatch api', () => {
     expect(list).toEqual([]);
   });
 
-  it('resolveMatchSport reads sport via generic match then tournament', async () => {
-    mock.onGet('/matches/m1').reply(200, { data: { data: { _id: 'm1', tournamentId: 't1' } } });
-    mock.onGet('/tournament/t1').reply(200, { data: { data: { sport: 'cricket' } } });
+  it('resolveMatchSport reads the sport off the match category', async () => {
+    mock.onGet('/matches/m1').reply(200, { data: { data: { _id: 'm1', categoryId: 'c1', tournamentId: 't1' } } });
+    mock.onGet('/categories/c1').reply(200, { data: { data: { _id: 'c1', sport: 'cricket' } } });
     const sport = await resolveMatchSport('m1');
     expect(sport).toBe('cricket');
   });
 
-  it('resolveMatchSport returns null when tournament missing', async () => {
+  it('resolveMatchSport prefers the category over the tournament in a multisport event', async () => {
+    // `tournament.sport` is a legacy single field that defaults to badminton, so
+    // trusting it opened the badminton scoreboard for a cricket match.
+    mock.onGet('/matches/m1').reply(200, { data: { data: { _id: 'm1', categoryId: 'c1', tournamentId: 't1' } } });
+    mock.onGet('/categories/c1').reply(200, { data: { data: { _id: 'c1', sport: 'cricket' } } });
+    mock.onGet('/tournament/t1').reply(200, { data: { data: { sport: 'badminton', sports: ['badminton', 'cricket'] } } });
+    expect(await resolveMatchSport('m1')).toBe('cricket');
+  });
+
+  it('resolveMatchSport falls back to the tournament when the category has no sport', async () => {
+    mock.onGet('/matches/m1').reply(200, { data: { data: { _id: 'm1', categoryId: 'c1', tournamentId: 't1' } } });
+    mock.onGet('/categories/c1').reply(200, { data: { data: { _id: 'c1' } } });
+    mock.onGet('/tournament/t1').reply(200, { data: { data: { sport: 'badminton' } } });
+    expect(await resolveMatchSport('m1')).toBe('badminton');
+  });
+
+  it('resolveMatchSport returns null when nothing identifies the match', async () => {
     mock.onGet('/matches/m1').reply(200, { data: { data: { _id: 'm1' } } });
     const sport = await resolveMatchSport('m1');
     expect(sport).toBeNull();

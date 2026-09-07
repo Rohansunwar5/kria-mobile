@@ -48,7 +48,7 @@ export default function Entering() {
       <Ghost text="Kria" size={200} style={{ left: -30, bottom: 120 }} />
       <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 24 }}>
         <Animated.View style={[logoStyle, { marginBottom: 34 }]}>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 44, lineHeight: 40, color: '#fff' }}>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 44, lineHeight: 53, color: '#fff' }}>
             Kria
           </Text>
           <Kick style={{ letterSpacing: 0.3 * 9, marginTop: 6 }}>Getting your arena ready</Kick>

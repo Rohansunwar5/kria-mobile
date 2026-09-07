@@ -63,7 +63,7 @@ export function BrandIntro({ onDone }: { onDone: () => void }) {
           resizeMode="contain"
           style={{ width: 74, height: 65, alignSelf: 'center', marginBottom: 14 }}
         />
-        <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 64, lineHeight: 58, letterSpacing: 0.01 * 64, color: '#FFFFFF', textTransform: 'uppercase' }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 64, lineHeight: 77, letterSpacing: 0.01 * 64, color: '#FFFFFF', textTransform: 'uppercase' }}>
           Kria
         </Text>
         <Animated.View style={[{ height: 5, marginTop: 12, alignSelf: 'center', overflow: 'hidden' }, sweepStyle]}>

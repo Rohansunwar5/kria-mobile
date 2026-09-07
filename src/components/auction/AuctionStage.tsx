@@ -45,7 +45,7 @@ export function AuctionStage({
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 13, marginTop: 9 }}>
           <InitialsAvatar name={name} size={58} color="#FA4C93" />
           <View style={{ flex: 1, paddingBottom: 2 }}>
-            <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 26, color: '#fff' }}>
+            <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 36, color: '#fff' }}>
               {name}
             </Text>
           </View>
@@ -68,7 +68,7 @@ export function AuctionStage({
           <View style={{ alignItems: 'flex-end', paddingBottom: 5 }}>
             <Text style={LBL}>Leading</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 6 }}>
-              <InitialsAvatar name={leader.name} size={24} color={leader.primaryColor || '#F97316'} />
+              <InitialsAvatar name={leader.name} logo={leader.logo} size={24} color={leader.primaryColor || '#F97316'} />
               <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, color: '#fff', maxWidth: 120 }}>
                 {leader.name}
               </Text>

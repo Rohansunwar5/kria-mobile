@@ -92,7 +92,7 @@ export function PlayerIDCard({ name, sport, city, photoUri, variant, playerNo, i
       </View>
 
       <View style={{ padding: 12 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 23, color: '#fff' }}>{name}</Text>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 32, color: '#fff' }}>{name}</Text>
         <View style={{ flexDirection: 'row', gap: 6, marginTop: 11 }}>
           <Tag label={sport} variant="live" />
           {city ? <Tag label={city} variant="up" /> : null}

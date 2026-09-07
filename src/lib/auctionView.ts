@@ -27,3 +27,14 @@ export function purseHealth(budget: number, initialBudget: number): { ratio: num
   const color = ratio >= 0.75 ? '#16C46A' : ratio >= 0.25 ? '#F97316' : '#FF4438';
   return { ratio, color };
 }
+
+/**
+ * What a team has spent at auction.
+ *
+ * A team document carries `budget` (what is left) and `initialBudget`; there is
+ * no `totalSpent` field — that only exists on the auction status payload, which
+ * the team screen does not fetch.
+ */
+export function teamSpent(team?: { budget?: number; initialBudget?: number }): number {
+  return Math.max(0, (team?.initialBudget ?? 0) - (team?.budget ?? 0));
+}

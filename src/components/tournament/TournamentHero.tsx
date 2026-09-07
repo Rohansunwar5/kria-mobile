@@ -1,6 +1,6 @@
 import { View, Text, Pressable, Image } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, type SharedValue } from 'react-native-reanimated';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Tournament } from '@/store/slices/tournamentSlice';
@@ -10,6 +10,7 @@ import { Hairlines } from '@/components/canvas';
 import { Ghost } from '@/components/states';
 import { heroParallax, useDrift } from '@/lib/motion';
 import { formatShortDate } from '@/lib/format';
+import { tournamentSports } from '@/lib/sports';
 
 function IconButton({ name, label, onPress }: { name: IconName; label: string; onPress?: () => void }) {
   return (
@@ -117,11 +118,13 @@ export function TournamentHero({
       <View style={{ position: 'absolute', left: 16, right: 16, bottom: 12 }}>
         <View style={{ flexDirection: 'row', gap: 7, marginBottom: 9 }}>
           <StatusPill status={tournament.status} />
-          {tournament.sport ? <Tag label={tournament.sport.replace('_', ' ')} /> : null}
+          {tournamentSports(tournament).map((s) => (
+            <Tag key={s} label={s.replace('_', ' ')} />
+          ))}
         </View>
         <Text
           numberOfLines={2}
-          style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 36, color: '#fff' }}
+          style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 48, color: '#fff' }}
         >
           {tournament.name}
         </Text>

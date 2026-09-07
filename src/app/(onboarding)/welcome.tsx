@@ -35,7 +35,7 @@ export default function Welcome() {
 
       <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
         <View style={{ paddingHorizontal: 20, paddingTop: 6 }}>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 24, color: '#fff' }}>Kria</Text>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 32, color: '#fff' }}>Kria</Text>
           <Lbl style={{ color: '#F97316', letterSpacing: 0.3 * 9, marginTop: 4 }}>Sports</Lbl>
         </View>
 
@@ -45,7 +45,7 @@ export default function Welcome() {
           <View style={{ height: 5, width: 64, marginBottom: 18, overflow: 'hidden' }}>
             <Hazard />
           </View>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 52, lineHeight: 46, color: '#fff' }}>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 52, lineHeight: 63, color: '#fff' }}>
             Play.{'\n'}Compete.{'\n'}
             <Text style={{ color: '#F97316' }}>Get picked.</Text>
           </Text>

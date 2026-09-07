@@ -11,10 +11,11 @@ export interface Team {
   captainId?: string;
   whatsappGroupLink?: string;
   tournamentId: string;
+  /** What is LEFT of the purse. The server decrements this on every sale;
+   *  spend is `initialBudget - budget` (see teamSpent). There is no `spent`,
+   *  `remainingBudget` or `totalSpent` on a team document. */
   budget: number;
   initialBudget: number;
-  spent: number;
-  remainingBudget: number;
   isActive: boolean;
   playersCount?: number;
   createdAt: string;

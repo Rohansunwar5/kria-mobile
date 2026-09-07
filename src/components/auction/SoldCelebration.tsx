@@ -48,7 +48,7 @@ export function SoldCelebration({ playerName, teamName, teamColor, soldPrice }: 
           <Hazard />
         </View>
 
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 24, lineHeight: 22, color: '#d4d4d4', textAlign: 'center' }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 24, lineHeight: 29, color: '#d4d4d4', textAlign: 'center' }}>
           {playerName}
         </Text>
 

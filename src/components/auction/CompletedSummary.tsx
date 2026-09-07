@@ -41,7 +41,7 @@ export function CompletedSummary({ tournamentName, categoryName, teams }: Props)
       <Ghost text="Done" size={170} style={{ right: -36, top: 90 }} />
 
       <Kick style={{ letterSpacing: 0.3 * 9 }}>Final results</Kick>
-      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 34, lineHeight: 30, color: '#fff', marginTop: 10 }}>
+      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 34, lineHeight: 41, color: '#fff', marginTop: 10 }}>
         Auction{'\n'}complete
       </Text>
       <Lbl style={{ marginTop: 9, letterSpacing: 0.1 * 9 }}>{`${tournamentName} · ${categoryName}`}</Lbl>
@@ -70,8 +70,8 @@ export function CompletedSummary({ tournamentName, categoryName, teams }: Props)
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 11 }}>
-              <InitialsAvatar name={team.name} size={28} color={team.primaryColor || '#F97316'} />
-              <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: '#fff' }}>
+              <InitialsAvatar name={team.name} logo={team.logo} size={28} color={team.primaryColor || '#F97316'} />
+              <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>
                 {team.name}
               </Text>
             </View>

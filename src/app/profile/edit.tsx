@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, View, Text, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { AvatarPicker } from '@/components/profile/AvatarPicker';
@@ -68,14 +69,14 @@ export default function EditProfile() {
       if (val) data[k] = val;
     });
     const result = await dispatch(updateProfile({ data }));
-    if (updateProfile.fulfilled.match(result)) router.back();
+    if (updateProfile.fulfilled.match(result)) goBack(router);
   };
 
   return (
     <Screen>
       <ScreenHeader
         title="Edit profile"
-        onBack={() => router.back()}
+        onBack={() => goBack(router)}
         right={<Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>PATCH</Text>}
       />
 
@@ -86,7 +87,7 @@ export default function EditProfile() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingTop: 16 }}>
             <AvatarPicker name={`${form.firstName} ${form.lastName}`} imageUrl={user?.profileImage} size={72} />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: '#fff' }}>Player photo</Text>
+              <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Player photo</Text>
               <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 11, lineHeight: 15, color: '#737373', marginTop: 5 }}>
                 Shown on your ID card and every roster you appear in.
               </Text>

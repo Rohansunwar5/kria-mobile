@@ -1,10 +1,12 @@
+import { useEffect, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Category } from '@/store/slices/registrationSlice';
 import { Tag } from '@/components/StatusPill';
 import { Icon } from '@/components/icons';
 import { Skeleton, EmptyState } from '@/components/states';
-import { drawDestination, DRAW_LABEL, type DrawKind } from '@/lib/drawRoute';
+import { drawDestination, drawSecondary, auctionTag, DRAW_LABEL, type DrawKind, type AuctionState } from '@/lib/drawRoute';
+import { getAuctionStatus } from '@/api/auction';
 
 const KIND_TAG: Record<Exclude<DrawKind, 'none'>, { label: string; variant: 'live' | 'auction' | 'up' }> = {
   auction: { label: 'Live', variant: 'auction' },
@@ -23,15 +25,39 @@ export function DrawTab({
   tournamentId: string;
   categories: Category[];
   isLoading: boolean;
-  /** Cricket has its own charts with seven sort keys; everything else uses the
-   *  points-based standings. */
+  /** Fallback when a category does not carry its own sport. Cricket has its own
+   *  charts with seven sort keys; everything else uses the points-based standings. */
   sport?: string;
 }) {
   const router = useRouter();
-  const standingsFor = (categoryId: string) =>
-    sport === 'cricket'
-      ? { pathname: '/cricket/leaderboard/[categoryId]' as const, params: { categoryId } }
-      : { pathname: '/leaderboard/[categoryId]' as const, params: { categoryId } };
+  // A category stays at status 'auction' until an organiser advances it by hand,
+  // so the auction document is the only source for "is bidding still happening".
+  const [auctions, setAuctions] = useState<Record<string, AuctionState>>({});
+  const auctionIds = categories.filter((c) => c.status === 'auction').map((c) => c._id).join(',');
+
+  useEffect(() => {
+    const ids = auctionIds ? auctionIds.split(',') : [];
+    if (ids.length === 0) return;
+    let active = true;
+    Promise.all(
+      ids.map((id) =>
+        getAuctionStatus(tournamentId, id)
+          .then((r) => [id, r?.auction?.status] as const)
+          .catch(() => [id, undefined] as const)
+      )
+    ).then((pairs) => {
+      if (!active) return;
+      setAuctions(Object.fromEntries(pairs.filter(([, s]) => s)) as Record<string, AuctionState>);
+    });
+    return () => { active = false; };
+  }, [tournamentId, auctionIds]);
+
+  // A multisport tournament has cricket and badminton categories side by side,
+  // so the category's own sport decides the standings screen.
+  const standingsFor = (cat: Category) =>
+    (cat.sport ?? sport) === 'cricket'
+      ? { pathname: '/cricket/leaderboard/[categoryId]' as const, params: { categoryId: cat._id } }
+      : { pathname: '/leaderboard/[categoryId]' as const, params: { categoryId: cat._id } };
 
   if (isLoading && categories.length === 0) {
     return (
@@ -58,10 +84,18 @@ export function DrawTab({
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 24, gap: 7 }}>
       {categories.map((cat) => {
-        const dest = drawDestination(cat, tournamentId);
-        const live = dest.kind === 'auction';
+        const auction = auctions[cat._id];
+        const dest = drawDestination(cat, tournamentId, auction);
+        const isAuctionRow = dest.kind === 'auction';
+        const auctionState = isAuctionRow ? auctionTag(auction) : null;
+        const live = auctionState?.live ?? false;
         const disabled = dest.kind === 'none';
-        const tag = dest.kind === 'none' ? null : KIND_TAG[dest.kind];
+        const tag = dest.kind === 'none'
+          ? null
+          : auctionState
+            ? { label: auctionState.short, variant: auctionState.live ? ('auction' as const) : ('up' as const) }
+            : KIND_TAG[dest.kind];
+        const subLabel = auctionState ? auctionState.label : DRAW_LABEL[dest.kind];
 
         return (
           <View key={cat._id}>
@@ -69,7 +103,7 @@ export function DrawTab({
             disabled={disabled}
             onPress={() => router.push(dest.href as any)}
             accessibilityRole="button"
-            accessibilityLabel={`${cat.name} — ${DRAW_LABEL[dest.kind]}`}
+            accessibilityLabel={`${cat.name} — ${subLabel}`}
             accessibilityState={{ disabled }}
             style={{
               flexDirection: 'row',
@@ -86,44 +120,51 @@ export function DrawTab({
             }}
           >
             <View style={{ flex: 1 }}>
-              <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 15, color: '#fff' }}>
+              <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 20, color: '#fff' }}>
                 {cat.name}
               </Text>
               <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 4 }}>
-                {DRAW_LABEL[dest.kind]}
+                {subLabel}
               </Text>
             </View>
             {tag ? <Tag label={tag.label} variant={tag.variant} dot={live} /> : null}
             {disabled ? null : <Icon name="chevron-right" size={15} color="#7d7d7d" />}
           </Pressable>
 
-          {/* Standings stand alone: they stay readable after the draw is done. */}
-          {disabled ? null : (
-            <Pressable
-              onPress={() => router.push(standingsFor(cat._id))}
-              accessibilityRole="button"
-              accessibilityLabel={`${cat.name} standings`}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                minHeight: 44,
-                paddingHorizontal: 13,
-                marginTop: -1.5,
-                borderWidth: 1.5,
-                borderTopWidth: 0,
-                borderColor: 'rgba(255,255,255,0.14)',
-                borderBottomLeftRadius: 6,
-                borderBottomRightRadius: 6,
-                backgroundColor: '#111',
-              }}
-            >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
-                Standings
-              </Text>
-              <Icon name="chevron-right" size={13} color="#7d7d7d" />
-            </Pressable>
-          )}
+          {/* Secondary rows: the draw stays reachable under a live auction, and
+              standings stay readable after the draw is done. */}
+          {disabled
+            ? null
+            : [
+                ...drawSecondary(cat, tournamentId, auction).map((r) => ({ label: r.label, to: r.href as any })),
+                { label: 'Standings', to: standingsFor(cat) },
+              ].map((row, i, all) => (
+                <Pressable
+                  key={row.label}
+                  onPress={() => router.push(row.to)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${cat.name} ${row.label.toLowerCase()}`}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    minHeight: 44,
+                    paddingHorizontal: 13,
+                    marginTop: -1.5,
+                    borderWidth: 1.5,
+                    borderTopWidth: 0,
+                    borderColor: 'rgba(255,255,255,0.14)',
+                    borderBottomLeftRadius: i === all.length - 1 ? 6 : 0,
+                    borderBottomRightRadius: i === all.length - 1 ? 6 : 0,
+                    backgroundColor: '#111',
+                  }}
+                >
+                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+                    {row.label}
+                  </Text>
+                  <Icon name="chevron-right" size={13} color="#7d7d7d" />
+                </Pressable>
+              ))}
         </View>
         );
       })}

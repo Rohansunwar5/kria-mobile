@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { View, Text, Image, Pressable, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -60,7 +61,7 @@ export default function OnboardingAuth() {
         <IconBtn
           icon="chevron-left"
           label="Go back"
-          onPress={() => (router.canGoBack() ? router.back() : router.replace('/(auth)/login'))}
+          onPress={() => goBack(router, '/(auth)/login')}
         />
         <View style={{ flex: 1 }} />
         <Pressable accessibilityRole="button" onPress={() => router.replace('/(auth)/login')} hitSlop={10}>
@@ -80,7 +81,7 @@ export default function OnboardingAuth() {
               <Kick style={{ letterSpacing: 0.26 * 9 }}>Almost there</Kick>
               <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>STEP 4 OF 4</Text>
             </View>
-            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 35, color: '#fff', marginTop: 12 }}>
+            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 48, color: '#fff', marginTop: 12 }}>
               Who&apos;s on{'\n'}the card?
             </Text>
           </View>
@@ -108,7 +109,7 @@ export default function OnboardingAuth() {
               )}
             </Pressable>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: '#fff' }}>Add a photo</Text>
+              <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Add a photo</Text>
               <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 11, lineHeight: 15, color: '#737373', marginTop: 5 }}>
                 Optional now — you can add it later from your profile.
               </Text>

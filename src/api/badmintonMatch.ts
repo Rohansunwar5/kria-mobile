@@ -26,6 +26,9 @@ export interface BadmintonMatch {
   teams?: { team1Id?: string; team2Id?: string; team1Name?: string; team2Name?: string };
   schedule?: { date?: string; time?: string; court?: string; venue?: string };
   status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'walkover';
+  /** A team-league tie: a parent container whose sub-matches carry `tieId`. */
+  isTie?: boolean;
+  tieId?: string;
   gameScores: GameScore[];
   matchConfig?: { bestOf?: number; pointsToWin?: number };
   winnerId?: string;
@@ -41,5 +44,10 @@ export async function getBadmintonMatch(matchId: string): Promise<BadmintonMatch
 
 export async function getBadmintonMatchesByCategory(categoryId: string): Promise<BadmintonMatch[]> {
   const res = await API.get(`/sports/badminton/match/by-category/${categoryId}`);
+  return unwrap(res) ?? [];
+}
+
+export async function getBadmintonMatchesByTournament(tournamentId: string): Promise<BadmintonMatch[]> {
+  const res = await API.get(`/sports/badminton/match/by-tournament/${tournamentId}`);
   return unwrap(res) ?? [];
 }

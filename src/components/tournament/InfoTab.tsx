@@ -19,7 +19,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={{ marginTop: 20 }}>
-      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 20, color: '#fff', marginBottom: 10 }}>
+      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#fff', marginBottom: 10 }}>
         {title}
       </Text>
       {children}
@@ -92,7 +92,7 @@ export function InfoTab({ tournament, awards }: { tournament: Tournament; awards
                 >
                   <InitialsAvatar name={recipient} size={38} color="#FA4C93" />
                   <View style={{ flex: 1 }}>
-                    <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 15, color: '#fff' }}>
+                    <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 20, color: '#fff' }}>
                       {award.title}
                     </Text>
                     <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 4 }}>

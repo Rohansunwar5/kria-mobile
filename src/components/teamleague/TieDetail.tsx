@@ -71,7 +71,7 @@ export function TieDetail({
                 <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, color: tie.winnerId === team2Id ? '#F97316' : '#a3a3a3' }}>{t2}</Text>
               </View>
             ) : (
-              <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, lineHeight: 18, color: '#F97316' }}>VS</Text>
+              <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, lineHeight: 24, color: '#F97316' }}>VS</Text>
             )}
             <Lbl style={{ letterSpacing: 0.1 * 9, marginTop: 5 }}>
               {showScore ? 'Rubbers won' : completed ? 'Completed' : 'In progress'}

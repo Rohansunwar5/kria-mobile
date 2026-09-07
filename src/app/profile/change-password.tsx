@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { PasswordRuleList, PasswordStrength, passwordRules } from '@/components/auth/PasswordRules';
@@ -39,7 +40,7 @@ export default function ChangePassword() {
 
   return (
     <Screen>
-      <ScreenHeader title="Change password" onBack={() => router.back()} />
+      <ScreenHeader title="Change password" onBack={() => goBack(router)} />
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }} keyboardShouldPersistTaps="handled">

@@ -61,7 +61,7 @@ export default function Profile() {
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14, paddingHorizontal: 16, paddingTop: 10 }}>
             <AvatarPicker name={name} imageUrl={user?.profileImage} size={76} />
             <View style={{ flex: 1, paddingBottom: 3 }}>
-              <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 26, color: '#fff' }}>
+              <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 36, color: '#fff' }}>
                 {name}
               </Text>
             </View>
@@ -101,7 +101,7 @@ export default function Profile() {
                 {user.titles.map((t, i) => (
                   <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 11, backgroundColor: '#F97316', borderRadius: 6 }}>
                     <Icon name="trophy" size={17} color="#0B0B0B" strokeWidth={2.2} />
-                    <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 14, color: '#0B0B0B' }}>
+                    <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: '#0B0B0B' }}>
                       {t}
                     </Text>
                   </View>

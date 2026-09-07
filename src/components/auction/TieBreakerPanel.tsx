@@ -24,7 +24,7 @@ export function TieBreakerPanel({ status, teams }: { status: AuctionStatus; team
       </View>
       <View style={{ paddingHorizontal: 12, paddingVertical: 11 }}>
         {winner ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, lineHeight: 19, color: '#fff' }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, lineHeight: 24, color: '#fff' }}>
             {winner.name}
           </Text>
         ) : (

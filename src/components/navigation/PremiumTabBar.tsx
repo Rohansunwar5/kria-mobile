@@ -1,7 +1,12 @@
 import { View, Pressable, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, type IconName } from '@/components/icons';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import type { Tabs } from 'expo-router';
+
+// expo-router 57 vendors react-navigation, so the tab-bar prop type comes from
+// the Tabs component itself — the standalone @react-navigation/bottom-tabs types
+// are a different, incompatible copy.
+type BottomTabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>>[0];
 
 const ICONS: Record<string, { icon: IconName; label: string }> = {
   home: { icon: 'trophy', label: 'Events' },

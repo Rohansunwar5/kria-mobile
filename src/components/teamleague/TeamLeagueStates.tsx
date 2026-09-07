@@ -12,7 +12,7 @@ export function ChampionBanner({ teamName }: { teamName: string }) {
           <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#16C46A' }}>
             Champion
           </Text>
-          <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 24, color: '#fff', marginTop: 5 }}>
+          <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 32, color: '#fff', marginTop: 5 }}>
             {teamName}
           </Text>
         </View>

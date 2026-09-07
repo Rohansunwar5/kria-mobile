@@ -5,18 +5,17 @@ import type { Registration, Category } from '@/store/slices/registrationSlice';
 import { Tag } from '@/components/StatusPill';
 import { Chip } from '@/components/canvas';
 import { Icon } from '@/components/icons';
+import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Skeleton, EmptyState } from '@/components/states';
 import { STATUS_TAG } from '@/lib/tournamentConstants';
 
 const EDGE: Record<string, string> = {
-  auction_in_progress: '#FA4C93',
+  auction: '#FA4C93',
   ongoing: '#F97316',
-  registration_open: '#16C46A',
+  registration: '#16C46A',
+  bracket_configured: '#F97316',
+  groups_configured: '#F97316',
 };
-
-function initials(name: string) {
-  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-}
 
 /** "Your place in this" — the team you were drafted to, and what happens next. */
 function YourPlace({ team, assignment }: { team: Team; assignment?: Registration }) {
@@ -30,11 +29,9 @@ function YourPlace({ team, assignment }: { team: Team; assignment?: Registration
       </Text>
       <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 13 }}>
-          <View style={{ width: 46, height: 46, borderRadius: 5, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 16, color: '#fff' }}>{initials(team.name)}</Text>
-          </View>
+          <InitialsAvatar name={team.name} logo={team.logo} size={46} color={color} />
           <View style={{ flex: 1 }}>
-            <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 17, color: '#fff' }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: '#fff' }}>
               {team.name}
             </Text>
             <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 5 }}>
@@ -164,7 +161,7 @@ export function OverviewTab({
                 }}
               >
                 <View style={{ flex: 1 }}>
-                  <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 15, color: '#fff' }}>
+                  <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 20, color: '#fff' }}>
                     {cat.name}
                   </Text>
                   <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 4 }}>

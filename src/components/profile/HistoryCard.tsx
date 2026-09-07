@@ -61,7 +61,7 @@ export function HistoryCard({ entry }: { entry: TournamentHistoryEntry }) {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 11, paddingHorizontal: 13, paddingVertical: 11 }}>
         <Icon name={SPORT_ICON[t?.sport || ''] || 'trophy'} size={20} color={highlight ? '#F97316' : '#7d7d7d'} strokeWidth={2} />
         <View style={{ flex: 1 }}>
-          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 16, color: highlight ? '#fff' : '#d4d4d4' }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: highlight ? '#fff' : '#d4d4d4' }}>
             {t?.name || 'Tournament'}
           </Text>
           {sub ? (

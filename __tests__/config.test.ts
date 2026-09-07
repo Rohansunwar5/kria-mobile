@@ -1,6 +1,7 @@
-// Guards the API base URL. This has silently pointed at production twice:
-// once from an app.json `extra` left on the prod URL, once from
-// `expo start --no-dev` flipping __DEV__ and taking the production branch.
+// Guards the API base URL. It still must not branch on __DEV__ — `expo start
+// --no-dev` once flipped the app to production that way. The last-resort
+// fallback is now the production API by choice, so the guarantee that matters
+// is the override order: a local server is always one env var away.
 
 const load = () => {
   let mod: typeof import('@/lib/config');
@@ -19,10 +20,10 @@ describe('API_BASE_URL', () => {
     jest.unmock('expo-constants');
   });
 
-  it('defaults to the local server', () => {
+  it('falls back to the production API when nothing else is configured', () => {
     delete process.env.EXPO_PUBLIC_API_BASE_URL;
     jest.doMock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { extra: {} } } }));
-    expect(load().API_BASE_URL).toBe('http://localhost:4010');
+    expect(load().API_BASE_URL).toBe('https://api.kria.club');
   });
 
   it('reads app.json extra when set', () => {
@@ -43,12 +44,10 @@ describe('API_BASE_URL', () => {
     expect(load().API_BASE_URL).toBe('https://api.example.test');
   });
 
-  it('never falls back to a hardcoded production host', () => {
+  it('still resolves with no expo config at all', () => {
     delete process.env.EXPO_PUBLIC_API_BASE_URL;
     jest.doMock('expo-constants', () => ({ __esModule: true, default: { expoConfig: undefined } }));
-    const url = load().API_BASE_URL;
-    expect(url).toBe('http://localhost:4010');
-    expect(url).not.toMatch(/kria\.club/);
+    expect(load().API_BASE_URL).toBe('https://api.kria.club');
   });
 
   it('points the socket at the same origin as the API', () => {

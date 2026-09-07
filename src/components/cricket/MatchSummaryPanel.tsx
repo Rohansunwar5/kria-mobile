@@ -69,7 +69,7 @@ export function MatchSummaryPanel({
           <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#06240F' }}>
             Result
           </Text>
-          <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 21, color: '#06240F', marginTop: 5 }}>
+          <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#06240F', marginTop: 5 }}>
             {winnerName ? `${winnerName} won` : 'Match complete'}
           </Text>
           {match?.result?.marginOfVictory ? (

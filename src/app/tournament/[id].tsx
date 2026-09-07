@@ -8,6 +8,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchTournament } from '@/store/slices/tournamentSlice';
@@ -23,6 +24,7 @@ import { LiveNowBanner } from '@/components/tournament/LiveNowBanner';
 import { Skeleton, ErrorBlock } from '@/components/states';
 import { Icon } from '@/components/icons';
 import { heroParallax } from '@/lib/motion';
+import { tournamentSports } from '@/lib/sports';
 
 // Eight tabs collapsed to four. Draw absorbs auction + bracket + team league,
 // Info absorbs awards, Players folds into Teams.
@@ -130,11 +132,11 @@ export default function TournamentDetail() {
             tournament={tournament}
             categoryCount={categories.length}
             scrollY={scrollY}
-            onBack={() => router.back()}
+            onBack={() => goBack(router)}
             onShare={share}
             onAnnouncements={() => router.push({ pathname: '/tournament/[id]/announcements', params: { id } })}
           />
-          {id ? <LiveNowBanner tournamentId={id} sport={tournament.sport} /> : null}
+          {id ? <LiveNowBanner tournamentId={id} sports={tournamentSports(tournament)} /> : null}
         </View>
 
         <DetailTabBar tabs={TABS} active={activeTab} onChange={setActiveTab} labels={LABELS} />
@@ -165,14 +167,20 @@ export default function TournamentDetail() {
       </Animated.ScrollView>
 
       <View
-        pointerEvents={pinned ? 'auto' : 'none'}
-        style={{ position: 'absolute', left: 0, right: 0, top: 0 }}
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: 0,
+          // The `pointerEvents` prop is deprecated; it belongs in style now.
+          pointerEvents: pinned ? 'auto' : 'none',
+        }}
       >
         <Animated.View style={barStyle}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Go back"
-            onPress={() => router.back()}
+            onPress={() => goBack(router)}
             style={{
               height: 52,
               flexDirection: 'row',

@@ -107,7 +107,7 @@ export default function Story() {
 
         <View style={{ paddingHorizontal: 20 }}>
           <Kick style={{ letterSpacing: 0.26 * 9 }}>{beat.kicker}</Kick>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 46, lineHeight: 41, color: '#fff', marginTop: 14 }}>
+          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 46, lineHeight: 56, color: '#fff', marginTop: 14 }}>
             {beat.headline}
             <Text style={{ color: '#F97316' }}>{beat.accent}</Text>
           </Text>
