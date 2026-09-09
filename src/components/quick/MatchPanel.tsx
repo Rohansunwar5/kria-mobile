@@ -22,7 +22,7 @@ const LBL = {
 
 const HAIRLINE = 'rgba(255,255,255,0.12)';
 
-function SideColumn({ name, score, games }: { name: string; score: number; games: number }) {
+function SideColumn({ name, score, games }: { name: string; score: number | null; games: number }) {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <Text
@@ -35,10 +35,41 @@ function SideColumn({ name, score, games }: { name: string; score: number; games
       >
         {name}
       </Text>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 54, color: '#fff', marginTop: 4 }}>
-        {String(score)}
-      </Text>
+      {score !== null ? (
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 54, color: '#fff', marginTop: 4 }}>
+          {String(score)}
+        </Text>
+      ) : null}
       <Text style={LBL}>{`games ${games}`}</Text>
+    </View>
+  );
+}
+
+/**
+ * Per-game scores, one entry per completed or in-progress game. The current
+ * (undecided) game — at most one — is emphasised in the brand accent so it
+ * reads as "the game happening now" rather than just another list row. This
+ * is also the only place a completed match's scores live: `currentGame`
+ * returns null once every game has a winner, so the big score display above
+ * has nothing to show and this list is what remains.
+ */
+function GameScores({ gameScores }: { gameScores: QuickMatch['gameScores'] }) {
+  const games = gameScores ?? [];
+  if (games.length === 0) return null;
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 14, flexWrap: 'wrap', marginTop: 12 }}>
+      {games.map((g) => (
+        <Text
+          key={g.gameNumber}
+          style={{
+            fontFamily: 'SpaceMono_700Bold',
+            fontSize: 14,
+            color: g.winnerSideId ? '#d4d4d4' : '#F97316',
+          }}
+        >
+          {`${g.side1Score}-${g.side2Score}`}
+        </Text>
+      ))}
     </View>
   );
 }
@@ -133,9 +164,11 @@ export function MatchPanel({
       </View>
 
       <View style={{ flexDirection: 'row', marginTop: 18, alignItems: 'flex-start' }}>
-        <SideColumn name={match.sides[0].name} score={game ? game.side1Score : 0} games={won.side1} />
-        <SideColumn name={match.sides[1].name} score={game ? game.side2Score : 0} games={won.side2} />
+        <SideColumn name={match.sides[0].name} score={game ? game.side1Score : null} games={won.side1} />
+        <SideColumn name={match.sides[1].name} score={game ? game.side2Score : null} games={won.side2} />
       </View>
+
+      <GameScores gameScores={match.gameScores} />
 
       {result ? (
         <Text

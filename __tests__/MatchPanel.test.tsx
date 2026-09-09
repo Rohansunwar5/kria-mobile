@@ -108,6 +108,48 @@ describe('MatchPanel', () => {
     expect(getByText('Reds won')).toBeTruthy();
   });
 
+  it('disables undo on a cancelled match even when a snapshot exists', () => {
+    // quickMatch.service.ts's cancel path does not clear previousGameScores,
+    // so canUndo(match) is true here. The `status !== 'cancelled'` clause in
+    // MatchPanel's `undoable` expression is the only thing standing between
+    // the host and a guaranteed 400 from the undo endpoint.
+    const cancelled = base({ status: 'cancelled', previousGameScores: [] });
+    const { getByTestId } = panel(cancelled, 'h1');
+    expect(getByTestId('undo').props.accessibilityState.disabled).toBe(true);
+  });
+
+  it('shows a per-game score list instead of a big 0-0 on a completed match', () => {
+    const done = base({
+      status: 'completed',
+      outcome: 'side1',
+      previousGameScores: [{ gameNumber: 2, side1Score: 20, side2Score: 18 }],
+      gameScores: [
+        { gameNumber: 1, side1Score: 21, side2Score: 18, winnerSideId: 's1' },
+        { gameNumber: 2, side1Score: 21, side2Score: 19, winnerSideId: 's1' },
+      ],
+    });
+    const { getByText, queryByText } = panel(done, 'h1');
+
+    // Real per-game scores are visible...
+    expect(getByText('21-18')).toBeTruthy();
+    expect(getByText('21-19')).toBeTruthy();
+    // ...and the completed match does not fall back to rendering two zeros.
+    expect(queryByText('0')).toBeNull();
+  });
+
+  it('emphasises the current undecided game in the per-game list', () => {
+    const live = base({
+      gameScores: [
+        { gameNumber: 1, side1Score: 21, side2Score: 18, winnerSideId: 's1' },
+        { gameNumber: 2, side1Score: 5, side2Score: 3 },
+      ],
+    });
+    const { getByText } = panel(live, 'h1');
+
+    expect(getByText('21-18').props.style.color).not.toBe('#F97316');
+    expect(getByText('5-3').props.style.color).toBe('#F97316');
+  });
+
   it('offers eject on another player but never on the host', () => {
     const withJoiner = base({
       sides: [

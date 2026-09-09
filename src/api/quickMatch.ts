@@ -68,7 +68,12 @@ export async function listMyQuickMatches(): Promise<QuickMatch[]> {
   const payload = unwrap(await API.get('/quick-match/mine')) as QuickMatch[] | null;
   // A player with no matches is a success with nothing in it, not an error —
   // callers render an empty state, they do not branch on null.
-  return payload ?? [];
+  //
+  // The server returns every sport on purpose — cricket's mobile surface will
+  // want this same endpoint. This call is badminton-scoped: MatchPanel,
+  // formatLabel and the point/undo endpoints below all assume badminton, so a
+  // quick cricket match is filtered out here rather than on the server.
+  return (payload ?? []).filter((m) => m.sport === 'badminton');
 }
 
 export async function getQuickMatch(id: string): Promise<QuickMatch> {

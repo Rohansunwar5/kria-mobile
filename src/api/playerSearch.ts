@@ -29,7 +29,12 @@ export async function searchPlayers(q: string): Promise<PlayerHit[]> {
   try {
     const payload = unwrap(await API.get('/player/search', { params: { q } })) as PlayerHit[] | null;
     return payload ?? [];
-  } catch {
-    return [];
+  } catch (err) {
+    // Only the expected "query too short" 422 resolves to an empty list. A
+    // 401, a network failure or a 5xx must not look identical to "no
+    // players found" — an expired token deserves a real error, not silence.
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    if (status === 422) return [];
+    throw err;
   }
 }

@@ -56,6 +56,21 @@ describe('quick match api', () => {
     await expect(listMyQuickMatches()).resolves.toEqual([]);
   });
 
+  it('filters out non-badminton matches — this list is badminton-scoped', async () => {
+    // The server intentionally returns every sport (cricket mobile will want
+    // that later). MatchPanel, formatLabel and the point/undo endpoints all
+    // assume badminton, so this call filters client-side.
+    mock.onGet('/quick-match/mine').reply(200, wrap([
+      match({ _id: 'm1', sport: 'badminton' }),
+      match({ _id: 'm2', sport: 'cricket' }),
+    ]));
+
+    const result = await listMyQuickMatches();
+
+    expect(result).toHaveLength(1);
+    expect(result[0]._id).toBe('m1');
+  });
+
   it('hits unprefixed routes — this server mounts no /api/v1', async () => {
     mock.onGet('/quick-match/mine').reply(200, wrap([]));
     await listMyQuickMatches();
@@ -132,5 +147,15 @@ describe('player search api', () => {
   it('returns an empty list for a query the server rejects', async () => {
     mock.onGet('/player/search').reply(422, { message: 'q must be at least 3 characters.' });
     await expect(searchPlayers('ro')).resolves.toEqual([]);
+  });
+
+  it('does not swallow a 401 as an empty list — an expired token is a real error', async () => {
+    mock.onGet('/player/search').reply(401, { message: 'Unauthorized' });
+    await expect(searchPlayers('roh')).rejects.toBeTruthy();
+  });
+
+  it('does not swallow a 5xx as an empty list', async () => {
+    mock.onGet('/player/search').reply(500, { message: 'Internal error' });
+    await expect(searchPlayers('roh')).rejects.toBeTruthy();
   });
 });

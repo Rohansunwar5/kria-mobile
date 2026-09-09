@@ -115,7 +115,7 @@ function SlotEditor({
       <Text style={LBL}>{slot.playerId ? 'Registered player' : 'Name or find a player'}</Text>
       <TextInput
         value={slot.displayName}
-        onChangeText={(displayName) => onChange({ displayName })}
+        onChangeText={(displayName) => onChange({ playerId: slot.playerId, displayName })}
         placeholder="Player name"
         placeholderTextColor="#5a5a5a"
         style={INPUT}
@@ -173,14 +173,16 @@ export default function NewQuickMatchScreen() {
   const [problem, setProblem] = useState('');
 
   const hostSlot: SlotDraft = { playerId: user?._id, displayName: hostName, locked: true };
-  const picked = [hostSlot, partner, opponent1, opponent2]
+  // Only the slots actually in play for the current doubles/singles choice —
+  // a previously-picked opponent 2 must stop being excluded from search the
+  // moment doubles is turned off, since they are no longer in the match.
+  const side1Slots = doubles ? [hostSlot, partner] : [hostSlot];
+  const side2Slots = doubles ? [opponent1, opponent2] : [opponent1];
+  const picked = [...side1Slots, ...side2Slots]
     .map((slot) => slot.playerId)
     .filter((id): id is string => Boolean(id));
 
   const submit = async () => {
-    const side1Slots = doubles ? [hostSlot, partner] : [hostSlot];
-    const side2Slots = doubles ? [opponent1, opponent2] : [opponent1];
-
     // displayName is required on EVERY slot, including ones carrying a
     // playerId — an empty one is a 422 from the server.
     const named = [...side1Slots, ...side2Slots].every((slot) => slot.displayName.trim().length > 0);

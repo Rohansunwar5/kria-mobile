@@ -60,8 +60,9 @@ export default function JoinQuickMatchScreen() {
       // Every one of these is reachable: the match may have completed, the
       // player may already be in it, or another joiner may have taken the slot
       // between the lookup and the tap.
-      setProblem(serverMessage(err, 'Could not claim that slot.'));
+      const message = serverMessage(err, 'Could not claim that slot.');
       await lookup();
+      setProblem(message);
     } finally {
       setBusy(false);
     }
