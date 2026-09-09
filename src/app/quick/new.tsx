@@ -93,10 +93,14 @@ function SlotEditor({
       return;
     }
     setSearching(true);
-    // searchPlayers swallows the server's 422 for a short query and returns [].
-    const found = await searchPlayers(text.trim());
-    setHits(found.filter((hit) => !alreadyPicked.includes(hit._id)));
-    setSearching(false);
+    try {
+      const found = await searchPlayers(text.trim());
+      setHits(found.filter((hit) => !alreadyPicked.includes(hit._id)));
+    } catch {
+      setHits([]);
+    } finally {
+      setSearching(false);
+    }
   };
 
   if (slot.locked) {
