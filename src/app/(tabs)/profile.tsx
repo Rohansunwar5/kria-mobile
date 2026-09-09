@@ -6,9 +6,11 @@ import { Icon } from '@/components/icons';
 import { Hairlines, Hazard } from '@/components/canvas';
 import { Ghost } from '@/components/states';
 import { AvatarPicker } from '@/components/profile/AvatarPicker';
+import { CareerCard } from '@/components/profile/CareerCard';
 import { MenuRow } from '@/components/profile/MenuRow';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPlayerStats, logout } from '@/store/slices/authSlice';
+import { useCareer } from '@/lib/useCareer';
 import { groupMenu } from '@/lib/profileMenu';
 
 const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
@@ -35,6 +37,7 @@ export default function Profile() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, playerStats } = useAppSelector((s) => s.auth);
+  const career = useCareer(user?._id);
 
   useEffect(() => {
     dispatch(fetchPlayerStats());
@@ -94,6 +97,13 @@ export default function Profile() {
         </View>
 
         <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
+          <CareerCard
+            profile={career.profile}
+            loading={career.loading}
+            error={career.error}
+            onRetry={career.reload}
+          />
+
           {user?.titles?.length ? (
             <View style={{ marginBottom: 16 }}>
               <Text style={{ ...LBL, marginBottom: 8 }}>Honors</Text>

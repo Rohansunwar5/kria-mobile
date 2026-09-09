@@ -8,7 +8,9 @@ import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hairlines, Hazard } from '@/components/canvas';
 import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
 import { Tag } from '@/components/StatusPill';
+import { CareerCard } from '@/components/profile/CareerCard';
 import { getPublicPlayer, type PublicPlayer, type PublicHistoryEntry } from '@/api/profileApi';
+import { useCareer } from '@/lib/useCareer';
 import { formatShortDate } from '@/lib/format';
 
 const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
@@ -33,6 +35,7 @@ export default function PlayerProfile() {
   const { playerId } = useLocalSearchParams<{ playerId: string }>();
   const router = useRouter();
 
+  const career = useCareer(playerId);
   const [data, setData] = useState<{ player: PublicPlayer; history: PublicHistoryEntry[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -136,6 +139,13 @@ export default function PlayerProfile() {
         </View>
 
         <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+          <CareerCard
+            profile={career.profile}
+            loading={career.loading}
+            error={career.error}
+            onRetry={career.reload}
+          />
+
           {player.titles.length ? (
             <View style={{ marginBottom: 16 }}>
               <Text style={{ ...LBL, letterSpacing: 0.18 * 9, marginBottom: 8 }}>Honors</Text>
