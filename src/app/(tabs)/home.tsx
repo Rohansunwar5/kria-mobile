@@ -130,6 +130,26 @@ export default function Home() {
         </ScrollView>
       ) : null}
 
+      <Pressable
+        onPress={() => router.push('/quick')}
+        style={{
+          marginHorizontal: 20,
+          marginTop: 18,
+          marginBottom: 18,
+          borderWidth: 1.5,
+          borderColor: '#F97316',
+          borderRadius: 6,
+          padding: 14,
+        }}
+      >
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }}>
+          Between tournaments
+        </Text>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, color: '#fff', marginTop: 4 }}>
+          Quick matches
+        </Text>
+      </Pressable>
+
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#fff' }}>
           Open for entry
