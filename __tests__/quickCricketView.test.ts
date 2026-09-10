@@ -212,6 +212,22 @@ describe('bowlingSideId', () => {
     expect(bowlingSideId(tossed())).toBe('s2');
   });
 
+  // decision: 'bat' makes the winner bat, so "not the winner" and "not the
+  // batting side" agree — this is the one case that pins them apart. With
+  // 'bowl' the winner IS the bowling side, so a formula that just returns
+  // "the non-winner" (instead of complementing battingSideId) would answer
+  // 's2' here, not 's1'.
+  it('is the toss winner when the winner chose to bowl, complementing battingSideId', () => {
+    const m = base({
+      cricketSetup: {
+        toss: { winnerTeamId: 's1', decision: 'bowl', recorded: true },
+        lineupsSet: true, side1Lineup: [], side2Lineup: [],
+      },
+    });
+    expect(bowlingSideId(m)).toBe('s1');
+    expect(battingSideId(m)).toBe('s2');
+  });
+
   it('is null before the toss', () => {
     expect(bowlingSideId(base())).toBeNull();
   });
