@@ -55,7 +55,7 @@ After any dependency change:
 
 ```bash
 npx tsc --noEmit        # must be clean
-npx jest                # 439 tests, 39 suites
+npx jest                # 521 tests, 49 suites (baseline 2026-09-10)
 npx expo config --json  # proves the plugin/config layer resolves
 ```
 

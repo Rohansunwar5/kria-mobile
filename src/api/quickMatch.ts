@@ -1,4 +1,5 @@
 import API from './axios';
+import type { LiveState } from './cricketMatch';
 
 export interface QuickMatchSlot {
   slotId: string;
@@ -37,13 +38,69 @@ export interface QuickMatch {
    * presence, never its truthiness. See `canUndo` in `@/lib/quickMatchView`.
    */
   previousGameScores?: QuickGameScore[];
-  matchConfig?: { bestOf: number; pointsToWin: number };
+  matchConfig?: {
+    bestOf?: number;
+    pointsToWin?: number;
+    maxOvers?: number;
+    maxOversPerBowler?: number;
+    playersPerTeam?: number;
+  };
+  /** Cricket only. */
+  cricketSetup?: QuickCricketSetup;
+  /** Cricket only. The engine's state, shaped exactly as the tournament path's. */
+  liveState?: LiveState;
+  /** Cricket only. Written at completion. */
+  inningsScores?: QuickInningsScore[];
+}
+
+export type WicketType =
+  | 'bowled' | 'caught' | 'lbw' | 'run_out' | 'stumped' | 'hit_wicket' | 'retired_hurt';
+
+export interface QuickCricketLineupEntry {
+  slotId: string;
+  playerId?: string;
+  name?: string;
+}
+
+export interface QuickCricketSetup {
+  /** Engine-facing name; holds a sideId, not a team id. */
+  toss: { winnerTeamId?: string; decision?: 'bat' | 'bowl'; recorded: boolean };
+  lineupsSet: boolean;
+  side1Lineup: QuickCricketLineupEntry[];
+  side2Lineup: QuickCricketLineupEntry[];
+}
+
+export interface QuickInningsScore {
+  inningsNumber: number;
+  battingSideId: string;
+  runs: number;
+  wickets: number;
+  overs: number;
+  balls: number;
+}
+
+export interface BallEntry {
+  batsmanOnStrikeId: string;
+  nonStrikerId: string;
+  bowlerId: string;
+  runs: number;
+  extrasType?: 'wide' | 'no_ball' | 'bye' | 'leg_bye';
+  extrasRuns?: number;
+  wicketType?: WicketType;
+  dismissedPlayerId?: string;
+  fielderId?: string;
 }
 
 export interface CreateQuickMatchBody {
-  sport: 'badminton';
+  sport: 'badminton' | 'cricket';
   sides: { name: string; slots: { playerId?: string; displayName: string }[] }[];
-  matchConfig?: { bestOf?: number; pointsToWin?: number };
+  matchConfig?: {
+    bestOf?: number;
+    pointsToWin?: number;
+    maxOvers?: number;
+    maxOversPerBowler?: number;
+    playersPerTeam?: number;
+  };
 }
 
 /**
@@ -69,11 +126,9 @@ export async function listMyQuickMatches(): Promise<QuickMatch[]> {
   // A player with no matches is a success with nothing in it, not an error —
   // callers render an empty state, they do not branch on null.
   //
-  // The server returns every sport on purpose — cricket's mobile surface will
-  // want this same endpoint. This call is badminton-scoped: MatchPanel,
-  // formatLabel and the point/undo endpoints below all assume badminton, so a
-  // quick cricket match is filtered out here rather than on the server.
-  return (payload ?? []).filter((m) => m.sport === 'badminton');
+  // Both sports. The list screen renders each by sport — the filter that used
+  // to sit here is what kept quick cricket unreachable from the app.
+  return (payload ?? []) as QuickMatch[];
 }
 
 export async function getQuickMatch(id: string): Promise<QuickMatch> {
@@ -111,4 +166,26 @@ export async function cancelQuickMatch(id: string): Promise<QuickMatch> {
 
 export async function removeQuickMatchPlayer(id: string, playerId: string): Promise<QuickMatch> {
   return asMatch(await API.delete(`/quick-match/${id}/players/${playerId}`));
+}
+
+export async function recordQuickToss(
+  id: string,
+  input: { winnerSideId: string; decision: 'bat' | 'bowl' },
+): Promise<QuickMatch> {
+  return asMatch(await API.post(`/quick-match/${id}/cricket/toss`, input));
+}
+
+export async function recordQuickLineup(
+  id: string,
+  input: { sideId: string; players: QuickCricketLineupEntry[] },
+): Promise<QuickMatch> {
+  return asMatch(await API.post(`/quick-match/${id}/cricket/lineup`, input));
+}
+
+export async function recordQuickBall(id: string, ball: BallEntry): Promise<QuickMatch> {
+  return asMatch(await API.post(`/quick-match/${id}/cricket/ball`, ball));
+}
+
+export async function undoQuickBall(id: string): Promise<QuickMatch> {
+  return asMatch(await API.post(`/quick-match/${id}/cricket/undo`));
 }
