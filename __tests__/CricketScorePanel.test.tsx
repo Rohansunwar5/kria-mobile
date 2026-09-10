@@ -252,4 +252,105 @@ describe('CricketScorePanel', () => {
       runs: 0, wicketType: 'caught', dismissedPlayerId: 'a1', fielderId: 'b1',
     }));
   });
+
+  // run_out and retired_hurt can dismiss either batsman — the other five
+  // types only ever dismiss the striker, so those keep defaulting silently.
+  const threePlayerSide1 = [
+    { sideId: 's1', name: 'Reds', slots: [
+      { slotId: 'a1', displayName: 'Kohli' },
+      { slotId: 'a2', displayName: 'Rahul' },
+      { slotId: 'a3', displayName: 'Dhawan' },
+    ] },
+    { sideId: 's2', name: 'Blues', slots: [{ slotId: 'b1', displayName: 'Bumrah' }] },
+  ];
+
+  it('lets the host attribute a run-out to the non-striker, then replaces the non-striker end (not the striker)', () => {
+    const onBall = jest.fn();
+    const { getByText, queryByText, rerender } = render(
+      <CricketScorePanel
+        match={live(midInnings, { sides: threePlayerSide1 })}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+      />
+    );
+
+    fireEvent.press(getByText(/wicket/i));
+    fireEvent.press(getByText(/run out/i));
+
+    expect(getByText(/who was dismissed/i)).toBeTruthy();
+    fireEvent.press(getByText('Rahul'));
+
+    // run_out still needs a fielder, same as before.
+    fireEvent.press(getByText('Bumrah'));
+
+    expect(onBall).toHaveBeenCalledWith(expect.objectContaining({
+      wicketType: 'run_out', dismissedPlayerId: 'a2', fielderId: 'b1',
+    }));
+
+    // The engine flags nextBatsmanNeeded but never says which end — the
+    // departed non-striker's id is still sitting in liveState.nonStrikerId.
+    rerender(
+      <CricketScorePanel
+        match={live({ ...midInnings, nextBatsmanNeeded: true }, { sides: threePlayerSide1 })}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+      />
+    );
+
+    expect(getByText(/who is at the non-striker/i)).toBeTruthy();
+    expect(queryByText(/who is on strike/i)).toBeNull();
+    // The surviving striker must not be offered as their own replacement.
+    expect(queryByText('Kohli')).toBeNull();
+
+    fireEvent.press(getByText('Dhawan'));
+    fireEvent.press(getByText('4'));
+
+    expect(onBall).toHaveBeenLastCalledWith({
+      batsmanOnStrikeId: 'a1', nonStrikerId: 'a3', bowlerId: 'b1', runs: 4,
+    });
+  });
+
+  it('lets a retired-hurt dismissal target the non-striker directly, with no fielder step', () => {
+    const onBall = jest.fn();
+    const { getByText } = render(
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+    );
+
+    fireEvent.press(getByText(/wicket/i));
+    fireEvent.press(getByText(/retired hurt/i));
+
+    expect(getByText(/who was dismissed/i)).toBeTruthy();
+    fireEvent.press(getByText('Rahul'));
+
+    expect(onBall).toHaveBeenCalledWith(expect.objectContaining({
+      wicketType: 'retired_hurt', dismissedPlayerId: 'a2',
+    }));
+  });
+
+  it('still defaults a plain run-out choosing the striker, replacing the striker end as before', () => {
+    const onBall = jest.fn();
+    const { getByText, queryByText, rerender } = render(
+      <CricketScorePanel
+        match={live(midInnings, { sides: threePlayerSide1 })}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+      />
+    );
+
+    fireEvent.press(getByText(/wicket/i));
+    fireEvent.press(getByText(/run out/i));
+    fireEvent.press(getByText('Kohli'));
+    fireEvent.press(getByText('Bumrah'));
+
+    expect(onBall).toHaveBeenCalledWith(expect.objectContaining({
+      wicketType: 'run_out', dismissedPlayerId: 'a1', fielderId: 'b1',
+    }));
+
+    rerender(
+      <CricketScorePanel
+        match={live({ ...midInnings, nextBatsmanNeeded: true }, { sides: threePlayerSide1 })}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+      />
+    );
+
+    expect(getByText(/who is on strike/i)).toBeTruthy();
+    expect(queryByText(/who is at the non-striker/i)).toBeNull();
+  });
 });

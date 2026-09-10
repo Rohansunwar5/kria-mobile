@@ -62,10 +62,16 @@ const WICKETS: { type: WicketType; label: string }[] = [
 
 const FIELDER_TYPES: WicketType[] = ['caught', 'run_out', 'stumped'];
 
+// Only these two can dismiss EITHER batsman — a run-out or a retired-hurt
+// walk-off can happen at either end. The other five always dismiss the
+// striker, so they skip this step and keep defaulting as before.
+const EITHER_END_TYPES: WicketType[] = ['run_out', 'retired_hurt'];
+
 const EXTRAS_RUNS = [0, 1, 2, 3, 4, 5, 6];
 
 type Pending = { strikerId?: string; nonStrikerId?: string; bowlerId?: string };
-type EntryMode = 'closed' | 'extras' | 'extras-runs' | 'wicket' | 'fielder';
+type EntryMode = 'closed' | 'extras' | 'extras-runs' | 'wicket' | 'wicket-who' | 'fielder';
+type CreaseEnd = 'striker' | 'non-striker';
 
 /**
  * The score panel: header, then either a name-picking prompt (first ball of
@@ -88,6 +94,13 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   const [mode, setMode] = useState<EntryMode>('closed');
   const [chosenWicketType, setChosenWicketType] = useState<WicketType | null>(null);
   const [chosenExtrasType, setChosenExtrasType] = useState<'wide' | 'no_ball' | 'bye' | 'leg_bye' | null>(null);
+  const [chosenDismissedId, setChosenDismissedId] = useState<string | null>(null);
+  // Which end the LAST wicket vacated. The engine's nextBatsmanNeeded flag
+  // says a replacement is needed but never which end — this is the only
+  // record of that, so the follow-up prompt below reads it rather than
+  // always assuming the striker (see Finding 2: a departed non-striker's id
+  // would otherwise stay wired into every remaining delivery).
+  const [vacatedEnd, setVacatedEnd] = useState<CreaseEnd>('striker');
 
   const isHost = Boolean(playerId) && playerId === match.hostId;
 
@@ -146,14 +159,19 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   const promptOutstanding = firstBall || need !== null;
 
   if (promptOutstanding) {
-    const needsStriker = firstBall || need === 'batsman' || need === 'both';
-    const needsNonStriker = firstBall;
+    // Mid-innings, a batsman replacement is needed at whichever end the last
+    // wicket vacated — `need` only says a replacement is needed, never which
+    // end, so `vacatedEnd` (set when the dismissed player was chosen) decides.
+    const needsBatsmanReplacement = !firstBall && (need === 'batsman' || need === 'both');
+    const needsStriker = firstBall || (needsBatsmanReplacement && vacatedEnd === 'striker');
+    const needsNonStriker = firstBall || (needsBatsmanReplacement && vacatedEnd === 'non-striker');
     const needsBowler = firstBall || need === 'bowler' || need === 'both';
 
-    // A mid-innings replacement batsman must not be the player already
-    // standing at the other end — that is not a real cricket state, and the
-    // server's shape check would accept it without complaint.
-    const excludedFromBatsman = pending.nonStrikerId ?? match.liveState?.nonStrikerId;
+    // A replacement must not be the player already standing at the other
+    // end — that is not a real cricket state, and the server's shape check
+    // would accept it without complaint.
+    const excludedFromStriker = pending.nonStrikerId ?? match.liveState?.nonStrikerId;
+    const excludedFromNonStriker = pending.strikerId ?? match.liveState?.strikerId;
 
     if (needsStriker && !pending.strikerId) {
       return (
@@ -162,7 +180,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
           <Text style={LBL}>Who is on strike?</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
             {battingLineup
-              .filter((slot) => slot.slotId !== excludedFromBatsman)
+              .filter((slot) => slot.slotId !== excludedFromStriker)
               .map((slot) => (
                 <Btn
                   key={slot.slotId}
@@ -184,7 +202,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
           <Text style={LBL}>Who is at the non-striker&apos;s end?</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
             {battingLineup
-              .filter((slot) => slot.slotId !== pending.strikerId)
+              .filter((slot) => slot.slotId !== excludedFromNonStriker)
               .map((slot) => (
                 <Btn
                   key={slot.slotId}
@@ -228,6 +246,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
     setMode('closed');
     setChosenWicketType(null);
     setChosenExtrasType(null);
+    setChosenDismissedId(null);
   };
 
   const post = (extra: Partial<BallEntry>) => {
@@ -244,6 +263,15 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   };
 
   const strikerName = battingLineup.find((s) => s.slotId === strikerId)?.displayName;
+  const nonStrikerName = battingLineup.find((s) => s.slotId === nonStrikerId)?.displayName;
+
+  // The two candidates for "who was dismissed" — run_out/retired_hurt only.
+  // Filtered so a missing name (should not happen once promptOutstanding has
+  // resolved) never reaches a Btn without a label.
+  const dismissedChoices: { id: string; label: string; end: CreaseEnd }[] = [
+    strikerId && strikerName ? { id: strikerId, label: strikerName, end: 'striker' as const } : null,
+    nonStrikerId && nonStrikerName ? { id: nonStrikerId, label: nonStrikerName, end: 'non-striker' as const } : null,
+  ].filter((choice): choice is { id: string; label: string; end: CreaseEnd } => choice !== null);
 
   return (
     <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 14 }}>
@@ -315,6 +343,15 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
               label={w.label}
               disabled={busy}
               onPress={busy ? undefined : () => {
+                if (EITHER_END_TYPES.includes(w.type)) {
+                  setChosenWicketType(w.type);
+                  setMode('wicket-who');
+                  return;
+                }
+                // Every other type always dismisses the striker — reset here
+                // in case an earlier run-out/retired-hurt left this pointed
+                // at the non-striker's end.
+                setVacatedEnd('striker');
                 if (FIELDER_TYPES.includes(w.type)) {
                   setChosenWicketType(w.type);
                   setMode('fielder');
@@ -327,6 +364,31 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
         </View>
       ) : null}
 
+      {mode === 'wicket-who' && chosenWicketType ? (
+        <View style={{ gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
+          <Text style={LBL}>Who was dismissed?</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+            {dismissedChoices.map((choice) => (
+              <Btn
+                key={choice.id}
+                label={choice.label}
+                disabled={busy}
+                onPress={busy ? undefined : () => {
+                  setVacatedEnd(choice.end);
+                  setChosenDismissedId(choice.id);
+                  // run_out is also a fielding action; retired_hurt is not.
+                  if (chosenWicketType === 'run_out') {
+                    setMode('fielder');
+                    return;
+                  }
+                  post({ wicketType: chosenWicketType, dismissedPlayerId: choice.id });
+                }}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       {mode === 'fielder' && chosenWicketType ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
           {bowlingLineup.map((slot) => (
@@ -336,7 +398,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
               disabled={busy}
               onPress={busy ? undefined : () => post({
                 wicketType: chosenWicketType,
-                dismissedPlayerId: strikerId,
+                dismissedPlayerId: chosenDismissedId ?? strikerId,
                 fielderId: slot.slotId,
               })}
             />
