@@ -219,6 +219,8 @@ export default function NewQuickMatchScreen() {
         side2Name: side2Name.trim(),
         maxOvers,
         squadSize,
+        hostPlayerId: user?._id,
+        hostName,
       }));
       return;
     }
