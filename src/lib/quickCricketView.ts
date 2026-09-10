@@ -132,3 +132,15 @@ export function cricketOutcomeLabel(match: QuickMatch): string | null {
   // written by any path today but the branch keeps the return total.
   return 'No result';
 }
+
+/**
+ * Which panel the detail screen should render.
+ *
+ * Extracted from the screen so it can be tested: no test in this codebase
+ * renders an `app/` screen, so a ternary living in the JSX would be uncovered.
+ * The screen keeps only the act of rendering.
+ */
+export function panelFor(match: QuickMatch): 'badminton' | 'cricket-setup' | 'cricket-score' {
+  if (match.sport !== 'cricket') return 'badminton';
+  return setupStage(match) === 'ready' ? 'cricket-score' : 'cricket-setup';
+}

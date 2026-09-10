@@ -6,6 +6,7 @@ import { Skeleton, EmptyState, ErrorBlock } from '@/components/states';
 import { Tag } from '@/components/StatusPill';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
 import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMatchView';
+import { scoreLine } from '@/lib/quickCricketView';
 import { useAppSelector } from '@/store/hooks';
 
 const LBL = {
@@ -18,6 +19,7 @@ const LBL = {
 
 function MatchRow({ match, playerId }: { match: QuickMatch; playerId?: string }) {
   const result = outcomeLabel(match);
+  const summary = match.sport === 'cricket' ? (scoreLine(match) ?? 'Not started') : formatLabel(match);
   return (
     <Pressable
       onPress={() => router.push({ pathname: '/quick/[id]', params: { id: match._id } })}
@@ -45,7 +47,7 @@ function MatchRow({ match, playerId }: { match: QuickMatch; playerId?: string })
       >
         {`${match.sides[0].name} v ${match.sides[1].name}`}
       </Text>
-      <Text style={{ ...LBL, marginTop: 4 }}>{result ? `${formatLabel(match)} · ${result}` : formatLabel(match)}</Text>
+      <Text style={{ ...LBL, marginTop: 4 }}>{result ? `${summary} · ${result}` : summary}</Text>
     </Pressable>
   );
 }

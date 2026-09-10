@@ -3,13 +3,20 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { Skeleton, ErrorBlock } from '@/components/states';
 import { MatchPanel } from '@/components/quick/MatchPanel';
+import { CricketSetupPanel } from '@/components/quick/CricketSetupPanel';
+import { CricketScorePanel } from '@/components/quick/CricketScorePanel';
 import { useQuickMatch } from '@/lib/useQuickMatch';
+import { panelFor } from '@/lib/quickCricketView';
 import { useAppSelector } from '@/store/hooks';
 
 export default function QuickMatchScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAppSelector((s) => s.auth);
-  const { match, loading, error, busy, reload, point, undo, cancel, removePlayer } = useQuickMatch(id);
+  const {
+    match, loading, error, busy, reload,
+    point, undo, cancel, removePlayer,
+    toss, lineup, ball, undoBall,
+  } = useQuickMatch(id);
 
   return (
     <Screen>
@@ -42,7 +49,7 @@ export default function QuickMatchScreen() {
           </View>
         ) : null}
 
-        {match ? (
+        {match && panelFor(match) === 'badminton' ? (
           <MatchPanel
             match={match}
             playerId={user?._id}
@@ -51,6 +58,27 @@ export default function QuickMatchScreen() {
             onUndo={undo}
             onCancel={cancel}
             onRemovePlayer={removePlayer}
+          />
+        ) : null}
+
+        {match && panelFor(match) === 'cricket-setup' ? (
+          <CricketSetupPanel
+            match={match}
+            playerId={user?._id}
+            busy={busy}
+            onToss={toss}
+            onLineup={lineup}
+          />
+        ) : null}
+
+        {match && panelFor(match) === 'cricket-score' ? (
+          <CricketScorePanel
+            match={match}
+            playerId={user?._id}
+            busy={busy}
+            onBall={ball}
+            onUndo={undoBall}
+            onCancel={cancel}
           />
         ) : null}
       </ScrollView>
