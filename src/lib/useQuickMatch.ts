@@ -3,9 +3,15 @@ import { useFocusEffect } from 'expo-router';
 import {
   cancelQuickMatch,
   getQuickMatch,
+  recordQuickBall,
+  recordQuickLineup,
   recordQuickPoint,
+  recordQuickToss,
   removeQuickMatchPlayer,
+  undoQuickBall,
   undoQuickPoint,
+  type BallEntry,
+  type QuickCricketLineupEntry,
   type QuickMatch,
 } from '@/api/quickMatch';
 
@@ -88,5 +94,29 @@ export function useQuickMatch(id?: string) {
     return run(() => removeQuickMatchPlayer(id, playerId));
   }, [id, run]);
 
-  return { match, loading, error, busy, reload: load, point, undo, cancel, removePlayer };
+  const toss = useCallback((input: { winnerSideId: string; decision: 'bat' | 'bowl' }) => {
+    if (!id) return;
+    return run(() => recordQuickToss(id, input));
+  }, [id, run]);
+
+  const lineup = useCallback((input: { sideId: string; players: QuickCricketLineupEntry[] }) => {
+    if (!id) return;
+    return run(() => recordQuickLineup(id, input));
+  }, [id, run]);
+
+  const ball = useCallback((entry: BallEntry) => {
+    if (!id) return;
+    return run(() => recordQuickBall(id, entry));
+  }, [id, run]);
+
+  const undoBall = useCallback(() => {
+    if (!id) return;
+    return run(() => undoQuickBall(id));
+  }, [id, run]);
+
+  return {
+    match, loading, error, busy, reload: load,
+    point, undo, cancel, removePlayer,
+    toss, lineup, ball, undoBall,
+  };
 }
