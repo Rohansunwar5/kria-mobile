@@ -22,8 +22,8 @@ const LBL = {
 
 const HAIRLINE = 'rgba(255,255,255,0.12)';
 
-function Btn({ label, onPress, disabled, accent }: {
-  label: string; onPress?: () => void; disabled?: boolean; accent?: boolean;
+function Btn({ label, onPress, disabled, accent, danger }: {
+  label: string; onPress?: () => void; disabled?: boolean; accent?: boolean; danger?: boolean;
 }) {
   return (
     <Pressable
@@ -32,11 +32,11 @@ function Btn({ label, onPress, disabled, accent }: {
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderWidth: 1,
-        borderColor: accent ? '#F97316' : HAIRLINE,
+        borderColor: danger ? '#FF4438' : accent ? '#F97316' : HAIRLINE,
         opacity: disabled ? 0.4 : 1,
       }}
     >
-      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, color: '#fff' }}>
+      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, color: danger ? '#FF4438' : '#fff' }}>
         {label}
       </Text>
     </Pressable>
@@ -74,7 +74,7 @@ type EntryMode = 'closed' | 'extras' | 'wicket' | 'fielder';
  * `nextBowlerNeeded` fires, there is no id to read yet, so this panel
  * collects them locally before any run button is reachable.
  */
-export function CricketScorePanel({ match, playerId, busy, onBall, onUndo }: {
+export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCancel }: {
   match: QuickMatch;
   playerId?: string;
   busy: boolean;
@@ -128,6 +128,16 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo }: {
   const battingLineup = match.sides.find((s) => s.sideId === battingSide)?.slots ?? [];
   const bowlingLineup = match.sides.find((s) => s.sideId === bowlingSide)?.slots ?? [];
 
+  // Reachable only once `isHost` and `match.status === 'live'` are both known
+  // true (the non-host and completed/cancelled branches above already
+  // returned), so it needs no visibility guard of its own — only the busy one
+  // every control here takes at its call site.
+  const cancelRow = (
+    <View style={{ marginTop: 4 }}>
+      <Btn label="Cancel match" danger disabled={busy} onPress={busy ? undefined : () => onCancel()} />
+    </View>
+  );
+
   const need = whoIsNeeded(match);
   const firstBall = isFirstBallOfInnings(match);
   const promptOutstanding = firstBall || need !== null;
@@ -137,21 +147,29 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo }: {
     const needsNonStriker = firstBall;
     const needsBowler = firstBall || need === 'bowler' || need === 'both';
 
+    // A mid-innings replacement batsman must not be the player already
+    // standing at the other end — that is not a real cricket state, and the
+    // server's shape check would accept it without complaint.
+    const excludedFromBatsman = pending.nonStrikerId ?? match.liveState?.nonStrikerId;
+
     if (needsStriker && !pending.strikerId) {
       return (
         <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 14 }}>
           {header}
           <Text style={LBL}>Who is on strike?</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {battingLineup.map((slot) => (
-              <Btn
-                key={slot.slotId}
-                label={slot.displayName}
-                disabled={busy}
-                onPress={busy ? undefined : () => setPending((p) => ({ ...p, strikerId: slot.slotId }))}
-              />
-            ))}
+            {battingLineup
+              .filter((slot) => slot.slotId !== excludedFromBatsman)
+              .map((slot) => (
+                <Btn
+                  key={slot.slotId}
+                  label={slot.displayName}
+                  disabled={busy}
+                  onPress={busy ? undefined : () => setPending((p) => ({ ...p, strikerId: slot.slotId }))}
+                />
+              ))}
           </View>
+          {cancelRow}
         </View>
       );
     }
@@ -173,6 +191,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo }: {
                 />
               ))}
           </View>
+          {cancelRow}
         </View>
       );
     }
@@ -192,6 +211,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo }: {
               />
             ))}
           </View>
+          {cancelRow}
         </View>
       );
     }
@@ -301,6 +321,8 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo }: {
           ))}
         </View>
       ) : null}
+
+      {cancelRow}
     </View>
   );
 }

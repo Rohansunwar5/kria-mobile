@@ -163,4 +163,75 @@ describe('CricketScorePanel', () => {
     fireEvent.press(getByText('4'));
     expect(onBall).not.toHaveBeenCalled();
   });
+
+  it('lets the host cancel the match', () => {
+    const onCancel = jest.fn();
+    const { getByText } = render(
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={onCancel} />
+    );
+
+    fireEvent.press(getByText(/cancel match/i));
+    expect(onCancel).toHaveBeenCalled();
+  });
+
+  it('gives a non-host no cancel control', () => {
+    const { queryByText } = render(
+      <CricketScorePanel match={live(midInnings)} playerId="someone-else" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()} />
+    );
+
+    expect(queryByText(/cancel match/i)).toBeNull();
+  });
+
+  it('collects both a new batsman and a new bowler when the engine asks for both, and posts the chosen ids rather than the stale ones', () => {
+    const onBall = jest.fn();
+    const { getByText, queryByText } = render(
+      <CricketScorePanel
+        match={live({
+          ...midInnings,
+          nextBatsmanNeeded: true,
+          nextBowlerNeeded: true,
+          strikerId: 'stale-striker',
+          currentBowlerId: 'stale-bowler',
+        })}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+      />
+    );
+
+    expect(getByText(/who is on strike/i)).toBeTruthy();
+    expect(queryByText('4')).toBeNull();
+
+    fireEvent.press(getByText('Kohli'));
+
+    expect(getByText(/who is bowling/i)).toBeTruthy();
+    expect(queryByText('4')).toBeNull();
+
+    fireEvent.press(getByText('Bumrah'));
+
+    expect(queryByText('4')).toBeTruthy();
+    fireEvent.press(getByText('4'));
+
+    expect(onBall).toHaveBeenCalledWith({
+      batsmanOnStrikeId: 'a1', nonStrikerId: 'a2', bowlerId: 'b1', runs: 4,
+    });
+  });
+
+  it('reveals a fielder row from the bowling side after choosing caught, and posts the fielder alongside the dismissal', () => {
+    const onBall = jest.fn();
+    const { getByText, queryByText } = render(
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+    );
+
+    fireEvent.press(getByText(/wicket/i));
+    fireEvent.press(getByText(/caught/i));
+
+    expect(getByText('Bumrah')).toBeTruthy();
+    expect(queryByText('Kohli')).toBeNull();
+    expect(queryByText('Rahul')).toBeNull();
+
+    fireEvent.press(getByText('Bumrah'));
+
+    expect(onBall).toHaveBeenCalledWith(expect.objectContaining({
+      runs: 0, wicketType: 'caught', dismissedPlayerId: 'a1', fielderId: 'b1',
+    }));
+  });
 });
