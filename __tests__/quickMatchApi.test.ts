@@ -56,10 +56,9 @@ describe('quick match api', () => {
     await expect(listMyQuickMatches()).resolves.toEqual([]);
   });
 
-  it('filters out non-badminton matches — this list is badminton-scoped', async () => {
-    // The server intentionally returns every sport (cricket mobile will want
-    // that later). MatchPanel, formatLabel and the point/undo endpoints all
-    // assume badminton, so this call filters client-side.
+  it('returns every sport — the list is no longer badminton-scoped', async () => {
+    // Spec 3b §4.1 deliberately widened this: quick cricket's mobile surface
+    // is what the badminton-only filter was always waiting on.
     mock.onGet('/quick-match/mine').reply(200, wrap([
       match({ _id: 'm1', sport: 'badminton' }),
       match({ _id: 'm2', sport: 'cricket' }),
@@ -67,8 +66,8 @@ describe('quick match api', () => {
 
     const result = await listMyQuickMatches();
 
-    expect(result).toHaveLength(1);
-    expect(result[0]._id).toBe('m1');
+    expect(result).toHaveLength(2);
+    expect(result.map((m) => m.sport)).toEqual(['badminton', 'cricket']);
   });
 
   it('hits unprefixed routes — this server mounts no /api/v1', async () => {
