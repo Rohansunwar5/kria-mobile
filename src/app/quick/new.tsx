@@ -169,6 +169,12 @@ export default function NewQuickMatchScreen() {
   // Badminton stays the default so anyone ignoring the sport choice gets
   // today's flow unchanged.
   const [sport, setSport] = useState<'badminton' | 'cricket'>('badminton');
+  // Is the host playing, or only keeping score? Career credit is written from
+  // sides[].slots[].playerId, so this decides whether the host earns figures
+  // for the match. Defaults to true, which is the behaviour badminton has
+  // always had — so a host who ignores this control gets exactly what they
+  // got before.
+  const [hostPlays, setHostPlays] = useState(true);
   const [maxOvers, setMaxOvers] = useState(8);
   const [squadSize, setSquadSize] = useState(6);
 
@@ -183,7 +189,12 @@ export default function NewQuickMatchScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [problem, setProblem] = useState('');
 
-  const hostSlot: SlotDraft = { playerId: user?._id, displayName: hostName, locked: true };
+  // Locked only while the host is playing — the slot is theirs and not
+  // reassignable. When they are only scoring it becomes an ordinary
+  // placeholder someone else can be searched into or can claim by code.
+  const hostSlot: SlotDraft = hostPlays
+    ? { playerId: user?._id, displayName: hostName, locked: true }
+    : { displayName: 'Player 1' };
   // Only the slots actually in play for the current doubles/singles choice —
   // a previously-picked opponent 2 must stop being excluded from search the
   // moment doubles is turned off, since they are no longer in the match.
@@ -221,6 +232,7 @@ export default function NewQuickMatchScreen() {
         squadSize,
         hostPlayerId: user?._id,
         hostName,
+        hostPlays,
       }));
       return;
     }
@@ -274,6 +286,32 @@ export default function NewQuickMatchScreen() {
             </Pressable>
           ))}
         </View>
+
+        <Text style={{ ...LBL, marginTop: 18 }}>Your role</Text>
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+          {([true, false] as const).map((playing) => (
+            <Pressable
+              key={String(playing)}
+              onPress={() => setHostPlays(playing)}
+              style={{
+                flex: 1,
+                paddingVertical: 12,
+                borderRadius: 4,
+                alignItems: 'center',
+                backgroundColor: hostPlays === playing ? '#F97316' : 'rgba(255,255,255,0.08)',
+              }}
+            >
+              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: hostPlays === playing ? '#0B0B0B' : '#d4d4d4' }}>
+                {playing ? "I'm playing" : "I'm just scoring"}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: '#7d7d7d', marginTop: 6 }}>
+          {hostPlays
+            ? 'You take a slot and the match counts towards your record.'
+            : 'You score only — the match will not count towards your record.'}
+        </Text>
 
         {sport === 'badminton' ? (
           <>

@@ -8,6 +8,16 @@ export interface CricketCreateInput {
   /** The logged-in host. May be absent, matching badminton's `user?._id`. */
   hostPlayerId?: string;
   hostName: string;
+  /**
+   * Is the host one of the players, or only keeping score?
+   *
+   * Career credit is written from `sides[].slots[].playerId`, so this decides
+   * whether the host earns figures for the match. A host who only scores must
+   * not be credited with a match they did not play, and a host who IS playing
+   * must not be silently left out. The screen offers the choice and defaults
+   * to `true`.
+   */
+  hostPlays: boolean;
 }
 
 /** Ranges mirror the server validator, so a bad config is caught inline
@@ -29,12 +39,19 @@ export function validateCricketConfig(input: { maxOvers: number; squadSize: numb
  * from slots and never typed fresh — see `lineupFromSlots` and spec §2. A side
  * created with fewer slots than its squad simply cannot field them.
  *
- * Side 1's first slot is always the host, carrying `playerId` — mirroring
- * `hostSlot` in `app/quick/new.tsx` for badminton. Career credit is written
- * from `sides[].slots[].playerId` and nothing else, so a host slot with no
- * `playerId` would score the match while crediting nobody. Every other slot
- * stays a generated placeholder with the `playerId` key left absent (not
- * `undefined`) so it matches the server's optional field.
+ * Side 1's first slot is the host — carrying `playerId` — only when
+ * `hostPlays`. Career credit is written from `sides[].slots[].playerId` and
+ * nothing else, so that flag is what decides whether the host earns figures:
+ * a host slot with no `playerId` would score the match while crediting nobody,
+ * and a host slotted when they were only keeping score would earn a record for
+ * a match they never played. Every other slot stays a generated placeholder
+ * with the `playerId` key left absent (not `undefined`) so it matches the
+ * server's optional field.
+ *
+ * The squad size is unchanged either way, so the slot a scoring host does not
+ * take remains claimable by whoever actually plays — and the host can still
+ * claim one later by join code if they change their mind, since they are not
+ * an occupant.
  *
  * `maxOversPerBowler` is deliberately not sent: a casual host does not think in
  * bowler quotas, and the server default of 4 is harmless.
@@ -45,8 +62,12 @@ export function buildCricketCreateBody(input: CricketCreateInput): CreateQuickMa
     (_unused, i) => ({ displayName: `Player ${startAt + i}` }),
   );
 
-  const hostSlot = { playerId: input.hostPlayerId, displayName: input.hostName };
-  const side1Slots = [hostSlot, ...placeholders(input.squadSize - 1, 2)];
+  const side1Slots = input.hostPlays
+    ? [
+      { playerId: input.hostPlayerId, displayName: input.hostName },
+      ...placeholders(input.squadSize - 1, 2),
+    ]
+    : placeholders(input.squadSize, 1);
   const side2Slots = placeholders(input.squadSize, 1);
 
   return {
