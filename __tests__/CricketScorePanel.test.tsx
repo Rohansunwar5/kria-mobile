@@ -95,7 +95,7 @@ describe('CricketScorePanel', () => {
     expect(getByText(/who is bowling/i)).toBeTruthy();
   });
 
-  it('posts extras with their type and runs', () => {
+  it('posts extras with their type and the chosen run count', () => {
     const onBall = jest.fn();
     const { getByText } = render(
       <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
@@ -103,9 +103,27 @@ describe('CricketScorePanel', () => {
 
     fireEvent.press(getByText(/extras/i));
     fireEvent.press(getByText(/wide/i));
+    fireEvent.press(getByText('1'));
 
     expect(onBall).toHaveBeenCalledWith(expect.objectContaining({
       runs: 0, extrasType: 'wide', extrasRuns: 1,
+    }));
+  });
+
+  // §4.4 calls for the extras sheet to collect type + runs. A leg-bye or wide
+  // that runs away for more than one is routine and must not be capped at 1.
+  it('posts a wide with 4 runs when the host picks a higher extras total', () => {
+    const onBall = jest.fn();
+    const { getByText } = render(
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+    );
+
+    fireEvent.press(getByText(/extras/i));
+    fireEvent.press(getByText(/wide/i));
+    fireEvent.press(getByText('4'));
+
+    expect(onBall).toHaveBeenCalledWith(expect.objectContaining({
+      runs: 0, extrasType: 'wide', extrasRuns: 4,
     }));
   });
 

@@ -62,8 +62,10 @@ const WICKETS: { type: WicketType; label: string }[] = [
 
 const FIELDER_TYPES: WicketType[] = ['caught', 'run_out', 'stumped'];
 
+const EXTRAS_RUNS = [0, 1, 2, 3, 4, 5, 6];
+
 type Pending = { strikerId?: string; nonStrikerId?: string; bowlerId?: string };
-type EntryMode = 'closed' | 'extras' | 'wicket' | 'fielder';
+type EntryMode = 'closed' | 'extras' | 'extras-runs' | 'wicket' | 'fielder';
 
 /**
  * The score panel: header, then either a name-picking prompt (first ball of
@@ -85,6 +87,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   const [pending, setPending] = useState<Pending>({});
   const [mode, setMode] = useState<EntryMode>('closed');
   const [chosenWicketType, setChosenWicketType] = useState<WicketType | null>(null);
+  const [chosenExtrasType, setChosenExtrasType] = useState<'wide' | 'no_ball' | 'bye' | 'leg_bye' | null>(null);
 
   const isHost = Boolean(playerId) && playerId === match.hostId;
 
@@ -224,6 +227,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   const closeEntryRows = () => {
     setMode('closed');
     setChosenWicketType(null);
+    setChosenExtrasType(null);
   };
 
   const post = (extra: Partial<BallEntry>) => {
@@ -250,17 +254,19 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
         </Text>
       ) : null}
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-        {[0, 1, 2, 3, 4, 6].map((n) => (
-          <Btn
-            key={n}
-            label={String(n)}
-            accent={n === 4 || n === 6}
-            disabled={busy}
-            onPress={busy ? undefined : () => post({ runs: n })}
-          />
-        ))}
-      </View>
+      {mode !== 'extras-runs' ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+          {[0, 1, 2, 3, 4, 6].map((n) => (
+            <Btn
+              key={n}
+              label={String(n)}
+              accent={n === 4 || n === 6}
+              disabled={busy}
+              onPress={busy ? undefined : () => post({ runs: n })}
+            />
+          ))}
+        </View>
+      ) : null}
 
       {mode === 'closed' ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
@@ -279,7 +285,23 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
               key={e.type}
               label={e.label}
               disabled={busy}
-              onPress={busy ? undefined : () => post({ extrasType: e.type, extrasRuns: 1 })}
+              onPress={busy ? undefined : () => {
+                setChosenExtrasType(e.type);
+                setMode('extras-runs');
+              }}
+            />
+          ))}
+        </View>
+      ) : null}
+
+      {mode === 'extras-runs' && chosenExtrasType ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
+          {EXTRAS_RUNS.map((n) => (
+            <Btn
+              key={n}
+              label={String(n)}
+              disabled={busy}
+              onPress={busy ? undefined : () => post({ extrasType: chosenExtrasType, extrasRuns: n })}
             />
           ))}
         </View>
