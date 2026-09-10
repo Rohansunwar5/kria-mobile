@@ -5,6 +5,7 @@ import { Screen } from '@/components/Screen';
 import { createQuickMatch, type CreateQuickMatchBody } from '@/api/quickMatch';
 import { searchPlayers, type PlayerHit } from '@/api/playerSearch';
 import { useAppSelector } from '@/store/hooks';
+import { buildCricketCreateBody, validateCricketConfig } from '@/lib/quickCricketCreate';
 
 const LBL = {
   fontFamily: 'SpaceMono_700Bold' as const,
@@ -165,6 +166,12 @@ export default function NewQuickMatchScreen() {
   const { user } = useAppSelector((s) => s.auth);
   const hostName = user ? `${user.firstName} ${user.lastName}` : 'You';
 
+  // Badminton stays the default so anyone ignoring the sport choice gets
+  // today's flow unchanged.
+  const [sport, setSport] = useState<'badminton' | 'cricket'>('badminton');
+  const [maxOvers, setMaxOvers] = useState(8);
+  const [squadSize, setSquadSize] = useState(6);
+
   const [doubles, setDoubles] = useState(false);
   const [bestOf, setBestOf] = useState<1 | 3 | 5>(3);
   const [pointsToWin, setPointsToWin] = useState<11 | 15 | 21>(21);
@@ -186,7 +193,36 @@ export default function NewQuickMatchScreen() {
     .map((slot) => slot.playerId)
     .filter((id): id is string => Boolean(id));
 
+  const postAndGo = async (body: CreateQuickMatchBody) => {
+    setSubmitting(true);
+    setProblem('');
+    try {
+      const created = await createQuickMatch(body);
+      router.replace({ pathname: '/quick/[id]', params: { id: created._id } });
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setProblem(message ? message : 'Could not create the match. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const submit = async () => {
+    if (sport === 'cricket') {
+      const validationError = validateCricketConfig({ maxOvers, squadSize });
+      if (validationError) {
+        setProblem(validationError);
+        return;
+      }
+      await postAndGo(buildCricketCreateBody({
+        side1Name: side1Name.trim(),
+        side2Name: side2Name.trim(),
+        maxOvers,
+        squadSize,
+      }));
+      return;
+    }
+
     // displayName is required on EVERY slot, including ones carrying a
     // playerId — an empty one is a 422 from the server.
     const named = [...side1Slots, ...side2Slots].every((slot) => slot.displayName.trim().length > 0);
@@ -204,17 +240,7 @@ export default function NewQuickMatchScreen() {
       matchConfig: { bestOf, pointsToWin },
     };
 
-    setSubmitting(true);
-    setProblem('');
-    try {
-      const created = await createQuickMatch(body);
-      router.replace({ pathname: '/quick/[id]', params: { id: created._id } });
-    } catch (err) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setProblem(message ? message : 'Could not create the match. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
+    await postAndGo(body);
   };
 
   return (
@@ -228,40 +254,98 @@ export default function NewQuickMatchScreen() {
         </Text>
 
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 18 }}>
-          {[false, true].map((isDoubles) => (
+          {(['badminton', 'cricket'] as const).map((option) => (
             <Pressable
-              key={String(isDoubles)}
-              onPress={() => setDoubles(isDoubles)}
+              key={option}
+              onPress={() => setSport(option)}
               style={{
                 flex: 1,
                 paddingVertical: 12,
                 borderRadius: 4,
                 alignItems: 'center',
-                backgroundColor: doubles === isDoubles ? '#F97316' : 'rgba(255,255,255,0.08)',
+                backgroundColor: sport === option ? '#F97316' : 'rgba(255,255,255,0.08)',
               }}
             >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: doubles === isDoubles ? '#0B0B0B' : '#d4d4d4' }}>
-                {isDoubles ? 'Doubles' : 'Singles'}
+              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: sport === option ? '#0B0B0B' : '#d4d4d4' }}>
+                {option === 'badminton' ? 'Badminton' : 'Cricket'}
               </Text>
             </Pressable>
           ))}
         </View>
 
-        <Chips label="Games" options={[1, 3, 5]} value={bestOf} onChange={(next) => setBestOf(next as 1 | 3 | 5)} />
-        <Chips label="Points to win" options={[11, 15, 21]} value={pointsToWin} onChange={(next) => setPointsToWin(next as 11 | 15 | 21)} />
+        {sport === 'badminton' ? (
+          <>
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 18 }}>
+              {[false, true].map((isDoubles) => (
+                <Pressable
+                  key={String(isDoubles)}
+                  onPress={() => setDoubles(isDoubles)}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    borderRadius: 4,
+                    alignItems: 'center',
+                    backgroundColor: doubles === isDoubles ? '#F97316' : 'rgba(255,255,255,0.08)',
+                  }}
+                >
+                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: doubles === isDoubles ? '#0B0B0B' : '#d4d4d4' }}>
+                    {isDoubles ? 'Doubles' : 'Singles'}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Chips label="Games" options={[1, 3, 5]} value={bestOf} onChange={(next) => setBestOf(next as 1 | 3 | 5)} />
+            <Chips label="Points to win" options={[11, 15, 21]} value={pointsToWin} onChange={(next) => setPointsToWin(next as 11 | 15 | 21)} />
+          </>
+        ) : (
+          <>
+            <View style={{ marginTop: 16 }}>
+              <Text style={LBL}>Overs</Text>
+              <TextInput
+                value={String(maxOvers)}
+                onChangeText={(text) => setMaxOvers(Number.parseInt(text, 10) || 0)}
+                keyboardType="number-pad"
+                style={INPUT}
+                placeholderTextColor="#5a5a5a"
+              />
+            </View>
+            <View style={{ marginTop: 16 }}>
+              <Text style={LBL}>Squad size</Text>
+              <TextInput
+                value={String(squadSize)}
+                onChangeText={(text) => setSquadSize(Number.parseInt(text, 10) || 0)}
+                keyboardType="number-pad"
+                style={INPUT}
+                placeholderTextColor="#5a5a5a"
+              />
+              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 12, color: '#7d7d7d', marginTop: 6 }}>
+                Players per side — sets the batting order length
+              </Text>
+            </View>
+          </>
+        )}
 
         <View style={{ marginTop: 22 }}>
           <Text style={LBL}>Side 1</Text>
           <TextInput value={side1Name} onChangeText={setSide1Name} style={INPUT} placeholderTextColor="#5a5a5a" />
-          <SlotEditor slot={hostSlot} onChange={() => undefined} alreadyPicked={picked} />
-          {doubles ? <SlotEditor slot={partner} onChange={setPartner} alreadyPicked={picked} /> : null}
+          {sport === 'badminton' ? (
+            <>
+              <SlotEditor slot={hostSlot} onChange={() => undefined} alreadyPicked={picked} />
+              {doubles ? <SlotEditor slot={partner} onChange={setPartner} alreadyPicked={picked} /> : null}
+            </>
+          ) : null}
         </View>
 
         <View style={{ marginTop: 22 }}>
           <Text style={LBL}>Side 2</Text>
           <TextInput value={side2Name} onChangeText={setSide2Name} style={INPUT} placeholderTextColor="#5a5a5a" />
-          <SlotEditor slot={opponent1} onChange={setOpponent1} alreadyPicked={picked} />
-          {doubles ? <SlotEditor slot={opponent2} onChange={setOpponent2} alreadyPicked={picked} /> : null}
+          {sport === 'badminton' ? (
+            <>
+              <SlotEditor slot={opponent1} onChange={setOpponent1} alreadyPicked={picked} />
+              {doubles ? <SlotEditor slot={opponent2} onChange={setOpponent2} alreadyPicked={picked} /> : null}
+            </>
+          ) : null}
         </View>
 
         {problem ? (
