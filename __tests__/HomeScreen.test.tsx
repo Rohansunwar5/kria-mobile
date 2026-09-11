@@ -9,13 +9,27 @@ import Home from '../src/app/(tabs)/home';
 // nothing reaches axios, and give the screen a real store — the repo builds
 // stores with preloadedState rather than a mock-store library (see
 // __tests__/uploadProfileImage.test.ts). Do NOT add redux-mock-store.
+//
+// The stub is wrapped in a jest.fn() (mockFetchPublicTournaments) rather than
+// being a bare no-op, so tests can assert what the screen actually dispatched
+// — which query a filter maps to, and whether a no-op Apply skipped the
+// refetch entirely — not just that the UI's local state changed. Jest only
+// allows the factory below to close over an out-of-scope variable when its
+// name is prefixed `mock`.
+type FetchPublicTournamentsParams = { limit?: number; sport?: string; city?: string; status?: string };
+
+const mockFetchPublicTournaments = jest.fn((_params?: FetchPublicTournamentsParams) => ({ type: 'tournament/noop' }));
+
 jest.mock('@/store/slices/tournamentSlice', () => {
   const actual = jest.requireActual('@/store/slices/tournamentSlice');
   return {
     ...actual,
     __esModule: true,
     default: actual.default,
-    fetchPublicTournaments: Object.assign(() => ({ type: 'tournament/noop' }), { pending: { type: 'p' }, fulfilled: { type: 'f' }, rejected: { type: 'r' } }),
+    fetchPublicTournaments: Object.assign(
+      (params?: FetchPublicTournamentsParams) => mockFetchPublicTournaments(params),
+      { pending: { type: 'p' }, fulfilled: { type: 'f' }, rejected: { type: 'r' } }
+    ),
   };
 });
 
@@ -49,7 +63,7 @@ const tournament = (over: Partial<Tournament>): Tournament => ({
   ...over,
 }) as Tournament;
 
-const makeStore = (publicTournaments: Tournament[] = []) =>
+const makeStore = (publicTournaments: Tournament[] = [], publicTotal = publicTournaments.length) =>
   configureStore({
     reducer: { auth: authReducer, tournament: tournamentReducer },
     preloadedState: {
@@ -57,14 +71,17 @@ const makeStore = (publicTournaments: Tournament[] = []) =>
         ...authReducer(undefined, INIT),
         user: { _id: 'p1', firstName: 'Rohan', lastName: 'Sunwar', email: 'rohan@kria.club', phone: '9000000000', status: 'active' },
       },
-      tournament: { ...tournamentReducer(undefined, INIT), publicTournaments },
+      tournament: { ...tournamentReducer(undefined, INIT), publicTournaments, publicTotal },
     },
   });
 
 // The quick-match list resolves on the next microtask, so flush it before
 // asserting — otherwise every test logs an out-of-act update it did not cause.
-const renderHome = async (tournaments: Tournament[] = []) => {
-  const utils = render(<Provider store={makeStore(tournaments)}><Home /></Provider>);
+// `publicTotal` defaults to the fixture list's own length; pass it explicitly
+// to simulate the server's true countDocuments total diverging from what got
+// fetched (see the "never promises more events" test below).
+const renderHome = async (tournaments: Tournament[] = [], publicTotal?: number) => {
+  const utils = render(<Provider store={makeStore(tournaments, publicTotal)}><Home /></Provider>);
   await act(async () => {});
   return utils;
 };
@@ -167,5 +184,69 @@ describe('Home', () => {
 
     // The chip proves the choice reached the screen's state, not just the sheet's.
     await waitFor(() => expect(getByText('Cricket')).toBeTruthy());
+  });
+
+  // publicTotal is the server's true count via countDocuments, but the fetch
+  // itself is capped (TOURNAMENT_FETCH_LIMIT, 100 — the max
+  // getAllTournamentsValidator accepts). Above that cap the two used to
+  // drift: the button quoted the server's true total while the list could
+  // only ever render 20. The button must never promise more than the fetch
+  // will actually return.
+  it('never promises more events on the filter button than the fetch will return', async () => {
+    const { getByLabelText, getByText, queryByText } = await renderHome([], 147);
+    fireEvent.press(getByLabelText('Filter tournaments'));
+    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
+
+    expect(getByText('Show 100 events')).toBeTruthy();
+    expect(queryByText(/show 147 events?/i)).toBeNull();
+  });
+
+  it('still shows the true count on the filter button when it is under the fetch limit', async () => {
+    const { getByLabelText, getByText } = await renderHome([], 3);
+    fireEvent.press(getByLabelText('Filter tournaments'));
+    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
+
+    expect(getByText('Show 3 events')).toBeTruthy();
+  });
+
+  // The chip assertion above proves the choice reached local state, but it
+  // would pass even if the load effect's dependency on `filters` were
+  // broken and nothing ever refetched. Assert the actual dispatch: applying
+  // a filter must reach the fetch with the query it maps to, and unset
+  // ('All') values must never leak into that query.
+  it('sends the filter to the fetch as a query, without All values', async () => {
+    const { getByLabelText, getByText } = await renderHome();
+    mockFetchPublicTournaments.mockClear();
+
+    fireEvent.press(getByLabelText('Filter tournaments'));
+    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
+    fireEvent.press(getByLabelText('Cricket'));
+    fireEvent.press(getByText(/show \d+ events?/i));
+
+    await waitFor(() =>
+      expect(mockFetchPublicTournaments).toHaveBeenCalledWith(expect.objectContaining({ sport: 'cricket' }))
+    );
+    const calls = mockFetchPublicTournaments.mock.calls;
+    const [args] = calls[calls.length - 1];
+    expect(args).not.toHaveProperty('city');
+    expect(args).not.toHaveProperty('status');
+  });
+
+  // FilterSheet's toggle() always spreads a new object, so selecting a value
+  // and then unselecting it before Apply produces a value-identical but
+  // reference-different Filters. The load effect keys off `filters` identity,
+  // so this used to refetch — and flash the stale-dim — for a filter set
+  // that never actually changed.
+  it('does not refetch when Apply carries back the same filters that were already applied', async () => {
+    const { getByLabelText, getByText } = await renderHome();
+    mockFetchPublicTournaments.mockClear();
+
+    fireEvent.press(getByLabelText('Filter tournaments'));
+    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
+    fireEvent.press(getByLabelText('Cricket'));
+    fireEvent.press(getByLabelText('Cricket'));
+    fireEvent.press(getByText(/show \d+ events?/i));
+
+    expect(mockFetchPublicTournaments).not.toHaveBeenCalled();
   });
 });

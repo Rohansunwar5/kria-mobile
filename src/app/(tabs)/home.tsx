@@ -43,6 +43,25 @@ function PortalPane({ active, children }: { active: boolean; children: ReactNode
   );
 }
 
+// The server's getAllTournamentsValidator caps `limit` at 100
+// (server/src/middlewares/validators/tournament.validator.ts) — asking for
+// more gets the whole request rejected. Real pagination is the correct
+// long-term fix for showing more than this many events; until it exists,
+// both the fetch below and the filter sheet's promised count read this same
+// constant so the two can never drift apart the way they did when the sheet
+// quoted the server's true total while the fetch silently capped at 20.
+const TOURNAMENT_FETCH_LIMIT = 100;
+
+// Two Filters are the same choice even when they are different objects — the
+// sheet's toggle() always spreads a fresh object, so selecting a value and
+// then unselecting it before Apply produces a value-identical but
+// reference-different Filters. The load effect below keys off `filters`
+// identity, so without this check that round trip would refetch for nothing
+// and flash the stale-dim over a list that was never going to change.
+function sameFilters(a: Filters, b: Filters): boolean {
+  return a.sport === b.sport && a.city === b.city && a.status === b.status;
+}
+
 export default function Home() {
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -56,7 +75,7 @@ export default function Home() {
   const load = () =>
     dispatch(
       fetchPublicTournaments({
-        limit: 20,
+        limit: TOURNAMENT_FETCH_LIMIT,
         ...toQuery(filters),
       })
     );
@@ -196,8 +215,19 @@ export default function Home() {
         // count. That would need a count-only endpoint; the applied count is
         // what ships. Said here so the next reader does not file this as a
         // bug.
-        resultCount={publicTotal}
-        onApply={(f) => { setFilters(f); setSheetOpen(false); }}
+        //
+        // Capped at TOURNAMENT_FETCH_LIMIT: `publicTotal` is the server's true
+        // count (countDocuments), which can be larger than what a single
+        // fetch of TOURNAMENT_FETCH_LIMIT rows will actually return — the
+        // button must never promise more events than the list can show.
+        resultCount={Math.min(publicTotal, TOURNAMENT_FETCH_LIMIT)}
+        onApply={(f) => {
+          // Skip the update entirely when nothing actually changed, so the
+          // load effect's `filters` dependency keeps the same reference and
+          // never refetches for a no-op edit (see sameFilters above).
+          setFilters((prev) => (sameFilters(prev, f) ? prev : f));
+          setSheetOpen(false);
+        }}
         onClose={() => setSheetOpen(false)}
       />
     </Screen>

@@ -35,11 +35,17 @@ export function EventsPortal({
   onRetry,
 }: EventsPortalProps) {
   const visible = visibleTournaments(tournaments);
-  // Surface a live/registration-open tournament as the hero, else the first one.
+  // Surface a live/registration-open tournament as the hero. There is
+  // deliberately no further fallback (e.g. visible[0]): those are the only
+  // two statuses that warrant a hero card, and a stage filter (Ended,
+  // Auction) can leave `visible` with nothing that qualifies. Promoting
+  // whatever came first used to put a finished tournament in the headline
+  // spot as though it were live. When nothing qualifies, `featured` stays
+  // undefined and `rest` below falls back to every visible tournament, so
+  // they all still render — just as list rows instead of one hero plus rows.
   const featured =
     visible.find((t) => t.status === 'ongoing') ||
-    visible.find((t) => t.status === 'registration_open') ||
-    visible[0];
+    visible.find((t) => t.status === 'registration_open');
   const rest = featured ? visible.filter((t) => t._id !== featured._id) : visible;
   const filtersActive = appliedCount(filters) > 0;
   const stale = isLoading && visible.length > 0;
@@ -112,7 +118,11 @@ export function EventsPortal({
           title={filtersActive ? 'Nothing matches' : 'No events yet'}
           message={
             filtersActive
-              ? 'No tournaments match this sport and city. Clear the filters to see everything that is open.'
+              // Generic on purpose: filtersActive fires on sport, city or
+              // stage alone or in any combination, so naming specific
+              // filters here (as this once did with "sport and city") can
+              // name ones the user never touched.
+              ? 'No tournaments match these filters. Clear them to see everything that is open.'
               : 'New tournaments land here as organisers open entry. Check back soon.'
           }
           cta={filtersActive ? 'Clear filters' : undefined}

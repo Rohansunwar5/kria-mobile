@@ -138,4 +138,61 @@ describe('EventsPortal', () => {
     const { getByTestId } = render(<EventsPortal {...props({ isLoading: true })} />);
     expect(getByTestId('events-list').props.style.opacity).toBe(0.5);
   });
+
+  // The old copy named "this sport and city" regardless of which filter was
+  // actually set — but filtersActive also fires on stage alone, so filtering
+  // to a stage with no results blamed a sport and city the user never touched.
+  it('does not name a specific filter in the empty-state message', () => {
+    const { getByText, queryByText } = render(
+      <EventsPortal {...props({ tournaments: [], filters: { sport: 'All', city: 'All', status: 'ongoing' } })} />
+    );
+    expect(getByText(/clear filters/i)).toBeTruthy();
+    expect(queryByText(/sport and city/i)).toBeNull();
+  });
+
+  // Only `ongoing` and `registration_open` are hero-worthy. This is the
+  // has-hero half of that rule: a registration_open tournament is promoted
+  // even when a finished one would otherwise have been visible[0].
+  it('features the registration_open tournament as the hero over a finished one', () => {
+    const { getByText, getByTestId } = render(
+      <EventsPortal
+        {...props({
+          tournaments: [
+            tournament({ _id: 'a', name: 'Harbour Slam', status: 'completed' }),
+            tournament({ _id: 'b', name: 'Monsoon Open', status: 'registration_open' }),
+          ],
+        })}
+      />
+    );
+
+    expect(getByText(/view tournament/i)).toBeTruthy();
+    // The finished tournament is the only one left as a row.
+    expect(getByTestId('events-list').props.data).toHaveLength(1);
+  });
+
+  // The no-hero half: filtering to a stage where nothing qualifies as a hero
+  // (e.g. Ended, Auction) used to fall back to visible[0] regardless of its
+  // status, promoting a finished tournament to the headline card. Now there
+  // must be no hero at all, and every visible tournament renders as a row.
+  it('features no hero when nothing is ongoing or open for entry, listing every tournament as a row', () => {
+    const { getByText, queryByText, getByTestId } = render(
+      <EventsPortal
+        {...props({
+          tournaments: [
+            tournament({ _id: 'a', name: 'Harbour Slam', status: 'completed' }),
+            tournament({ _id: 'b', name: 'Monsoon Open', status: 'auction_in_progress' }),
+          ],
+        })}
+      />
+    );
+
+    expect(queryByText(/view tournament/i)).toBeNull();
+    expect(queryByText(/watch the broadcast/i)).toBeNull();
+    expect(getByText(/harbour slam/i)).toBeTruthy();
+    expect(getByText(/monsoon open/i)).toBeTruthy();
+    // Neither tournament was consumed as a hero, so both are rows — the
+    // section count (driven by this same array) is right without a phantom
+    // featured card silently eating one of them.
+    expect(getByTestId('events-list').props.data).toHaveLength(2);
+  });
 });
