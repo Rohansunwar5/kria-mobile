@@ -37,6 +37,16 @@ export const NAV_SLOTS: Slot[] = [
 const IDLE = '#7d7d7d';
 const PENDING = 'rgba(255,255,255,0.28)';
 
+// The Host circle is lifted above the bar by HOST_LIFT px (negative marginTop),
+// which is exactly how far it overflows the bar's bounds. On Android, touches
+// outside a parent's bounds never reach the child, so the Pressable's hitSlop
+// must cover at least that much or the top of the visible circle goes dead.
+// Both live here, as the single source of truth, so a future change to either
+// number can't silently desync hitSlop from the actual overflow.
+export const HOST_CIRCLE_SIZE = 64;
+export const HOST_LIFT = 30;
+const HOST_HIT_SLOP = { top: HOST_LIFT };
+
 const label = (color: string) => ({
   fontFamily: 'SpaceGrotesk_700Bold' as const,
   fontSize: 9,
@@ -102,6 +112,7 @@ export function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
               accessibilityLabel={a11yLabel}
               accessibilityState={{ selected: false, disabled: false }}
               onPress={onPress}
+              hitSlop={HOST_HIT_SLOP}
               style={{
                 flex: 1,
                 minHeight: 44,
@@ -111,10 +122,10 @@ export function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
             >
               <View
                 style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 32,
-                  marginTop: -30,
+                  width: HOST_CIRCLE_SIZE,
+                  height: HOST_CIRCLE_SIZE,
+                  borderRadius: HOST_CIRCLE_SIZE / 2,
+                  marginTop: -HOST_LIFT,
                   backgroundColor: colors.auction,
                   borderWidth: 5,
                   borderColor: colors.ink,

@@ -1,12 +1,17 @@
 import type { ComponentProps } from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { FloatingTabBar } from '../src/components/navigation/FloatingTabBar';
+import { FloatingTabBar, NAV_SLOTS, HOST_LIFT } from '../src/components/navigation/FloatingTabBar';
 
 // Named `mockPush` (not `push`) because babel-plugin-jest-hoist only allows a
 // jest.mock() factory to reference out-of-scope variables whose name starts
 // with `mock` — otherwise the module factory throws before the suite runs.
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({ router: { push: (...a: unknown[]) => mockPush(...a) } }));
+
+// Driven from NAV_SLOTS (not a hand-copied literal) so a slot added, renamed,
+// or removed later is covered by these two loops automatically instead of
+// silently going unchecked because the test's own list drifted from reality.
+const ALL_LABELS = NAV_SLOTS.map((slot) => (slot.kind === 'action' ? slot.a11y : slot.label));
 
 // Return type is annotated explicitly so `as never` below only widens the
 // fixture past the exact BottomTabBarProps shape (real react-navigation state
@@ -28,7 +33,7 @@ describe('FloatingTabBar', () => {
 
   it('renders all five slots', () => {
     const { getByLabelText } = render(<FloatingTabBar {...props()} />);
-    for (const label of ['Home', 'Explore', 'Host a match', 'Live', 'You']) {
+    for (const label of ALL_LABELS) {
       expect(getByLabelText(label)).toBeTruthy();
     }
   });
@@ -76,9 +81,23 @@ describe('FloatingTabBar', () => {
 
   it('gives every slot a 44px hit target', () => {
     const { getByLabelText } = render(<FloatingTabBar {...props()} />);
-    for (const label of ['Home', 'Explore', 'Host a match', 'Live', 'You']) {
+    for (const label of ALL_LABELS) {
       const style = getByLabelText(label).props.style;
       expect(style.minHeight).toBeGreaterThanOrEqual(44);
     }
+  });
+
+  // The Host circle is lifted above the bar by HOST_LIFT px (a negative
+  // marginTop) — that is exactly how far it overflows the bar's bounds. On
+  // Android, touches outside a parent's bounds are not delivered to the
+  // child, so the Pressable's hitSlop must cover at least that overflow or
+  // the top of the visible circle silently stops responding to taps. This
+  // asserts against the component's own HOST_LIFT constant rather than a
+  // hard-coded number, so it stays meaningful if the circle size or lift
+  // distance ever change.
+  it('gives the Host slot a hitSlop covering its lift-induced overflow', () => {
+    const { getByLabelText } = render(<FloatingTabBar {...props()} />);
+    const hitSlop = getByLabelText('Host a match').props.hitSlop;
+    expect(hitSlop?.top).toBeGreaterThanOrEqual(HOST_LIFT);
   });
 });
