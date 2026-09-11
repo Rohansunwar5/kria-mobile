@@ -67,8 +67,12 @@ const FIELDER_TYPES: WicketType[] = ['caught', 'run_out', 'stumped'];
 // striker, so they skip this step and keep defaulting as before.
 const EITHER_END_TYPES: WicketType[] = ['run_out', 'retired_hurt'];
 
-const EXTRAS_RUNS = [0, 1, 2, 3, 4, 5, 6];
+// No zero. For a wide or no-ball this is the TOTAL extra including the
+// penalty run, so it is at least 1; for a bye or leg-bye it is the runs run,
+// and a bye of nothing is not a bye.
+const EXTRAS_RUNS = [1, 2, 3, 4, 5, 6];
 
+type ExtrasType = 'wide' | 'no_ball' | 'bye' | 'leg_bye';
 type Pending = { strikerId?: string; nonStrikerId?: string; bowlerId?: string };
 type EntryMode = 'closed' | 'extras' | 'extras-runs' | 'wicket' | 'wicket-who' | 'fielder';
 type CreaseEnd = 'striker' | 'non-striker';
@@ -93,7 +97,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   const [pending, setPending] = useState<Pending>({});
   const [mode, setMode] = useState<EntryMode>('closed');
   const [chosenWicketType, setChosenWicketType] = useState<WicketType | null>(null);
-  const [chosenExtrasType, setChosenExtrasType] = useState<'wide' | 'no_ball' | 'bye' | 'leg_bye' | null>(null);
+  const [chosenExtrasType, setChosenExtrasType] = useState<ExtrasType | null>(null);
   const [chosenDismissedId, setChosenDismissedId] = useState<string | null>(null);
   // Which end the LAST wicket vacated. The engine's nextBatsmanNeeded flag
   // says a replacement is needed but never which end — this is the only
@@ -101,6 +105,11 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   // always assuming the striker (see Finding 2: a departed non-striker's id
   // would otherwise stay wired into every remaining delivery).
   const [vacatedEnd, setVacatedEnd] = useState<CreaseEnd>('striker');
+  // Armed on the extras sheet before the type is picked, so the common
+  // extra-only case gains no step. Once set, choosing the runs routes into the
+  // wicket flow instead of posting, and `post` merges it into that delivery.
+  const [alsoWicket, setAlsoWicket] = useState(false);
+  const [pendingExtras, setPendingExtras] = useState<{ extrasType: ExtrasType; extrasRuns: number } | null>(null);
 
   const isHost = Boolean(playerId) && playerId === match.hostId;
 
@@ -254,6 +263,8 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
     setChosenWicketType(null);
     setChosenExtrasType(null);
     setChosenDismissedId(null);
+    setAlsoWicket(false);
+    setPendingExtras(null);
   };
 
   const post = (extra: Partial<BallEntry>) => {
@@ -263,6 +274,8 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
       nonStrikerId,
       bowlerId,
       runs: 0,
+      // The armed extra first, so an explicit value in `extra` still wins.
+      ...(pendingExtras ?? {}),
       ...extra,
     });
     setPending({});
@@ -315,6 +328,16 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
 
       {mode === 'extras' ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
+          {/* A run-out off a wide or a bye is routine in casual play, and the
+              server has always accepted both fields on one ball — only this
+              panel forced a choice, so the host recorded the wicket and lost
+              the extra. Armed here rather than asked afterwards so the
+              extra-only case still takes the same number of taps. */}
+          <Btn
+            label={alsoWicket ? '✓ Wicket too' : '+ Wicket too'}
+            disabled={busy}
+            onPress={busy ? undefined : () => setAlsoWicket((on) => !on)}
+          />
           {EXTRAS.map((e) => (
             <Btn
               key={e.type}
@@ -336,7 +359,14 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
               key={n}
               label={String(n)}
               disabled={busy}
-              onPress={busy ? undefined : () => post({ extrasType: chosenExtrasType, extrasRuns: n })}
+              onPress={busy ? undefined : () => {
+                if (!alsoWicket) {
+                  post({ extrasType: chosenExtrasType, extrasRuns: n });
+                  return;
+                }
+                setPendingExtras({ extrasType: chosenExtrasType, extrasRuns: n });
+                setMode('wicket');
+              }}
             />
           ))}
         </View>
