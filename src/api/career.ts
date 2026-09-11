@@ -64,6 +64,14 @@ export interface RecentMatch {
   result: 'won' | 'lost' | 'tied' | 'no_result';
   /** ISO 8601 — the server serialises a Date. */
   playedAt: string;
+  /**
+   * "Alpha vs Bravo". Absent when the match document could not be read — it
+   * was deleted, or its sport has no feed summariser yet — so every reader
+   * must have a fallback. The ledger outlives the matches it describes.
+   */
+  title?: string;
+  /** "21-15, 21-18" or "150/6 (20.0) vs 151/4 (19.2)". Absent for a walkover. */
+  scoreline?: string;
 }
 
 /**

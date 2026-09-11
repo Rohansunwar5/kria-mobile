@@ -66,6 +66,8 @@ function Row({ match, last }: { match: RecentMatch; last?: boolean }) {
       </View>
 
       <View style={{ flex: 1 }}>
+        {/* The title names the sides; without one the sport is the only thing
+            left to call the match, and a blank line would read as a bug. */}
         <Text
           style={{
             fontFamily: 'SpaceMono_700Bold',
@@ -76,8 +78,13 @@ function Row({ match, last }: { match: RecentMatch; last?: boolean }) {
           }}
           numberOfLines={1}
         >
-          {match.sport}
+          {match.title ?? match.sport}
         </Text>
+        {match.scoreline ? (
+          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: '#a0a0a0', marginTop: 3 }} numberOfLines={1}>
+            {match.scoreline}
+          </Text>
+        ) : null}
         {/* Naming the context matters: a quick match and a tournament match
             carry very different weight, and the feed blends both. */}
         <Text style={{ ...LBL, marginTop: 3 }}>{match.context}</Text>
