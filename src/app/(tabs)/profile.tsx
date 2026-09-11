@@ -7,6 +7,7 @@ import { Hairlines, Hazard } from '@/components/canvas';
 import { Ghost } from '@/components/states';
 import { AvatarPicker } from '@/components/profile/AvatarPicker';
 import { CareerCard } from '@/components/profile/CareerCard';
+import { RecentMatches } from '@/components/profile/RecentMatches';
 import { MenuRow } from '@/components/profile/MenuRow';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPlayerStats, logout } from '@/store/slices/authSlice';
@@ -101,6 +102,13 @@ export default function Profile() {
             profile={career.profile}
             loading={career.loading}
             error={career.error}
+            onRetry={career.reload}
+          />
+
+          <RecentMatches
+            matches={career.recent}
+            loading={career.loading}
+            error={career.recentError}
             onRetry={career.reload}
           />
 
