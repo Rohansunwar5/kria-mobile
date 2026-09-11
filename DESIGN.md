@@ -22,7 +22,7 @@ Separating display, interface and data is what makes the app feel designed rathe
 
 | Face | Job | Weights |
 |---|---|---|
-| **Anton** | Display. Screen titles, player and team names, buttons, section heads. Always uppercase, always tight leading (`line-height` ≈ 0.88 × size). | 400 |
+| **Anton** | Display. Screen titles, player and team names, buttons, section heads. Always uppercase. **Leading never below 1.188 × size** — see the floor below. | 400 |
 | **Space Grotesk** | Interface. Body copy, row titles, descriptions, form labels. | 400, 500, 700 |
 | **Space Mono** | Data. Every score, price, over, timestamp, and all overline labels. Tabular figures. | 400, 700 |
 
@@ -44,17 +44,34 @@ Space Mono    → ui-monospace, 'Cascadia Mono', Menlo, monospace
 
 | Role | Size / leading | Face |
 |---|---|---|
-| Screen title | 30–40 / 27–36 | Anton |
-| Section head | 18–22 | Anton |
-| Row title | 14–16 | Anton |
+| Screen title | 30–40 / 36–48 | Anton |
+| Section head | 18–22 / 22–27 | Anton |
+| Row title | 14–16 / 17–19 | Anton |
 | Body | 13 / 19 | Space Grotesk 400 |
 | Row label, emphasis | 12–13 | Space Grotesk 700 |
 | Meta | 11–12 | Space Grotesk 400 |
 | Overline label | 9 / 0.18em tracking | Space Mono 700 |
 | Big data | 26–52 | Space Mono 700 |
 
-> Two-line Anton names run at tighter leading than their glyph box, so they extend a few px past
-> it. That paints fine, but never wrap one in a container with `overflow: hidden`.
+### The Anton leading floor — 1.188 × size, enforced
+
+**An earlier version of this file said Anton runs at ≈0.88 × size, and the artboards are still
+drawn that way. That was wrong, and it shipped clipped capitals on iPhone.** Anton's metrics
+(unitsPerEm 2048) give capHeight 1760 = 0.859em and hhea descent 674 = 0.329em, so the glyphs
+need `capHeight + descent = 1.188em` of line box. iOS compresses the line box to `lineHeight` and
+**clips** whatever sticks out; Android overlaps instead, which is exactly why the tight leading
+looked fine in review and shaved the caps on a real iPhone.
+
+[`__tests__/antonLeading.test.ts`](__tests__/antonLeading.test.ts) enforces the floor across every
+`.tsx` under `src/`. **Never weaken it to make a screen pass** — raise the `lineHeight`, never
+shrink the `fontSize`, because the sizes are the design and the leading is not.
+
+Known gaps in that fence, so nobody mistakes green for safe: it reads integer literals only, so a
+ternary (`fontSize: subtitle ? 17 : 18`) or a computed value slips past it, and it scans `.tsx`
+only. Two live violations are known and deliberately deferred —
+`src/components/canvas.tsx` (the shared `.hdr` header, 0.941em with a subtitle) and
+`src/components/states.tsx`'s `Ghost` (0.78em, decorative oversized art type where clipping may
+be intended). Fix them as their own change, not folded into unrelated work.
 
 ---
 
