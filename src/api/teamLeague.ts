@@ -1,6 +1,5 @@
 import API from './axios';
-
-const unwrap = (res: any) => res.data?.data?.data || res.data?.data;
+import { unwrap } from './unwrap';
 
 export interface Group {
   _id: string;

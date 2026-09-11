@@ -1,4 +1,5 @@
 import API from './axios';
+import { unwrap } from './unwrap';
 
 /**
  * What the server will return, and all it will return — id, name and avatar.
@@ -10,13 +11,6 @@ export interface PlayerHit {
   firstName: string;
   lastName: string;
   profileImage?: string;
-}
-
-function unwrap(res: unknown): unknown {
-  const lvl1 = (res as { data?: unknown } | null)?.data;
-  const lvl2 = (lvl1 as { data?: unknown } | null)?.data;
-  const lvl3 = (lvl2 as { data?: unknown } | null)?.data;
-  return lvl3 ?? lvl2 ?? null;
 }
 
 /**

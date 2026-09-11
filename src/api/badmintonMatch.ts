@@ -1,4 +1,5 @@
 import API from './axios';
+import { unwrap } from './unwrap';
 
 export interface GameScore {
   gameNumber: number;
@@ -35,7 +36,6 @@ export interface BadmintonMatch {
   winReason?: string;
 }
 
-const unwrap = (res: any) => res?.data?.data?.data ?? res?.data?.data ?? null;
 
 export async function getBadmintonMatch(matchId: string): Promise<BadmintonMatch | null> {
   const res = await API.get(`/sports/badminton/match/${matchId}`);

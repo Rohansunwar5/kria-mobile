@@ -1,5 +1,6 @@
 import API from '@/api/axios';
 import type { Category } from '@/store/slices/registrationSlice';
+import { unwrap } from './unwrap';
 
 export interface SportConfig {
   sport: string;
@@ -21,8 +22,6 @@ export interface SportConfig {
   scoreLabels?: { primary?: string; secondary?: string; tertiary?: string };
   defaults?: { bestOf?: number; pointsToWin?: number; tieBreakerPoints?: number };
 }
-
-const unwrap = (res: any) => res?.data?.data?.data ?? res?.data?.data ?? null;
 
 export async function getCategory(categoryId: string): Promise<Category | null> {
   const res = await API.get(`/categories/${categoryId}`);

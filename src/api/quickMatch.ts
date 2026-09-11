@@ -1,5 +1,6 @@
 import API from './axios';
 import type { LiveState } from './cricketMatch';
+import { unwrap } from './unwrap';
 
 export interface QuickMatchSlot {
   slotId: string;
@@ -77,6 +78,13 @@ export interface QuickInningsScore {
   wickets: number;
   overs: number;
   balls: number;
+  /**
+   * Whether the innings ended on wickets rather than overs. The server has
+   * always written it; mobile used to drop it. `playersPerTeam - 1` wickets on
+   * a match carrying `honoursSquadSize`, a hard-coded 10 on one that predates
+   * that field.
+   */
+  isAllOut: boolean;
 }
 
 export interface BallEntry {
@@ -94,25 +102,20 @@ export interface BallEntry {
 export interface CreateQuickMatchBody {
   sport: 'badminton' | 'cricket';
   sides: { name: string; slots: { playerId?: string; displayName: string }[] }[];
+  /**
+   * Mirrors `createQuickMatchValidator`. The badminton pair are closed sets, so
+   * a wrong value is a compile error instead of a 422. The cricket three are
+   * ranges the validator enforces at runtime — `maxOvers` and
+   * `maxOversPerBowler` 1-50, `playersPerTeam` 2-11 — and a union of those is
+   * noise, so they stay `number`.
+   */
   matchConfig?: {
-    bestOf?: number;
-    pointsToWin?: number;
+    bestOf?: 1 | 3 | 5;
+    pointsToWin?: 11 | 15 | 21;
     maxOvers?: number;
     maxOversPerBowler?: number;
     playersPerTeam?: number;
   };
-}
-
-/**
- * `next(response)` hands the whole SuccessResponse over as the body's `data`,
- * and it carries its own `.data`, so the payload sits two levels below the body
- * and three below the axios response. Same shape `career.ts` unwraps.
- */
-function unwrap(res: unknown): unknown {
-  const lvl1 = (res as { data?: unknown } | null)?.data;
-  const lvl2 = (lvl1 as { data?: unknown } | null)?.data;
-  const lvl3 = (lvl2 as { data?: unknown } | null)?.data;
-  return lvl3 ?? lvl2 ?? null;
 }
 
 const asMatch = (res: unknown) => unwrap(res) as QuickMatch;

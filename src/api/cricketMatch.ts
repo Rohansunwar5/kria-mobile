@@ -1,6 +1,5 @@
 import API from './axios';
-
-const unwrap = (res: any) => res.data?.data?.data || res.data?.data;
+import { unwrap } from './unwrap';
 
 /** `cricketLiveState.matchStatus` — the client used to test only for
  *  'completed', which left innings breaks looking like a frozen scoreboard. */

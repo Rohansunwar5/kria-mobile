@@ -1,4 +1,5 @@
 import API from './axios';
+import { unwrap } from './unwrap';
 
 /**
  * Per-sport career figures, exactly as the server computes them.
@@ -28,18 +29,6 @@ export interface CareerProfile {
    * re-implement it here, or the two copies will drift.
    */
   bestSport: SportSummary | null;
-}
-
-/**
- * `next(response)` hands the whole SuccessResponse over as `data`, and it
- * carries its own `.data`, so the payload sits two levels down. Same shape
- * profileApi.ts already unwraps.
- */
-function unwrap(res: unknown): unknown {
-  const lvl1 = (res as { data?: unknown } | null)?.data;
-  const lvl2 = (lvl1 as { data?: unknown } | null)?.data;
-  const lvl3 = (lvl2 as { data?: unknown } | null)?.data;
-  return lvl3 ?? lvl2 ?? null;
 }
 
 /**

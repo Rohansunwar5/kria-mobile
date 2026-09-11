@@ -1,4 +1,5 @@
 import API from './axios';
+import { unwrap } from './unwrap';
 
 export interface LeaderboardEntry {
   _id: string;
@@ -25,8 +26,6 @@ export interface CategoryLeaderboard {
   sportType?: string;
   boards: Board[];
 }
-
-const unwrap = (res: any) => res?.data?.data?.data ?? res?.data?.data ?? null;
 
 /**
  * The endpoint answers in two shapes: a flat `leaderboard` for an ordinary

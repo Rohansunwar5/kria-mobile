@@ -1,4 +1,5 @@
 import API from './axios';
+import { unwrap } from './unwrap';
 
 export interface MatchTeams {
   team1Id: string;
@@ -69,8 +70,6 @@ export interface BracketResponse {
   rounds: Record<string, Match[]>;
   competitorType: 'player' | 'team';
 }
-
-const unwrap = (res: any) => res.data?.data?.data || res.data?.data;
 
 export async function getCategoryBracket(categoryId: string): Promise<BracketResponse> {
   const res = await API.get(`/matches/categories/${categoryId}`);

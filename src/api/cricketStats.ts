@@ -1,6 +1,5 @@
 import API from './axios';
-
-const unwrap = (res: any) => res?.data?.data?.data ?? res?.data?.data ?? null;
+import { unwrap } from './unwrap';
 
 export interface Ball {
   _id: string;

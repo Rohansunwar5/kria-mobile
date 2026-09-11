@@ -1,4 +1,5 @@
 import API from './axios';
+import { unwrap } from './unwrap';
 
 export interface AuctionPlayer {
   _id: string;
@@ -68,8 +69,6 @@ export interface SoldLogResponse {
   totalSold: number;
   totalRevenue: number;
 }
-
-const unwrap = (res: any) => res.data?.data?.data || res.data?.data;
 
 export async function getAuctionStatus(tournamentId: string, categoryId: string): Promise<AuctionStatusResponse> {
   const res = await API.get(`/auction/${tournamentId}/${categoryId}/status`);
