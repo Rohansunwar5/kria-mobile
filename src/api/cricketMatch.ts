@@ -27,6 +27,16 @@ export interface LiveState {
   nextBowlerNeeded?: boolean;
   /** { [registrationId]: { completedOvers, ballsInCurrentOver } } */
   bowlerStats?: Record<string, { completedOvers?: number; ballsInCurrentOver?: number }>;
+  /**
+   * Batsmen already out this innings. The server refuses a ball that sends one
+   * of them back in, so the batsman pickers filter on it — offering a dismissed
+   * player only earns the host a 400 after they have already tapped.
+   *
+   * `retired_hurt` is deliberately NOT in here: that batsman may resume.
+   * Absent on a match that was already in flight before the server started
+   * recording it, which is why every read must tolerate `undefined`.
+   */
+  dismissedIds?: string[];
 }
 
 export interface Dismissal {

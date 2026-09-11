@@ -172,6 +172,13 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
     // would accept it without complaint.
     const excludedFromStriker = pending.nonStrikerId ?? match.liveState?.nonStrikerId;
     const excludedFromNonStriker = pending.strikerId ?? match.liveState?.strikerId;
+    // Batsmen already out. The server refuses a ball that sends one back in, so
+    // offering them here only earns the host a 400 after they have tapped.
+    // Absent on a match that predates the field — then nobody is filtered, which
+    // is the safe direction: a stale empty picker would be worse than the bug.
+    const dismissed = match.liveState?.dismissedIds ?? [];
+    const available = (slotId: string, excluded?: string) =>
+      slotId !== excluded && !dismissed.includes(slotId);
 
     if (needsStriker && !pending.strikerId) {
       return (
@@ -180,7 +187,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
           <Text style={LBL}>Who is on strike?</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
             {battingLineup
-              .filter((slot) => slot.slotId !== excludedFromStriker)
+              .filter((slot) => available(slot.slotId, excludedFromStriker))
               .map((slot) => (
                 <Btn
                   key={slot.slotId}
@@ -202,7 +209,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
           <Text style={LBL}>Who is at the non-striker&apos;s end?</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
             {battingLineup
-              .filter((slot) => slot.slotId !== excludedFromNonStriker)
+              .filter((slot) => available(slot.slotId, excludedFromNonStriker))
               .map((slot) => (
                 <Btn
                   key={slot.slotId}
