@@ -94,4 +94,59 @@ describe('PlayPortal', () => {
     );
     expect(getByLabelText('Host a match')).toBeTruthy();
   });
+
+  // The flagship cross-portal affordance: a quick match still in progress
+  // surfaces at the top of the recent-matches feed. Side names distinct from
+  // the `recent` fixture's "Rohan v Dev" so the two rows can't be confused.
+  it('shows a live quick match as a live row with both sides named and a live tag', () => {
+    const live = quickMatch({
+      sides: [
+        { sideId: 's1', name: 'Falcons', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
+        { sideId: 's2', name: 'Titans', slots: [{ slotId: 'b', playerId: 'p2', displayName: 'Dev' }] },
+      ],
+    });
+    const { getByText } = render(<PlayPortal {...props({ matches: [live] })} />);
+    expect(getByText(/falcons v titans/i)).toBeTruthy();
+    expect(getByText('live')).toBeTruthy();
+  });
+
+  // A quick match that has finished is already represented by a ledger row —
+  // it must not also produce a live row, or the same result would appear twice.
+  it('renders no live row for a completed or cancelled quick match, while ledger rows still show', () => {
+    const done = quickMatch({
+      status: 'completed',
+      outcome: 'side1',
+      sides: [
+        { sideId: 's1', name: 'Falcons', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
+        { sideId: 's2', name: 'Titans', slots: [{ slotId: 'b', playerId: 'p2', displayName: 'Dev' }] },
+      ],
+    });
+    const cancelled = quickMatch({
+      _id: 'q2',
+      status: 'cancelled',
+      sides: [
+        { sideId: 's1', name: 'Eagles', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
+        { sideId: 's2', name: 'Hawks', slots: [{ slotId: 'b', playerId: 'p2', displayName: 'Dev' }] },
+      ],
+    });
+    const { queryByText, getByText } = render(<PlayPortal {...props({ matches: [done, cancelled] })} />);
+    expect(queryByText(/falcons v titans/i)).toBeNull();
+    expect(queryByText(/eagles v hawks/i)).toBeNull();
+    expect(getByText(/rohan v dev/i)).toBeTruthy();
+  });
+
+  // `isHost` distinguishes the host's own live match from one they are merely
+  // playing in — both read from the same `hostId` the fixture already sets.
+  it('labels a live row Hosting for the host and Playing for a participant who is not', () => {
+    const live = quickMatch();
+
+    const asHost = render(<PlayPortal {...props({ matches: [live], playerId: 'p1', recent: [] })} />);
+    expect(asHost.getByText('Hosting')).toBeTruthy();
+    expect(asHost.queryByText('Playing')).toBeNull();
+    asHost.unmount();
+
+    const asParticipant = render(<PlayPortal {...props({ matches: [live], playerId: 'p2', recent: [] })} />);
+    expect(asParticipant.getByText('Playing')).toBeTruthy();
+    expect(asParticipant.queryByText('Hosting')).toBeNull();
+  });
 });
