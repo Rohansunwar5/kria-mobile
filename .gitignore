@@ -50,3 +50,6 @@ example
 # generated native folders
 /ios
 /android
+
+# graphify code graph — derived, rebuilt by the umbrella refresh-graph.sh
+graphify-out/
