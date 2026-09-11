@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react-native';
+import { Path } from 'react-native-svg';
 import { NavIcon, NAV_ICON_NAMES, NAV_ICON_PATHS } from '../src/components/icons/nav';
 
 describe('nav icon set', () => {
@@ -25,5 +26,20 @@ describe('nav icon set', () => {
     const { UNSAFE_root } = render(<NavIcon name="user" size={44} color="#fff" />);
     // 1.8 at the 24 grid, doubled for a 44px render.
     expect(UNSAFE_root.findByProps({ strokeLinecap: 'round' }).props.strokeWidth).toBeCloseTo(3.3, 1);
+  });
+
+  // Guard against stray square caps or mitre joins on individual paths.
+  // If someone adds strokeLinecap="square" to a Path, it breaks the design boundary.
+  it('does not allow square caps or mitre joins on individual paths', () => {
+    for (const name of NAV_ICON_NAMES) {
+      const { UNSAFE_root } = render(<NavIcon name={name} size={22} color="#fff" />);
+      const paths = UNSAFE_root.findAllByType(Path);
+      for (const path of paths) {
+        expect(path.props.strokeLinecap).not.toBe('butt');
+        expect(path.props.strokeLinecap).not.toBe('square');
+        expect(path.props.strokeLinejoin).not.toBe('miter');
+        expect(path.props.strokeLinejoin).not.toBe('bevel');
+      }
+    }
   });
 });
