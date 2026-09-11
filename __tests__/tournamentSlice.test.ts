@@ -31,3 +31,42 @@ describe('tournamentSlice', () => {
     expect(store.getState().tournament.currentTournament?._id).toBe('t1');
   });
 });
+
+describe('fetchPublicTournaments — the result total', () => {
+  it('keeps the total the server sent', () => {
+    const state = reducer(
+      undefined,
+      { type: fetchPublicTournaments.fulfilled.type, payload: { tournaments: [{ _id: 't1' }], total: 12 } }
+    );
+    expect(state.publicTournaments).toHaveLength(1);
+    expect(state.publicTotal).toBe(12);
+  });
+
+  // The old payload was a bare array. If anything still dispatches that shape,
+  // the list must survive rather than the reducer throwing on payload.tournaments.
+  it('survives a bare-array payload without losing the list', () => {
+    const state = reducer(
+      undefined,
+      { type: fetchPublicTournaments.fulfilled.type, payload: [{ _id: 't1' }] }
+    );
+    expect(state.publicTournaments).toHaveLength(1);
+    expect(state.publicTotal).toBe(1);
+  });
+
+  it('falls back to the page length when the server omits a total', () => {
+    const state = reducer(
+      undefined,
+      { type: fetchPublicTournaments.fulfilled.type, payload: { tournaments: [{ _id: 'a' }, { _id: 'b' }] } }
+    );
+    expect(state.publicTotal).toBe(2);
+  });
+
+  it('resets the total to 0 when a load fails', () => {
+    const loaded = reducer(
+      undefined,
+      { type: fetchPublicTournaments.fulfilled.type, payload: { tournaments: [{ _id: 't1' }], total: 12 } }
+    );
+    const failed = reducer(loaded, { type: fetchPublicTournaments.rejected.type, payload: 'boom' });
+    expect(failed.publicTotal).toBe(0);
+  });
+});

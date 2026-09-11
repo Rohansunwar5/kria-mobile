@@ -39,6 +39,7 @@ export interface Tournament {
 
 interface TournamentState {
     publicTournaments: Tournament[];
+    publicTotal: number;
     currentTournament: Tournament | null;
     isLoading: boolean;
     error: string | null;
@@ -46,6 +47,7 @@ interface TournamentState {
 
 const initialState: TournamentState = {
     publicTournaments: [],
+    publicTotal: 0,
     currentTournament: null,
     isLoading: false,
     error: null,
@@ -73,7 +75,8 @@ export const fetchPublicTournaments = createAsyncThunk(
             const response = await API.get(url);
             const payload = response.data?.data?.data || response.data?.data || {};
             const data = payload.tournaments || (Array.isArray(payload) ? payload : []);
-            return data;
+            const total = typeof payload.total === 'number' ? payload.total : data.length;
+            return { tournaments: data, total };
         } catch (error) {
             return rejectWithValue(extractError(error));
         }
@@ -110,9 +113,15 @@ const tournamentSlice = createSlice({
         builder.addCase(fetchPublicTournaments.pending, (state) => { state.isLoading = true; state.error = null; });
         builder.addCase(fetchPublicTournaments.fulfilled, (state, action) => {
             state.isLoading = false;
-            state.publicTournaments = Array.isArray(action.payload) ? action.payload : [];
+            if (Array.isArray(action.payload)) {
+                state.publicTournaments = action.payload;
+                state.publicTotal = action.payload.length;
+            } else {
+                state.publicTournaments = action.payload.tournaments;
+                state.publicTotal = typeof action.payload.total === 'number' ? action.payload.total : action.payload.tournaments.length;
+            }
         });
-        builder.addCase(fetchPublicTournaments.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
+        builder.addCase(fetchPublicTournaments.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; state.publicTotal = 0; });
 
         builder.addCase(fetchTournament.pending, (state) => { state.isLoading = true; state.error = null; });
         builder.addCase(fetchTournament.fulfilled, (state, action) => {
