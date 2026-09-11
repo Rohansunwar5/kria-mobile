@@ -35,7 +35,7 @@ export function SoldCelebration({ playerName, teamName, teamColor, soldPrice }: 
             fontFamily: 'Anton_400Regular',
             textTransform: 'uppercase',
             fontSize: 46,
-            lineHeight: 41,
+            lineHeight: 55,
             textAlign: 'center',
             marginTop: 12,
             color: teamColor || '#F97316',

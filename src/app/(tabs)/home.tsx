@@ -7,7 +7,7 @@ import { PlayPortal } from '@/components/home/PlayPortal';
 import { PortalSwitch } from '@/components/home/PortalSwitch';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
-import { hasLiveQuickMatch, portalStrip, type Portal } from '@/lib/homePortal';
+import { hasLiveQuickMatch, portalStrip, visibleTournaments, type Portal } from '@/lib/homePortal';
 import { useCareer } from '@/lib/useCareer';
 import { colors } from '@/lib/theme';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -60,9 +60,9 @@ export default function Home() {
   const isPlay = portal === 'play';
   const accent = isPlay ? colors.auction : colors.brand;
 
-  // The same set EventsPortal shows — the strip counts what the user can see,
-  // not what the response happened to carry.
-  const openCount = publicTournaments.filter((t) => t.status !== 'draft' && t.isActive !== false).length;
+  // The strip counts what the user can see, not what the response carried —
+  // the same set EventsPortal renders, through the same predicate.
+  const openCount = visibleTournaments(publicTournaments).length;
   const played = career.profile?.sports.reduce((n, s) => n + s.played, 0) ?? 0;
   const live = hasLiveQuickMatch(matches);
 

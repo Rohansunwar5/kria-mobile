@@ -59,19 +59,32 @@ const renderHome = async () => {
   return utils;
 };
 
+// PortalSwitch relabels the PLAY tab to 'Play, a match is live' the moment a
+// fixture has a live quick match, so an exact-string query would break the
+// first time one does. Match the prefix instead.
+const PLAY_TAB = /^Play/;
+
 describe('Home', () => {
   it('opens on the events portal', async () => {
-    const { getByLabelText } = await renderHome();
+    const { getByLabelText, getByTestId } = await renderHome();
     expect(getByLabelText('Events').props.accessibilityState.selected).toBe(true);
+    expect(getByTestId('events-list')).toBeTruthy();
   });
 
   it('crosses to the play portal and back', async () => {
-    const { getByLabelText } = await renderHome();
-    fireEvent.press(getByLabelText('Play'));
-    await waitFor(() => expect(getByLabelText('Host a match')).toBeTruthy());
+    const { getByLabelText, getByTestId, queryByLabelText, queryByTestId } = await renderHome();
 
+    fireEvent.press(getByLabelText(PLAY_TAB));
+    await waitFor(() => expect(getByLabelText('Host a match')).toBeTruthy());
+    expect(queryByTestId('events-list')).toBeNull();
+
+    // Crossing back has to restore the events BODY, not just repaint the tab —
+    // the two portals are swapped siblings, so a half-applied switch would
+    // still flip the selected state while showing the wrong content.
     fireEvent.press(getByLabelText('Events'));
-    await waitFor(() => expect(getByLabelText('Play').props.accessibilityState.selected).toBe(false));
+    await waitFor(() => expect(getByTestId('events-list')).toBeTruthy());
+    expect(queryByLabelText('Host a match')).toBeNull();
+    expect(getByLabelText(PLAY_TAB).props.accessibilityState.selected).toBe(false);
   });
 
   // The masthead renders from cached auth state, which is the whole point of
@@ -79,7 +92,7 @@ describe('Home', () => {
   it('keeps the masthead across a portal change', async () => {
     const { getByLabelText, getByText } = await renderHome();
     expect(getByText('Kria')).toBeTruthy();
-    fireEvent.press(getByLabelText('Play'));
+    fireEvent.press(getByLabelText(PLAY_TAB));
     expect(getByText('Kria')).toBeTruthy();
   });
 });

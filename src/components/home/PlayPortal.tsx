@@ -111,7 +111,7 @@ function HostJoin() {
               fontFamily: 'Anton_400Regular',
               textTransform: 'uppercase',
               fontSize: 30,
-              lineHeight: 34,
+              lineHeight: 36,
               color: colors.white,
               marginTop: 5,
             }}
@@ -324,7 +324,7 @@ function LiveRow({ match, playerId }: { match: QuickMatch; playerId?: string }) 
           fontFamily: 'Anton_400Regular',
           textTransform: 'uppercase',
           fontSize: 18,
-          lineHeight: 21,
+          lineHeight: 22,
           color: colors.white,
           marginTop: 8,
         }}
@@ -359,7 +359,7 @@ function LedgerRow({ match }: { match: RecentMatch }) {
           fontFamily: 'Anton_400Regular',
           textTransform: 'uppercase',
           fontSize: 18,
-          lineHeight: 21,
+          lineHeight: 22,
           color: colors.white,
           marginTop: 8,
         }}

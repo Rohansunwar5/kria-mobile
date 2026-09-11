@@ -1,6 +1,17 @@
 import type { QuickMatch } from '@/api/quickMatch';
+import type { Tournament } from '@/store/slices/tournamentSlice';
 
 export type Portal = 'events' | 'play';
+
+/**
+ * What the events side actually shows: drafts and deactivated tournaments are
+ * the organiser's, not the player's. `EventsPortal` renders this set and the
+ * home strip counts it, so it is defined once — two copies of the predicate
+ * would drift and the strip would start claiming a number nobody can see.
+ */
+export function visibleTournaments(tournaments: Tournament[]): Tournament[] {
+  return tournaments.filter((t) => t.status !== 'draft' && t.isActive !== false);
+}
 
 /** Whether any of your quick matches is in progress. This is what puts the dot
  *  on the PLAY tab — the only unprompted reason to cross portals. */

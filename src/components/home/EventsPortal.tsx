@@ -6,6 +6,7 @@ import { Tag } from '@/components/StatusPill';
 import { Chip } from '@/components/canvas';
 import { Skeleton, EmptyState, ErrorBlock } from '@/components/states';
 import type { Tournament } from '@/store/slices/tournamentSlice';
+import { visibleTournaments } from '@/lib/homePortal';
 import { CITIES, SPORTS } from '@/lib/tournamentConstants';
 
 const SPORT_CHIPS = SPORTS.filter((s) => s !== 'All');
@@ -24,8 +25,11 @@ interface EventsPortalProps {
   onRetry: () => void;
 }
 
-// Lifted verbatim out of app/(tabs)/home.tsx: the tournament-discovery body,
-// unchanged. The masthead stays on the screen above it.
+// The tournament-discovery body, lifted out of app/(tabs)/home.tsx. It is that
+// body unchanged except for one removal: the "Between tournaments / Quick
+// matches" CTA is gone, because the PLAY portal and the nav's Host button are
+// the ways to a quick match now. The masthead stays on the screen above it, and
+// every navigation leaves through `onOpen` — this component is presentational.
 export function EventsPortal({
   tournaments,
   isLoading,
@@ -39,7 +43,7 @@ export function EventsPortal({
   onOpen,
   onRetry,
 }: EventsPortalProps) {
-  const visible = tournaments.filter((t) => t.status !== 'draft' && t.isActive !== false);
+  const visible = visibleTournaments(tournaments);
   // Surface a live/registration-open tournament as the hero, else the first one.
   const featured =
     visible.find((t) => t.status === 'ongoing') ||

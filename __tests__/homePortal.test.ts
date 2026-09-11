@@ -1,7 +1,32 @@
-import { hasLiveQuickMatch, portalStrip } from '../src/lib/homePortal';
+import { hasLiveQuickMatch, portalStrip, visibleTournaments } from '../src/lib/homePortal';
 import type { QuickMatch } from '../src/api/quickMatch';
+import type { Tournament } from '../src/store/slices/tournamentSlice';
 
 const match = (status: QuickMatch['status']) => ({ status }) as QuickMatch;
+
+const tournament = (over: Partial<Tournament>) => ({ _id: 't', status: 'registration_open', ...over }) as Tournament;
+
+// EventsPortal renders this set and the home strip counts it. They used to hold
+// a copy of the predicate each; this is the single definition both now call.
+describe('visibleTournaments', () => {
+  it('hides an organiser draft', () => {
+    expect(visibleTournaments([tournament({ status: 'draft' })])).toEqual([]);
+  });
+
+  it('hides a deactivated tournament', () => {
+    expect(visibleTournaments([tournament({ isActive: false })])).toEqual([]);
+  });
+
+  // Older documents predate the flag, so only an explicit `false` hides one.
+  it('keeps a tournament whose isActive was never set', () => {
+    expect(visibleTournaments([tournament({})])).toHaveLength(1);
+  });
+
+  it('keeps every other status', () => {
+    const all = [tournament({ _id: 'a', status: 'ongoing' }), tournament({ _id: 'b', status: 'completed' })];
+    expect(visibleTournaments(all).map((t) => t._id)).toEqual(['a', 'b']);
+  });
+});
 
 describe('hasLiveQuickMatch', () => {
   it('is true when any match is live', () => {
