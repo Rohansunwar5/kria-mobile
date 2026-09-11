@@ -42,4 +42,19 @@ describe('tournament filters', () => {
       'registration_open', 'ongoing', 'auction_in_progress', 'completed',
     ]);
   });
+
+  // SportConfig already has table_tennis/football/kabaddi/tennis; SPORTS
+  // just hasn't grown to list them yet. The label must survive that day
+  // without silently mangling to 'Table_tennis'. Tested against the value
+  // directly — table_tennis is deliberately not added to SPORTS here.
+  it('title-cases a multi-word sport value', () => {
+    expect(appliedChips({ ...EMPTY_FILTERS, sport: 'table_tennis' }))
+      .toEqual([{ key: 'sport', label: 'Table Tennis' }]);
+  });
+
+  // An empty string is as meaningless as 'All' and must not reach the query.
+  it('treats an empty string the same as the sentinel', () => {
+    expect(toQuery({ sport: '', city: 'All', status: 'ongoing' }))
+      .toEqual({ status: 'ongoing' });
+  });
 });

@@ -38,8 +38,17 @@ export const STAGES: { value: string; label: string; tone: 'open' | 'live' | 'au
     tone: STAGE_TONES[value],
   }));
 
+// A lookup map would need a new entry every time a sport plugin lands —
+// exactly the kind of edit this project's "add sports as plugins, don't
+// modify what exists" convention makes easy to forget. Splitting on `_`
+// and capitalising each word instead needs no maintenance as sports are
+// added: `table_tennis` -> `Table Tennis` today, and whatever the next
+// snake_case sport value is, automatically, later.
 function titleCase(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+  return value
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
 
 // The chip says what a human picked, not the enum the server takes: sport
@@ -73,11 +82,13 @@ export function clearOne(f: Filters, key: keyof Filters): Filters {
 
 // 'All' is the unfiltered sentinel and must never reach the query string —
 // the server would treat it as a literal city named "All" — so each key is
-// checked individually against the sentinel rather than assumed.
+// checked individually against the sentinel rather than assumed. A falsy
+// value (e.g. '') is just as meaningless as the sentinel, so it is excluded
+// the same way rather than sent through as a literal empty filter.
 export function toQuery(f: Filters): { sport?: string; city?: string; status?: string } {
   const query: { sport?: string; city?: string; status?: string } = {};
-  if (f.sport !== ALL) query.sport = f.sport;
-  if (f.city !== ALL) query.city = f.city;
-  if (f.status !== ALL) query.status = f.status;
+  if (f.sport && f.sport !== ALL) query.sport = f.sport;
+  if (f.city && f.city !== ALL) query.city = f.city;
+  if (f.status && f.status !== ALL) query.status = f.status;
   return query;
 }
