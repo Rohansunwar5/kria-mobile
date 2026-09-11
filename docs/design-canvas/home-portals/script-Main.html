@@ -1,0 +1,40 @@
+<script data-dc-script data-props='{"startPortal":{"editor":"enum","options":["events","play"],"default":"events","section":"Portal"},"playLive":{"editor":"boolean","default":true,"section":"Portal"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // Events is the default face of home; Play is the player ecosystem.
+    const portal = (this.state && this.state.portal) || this.props.startPortal || 'events';
+    const isPlay = portal === 'play';
+    const live = this.props.playLive !== false;
+
+    // brand orange for the organiser side, auction magenta for "you" —
+    // the same two meanings the design system already assigns them.
+    const brand = 'rgba(249,115,22,0.9)';
+    const mag = 'rgba(250,76,147,0.9)';
+
+    return {
+      isEvents: !isPlay,
+      isPlay: isPlay,
+      goEvents: () => this.setState({ portal: 'events' }),
+      goPlay: () => this.setState({ portal: 'play' }),
+
+      accent: isPlay ? mag : brand,
+      accent2: isPlay ? '#FA4C93' : '#F97316',
+      tabIdle: isPlay ? 'rgba(36,6,20,0.62)' : 'rgba(11,11,11,0.62)',
+
+      aBg: isPlay ? 'transparent' : '#F97316',
+      aFg: isPlay ? '#7d7d7d' : '#0B0B0B',
+      bBg: isPlay ? '#FA4C93' : 'transparent',
+      bFg: isPlay ? '#240614' : '#7d7d7d',
+
+      // A live quick match is the only reason to cross to the other side
+      // unprompted, so the dot is the whole prompt.
+      dot: live ? (isPlay ? '#240614' : '#FA4C93') : 'transparent',
+
+      strip: isPlay
+        ? (live ? 'YOUR GAME · 1 LIVE NOW' : 'YOUR GAME · 47 PLAYED')
+        : 'ORGANISER-HOSTED · 3 OPEN IN BANGALORE',
+      stripColor: isPlay ? '#FA4C93' : '#7d7d7d',
+    };
+  }
+}
+</script>

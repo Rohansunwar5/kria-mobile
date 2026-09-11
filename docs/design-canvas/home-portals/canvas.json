@@ -1,0 +1,56 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "Home — both portals (tap to switch)", "x": 0, "y": 0, "w": 390, "h": 844, "is_interactive": true },
+    { "file": "Filters.dc.html", "title": "Filter sheet", "x": 470, "y": 0, "w": 390, "h": 844 },
+    { "file": "PlayEmpty.dc.html", "title": "Play — first run", "x": 940, "y": 0, "w": 390, "h": 844 },
+    { "file": "Light.dc.html", "title": "Light mode — second attempt", "x": 1410, "y": 0, "w": 390, "h": 844 },
+    { "file": "NavBar.dc.html", "title": "Floating nav — A or B", "x": 1880, "y": 0, "w": 430, "h": 660 },
+    { "file": "Profile.dc.html", "title": "Player profile", "x": 2390, "y": 0, "w": 390, "h": 1760 },
+    { "file": "PlayFull.dc.html", "title": "Play — full scroll", "x": 2860, "y": 0, "w": 390, "h": 1560 }
+  ],
+  "annotations": [
+    {
+      "id": "portal-switch",
+      "x": 0,
+      "y": -300,
+      "w": 390,
+      "text": "Tap EVENTS / PLAY on this artboard — it works.\n\nEVENTS is the default face of home. PLAY is the new player-ecosystem side. The dot on PLAY means a quick match of yours is live — the only unprompted reason to cross over.\n\nThe featured card carries the real TournamentArt strip the shipped FeaturedTournament already renders: organiser banner when there is one, else the seeded duotone ground with the Kria mark. The hazard rule now lives only on that art edge."
+    },
+    {
+      "id": "nav-bar",
+      "x": 1880,
+      "y": -300,
+      "w": 430,
+      "text": "PICK A OR B.\n\nA is your reference: pill bar, circular lift. B is the same idea in the house radii — 8px bar, 6px lifted tile.\n\nThis is a real decision, not a style preference. DESIGN.md §3 says radii 5–6, nothing is a soft card, and circles are only for genuinely round things. A breaks that rule on purpose and it does look better; B keeps it. If you take A, §3 needs rewriting to say the nav is the exception, or the whole system softens — don't leave the doc contradicting the app.\n\nThe five glyphs are NEW: 1.8 stroke, round caps, simpler geometry. The industrial set (square caps, mitred joins) is right on scoreboards and tags but read spiky at 22px in a bar. That leaves two icon languages in the app — fine if the boundary is 'nav is soft, content is industrial', but it should be a decision, not a drift.\n\nOnly one circle ever lifts, and it is Host, so the lift never competes with which tab you are on.\n\nExplore and Live are routes that do not exist yet."
+    },
+    {
+      "id": "filters",
+      "x": 470,
+      "y": 900,
+      "w": 390,
+      "text": "PROPER FILTER, not hard-coded chips.\n\nApplied filters show as dismissible chips on home; the button carries the count. The sheet offers exactly what getAllTournamentsValidator accepts — sport, city, status — and nothing more. Entry fee, date range and format would each need a new query param before they could be drawn honestly.\n\nStage maps to the real enum: registration_open, ongoing, auction_in_progress, completed.\n\nThe footer count needs a cheap count query, or run the filter optimistically and correct it."
+    },
+    {
+      "id": "profile-data",
+      "x": 2390,
+      "y": -300,
+      "w": 390,
+      "text": "PLAYER PROFILE — what is real and what is not.\n\nALREADY SERVED:\n• Best sport, career table, form — CareerProfile + RecentMatch. bestSport is null under 10 decided matches and no badge should show then; that rule lives on the server, don't mirror it.\n• Titles — PublicPlayer.titles[] on getPublicPlayer.\n• Played for — PublicHistoryEntry already carries tournament, category, team (name + primaryColor) and stats.matchesPlayed/matchesWon. The team swatch colour is team.primaryColor.\n\nNEEDS BUILDING:\n• The achievement badges. No badge/milestone model exists anywhere on the server — I checked. But none of these are fantasy: 50 matches, 100 matches, two sports, 25 wins are all count queries over MatchParticipation, which already carries sport and context. It is an aggregate, not a new write path.\n• Follow / Challenge. No follower model, no challenge flow. CricHeroes has both; you have neither. Cut the buttons or scope the feature — do not ship them dead.\n\nThe 'sold for' figure on Thunder XI comes from Auction, which is tournament-only, so it is absent for a badminton team and for quick play."
+    },
+    {
+      "id": "top-players-api",
+      "x": 2860,
+      "y": -300,
+      "w": 390,
+      "text": "TOP PLAYERS NEEDS A NEW ENDPOINT.\n\nEverything else on this side already has one:\n  host / join  -> /quick-match\n  your record  -> /player/career/:playerId\n  recent feed  -> /player/career/:playerId/recent\n\nThere is no platform-wide ranking route in careerStats.route.ts. It would be a new aggregate over MatchParticipation, filtered by sport, with a minimum decided-match floor so a 1-match 100% player does not top the table — the same rule bestSport already uses at 10."
+    },
+    {
+      "id": "light-palette",
+      "x": 1410,
+      "y": -300,
+      "w": 390,
+      "text": "LIGHT MODE, SECOND ATTEMPT.\n\nThe first was muddy. The error: holding 'one lightness and chroma' across all three hues on paper forces every accent dark and grey at once, and keeping dark mode's big solid accent fills then floods the page with burnt orange.\n\nThe rule that works splits accents by ROLE:\n\n• As a FILL the accent keeps its bright dark-mode hex. A fill carries its own ground, so #F97316 with ink on top is as legible on paper as on black. Live tag, filter button, avatar, the Host circle: unchanged.\n\n• As TEXT on paper, and only there, it drops to the derived dark hue: brand #b24b04 (5.15:1), open #248430 (4.55:1), fail #b54438, auction #ab437b. That is the Rs 750, the 03 count, the PLAYER overline.\n\n• The heavy blocks go INK. The broadcast bar is #0B0B0B with an orange arrow. A burnt-orange slab on paper reads as flooded ink; black reads as print.\n\n• The art strip stays dark. A dark image block on paper is what gives the layout its contrast.\n\nHonest cost: ghost type nearly disappears on paper and does less work here than on black."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

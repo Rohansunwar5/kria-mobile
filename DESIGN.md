@@ -2,8 +2,13 @@
 
 The visual language for the player app. This file is the **reference**; the build handoff is
 [`docs/design-canvas/IMPLEMENTATION.md`](docs/design-canvas/IMPLEMENTATION.md), and the screen
-designs are the 34 artboards in [`docs/design-canvas/`](docs/design-canvas/) (open
-`docs/design-canvas/kria-player-app-screens.html` in a browser to view them all on one canvas).
+designs are the 31 artboards in [`docs/design-canvas/`](docs/design-canvas/) (open
+`docs/design-canvas/kria-player-app-screens.html` in a browser to view them all on one canvas),
+plus the 7 in [`docs/design-canvas/home-portals/`](docs/design-canvas/home-portals/) covering the
+two-portal home, the filter sheet, the floating nav and the player profile.
+
+The old `Main`, `Profile` and `PlayerProfile` artboards were deleted when `home-portals/`
+superseded them — that is why the entry artboard is no longer named `Main`.
 
 The direction is **maximalist and industrial** — sports-broadcast, not consumer-soft. Heavy type,
 flat colour blocks, hard edges, visible texture. It deliberately replaces the earlier rounded
@@ -91,6 +96,14 @@ daylight. Only `live` carries a dot.
 - **Avatars and team badges are squares**, 4px radius — players on brand orange, teams in their
   own colour. Circles are used only for genuinely round things (a cricket ball, a live dot).
 
+**The bottom nav is the one exception, and it is deliberate.** It is a floating pill —
+`border-radius: 32px`, inset 14px from both edges and 20px from the bottom — carrying a single
+lifted **circle** for the Host action, ringed 5px in the page ground so the ring reads as a notch
+cut into the bar. Only that one circle ever lifts, so the lift always means *create* and never
+competes with which tab is selected. Nothing else in the app may take a pill radius or a circular
+control on the strength of this; if a second exception is ever wanted, change this rule rather
+than quietly widening it. Designed in `docs/design-canvas/home-portals/NavBar.dc.html`.
+
 ### Texture — four devices, used sparingly
 
 | Device | What it is | Where |
@@ -119,6 +132,17 @@ low-opacity image or nothing. Ghost type has no `-webkit-text-stroke` equivalent
   where a library would use a circle.
 - **sport glyphs no generic set has** — `shuttlecock`, `cricket-bat`, `stumps`, `ball`, `court`,
   `gavel` (the auction), `bracket` (the knockout draw). These carry most of the brand character.
+
+### The nav set is the second language, and the boundary is fixed
+
+The five bottom-nav glyphs — `home`, `search`, `plus`, `live`, `user` — are drawn to **1.8 stroke
+with round caps and round joins**, the opposite of the rule above. At 22px in a floating bar the
+industrial set read spiky rather than precise; the nav is chrome you see on every screen, and it
+should recede.
+
+**The boundary is: nav is soft, everything else is industrial.** That is the whole of it. A round
+terminal anywhere in content — a tag, a scoreboard, a row, an empty state — is a bug, not a style
+choice. Two icon languages only stay legible while the line between them is this blunt.
 
 ```tsx
 import { Icon } from '@/components/icons';
@@ -208,7 +232,8 @@ reads as a progress bar.
 
 | | |
 |---|---|
-| Designed | 34 screens: the full player journey for badminton and cricket, plus onboarding/auth and the account screens |
+| Designed | 38 screens: the full player journey for badminton and cricket, onboarding/auth, the account screens, and the two-portal home set in `home-portals/` |
 | Built | Foundation complete — fonts, tokens, icon set, state patterns. Most of the app surface migrated. |
 | Not yet migrated | All 12 onboarding and auth screens, `profile/edit`, `profile/invoices`, `team-league` |
+| Designed, not built | Everything in `home-portals/`: the two-portal home, the filter sheet, the floating nav, the new player profile. Three of these need server work first — a platform-wide top-players aggregate, an achievements aggregate over `MatchParticipation`, and a count for the filter sheet's result button. Follow and Challenge on the profile have no model at all. |
 | Sport scope | Badminton and cricket only. `src/lib/tournamentConstants.ts` still offers bowling, basketball and volleyball, which `SportConfig` cannot serve. |
