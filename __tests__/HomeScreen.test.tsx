@@ -140,8 +140,12 @@ describe('Home', () => {
     fireEvent.press(getByLabelText(PLAY_TAB));
 
     await waitFor(() => expect(getByLabelText('Host a match')).toBeTruthy());
-    expect(queryByLabelText('City')).toBeNull();
-    expect(getByLabelText('City', { includeHiddenElements: true })).toBeTruthy();
+    // 'City' was the old city chip's label, retired along with the rest of the
+    // hard-coded chip row; the filter bar's button is the same kind of
+    // always-present, stably-labelled probe for "this hidden subtree still
+    // rendered its header."
+    expect(queryByLabelText('Filter tournaments')).toBeNull();
+    expect(getByLabelText('Filter tournaments', { includeHiddenElements: true })).toBeTruthy();
   });
 
   // The masthead renders from cached auth state, which is the whole point of
@@ -151,5 +155,17 @@ describe('Home', () => {
     expect(getByText('Kria')).toBeTruthy();
     fireEvent.press(getByLabelText(PLAY_TAB));
     expect(getByText('Kria')).toBeTruthy();
+  });
+
+  it('opens the filter sheet from the bar and applies a choice', async () => {
+    const { getByLabelText, getByText } = await renderHome();
+    fireEvent.press(getByLabelText('Filter tournaments'));
+    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
+
+    fireEvent.press(getByLabelText('Cricket'));
+    fireEvent.press(getByText(/show \d+ events?/i));
+
+    // The chip proves the choice reached the screen's state, not just the sheet's.
+    await waitFor(() => expect(getByText('Cricket')).toBeTruthy());
   });
 });

@@ -1,26 +1,20 @@
-import { View, Text, FlatList, Pressable, ScrollView } from 'react-native';
-import { Icon } from '@/components/icons';
+import { View, Text, FlatList, Pressable } from 'react-native';
 import { TournamentCard } from '@/components/TournamentCard';
 import { FeaturedTournament } from '@/components/home/FeaturedTournament';
 import { Tag } from '@/components/StatusPill';
-import { Chip } from '@/components/canvas';
+import { FilterBar } from '@/components/home/FilterBar';
 import { Skeleton, EmptyState, ErrorBlock } from '@/components/states';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 import { visibleTournaments } from '@/lib/homePortal';
-import { CITIES, SPORTS } from '@/lib/tournamentConstants';
-
-const SPORT_CHIPS = SPORTS.filter((s) => s !== 'All');
+import { appliedChips, appliedCount, type Filters } from '@/lib/tournamentFilters';
 
 interface EventsPortalProps {
   tournaments: Tournament[];
   isLoading: boolean;
   error: string | null;
-  sport: string;
-  city: string;
-  cityOpen: boolean;
-  onSport: (sport: string) => void;
-  onCity: (city: string) => void;
-  onToggleCity: () => void;
+  filters: Filters;
+  onClearFilter: (key: keyof Filters) => void;
+  onOpenFilters: () => void;
   onOpen: (id: string) => void;
   onRetry: () => void;
 }
@@ -34,12 +28,9 @@ export function EventsPortal({
   tournaments,
   isLoading,
   error,
-  sport,
-  city,
-  cityOpen,
-  onSport,
-  onCity,
-  onToggleCity,
+  filters,
+  onClearFilter,
+  onOpenFilters,
   onOpen,
   onRetry,
 }: EventsPortalProps) {
@@ -50,7 +41,7 @@ export function EventsPortal({
     visible.find((t) => t.status === 'registration_open') ||
     visible[0];
   const rest = featured ? visible.filter((t) => t._id !== featured._id) : visible;
-  const filtersActive = sport !== 'All' || city !== 'All';
+  const filtersActive = appliedCount(filters) > 0;
   const stale = isLoading && visible.length > 0;
 
   const open = (id: string) => onOpen(id);
@@ -69,38 +60,7 @@ export function EventsPortal({
         </View>
       ) : null}
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 16, paddingTop: 18 }}>
-        {SPORT_CHIPS.map((s) => (
-          <Chip key={s} label={s} selected={sport === s} onPress={() => onSport(sport === s ? 'All' : s)} />
-        ))}
-        <View style={{ flex: 1 }} />
-        <Chip
-          label={city === 'All' ? 'City' : city.slice(0, 3)}
-          selected={city !== 'All'}
-          onPress={() => onToggleCity()}
-          icon={<Icon name="filter" size={12} color={city !== 'All' ? '#0B0B0B' : '#bdbdbd'} />}
-        />
-      </View>
-
-      {cityOpen ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 7, paddingHorizontal: 16, paddingTop: 10 }}
-        >
-          {CITIES.map((c) => (
-            <Chip
-              key={c}
-              label={c}
-              selected={city === c}
-              onPress={() => {
-                onCity(c);
-                onToggleCity();
-              }}
-            />
-          ))}
-        </ScrollView>
-      ) : null}
+      <FilterBar filters={filters} onClear={onClearFilter} onOpen={onOpenFilters} />
 
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#fff' }}>
@@ -156,7 +116,7 @@ export function EventsPortal({
               : 'New tournaments land here as organisers open entry. Check back soon.'
           }
           cta={filtersActive ? 'Clear filters' : undefined}
-          onCta={filtersActive ? () => { onSport('All'); onCity('All'); } : undefined}
+          onCta={filtersActive ? () => appliedChips(filters).forEach((chip) => onClearFilter(chip.key)) : undefined}
         />
       }
     />

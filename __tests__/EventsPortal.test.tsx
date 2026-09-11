@@ -1,6 +1,7 @@
 import { fireEvent, render, within } from '@testing-library/react-native';
 import { EventsPortal } from '../src/components/home/EventsPortal';
 import type { Tournament } from '../src/store/slices/tournamentSlice';
+import { EMPTY_FILTERS } from '../src/lib/tournamentFilters';
 
 // The featured card's art strip calls expo-router's `useIsFocused`, which needs
 // a real NavigationContainer — absent when rendering a bare component. Same
@@ -25,12 +26,9 @@ const props = (over = {}) => ({
   tournaments: [tournament()],
   isLoading: false,
   error: null,
-  sport: 'All',
-  city: 'All',
-  cityOpen: false,
-  onSport: jest.fn(),
-  onCity: jest.fn(),
-  onToggleCity: jest.fn(),
+  filters: EMPTY_FILTERS,
+  onClearFilter: jest.fn(),
+  onOpenFilters: jest.fn(),
   onOpen: jest.fn(),
   onRetry: jest.fn(),
   ...over,
@@ -110,12 +108,19 @@ describe('EventsPortal', () => {
     expect(getByText(/events unavailable/i)).toBeTruthy();
   });
 
-  it('offers a filter reset only when a filter is actually applied', () => {
+  it('shows the filter bar instead of the old sport chips', () => {
+    const { getByLabelText, queryByText } = render(<EventsPortal {...props()} />);
+    expect(getByLabelText('Filter tournaments')).toBeTruthy();
+    // The hard-coded chip row is gone for good.
+    expect(queryByText('BLR')).toBeNull();
+  });
+
+  it('offers a filter reset in the empty state only when a filter is applied', () => {
     const { queryByText } = render(<EventsPortal {...props({ tournaments: [] })} />);
     expect(queryByText(/clear filters/i)).toBeNull();
 
     const { getByText } = render(
-      <EventsPortal {...props({ tournaments: [], sport: 'badminton' })} />
+      <EventsPortal {...props({ tournaments: [], filters: { sport: 'badminton', city: 'All', status: 'All' } })} />
     );
     expect(getByText(/clear filters/i)).toBeTruthy();
   });

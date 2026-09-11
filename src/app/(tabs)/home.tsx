@@ -3,6 +3,7 @@ import { View, Text, Pressable, Image } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { EventsPortal } from '@/components/home/EventsPortal';
+import { FilterSheet } from '@/components/home/FilterSheet';
 import { PlayPortal } from '@/components/home/PlayPortal';
 import { PortalSwitch } from '@/components/home/PortalSwitch';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
@@ -10,6 +11,7 @@ import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
 import { hasLiveQuickMatch, openForEntryCount, portalStrip, type Portal } from '@/lib/homePortal';
 import { useCareer } from '@/lib/useCareer';
 import { colors } from '@/lib/theme';
+import { EMPTY_FILTERS, clearOne, toQuery, type Filters } from '@/lib/tournamentFilters';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPublicTournaments } from '@/store/slices/tournamentSlice';
 
@@ -44,11 +46,10 @@ function PortalPane({ active, children }: { active: boolean; children: ReactNode
 export default function Home() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { publicTournaments, isLoading, error } = useAppSelector((s) => s.tournament);
+  const { publicTournaments, publicTotal, isLoading, error } = useAppSelector((s) => s.tournament);
   const user = useAppSelector((s) => s.auth.user);
-  const [sport, setSport] = useState('All');
-  const [city, setCity] = useState('All');
-  const [cityOpen, setCityOpen] = useState(false);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [portal, setPortal] = useState<Portal>('events');
   const [matches, setMatches] = useState<QuickMatch[]>([]);
 
@@ -56,15 +57,14 @@ export default function Home() {
     dispatch(
       fetchPublicTournaments({
         limit: 20,
-        sport: sport !== 'All' ? sport : undefined,
-        city: city !== 'All' ? city : undefined,
+        ...toQuery(filters),
       })
     );
 
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, sport, city]);
+  }, [dispatch, filters]);
 
   const career = useCareer(user?._id);
 
@@ -84,6 +84,8 @@ export default function Home() {
   const firstName = user?.firstName || 'Player';
 
   const open = (id: string) => router.push({ pathname: '/tournament/[id]', params: { id } });
+  const onClearFilter = (key: keyof Filters) => setFilters((f) => clearOne(f, key));
+  const onOpenFilters = () => setSheetOpen(true);
 
   const isPlay = portal === 'play';
   const accent = isPlay ? colors.auction : colors.brand;
@@ -148,7 +150,7 @@ export default function Home() {
           paddingTop: 9,
         }}
       >
-        {portalStrip(portal, { openCount, city, played, live })}
+        {portalStrip(portal, { openCount, city: filters.city, played, live })}
       </Text>
 
       {/* Self-scrolling siblings: PlayPortal owns a ScrollView and EventsPortal
@@ -163,12 +165,9 @@ export default function Home() {
             tournaments={publicTournaments}
             isLoading={isLoading}
             error={error}
-            sport={sport}
-            city={city}
-            cityOpen={cityOpen}
-            onSport={setSport}
-            onCity={setCity}
-            onToggleCity={() => setCityOpen((o) => !o)}
+            filters={filters}
+            onClearFilter={onClearFilter}
+            onOpenFilters={onOpenFilters}
             onOpen={open}
             onRetry={load}
           />
@@ -187,6 +186,20 @@ export default function Home() {
           />
         </PortalPane>
       </View>
+
+      <FilterSheet
+        visible={sheetOpen}
+        filters={filters}
+        // Honest caveat: this count reflects the filters currently applied,
+        // not the draft being edited inside the sheet, because the server is
+        // only asked once the user taps Apply — there is no live per-tap
+        // count. That would need a count-only endpoint; the applied count is
+        // what ships. Said here so the next reader does not file this as a
+        // bug.
+        resultCount={publicTotal}
+        onApply={(f) => { setFilters(f); setSheetOpen(false); }}
+        onClose={() => setSheetOpen(false)}
+      />
     </Screen>
   );
 }
