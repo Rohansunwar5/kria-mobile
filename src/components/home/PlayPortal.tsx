@@ -407,6 +407,16 @@ export interface PlayPortalProps {
   matches: QuickMatch[];
   playerId?: string;
   loading: boolean;
+  /**
+   * The career-profile request actually FAILED. A missing `profile` is not the
+   * same thing — a player whose id was never known, or who has simply never
+   * played, also has none — and using it as the error proxy put a "Couldn't
+   * load your record" block with a dead retry in front of people whose record
+   * had never been asked for. `useCareer` reports the two independently
+   * (`allSettled`), so a failed feed still cannot blank a record that loaded.
+   */
+  error: boolean;
+  recentError: boolean;
   onRetry: () => void;
 }
 
@@ -417,7 +427,16 @@ export interface PlayPortalProps {
  * Props-driven for the same reason `EventsPortal` is — the home screen owns the
  * loading, the portal owns only how it looks.
  */
-export function PlayPortal({ profile, recent, matches, playerId, loading, onRetry }: PlayPortalProps) {
+export function PlayPortal({
+  profile,
+  recent,
+  matches,
+  playerId,
+  loading,
+  error,
+  recentError,
+  onRetry,
+}: PlayPortalProps) {
   const sports = profile ? profile.sports : [];
   const played = sports.reduce((sum, s) => sum + s.played, 0);
   const live = matches.filter((m) => m.status === 'live');
@@ -436,7 +455,7 @@ export function PlayPortal({ profile, recent, matches, playerId, loading, onRetr
       );
     }
 
-    if (!profile) {
+    if (error) {
       return (
         <View style={{ paddingHorizontal: 16 }}>
           <ErrorBlock
@@ -448,6 +467,11 @@ export function PlayPortal({ profile, recent, matches, playerId, loading, onRetr
         </View>
       );
     }
+
+    // Unreachable — the section below only calls this when there is a record,
+    // a load in flight, or a failure — but it is what narrows `profile` for the
+    // cells, and it fails to nothing rather than to a false error.
+    if (!profile) return null;
 
     return (
       <View style={{ paddingHorizontal: 16 }}>
@@ -474,7 +498,7 @@ export function PlayPortal({ profile, recent, matches, playerId, loading, onRetr
       );
     }
 
-    if (!recent) {
+    if (recentError) {
       return (
         <View style={{ paddingHorizontal: 16 }}>
           <ErrorBlock
@@ -501,14 +525,17 @@ export function PlayPortal({ profile, recent, matches, playerId, loading, onRetr
 
   // A player with no history has an empty record AND an empty feed. The record
   // block already says so in words, so the feed is omitted rather than given a
-  // second empty state saying the same sentence again.
-  const showRecent = loading || !recent || live.length > 0 || ledger.length > 0;
+  // second empty state saying the same sentence again. A genuine failure is the
+  // exception — that has to be said out loud.
+  const showRecent = loading || recentError || live.length > 0 || ledger.length > 0;
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
       <HostJoin />
 
-      {hasRecord || loading || !profile ? (
+      {/* Nothing yet is the first-run state, not a failure: only `loading` and a
+          real `error` keep the record section up in place of EmptyRecord. */}
+      {hasRecord || loading || error ? (
         <View>
           <SectionHeading title="Your record" meta={played > 0 ? `${played} played` : undefined} />
           {recordBody()}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { View, Text, Pressable, Image } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
@@ -7,11 +7,39 @@ import { PlayPortal } from '@/components/home/PlayPortal';
 import { PortalSwitch } from '@/components/home/PortalSwitch';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
-import { hasLiveQuickMatch, portalStrip, visibleTournaments, type Portal } from '@/lib/homePortal';
+import { hasLiveQuickMatch, openForEntryCount, portalStrip, type Portal } from '@/lib/homePortal';
 import { useCareer } from '@/lib/useCareer';
 import { colors } from '@/lib/theme';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPublicTournaments } from '@/store/slices/tournamentSlice';
+
+/**
+ * One portal's slot. Both portals stay MOUNTED for the life of the screen and
+ * the inactive one is hidden here, because unmounting threw away everything the
+ * user had built up on the other side: the events FlatList's scroll offset went
+ * back to the top and the featured card's art re-entered on every crossing.
+ *
+ * `display: 'none'` is the hide, not opacity or a zero height: Yoga honours it
+ * by taking the pane out of layout entirely, so the visible pane still gets the
+ * whole flex box. A transparent pane would keep its layout box and halve the
+ * other one, and would still be tappable.
+ *
+ * Hidden has to mean hidden to everyone — `pointerEvents` for fingers, and both
+ * accessibility props because iOS reads one and Android the other. Without them
+ * VoiceOver would happily read out a portal nobody can see.
+ */
+function PortalPane({ active, children }: { active: boolean; children: ReactNode }) {
+  return (
+    <View
+      style={active ? { flex: 1 } : { display: 'none' }}
+      pointerEvents={active ? 'auto' : 'none'}
+      accessibilityElementsHidden={!active}
+      importantForAccessibility={active ? 'auto' : 'no-hide-descendants'}
+    >
+      {children}
+    </View>
+  );
+}
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -60,9 +88,10 @@ export default function Home() {
   const isPlay = portal === 'play';
   const accent = isPlay ? colors.auction : colors.brand;
 
-  // The strip counts what the user can see, not what the response carried —
-  // the same set EventsPortal renders, through the same predicate.
-  const openCount = visibleTournaments(publicTournaments).length;
+  // The strip says OPEN, so it counts what is actually open for entry — not
+  // every visible tournament. Counting the visible set let a screenful of
+  // finished events announce itself as open.
+  const openCount = openForEntryCount(publicTournaments);
   const played = career.profile?.sports.reduce((n, s) => n + s.played, 0) ?? 0;
   const live = hasLiveQuickMatch(matches);
 
@@ -123,18 +152,13 @@ export default function Home() {
       </Text>
 
       {/* Self-scrolling siblings: PlayPortal owns a ScrollView and EventsPortal
-          a FlatList, so they are swapped, never nested in an outer scroller. */}
+          a FlatList, so they sit side by side here, never nested in an outer
+          scroller. Both stay mounted — see PortalPane — so crossing a portal
+          keeps the other side's scroll position and animation state. Neither
+          costs anything while hidden: both are presentational, every request on
+          this screen is fired by the screen itself, above. */}
       <View style={{ flex: 1 }}>
-        {isPlay ? (
-          <PlayPortal
-            profile={career.profile}
-            recent={career.recent}
-            matches={matches}
-            playerId={user?._id}
-            loading={career.loading}
-            onRetry={career.reload}
-          />
-        ) : (
+        <PortalPane active={!isPlay}>
           <EventsPortal
             tournaments={publicTournaments}
             isLoading={isLoading}
@@ -148,7 +172,20 @@ export default function Home() {
             onOpen={open}
             onRetry={load}
           />
-        )}
+        </PortalPane>
+
+        <PortalPane active={isPlay}>
+          <PlayPortal
+            profile={career.profile}
+            recent={career.recent}
+            matches={matches}
+            playerId={user?._id}
+            loading={career.loading}
+            error={career.error}
+            recentError={career.recentError}
+            onRetry={career.reload}
+          />
+        </PortalPane>
       </View>
     </Screen>
   );

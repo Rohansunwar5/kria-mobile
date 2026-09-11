@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react-native';
 import { PlayPortal } from '../src/components/home/PlayPortal';
 import type { CareerProfile, RecentMatch } from '../src/api/career';
+import type { QuickMatch } from '../src/api/quickMatch';
 
 const profile: CareerProfile = {
   sports: [
@@ -22,12 +23,28 @@ const recent: RecentMatch[] = [
   },
 ];
 
+const quickMatch = (over: Partial<QuickMatch> = {}): QuickMatch => ({
+  _id: 'q1',
+  hostId: 'p1',
+  sport: 'badminton',
+  joinCode: 'AB12CD',
+  status: 'live',
+  createdAt: '2026-09-11T09:00:00.000Z',
+  sides: [
+    { sideId: 's1', name: 'Rohan', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
+    { sideId: 's2', name: 'Dev', slots: [{ slotId: 'b', playerId: 'p2', displayName: 'Dev' }] },
+  ],
+  ...over,
+});
+
 const props = (over = {}) => ({
   profile,
   recent,
-  matches: [],
+  matches: [] as QuickMatch[],
   playerId: 'p1',
   loading: false,
+  error: false,
+  recentError: false,
   onRetry: jest.fn(),
   ...over,
 });

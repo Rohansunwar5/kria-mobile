@@ -13,6 +13,21 @@ export function visibleTournaments(tournaments: Tournament[]): Tournament[] {
   return tournaments.filter((t) => t.status !== 'draft' && t.isActive !== false);
 }
 
+/**
+ * How many tournaments are genuinely open for entry.
+ *
+ * `visibleTournaments` is a VISIBILITY predicate: it drops only the organiser's
+ * drafts and deactivated events, and deliberately keeps `ongoing` and
+ * `completed` because a discovery list should still show them. Counting that
+ * set was wrong for a strip that says OPEN — a page of finished events reported
+ * itself as open for entry. Only `registration_open` actually takes an entry,
+ * so that is what the strip counts, still composed through the visibility
+ * predicate so the draft/inactive exclusions cannot drift apart from it.
+ */
+export function openForEntryCount(tournaments: Tournament[]): number {
+  return visibleTournaments(tournaments).filter((t) => t.status === 'registration_open').length;
+}
+
 /** Whether any of your quick matches is in progress. This is what puts the dot
  *  on the PLAY tab — the only unprompted reason to cross portals. */
 export function hasLiveQuickMatch(matches: QuickMatch[]): boolean {

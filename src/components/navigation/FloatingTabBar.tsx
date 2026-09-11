@@ -47,6 +47,28 @@ export const HOST_CIRCLE_SIZE = 64;
 export const HOST_LIFT = 30;
 const HOST_HIT_SLOP = { top: HOST_LIFT };
 
+/**
+ * The second, non-colour signal on the unbuilt slots.
+ *
+ * Explore and Live announce themselves disabled to a screen reader, but to a
+ * sighted user they were dimmer chrome and nothing else — and DESIGN.md §7 is
+ * explicit that colour is never the only signal. A three-dot ellipsis under the
+ * label reads as "not yet" at a glance, survives a greyscale screenshot and a
+ * colour-blind eye, and stays chrome-sized: 2px tall, no extra text, no badge.
+ *
+ * Drawn as three views rather than a dashed border because React Native renders
+ * `borderStyle: 'dashed'` inconsistently when only one edge has a width.
+ */
+function PendingMarker() {
+  return (
+    <View testID="pending-marker" style={{ flexDirection: 'row', gap: 3, marginTop: 3 }}>
+      {[0, 1, 2].map((i) => (
+        <View key={i} style={{ width: 2, height: 2, borderRadius: 1, backgroundColor: PENDING }} />
+      ))}
+    </View>
+  );
+}
+
 const label = (color: string) => ({
   fontFamily: 'SpaceGrotesk_700Bold' as const,
   fontSize: 9,
@@ -159,6 +181,7 @@ export function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
           >
             <NavIcon name={slot.icon} size={22} color={tint} />
             <Text style={label(tint)}>{slot.label}</Text>
+            {disabled ? <PendingMarker /> : null}
           </Pressable>
         );
       })}

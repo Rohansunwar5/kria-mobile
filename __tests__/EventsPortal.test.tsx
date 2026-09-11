@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react-native';
+import { fireEvent, render, within } from '@testing-library/react-native';
 import { EventsPortal } from '../src/components/home/EventsPortal';
 import type { Tournament } from '../src/store/slices/tournamentSlice';
 
@@ -40,6 +40,66 @@ describe('EventsPortal', () => {
   it('shows the tournament list', () => {
     const { getByText } = render(<EventsPortal {...props()} />);
     expect(getByText(/kria smash cup/i)).toBeTruthy();
+  });
+
+  // Every other test here passes a single tournament, which becomes the
+  // FEATURED card — so the `rest` mapping, i.e. the entire list body, was never
+  // rendered by any test and could have broken silently. This is the list.
+  it('renders every non-featured tournament as a numbered list row', () => {
+    const { getByText } = render(
+      <EventsPortal
+        {...props({
+          tournaments: [
+            tournament({ _id: 'a', name: 'City League', status: 'ongoing' }),
+            tournament({ _id: 'b', name: 'Monsoon Open' }),
+            tournament({ _id: 'c', name: 'Harbour Slam' }),
+          ],
+        })}
+      />
+    );
+
+    // The ongoing one is the hero, so the other two are rows — and rows carry
+    // the ghost index the featured card has no place for.
+    expect(getByText(/city league/i)).toBeTruthy();
+    expect(getByText(/monsoon open/i)).toBeTruthy();
+    expect(getByText(/harbour slam/i)).toBeTruthy();
+
+    // The "Open for entry" header prints its own count, which for two
+    // non-featured tournaments is also "02" — so a bare getByText('02')
+    // legitimately matches twice and proves nothing about rows. Climb from
+    // each row's title up to the nearest ancestor that also contains its
+    // badge: that ancestor is the row's own Pressable, never the header,
+    // since the header text is never an ancestor of a row's title.
+    const rowFor = (title: RegExp, badge: string) => {
+      let node = getByText(title);
+      for (;;) {
+        if (within(node).queryByText(badge)) return node;
+        const parent = node.parent;
+        if (!parent) return node;
+        node = parent;
+      }
+    };
+
+    expect(within(rowFor(/monsoon open/i, '01')).getByText('01')).toBeTruthy();
+    expect(within(rowFor(/harbour slam/i, '02')).getByText('02')).toBeTruthy();
+  });
+
+  it('opens the tournament a list row was tapped on, not the featured one', () => {
+    const onOpen = jest.fn();
+    const { getByText } = render(
+      <EventsPortal
+        {...props({
+          onOpen,
+          tournaments: [
+            tournament({ _id: 'a', name: 'City League', status: 'ongoing' }),
+            tournament({ _id: 'b', name: 'Monsoon Open' }),
+          ],
+        })}
+      />
+    );
+
+    fireEvent.press(getByText(/monsoon open/i));
+    expect(onOpen).toHaveBeenCalledWith('b');
   });
 
   // DESIGN.md §5: an error scopes to the section that failed. The rest of home
