@@ -60,6 +60,15 @@ describe('EventsPortal', () => {
     expect(getByText(/clear filters/i)).toBeTruthy();
   });
 
+  // The PLAY portal and the nav's Host button are the ways to a quick match
+  // now. This CTA was a third route to the same place and the approved design
+  // has none on the events side — it must not creep back.
+  it('no longer carries the quick-matches CTA', () => {
+    const { queryByText } = render(<EventsPortal {...props()} />);
+    expect(queryByText(/between tournaments/i)).toBeNull();
+    expect(queryByText(/quick matches/i)).toBeNull();
+  });
+
   it('dims rather than blanks while refreshing over cached data', () => {
     const { getByTestId } = render(<EventsPortal {...props({ isLoading: true })} />);
     expect(getByTestId('events-list').props.style.opacity).toBe(0.5);
