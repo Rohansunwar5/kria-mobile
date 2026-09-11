@@ -179,11 +179,9 @@ function StageSwatch({
  * `onApply` fires from the footer button, and `onClose` (backdrop, hardware
  * back, or a future close affordance) discards the draft outright. Reopening
  * must start from what is actually applied, not a discarded edit, so the
- * draft is re-seeded from `filters` whenever `visible` turns true — and
- * deliberately only then: `filters` is read inside the effect but left out
- * of its dependency list on purpose, so an in-progress edit survives an
- * unrelated re-render (e.g. a live result-count refresh) while the sheet
- * stays open.
+ * draft is re-seeded from `filters` whenever `visible` turns true — see the
+ * comment on that effect for why `filters` itself is deliberately not a
+ * dependency, and what has to stay true for that to remain safe.
  */
 export function FilterSheet({
   visible,
@@ -200,6 +198,16 @@ export function FilterSheet({
 }) {
   const [draft, setDraft] = useState<Filters>(filters);
 
+  // Resets the draft to whatever is currently applied every time the sheet
+  // opens. `filters` is read here but deliberately NOT a dependency — only
+  // `visible` retriggers this. That is safe only because nothing can change
+  // `filters` while `visible` is true: `onApply` always pairs the parent's
+  // setFilters with closing this sheet in the same update (Task 5's
+  // wiring), and a real RN `Modal` captures all touch while visible, so the
+  // `FilterBar` chips behind it are unreachable. That invariant lives in
+  // the screen that mounts this component, not in this file — if a future
+  // change ever applies without closing, this effect will silently strand
+  // a stale draft, and nothing here will catch it.
   useEffect(() => {
     if (visible) setDraft(filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -247,7 +255,12 @@ export function FilterSheet({
               Filter
             </Text>
             <View style={{ flex: 1 }} />
-            <Pressable onPress={resetDraft} accessibilityRole="button" accessibilityLabel="Clear all filters" hitSlop={8}>
+            <Pressable
+              onPress={resetDraft}
+              accessibilityRole="button"
+              accessibilityLabel="Clear all filters"
+              style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
+            >
               <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.14 * 10, textTransform: 'uppercase', color: '#7d7d7d' }}>
                 Clear all
               </Text>

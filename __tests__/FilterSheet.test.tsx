@@ -59,9 +59,17 @@ describe('FilterSheet', () => {
     expect(getByLabelText('Cricket').props.accessibilityState.selected).toBe(false);
   });
 
+  // One label per distinct control that builds its own inline style in this
+  // file — 'Clear all filters' was missing (fix round 1) and had no real
+  // target. Sport/city/stage each share one component across several
+  // instances (e.g. every CityChip), so one label per component is enough
+  // to catch a regression in that shared style. The backdrop (full-bleed,
+  // no natural height) and the two footer buttons (the reviewed `Btn`
+  // primitive, which uses `height`, not `minHeight`, and already renders
+  // at 54) are deliberately not asserted here.
   it('gives every control a 44px hit target', () => {
     const { getByLabelText } = render(<FilterSheet {...props()} />);
-    for (const label of ['Badminton', 'Cricket', 'Bangalore', 'Open']) {
+    for (const label of ['Badminton', 'Cricket', 'Bangalore', 'Open', 'Clear all filters']) {
       expect(getByLabelText(label).props.style.minHeight).toBeGreaterThanOrEqual(44);
     }
   });
