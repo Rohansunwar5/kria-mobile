@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import type { BallEntry, QuickMatch, WicketType } from '@/api/quickMatch';
+import { freeSlots } from '@/lib/quickMatchView';
 import {
   battingSideId,
   bowlingSideId,
@@ -116,6 +117,29 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   const score = scoreLine(match);
   const chase = chaseLine(match);
 
+  // Same gate as badminton's MatchPanel: the host, a live match, and a slot
+  // still to fill. Without it a cricket host had to leave the match to find
+  // the code — the panel showed everything except the one thing needed to
+  // invite anyone.
+  const openSlots = freeSlots(match);
+  const joinCodeRow = isHost && match.status === 'live' && openSlots.length > 0 && match.joinCode ? (
+    <View style={{ paddingHorizontal: 20, paddingTop: 12 }}>
+      <Text style={LBL}>Share this code to fill the open slots</Text>
+      <Text
+        testID="join-code"
+        style={{
+          fontFamily: 'SpaceMono_700Bold',
+          fontSize: 24,
+          letterSpacing: 0.2 * 24,
+          color: '#F97316',
+          marginTop: 4,
+        }}
+      >
+        {match.joinCode}
+      </Text>
+    </View>
+  ) : null;
+
   const header = (
     <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 4 }}>
       <Text style={LBL}>Score</Text>
@@ -129,6 +153,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
           {chase}
         </Text>
       ) : null}
+      {joinCodeRow}
     </View>
   );
 
@@ -267,6 +292,43 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
     setPendingExtras(null);
   };
 
+  /**
+   * One step back, not a full exit. Every entry sheet used to escape only via
+   * "Cancel match", which ends the match — so a mis-tap on the extras type had
+   * no undo short of abandoning the game.
+   *
+   * The wicket sheet has two predecessors: reached from the main controls it
+   * goes back there, but reached from the extras flow it returns to the run
+   * count, keeping the extra the host already chose.
+   */
+  const back = () => {
+    if (mode === 'extras' || mode === 'wicket') {
+      if (mode === 'wicket' && pendingExtras) {
+        setPendingExtras(null);
+        setMode('extras-runs');
+        return;
+      }
+      closeEntryRows();
+      return;
+    }
+    if (mode === 'extras-runs') {
+      setChosenExtrasType(null);
+      setMode('extras');
+      return;
+    }
+    if (mode === 'wicket-who') {
+      setChosenWicketType(null);
+      setMode('wicket');
+      return;
+    }
+    if (mode === 'fielder') {
+      setMode(chosenWicketType && EITHER_END_TYPES.includes(chosenWicketType) ? 'wicket-who' : 'wicket');
+      return;
+    }
+  };
+
+  const backBtn = <Btn label="Back" disabled={busy} onPress={busy ? undefined : back} />;
+
   const post = (extra: Partial<BallEntry>) => {
     if (!strikerId || !nonStrikerId || !bowlerId) return;
     onBall({
@@ -338,6 +400,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
             disabled={busy}
             onPress={busy ? undefined : () => setAlsoWicket((on) => !on)}
           />
+          {backBtn}
           {EXTRAS.map((e) => (
             <Btn
               key={e.type}
@@ -354,6 +417,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
 
       {mode === 'extras-runs' && chosenExtrasType ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
+          {backBtn}
           {EXTRAS_RUNS.map((n) => (
             <Btn
               key={n}
@@ -374,6 +438,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
 
       {mode === 'wicket' ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
+          {backBtn}
           {WICKETS.map((w) => (
             <Btn
               key={w.type}
@@ -404,6 +469,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
       {mode === 'wicket-who' && chosenWicketType ? (
         <View style={{ gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
           <Text style={LBL}>Who was dismissed?</Text>
+          {backBtn}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
             {dismissedChoices.map((choice) => (
               <Btn
@@ -428,6 +494,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
 
       {mode === 'fielder' && chosenWicketType ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
+          {backBtn}
           {bowlingLineup.map((slot) => (
             <Btn
               key={slot.slotId}
