@@ -10,7 +10,7 @@ import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
 import { hasLiveQuickMatch, openForEntryCount, portalStrip, type Portal } from '@/lib/homePortal';
 import { useCareer } from '@/lib/useCareer';
-import { colors } from '@/lib/theme';
+import { colors, useTheme } from '@/lib/theme';
 import { EMPTY_FILTERS, clearOne, toQuery, type Filters } from '@/lib/tournamentFilters';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPublicTournaments } from '@/store/slices/tournamentSlice';
@@ -63,6 +63,7 @@ function sameFilters(a: Filters, b: Filters): boolean {
 }
 
 export default function Home() {
+  const theme = useTheme();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { publicTournaments, publicTotal, isLoading, error } = useAppSelector((s) => s.tournament);
@@ -126,7 +127,7 @@ export default function Home() {
             line box is compressed to lineHeight and the caps are shaved, which
             is what __tests__/antonLeading.test.ts fences at 1.188em. 23px needs
             27.3px, so the leading is 28 and the size is the design's. */}
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 23, lineHeight: 28, color: '#fff' }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 23, lineHeight: 28, color: theme.text }}>
           Kria
         </Text>
         <View style={{ flex: 1 }} />
@@ -146,7 +147,7 @@ export default function Home() {
 
       {/* The hazard rule now belongs only to an art edge. Under the masthead a
           plain hairline carries a short tab in the live portal's accent. */}
-      <View style={{ height: 2, backgroundColor: 'rgba(255,255,255,0.10)' }}>
+      <View style={{ height: 2, backgroundColor: theme.lineFaint }}>
         <View style={{ position: 'absolute', left: 16, top: 0, width: 54, height: 2, backgroundColor: accent }} />
       </View>
     </View>
@@ -164,7 +165,7 @@ export default function Home() {
           fontSize: 9,
           letterSpacing: 0.14 * 9,
           textTransform: 'uppercase',
-          color: isPlay ? colors.auction : '#7d7d7d',
+          color: isPlay ? colors.auction : theme.textFaint,
           paddingHorizontal: 17,
           paddingTop: 9,
         }}

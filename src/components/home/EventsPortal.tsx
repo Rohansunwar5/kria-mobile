@@ -7,6 +7,7 @@ import { Skeleton, EmptyState, ErrorBlock } from '@/components/states';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 import { visibleTournaments } from '@/lib/homePortal';
 import { appliedChips, appliedCount, type Filters } from '@/lib/tournamentFilters';
+import { useTheme } from '@/lib/theme';
 
 interface EventsPortalProps {
   tournaments: Tournament[];
@@ -34,6 +35,7 @@ export function EventsPortal({
   onOpen,
   onRetry,
 }: EventsPortalProps) {
+  const theme = useTheme();
   const visible = visibleTournaments(tournaments);
   // Surface a live/registration-open tournament as the hero. There is
   // deliberately no further fallback (e.g. visible[0]): those are the only
@@ -58,7 +60,7 @@ export function EventsPortal({
         <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 9 }}>
             {featured.status === 'ongoing' ? <Tag label="Live now" variant="live" dot /> : null}
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: theme.textFaint }}>
               {featured.sport?.replace('_', ' ')}
             </Text>
           </View>
@@ -69,10 +71,10 @@ export function EventsPortal({
       <FilterBar filters={filters} onClear={onClearFilter} onOpen={onOpenFilters} />
 
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 18, paddingBottom: 10 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#fff' }}>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: theme.text }}>
           Open for entry
         </Text>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: '#F97316' }}>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: theme.brand }}>
           {String(rest.length).padStart(2, '0')}
         </Text>
       </View>

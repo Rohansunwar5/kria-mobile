@@ -2,7 +2,7 @@ import { View, Pressable, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, type Tabs } from 'expo-router';
 import { NavIcon, type NavIconName } from '@/components/icons/nav';
-import { colors } from '@/lib/theme';
+import { colors, useTheme } from '@/lib/theme';
 
 // expo-router 57 vendors react-navigation, so the tab-bar prop type comes from
 // the Tabs component itself — the standalone @react-navigation/bottom-tabs types
@@ -34,9 +34,6 @@ export const NAV_SLOTS: Slot[] = [
   { kind: 'route', route: 'profile', icon: 'user', label: 'You' },
 ];
 
-const IDLE = '#7d7d7d';
-const PENDING = 'rgba(255,255,255,0.28)';
-
 // The Host circle is lifted above the bar by HOST_LIFT px (negative marginTop),
 // which is exactly how far it overflows the bar's bounds. On Android, touches
 // outside a parent's bounds never reach the child, so the Pressable's hitSlop
@@ -60,10 +57,11 @@ const HOST_HIT_SLOP = { top: HOST_LIFT };
  * `borderStyle: 'dashed'` inconsistently when only one edge has a width.
  */
 function PendingMarker() {
+  const theme = useTheme();
   return (
     <View testID="pending-marker" style={{ flexDirection: 'row', gap: 3, marginTop: 3 }}>
       {[0, 1, 2].map((i) => (
-        <View key={i} style={{ width: 2, height: 2, borderRadius: 1, backgroundColor: PENDING }} />
+        <View key={i} style={{ width: 2, height: 2, borderRadius: 1, backgroundColor: theme.mutedTint }} />
       ))}
     </View>
   );
@@ -78,6 +76,7 @@ const label = (color: string) => ({
 });
 
 export function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -94,7 +93,7 @@ export function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
         borderWidth: 1.5,
         borderColor: colors.line,
         borderRadius: 32,
-        shadowColor: '#000',
+        shadowColor: theme.shadow,
         shadowOpacity: 0.5,
         shadowRadius: 22,
         shadowOffset: { width: 0, height: 8 },
@@ -155,14 +154,14 @@ export function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
                   justifyContent: 'center',
                 }}
               >
-                <NavIcon name={slot.icon} size={24} color="#240614" strokeWidth={2.2} />
+                <NavIcon name={slot.icon} size={24} color={theme.onAuction} strokeWidth={2.2} />
               </View>
-              <Text style={label('#FFFFFF')}>{slot.label}</Text>
+              <Text style={label(theme.text)}>{slot.label}</Text>
             </Pressable>
           );
         }
 
-        const tint = disabled ? PENDING : focused ? colors.brand : IDLE;
+        const tint = disabled ? theme.mutedTint : focused ? colors.brand : theme.textFaint;
 
         return (
           <Pressable

@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Lbl } from '@/components/canvas';
 import { Icon } from '@/components/icons';
-import { colors } from '@/lib/theme';
+import { colors, useTheme } from '@/lib/theme';
 import { appliedChips, appliedCount, type Filters } from '@/lib/tournamentFilters';
 
 const BAR = {
@@ -10,23 +10,6 @@ const BAR = {
   gap: 7,
   paddingHorizontal: 16,
   paddingTop: 14,
-};
-
-// `.chip` from body-Main.html, overridden the same way the artboard's
-// applied-filter chips override it: filled neutral, no keyline (the base
-// class's inset box-shadow border is what `chip-on` and this both drop).
-const CHIP = {
-  flexDirection: 'row' as const,
-  alignItems: 'center' as const,
-  gap: 6,
-  paddingLeft: 12,
-  // Load-bearing alongside FilterChip's dismiss hitSlop and the chip row's
-  // inter-chip `gap` below (see the comment on that hitSlop) — do not change
-  // this on its own.
-  paddingRight: 8,
-  paddingVertical: 7,
-  borderRadius: 3,
-  backgroundColor: 'rgba(255,255,255,0.10)',
 };
 
 const CHIP_TEXT = {
@@ -67,26 +50,43 @@ const COUNT_TEXT = {
 };
 
 function FilterChip({ label, onDismiss }: { label: string; onDismiss: () => void }) {
+  const theme = useTheme();
+  // `.chip` from body-Main.html, overridden the same way the artboard's
+  // applied-filter chips override it: filled neutral, no keyline (the base
+  // class's inset box-shadow border is what `chip-on` and this both drop).
+  const chip = {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 6,
+    paddingLeft: 12,
+    // Load-bearing alongside FilterChip's dismiss hitSlop and the chip row's
+    // inter-chip `gap` below (see the comment on that hitSlop) — do not change
+    // this on its own.
+    paddingRight: 8,
+    paddingVertical: 7,
+    borderRadius: 3,
+    backgroundColor: theme.lineFaint,
+  };
   return (
-    <View style={CHIP}>
+    <View style={chip}>
       <Text style={CHIP_TEXT}>{label}</Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Clear ${label} filter`}
         onPress={onDismiss}
-        // hitSlop (14) minus CHIP.paddingRight (8) equals exactly the
+        // hitSlop (14) minus chip.paddingRight (8) equals exactly the
         // inter-chip `gap` (6) on the ScrollView below — that exact equality
         // is why adjacent chips' extended tap zones touch edge-to-edge but
         // never overlap. It is unguarded: nothing enforces it in code, so
         // changing any ONE of these three numbers on its own either reopens
         // a dead gap between chips or makes their tap targets overlap.
-        // (Unrelated: CHIP's own `gap: 6` above is the label-to-X spacing
+        // (Unrelated: chip's own `gap: 6` above is the label-to-X spacing
         // inside a single chip, not this relationship — same number, but
         // that one is a coincidence, not a constraint.)
         hitSlop={14}
         style={CHIP_DISMISS}
       >
-        <Icon name="close" size={9} color="#8a8a8a" strokeWidth={2.6} />
+        <Icon name="close" size={9} color={theme.textFaint} strokeWidth={2.6} />
       </Pressable>
     </View>
   );

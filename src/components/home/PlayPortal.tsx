@@ -3,7 +3,8 @@ import { router } from 'expo-router';
 import { Icon, type IconName } from '@/components/icons';
 import { Tag, type TagVariant } from '@/components/StatusPill';
 import { Skeleton, ErrorBlock, Ghost } from '@/components/states';
-import { colors } from '@/lib/theme';
+import { colors, useTheme } from '@/lib/theme';
+import type { Palette } from '@/lib/theme/palette';
 import { SPORT_ICON, SPORT_LABELS } from '@/lib/sports';
 import { formatShortDate } from '@/lib/format';
 import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMatchView';
@@ -14,23 +15,21 @@ import type { QuickMatch } from '@/api/quickMatch';
 // PlayFull.dc.html / PlayEmpty.dc.html. The masthead, the portal switch and the
 // strip above this belong to the screen; the portal starts at host/join.
 
-const HAIRLINE = 'rgba(255,255,255,0.10)';
-
-const LBL = {
+const LBL = (theme: Palette) => ({
   fontFamily: 'SpaceMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.18 * 9,
   textTransform: 'uppercase' as const,
-  color: '#7d7d7d',
-};
+  color: theme.textFaint,
+});
 
-const MONO = {
+const MONO = (theme: Palette) => ({
   fontFamily: 'SpaceMono_700Bold' as const,
   fontSize: 10,
   letterSpacing: 0.12 * 10,
   textTransform: 'uppercase' as const,
-  color: '#7d7d7d',
-};
+  color: theme.textFaint,
+});
 
 const HEADING = {
   fontFamily: 'Anton_400Regular' as const,
@@ -75,12 +74,12 @@ const RESULT_TAG: Record<RecentMatch['result'], { label: string; variant: TagVar
   no_result: { label: 'No result', variant: 'end' },
 };
 
-const FORM_TOKEN: Record<RecentMatch['result'], { token: string; bg: string; fg: string }> = {
-  won: { token: 'W', bg: colors.open, fg: '#06240F' },
-  lost: { token: 'L', bg: colors.fail, fg: '#2A0703' },
-  tied: { token: 'T', bg: 'rgba(255,255,255,0.10)', fg: '#d4d4d4' },
-  no_result: { token: 'NR', bg: 'rgba(255,255,255,0.10)', fg: '#8a8a8a' },
-};
+const FORM_TOKEN = (theme: Palette): Record<RecentMatch['result'], { token: string; bg: string; fg: string }> => ({
+  won: { token: 'W', bg: colors.open, fg: theme.onOpen },
+  lost: { token: 'L', bg: colors.fail, fg: theme.onFail },
+  tied: { token: 'T', bg: theme.lineFaint, fg: theme.textBody },
+  no_result: { token: 'NR', bg: theme.lineFaint, fg: theme.textFaint },
+});
 
 function sportIcon(sport: string): IconName {
   return SPORT_ICON[sport] ?? 'trophy';
@@ -92,12 +91,13 @@ function sportLabel(sport: string): string {
 
 /** No organiser needed — the one action that fills every empty block below it. */
 function HostJoin() {
+  const theme = useTheme();
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 13 }}>
       <View
         style={{
           ...CARD,
-          borderColor: 'rgba(250,76,147,0.45)',
+          borderColor: theme.auctionLine,
           borderLeftWidth: 4,
           borderLeftColor: colors.auction,
           overflow: 'hidden',
@@ -105,7 +105,7 @@ function HostJoin() {
       >
         <Ghost text="QM" size={86} style={{ right: -4, top: -10 }} />
         <View style={{ paddingHorizontal: 14, paddingTop: 13 }}>
-          <Text style={{ ...LBL, letterSpacing: 0.22 * 9, color: colors.auction }}>No organiser needed</Text>
+          <Text style={{ ...LBL(theme), letterSpacing: 0.22 * 9, color: colors.auction }}>No organiser needed</Text>
           <Text
             style={{
               fontFamily: 'Anton_400Regular',
@@ -118,7 +118,7 @@ function HostJoin() {
           >
             Start a match
           </Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 17, color: '#a3a3a3', marginTop: 7 }}>
+          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 17, color: theme.textMeta, marginTop: 7 }}>
             Badminton or cricket, scored live. Invite with a six-character code.
           </Text>
         </View>
@@ -139,8 +139,8 @@ function HostJoin() {
               gap: 8,
             }}
           >
-            <Icon name="plus" size={17} color="#240614" strokeWidth={2.4} />
-            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, color: '#240614' }}>Host</Text>
+            <Icon name="plus" size={17} color={theme.onAuction} strokeWidth={2.4} />
+            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, color: theme.onAuction }}>Host</Text>
           </Pressable>
 
           <Pressable
@@ -152,7 +152,7 @@ function HostJoin() {
               minHeight: 48,
               borderRadius: 5,
               borderWidth: 1.5,
-              borderColor: 'rgba(255,255,255,0.22)',
+              borderColor: theme.keylineStrong,
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
@@ -160,7 +160,7 @@ function HostJoin() {
             }}
           >
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, color: colors.white }}>Join</Text>
-            <Text style={{ ...MONO, fontSize: 11, letterSpacing: 0.14 * 11 }}>Code</Text>
+            <Text style={{ ...MONO(theme), fontSize: 11, letterSpacing: 0.14 * 11 }}>Code</Text>
           </Pressable>
         </View>
       </View>
@@ -179,24 +179,25 @@ function SportCell({
   right?: boolean;
   top?: boolean;
 }) {
+  const theme = useTheme();
   return (
     <View
       style={{
         width: '50%',
         paddingHorizontal: 13,
         paddingVertical: 12,
-        ...(right ? { borderRightWidth: 1.5, borderRightColor: HAIRLINE } : null),
-        ...(top ? { borderTopWidth: 1.5, borderTopColor: HAIRLINE } : null),
+        ...(right ? { borderRightWidth: 1.5, borderRightColor: theme.lineFaint } : null),
+        ...(top ? { borderTopWidth: 1.5, borderTopColor: theme.lineFaint } : null),
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        <Icon name={sportIcon(summary.sport)} size={13} color={accent ? colors.auction : '#7d7d7d'} />
-        <Text style={{ ...LBL, letterSpacing: 0.12 * 9, color: '#d4d4d4' }}>{sportLabel(summary.sport)}</Text>
+        <Icon name={sportIcon(summary.sport)} size={13} color={accent ? colors.auction : theme.textFaint} />
+        <Text style={{ ...LBL(theme), letterSpacing: 0.12 * 9, color: theme.textBody }}>{sportLabel(summary.sport)}</Text>
       </View>
       <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 34, lineHeight: 36, color: colors.white, marginTop: 6 }}>
         {winPercent(summary)}
       </Text>
-      <Text style={{ ...MONO, letterSpacing: 0.1 * 10, marginTop: 6 }}>{recordLine(summary)}</Text>
+      <Text style={{ ...MONO(theme), letterSpacing: 0.1 * 10, marginTop: 6 }}>{recordLine(summary)}</Text>
     </View>
   );
 }
@@ -204,6 +205,8 @@ function SportCell({
 /** The last six results, newest on the right — letter as well as colour, so it
  *  never depends on hue alone. */
 function FormStrip({ recent }: { recent: RecentMatch[] }) {
+  const theme = useTheme();
+  const formToken = FORM_TOKEN(theme);
   const form = recent.slice(0, 6).reverse();
   return (
     <View
@@ -214,13 +217,13 @@ function FormStrip({ recent }: { recent: RecentMatch[] }) {
         paddingHorizontal: 13,
         paddingVertical: 11,
         borderTopWidth: 1.5,
-        borderTopColor: HAIRLINE,
+        borderTopColor: theme.lineFaint,
       }}
     >
-      <Text style={{ ...LBL, letterSpacing: 0.12 * 9 }}>Form</Text>
+      <Text style={{ ...LBL(theme), letterSpacing: 0.12 * 9 }}>Form</Text>
       <View style={{ flexDirection: 'row', gap: 4 }}>
         {form.map((m) => {
-          const t = FORM_TOKEN[m.result];
+          const t = formToken[m.result];
           return (
             <View
               key={m._id}
@@ -240,8 +243,8 @@ function FormStrip({ recent }: { recent: RecentMatch[] }) {
         })}
       </View>
       <View style={{ flex: 1 }} />
-      <Text style={{ ...MONO, letterSpacing: 0.1 * 10 }}>Newest</Text>
-      <Icon name="chevron-right" size={10} color="#7d7d7d" strokeWidth={2.4} />
+      <Text style={{ ...MONO(theme), letterSpacing: 0.1 * 10 }}>Newest</Text>
+      <Icon name="chevron-right" size={10} color={theme.textFaint} strokeWidth={2.4} />
     </View>
   );
 }
@@ -252,6 +255,7 @@ function FormStrip({ recent }: { recent: RecentMatch[] }) {
  * two homes and let them drift.
  */
 function BestSport({ summary }: { summary: SportSummary }) {
+  const theme = useTheme();
   return (
     <View
       style={{
@@ -261,11 +265,11 @@ function BestSport({ summary }: { summary: SportSummary }) {
         paddingHorizontal: 13,
         paddingVertical: 11,
         borderTopWidth: 1.5,
-        borderTopColor: HAIRLINE,
+        borderTopColor: theme.lineFaint,
       }}
     >
       <Icon name="trophy" size={14} color={colors.auction} />
-      <Text style={{ ...MONO, letterSpacing: 0.14 * 10, color: colors.auction }}>
+      <Text style={{ ...MONO(theme), letterSpacing: 0.14 * 10, color: colors.auction }}>
         {`Best sport · ${sportLabel(summary.sport)}`}
       </Text>
     </View>
@@ -275,16 +279,17 @@ function BestSport({ summary }: { summary: SportSummary }) {
 /** Names what would be here, and offers NO action of its own: Host sits
  *  directly above and is the single thing that fills it. */
 function EmptyRecord() {
+  const theme = useTheme();
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 18 }}>
-      <View style={{ ...CARD, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.16)', overflow: 'hidden' }}>
+      <View style={{ ...CARD, borderStyle: 'dashed', borderColor: theme.keyline, overflow: 'hidden' }}>
         <Ghost text="00" size={76} style={{ right: 6, top: -8 }} />
         <View style={{ paddingHorizontal: 14, paddingVertical: 15 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Icon name="chart" size={15} color="#7d7d7d" />
-            <Text style={{ ...LBL, letterSpacing: 0.14 * 9 }}>Your record</Text>
+            <Icon name="chart" size={15} color={theme.textFaint} />
+            <Text style={{ ...LBL(theme), letterSpacing: 0.14 * 9 }}>Your record</Text>
           </View>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: '#a3a3a3', marginTop: 9 }}>
+          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: theme.textMeta, marginTop: 9 }}>
             Win rate, form and best sport appear here once you have played. Tournament matches count towards it too — so
             does anything you score above.
           </Text>
@@ -297,6 +302,7 @@ function EmptyRecord() {
 /** A quick match still in progress, rendered through the same helpers the
  *  quick-match list uses, so the two surfaces cannot disagree. */
 function LiveRow({ match, playerId }: { match: QuickMatch; playerId?: string }) {
+  const theme = useTheme();
   const result = outcomeLabel(match);
   const summary = match.sport === 'cricket' ? (scoreLine(match) ?? 'Not started') : formatLabel(match);
   return (
@@ -317,7 +323,7 @@ function LiveRow({ match, playerId }: { match: QuickMatch; playerId?: string }) 
         <Tag label={match.status} variant={statusVariant(match.status)} dot={match.status === 'live'} />
         <Tag label="Quick" variant="up" />
         <View style={{ flex: 1 }} />
-        <Text style={MONO}>{isHost(match, playerId) ? 'Hosting' : 'Playing'}</Text>
+        <Text style={MONO(theme)}>{isHost(match, playerId) ? 'Hosting' : 'Playing'}</Text>
       </View>
       <Text
         style={{
@@ -345,6 +351,7 @@ function LiveRow({ match, playerId }: { match: QuickMatch; playerId?: string }) 
  * an empty line.
  */
 function LedgerRow({ match }: { match: RecentMatch }) {
+  const theme = useTheme();
   const tag = RESULT_TAG[match.result];
   return (
     <View style={{ ...CARD, paddingHorizontal: 13, paddingVertical: 11, marginBottom: 9 }}>
@@ -352,7 +359,7 @@ function LedgerRow({ match }: { match: RecentMatch }) {
         <Tag label={tag.label} variant={tag.variant} />
         <Tag label={match.context} variant="up" />
         <View style={{ flex: 1 }} />
-        <Text style={MONO}>{formatShortDate(match.playedAt)}</Text>
+        <Text style={MONO(theme)}>{formatShortDate(match.playedAt)}</Text>
       </View>
       <Text
         style={{
@@ -368,7 +375,7 @@ function LedgerRow({ match }: { match: RecentMatch }) {
         {match.title ?? 'Match unavailable'}
       </Text>
       {match.scoreline ? (
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.06 * 11, color: '#a3a3a3', marginTop: 5 }}>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.06 * 11, color: theme.textMeta, marginTop: 5 }}>
           {match.scoreline}
         </Text>
       ) : null}
@@ -377,6 +384,7 @@ function LedgerRow({ match }: { match: RecentMatch }) {
 }
 
 function SectionHeading({ title, meta, metaAccent }: { title: string; meta?: string; metaAccent?: boolean }) {
+  const theme = useTheme();
   return (
     <View
       style={{
@@ -390,7 +398,7 @@ function SectionHeading({ title, meta, metaAccent }: { title: string; meta?: str
     >
       <Text style={HEADING}>{title}</Text>
       {meta ? (
-        <Text style={{ ...MONO, letterSpacing: 0.1 * 10, ...(metaAccent ? { color: colors.auction } : null) }}>{meta}</Text>
+        <Text style={{ ...MONO(theme), letterSpacing: 0.1 * 10, ...(metaAccent ? { color: colors.auction } : null) }}>{meta}</Text>
       ) : null}
     </View>
   );

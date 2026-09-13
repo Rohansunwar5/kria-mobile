@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { Btn, Lbl } from '@/components/canvas';
 import { Icon } from '@/components/icons';
-import { colors } from '@/lib/theme';
+import { colors, useTheme } from '@/lib/theme';
+import type { Palette } from '@/lib/theme/palette';
 import { CITIES, SPORTS } from '@/lib/tournamentConstants';
 import { EMPTY_FILTERS, STAGES, type Filters } from '@/lib/tournamentFilters';
 
@@ -17,12 +18,12 @@ function titleCase(value: string): string {
     .join(' ');
 }
 
-const TONE_COLOR: Record<'open' | 'live' | 'auction' | 'ended', string> = {
+const TONE_COLOR = (theme: Palette): Record<'open' | 'live' | 'auction' | 'ended', string> => ({
   open: colors.open,
   live: colors.brand,
   auction: colors.auction,
-  ended: 'rgba(255,255,255,0.28)',
-};
+  ended: theme.mutedTint,
+});
 
 function SportTile({
   label,
@@ -35,7 +36,8 @@ function SportTile({
   selected: boolean;
   onPress: () => void;
 }) {
-  const contentColor = selected ? colors.ink : '#bdbdbd';
+  const theme = useTheme();
+  const contentColor = selected ? colors.ink : theme.textBody;
   return (
     <Pressable
       onPress={onPress}
@@ -84,6 +86,7 @@ function CityChip({
   selected: boolean;
   onPress: () => void;
 }) {
+  const theme = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -98,7 +101,7 @@ function CityChip({
         paddingHorizontal: 13,
         paddingVertical: 9,
         backgroundColor: selected ? colors.brand : 'transparent',
-        ...(selected ? null : { borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.16)' }),
+        ...(selected ? null : { borderWidth: 1.5, borderColor: theme.keyline }),
       }}
     >
       <Text
@@ -107,7 +110,7 @@ function CityChip({
           fontSize: 10,
           letterSpacing: 0.1 * 10,
           textTransform: 'uppercase',
-          color: selected ? colors.ink : '#bdbdbd',
+          color: selected ? colors.ink : theme.textBody,
         }}
       >
         {label}
@@ -127,6 +130,7 @@ function StageSwatch({
   selected: boolean;
   onPress: () => void;
 }) {
+  const theme = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -142,8 +146,8 @@ function StageSwatch({
         gap: 9,
         paddingHorizontal: 12,
         borderWidth: 1.5,
-        borderColor: selected ? colors.brand : 'rgba(255,255,255,0.16)',
-        backgroundColor: selected ? 'rgba(249,115,22,0.12)' : 'transparent',
+        borderColor: selected ? colors.brand : theme.keyline,
+        backgroundColor: selected ? theme.brandTint : 'transparent',
       }}
     >
       {/* 9px square, not a dot — DESIGN.md §3. Colour says which stage; the
@@ -196,6 +200,7 @@ export function FilterSheet({
   onApply: (f: Filters) => void;
   onClose: () => void;
 }) {
+  const theme = useTheme();
   const [draft, setDraft] = useState<Filters>(filters);
 
   // Resets the draft to whatever is currently applied every time the sheet
@@ -230,8 +235,8 @@ export function FilterSheet({
           onPress={onClose}
           accessibilityRole="button"
           accessibilityLabel="Close filters"
-          // rgb(11,11,11) is colors.ink; the dim is that colour at 72% alpha.
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11,11,11,0.72)' }}
+          // theme.scrim is colors.ink at 72% alpha.
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: theme.scrim }}
         />
 
         <View
@@ -245,7 +250,7 @@ export function FilterSheet({
           }}
         >
           <View style={{ alignItems: 'center', paddingTop: 9 }}>
-            <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.20)' }} />
+            <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: theme.handle }} />
           </View>
 
           <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 13, paddingBottom: 14 }}>
@@ -261,12 +266,12 @@ export function FilterSheet({
               accessibilityLabel="Clear all filters"
               style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
             >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.14 * 10, textTransform: 'uppercase', color: '#7d7d7d' }}>
+              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.14 * 10, textTransform: 'uppercase', color: theme.textFaint }}>
                 Clear all
               </Text>
             </Pressable>
           </View>
-          <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.10)' }} />
+          <View style={{ height: 1.5, backgroundColor: theme.lineFaint }} />
 
           <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingBottom: 8 }}>
             <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
@@ -302,7 +307,7 @@ export function FilterSheet({
                       <StageSwatch
                         key={stage.value}
                         label={stage.label}
-                        toneColor={TONE_COLOR[stage.tone]}
+                        toneColor={TONE_COLOR(theme)[stage.tone]}
                         selected={draft.status === stage.value}
                         onPress={() => toggle('status', stage.value)}
                       />
@@ -322,7 +327,7 @@ export function FilterSheet({
               paddingBottom: 26,
               marginTop: 6,
               borderTopWidth: 1.5,
-              borderTopColor: 'rgba(255,255,255,0.10)',
+              borderTopColor: theme.lineFaint,
             }}
           >
             <Btn label="Reset" onPress={resetDraft} variant="ghost" style={{ width: 104 }} />

@@ -1,5 +1,5 @@
 import { View, Pressable, Text } from 'react-native';
-import { colors } from '@/lib/theme';
+import { colors, useTheme } from '@/lib/theme';
 import type { Portal } from '@/lib/homePortal';
 
 const HALF = {
@@ -35,6 +35,7 @@ export function PortalSwitch({
   live: boolean;
   onChange: (p: Portal) => void;
 }) {
+  const theme = useTheme();
   const isPlay = portal === 'play';
 
   return (
@@ -57,7 +58,7 @@ export function PortalSwitch({
         onPress={() => { if (isPlay) onChange('events'); }}
         style={{ ...HALF, backgroundColor: isPlay ? 'transparent' : colors.brand }}
       >
-        <Text style={{ ...TEXT, color: isPlay ? '#7d7d7d' : colors.ink }}>Events</Text>
+        <Text style={{ ...TEXT, color: isPlay ? theme.textFaint : colors.ink }}>Events</Text>
       </Pressable>
 
       <Pressable
@@ -73,11 +74,11 @@ export function PortalSwitch({
               width: 6,
               height: 6,
               borderRadius: 3,
-              backgroundColor: isPlay ? '#240614' : colors.auction,
+              backgroundColor: isPlay ? theme.onAuction : colors.auction,
             }}
           />
         ) : null}
-        <Text style={{ ...TEXT, color: isPlay ? '#240614' : '#7d7d7d' }}>Play</Text>
+        <Text style={{ ...TEXT, color: isPlay ? theme.onAuction : theme.textFaint }}>Play</Text>
       </Pressable>
     </View>
   );

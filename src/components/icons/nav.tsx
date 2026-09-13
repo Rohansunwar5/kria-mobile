@@ -38,12 +38,12 @@ const STROKE = 1.8;
 export function NavIcon({
   name,
   size = 22,
-  color = '#FFFFFF',
+  color,
   strokeWidth,
 }: {
   name: NavIconName;
   size?: number;
-  color?: string;
+  color: string;
   strokeWidth?: number;
 }) {
   const width = strokeWidth ?? (STROKE * size) / GRID;
