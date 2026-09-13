@@ -46,7 +46,20 @@ export interface ColourLiteralFinding {
 const COLOUR_LITERAL = /(['"`])(?:(?!\1).)*?\1/g;
 
 const HEX_COLOUR = /^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
-const RGB_FUNCTION = /rgba?\(/i;
+
+/**
+ * Anchored, because a colour literal is a WHOLE style value and never a
+ * fragment of prose. Unanchored, this flagged `'the rgb(a) channel'` — and a
+ * fence that cries wolf gets muted by the next person who trips it, which is
+ * how three Anton violations shipped through a fence that looked green.
+ *
+ * The same rule applies to `HEX_COLOUR` above, which is why it is `^...$`: a
+ * hex inside a longer string (`'1px solid #fff'`) is deliberately NOT flagged.
+ * React Native styles take values, not CSS strings, so that shape does not
+ * occur here; if it ever does, it wants its own rule rather than a loosening
+ * of this one.
+ */
+const RGB_FUNCTION = /^rgba?\(/i;
 const DATA_URI = /^data:/i;
 
 /** True when the string content (without its surrounding quotes) is a colour literal. */
