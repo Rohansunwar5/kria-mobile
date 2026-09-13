@@ -58,6 +58,19 @@ describe('dark palette', () => {
     expect(dark.line).toBe(colors.line);
   });
 
+  // Added in fix round 1: ten literals across Task 3's eight target files had
+  // no token. Values are byte-for-byte from the coordinator's table.
+  it('covers the keyline, handle, tint, scrim and shadow literals Task 3 needs', () => {
+    expect(dark.keyline).toBe('rgba(255,255,255,0.16)');
+    expect(dark.keylineStrong).toBe('rgba(255,255,255,0.22)');
+    expect(dark.handle).toBe('rgba(255,255,255,0.20)');
+    expect(dark.mutedTint).toBe('rgba(255,255,255,0.28)');
+    expect(dark.brandTint).toBe('rgba(249,115,22,0.12)');
+    expect(dark.auctionLine).toBe('rgba(250,76,147,0.45)');
+    expect(dark.scrim).toBe('rgba(11,11,11,0.72)');
+    expect(dark.shadow).toBe('#000');
+  });
+
   it('registers dark as a named palette', () => {
     expect(PALETTES.dark).toBe(dark);
   });

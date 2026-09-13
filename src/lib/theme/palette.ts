@@ -33,6 +33,32 @@
  * beside the others. `fail` is the one accent without a hue in that rotation
  * (see DESIGN.md §2). If a future palette or a new accent is added, derive it
  * the same way rather than eyeballing a hex.
+ *
+ * `handle` and `mutedTint` are deliberately not named `line*`. They are fills
+ * applied to a shape or a glyph (a grab handle, a dead nav slot) rather than
+ * borders, and giving them a `line` name would mislead the next reader into
+ * reaching for them as a border colour.
+ *
+ * `brandTint` is not `brandSoft`. The `Soft`/`Faint` suffixes already mean
+ * "the next rung down" within the `fill` and `line` families; reusing that
+ * suffix on a different base colour would imply a ladder of brand alpha steps
+ * that does not exist — there is exactly one brand tint.
+ *
+ * `shadow` (`#000`) is the same literal in every palette this file will ever
+ * register. A drop shadow is black in both a dark and a light theme, so it is
+ * not actually theme-aware — it still gets a token rather than a carve-out in
+ * Task 4's colour-literal fence, because one token that never varies is less
+ * machinery than an exception rule. Do not "fix" this into a theme-varying
+ * value; it is supposed to stay `#000` everywhere.
+ *
+ * DESIGN.md §2 defines exactly four text tiers as a closed set — `#FFFFFF`,
+ * `#d4d4d4` (`textBody`), `#a3a3a3` (`textMeta`), `#7d7d7d` (`textFaint`).
+ * Two greys found in the tree, `#bdbdbd` and `#8a8a8a`, sit between those
+ * tiers and are drift, not a fifth and sixth tier — they deliberately have no
+ * token here. Task 3 snaps them to the nearest tier instead (`#bdbdbd` →
+ * `textBody`, `#8a8a8a` → `textFaint`) rather than this file canonising a
+ * six-tier ramp the design system never sanctioned, which would also double
+ * what every future palette has to define.
  */
 
 export type ThemeName = 'dark';
@@ -80,6 +106,22 @@ export interface Palette {
   onAuction: string;
   /** Ink that rides on the fail accent fill. */
   onFail: string;
+  /** The keyline on chips and option tiles. */
+  keyline: string;
+  /** A heavier keyline (outline buttons). */
+  keylineStrong: string;
+  /** The filter sheet's grab handle — a fill, not a border. */
+  handle: string;
+  /** A disabled/pending glyph, e.g. the nav's dead slots — a fill, not a border. */
+  mutedTint: string;
+  /** Brand at low alpha as a selected background. */
+  brandTint: string;
+  /** Auction at alpha as a card border. */
+  auctionLine: string;
+  /** The modal backdrop. */
+  scrim: string;
+  /** Drop shadow — black in every palette; see docblock. */
+  shadow: string;
 }
 
 export const dark: Palette = {
@@ -104,6 +146,14 @@ export const dark: Palette = {
   onOpen: '#06240F',
   onAuction: '#240614',
   onFail: '#2A0703',
+  keyline: 'rgba(255,255,255,0.16)',
+  keylineStrong: 'rgba(255,255,255,0.22)',
+  handle: 'rgba(255,255,255,0.20)',
+  mutedTint: 'rgba(255,255,255,0.28)',
+  brandTint: 'rgba(249,115,22,0.12)',
+  auctionLine: 'rgba(250,76,147,0.45)',
+  scrim: 'rgba(11,11,11,0.72)',
+  shadow: '#000',
 };
 
 export const PALETTES: Record<ThemeName, Palette> = {
