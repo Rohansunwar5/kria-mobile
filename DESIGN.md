@@ -66,12 +66,29 @@ looked fine in review and shaved the caps on a real iPhone.
 `.tsx` under `src/`. **Never weaken it to make a screen pass** — raise the `lineHeight`, never
 shrink the `fontSize`, because the sizes are the design and the leading is not.
 
-Known gaps in that fence, so nobody mistakes green for safe: it reads integer literals only, so a
-ternary (`fontSize: subtitle ? 17 : 18`) or a computed value slips past it, and it scans `.tsx`
-only. Two live violations are known and deliberately deferred —
-`src/components/canvas.tsx` (the shared `.hdr` header, 0.941em with a subtitle) and
-`src/components/states.tsx`'s `Ghost` (0.78em, decorative oversized art type where clipping may
-be intended). Fix them as their own change, not folded into unrelated work.
+**The fence no longer skips anything in silence.** Its analyser lives in
+[`test-utils/antonLeading.ts`](test-utils/antonLeading.ts) and is itself unit-tested in
+[`__tests__/antonLeadingFence.test.ts`](__tests__/antonLeadingFence.test.ts) — a fence cannot
+prove it would catch a shape it never meets, so those tests feed it synthetic source.
+
+It now reads multi-line styles, ternaries and computed values, and scans `.ts` as well as `.tsx`.
+Every Anton style has exactly three possible outcomes:
+
+1. **Measured and safe** — a ratio at or above 1.188. For a ternary it takes the worst case, the
+   tightest leading over the largest size, because a style must be safe on every branch.
+2. **Measured and failing** — reported with the ratio. Raise the `lineHeight`.
+3. **Unmeasurable** — no integer it can trust (`fontSize: size`). **This is not a pass.** It is
+   reported until someone writes `anton-leading-exempt: <reason>` next to it.
+
+The marker must sit **adjacent** to the style it exempts — within a couple of lines, above the
+`style=` — so one comment can never drift into exempting something further down the file. Put the
+prose above it and the marker on the last line. There is exactly one exemption in the codebase:
+`Ghost` in `src/components/states.tsx`, where 0.78em is the point.
+
+The two violations this section used to list as deferred are fixed: `.hdr`'s header title ran at
+0.941em with a subtitle and now uses one flat `lineHeight: 22` that clears the floor for both of
+its sizes. If a decimal `lineHeight` ever appears it will read as unmeasurable rather than
+truncating — the analyser refuses to guess.
 
 ---
 

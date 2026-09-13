@@ -262,7 +262,11 @@ export function ScreenHeader({
       {onBack ? <IconBtn icon="chevron-left" label="Go back" onPress={onBack} /> : null}
       <View style={{ flex: 1 }}>
         {title ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: subtitle ? 17 : 18, lineHeight: subtitle ? 16 : 20, color: '#fff' }}>
+          // One flat lineHeight, not a second ternary: 22 clears the 1.188em
+          // Anton floor for both 17 and 18, and iOS clips whatever the line box
+          // does not cover. This was 16/20, which shaved the capitals of every
+          // screen header on iPhone while looking fine on Android.
+          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: subtitle ? 17 : 18, lineHeight: 22, color: '#fff' }}>
             {title}
           </Text>
         ) : null}

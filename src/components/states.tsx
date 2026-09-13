@@ -14,6 +14,12 @@ import { Icon, type IconName } from '@/components/icons';
 export function Ghost({ text, size, color, style }: { text: string; size: number; color?: string; style?: ViewStyle }) {
   return (
     <Text
+      // The ghost device from DESIGN.md §3 — oversized Anton at 4.5% opacity,
+      // absolutely positioned and bleeding off the frame edge on purpose. The
+      // tight leading is how it sits where it sits, and iOS trimming the line
+      // box is part of the look rather than a defect on type nobody reads.
+      // `size` is a prop, so the fence cannot measure it either way.
+      // anton-leading-exempt: 0.78em is deliberate on decorative art type
       style={[
         {
           position: 'absolute',
