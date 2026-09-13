@@ -16,7 +16,7 @@ import { store } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { bootstrapAuth, logout } from '@/store/slices/authSlice';
 import { setUnauthorizedHandler } from '@/api/axios';
-import { colors } from '@/lib/theme';
+import { colors, ThemeProvider } from '@/lib/theme';
 import { getOnboardingComplete } from '@/lib/onboardingStorage';
 import { BrandIntro } from '@/components/BrandIntro';
 
@@ -129,7 +129,9 @@ export default function RootLayout() {
   });
   return (
     <Provider store={store}>
-      <AuthGate fontsLoaded={fontsLoaded} />
+      <ThemeProvider>
+        <AuthGate fontsLoaded={fontsLoaded} />
+      </ThemeProvider>
     </Provider>
   );
 }

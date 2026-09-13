@@ -19,3 +19,8 @@ export const fonts = {
   data: 'SpaceMono_400Regular',
   dataBold: 'SpaceMono_700Bold',
 };
+
+// Single import path for the token layer, alongside the legacy `colors` and
+// `fonts` above (left untouched — 8 files import those).
+export { useTheme, ThemeProvider } from './theme/ThemeProvider';
+export { dark } from './theme/palette';
