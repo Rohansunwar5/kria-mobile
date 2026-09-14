@@ -7,6 +7,7 @@ import { Hairlines, Hazard } from '@/components/canvas';
 import { Ghost } from '@/components/states';
 import { AvatarPicker } from '@/components/profile/AvatarPicker';
 import { CareerCard } from '@/components/profile/CareerCard';
+import { BestSportHero } from '@/components/profile/BestSportHero';
 import { RecentMatches } from '@/components/profile/RecentMatches';
 import { MenuRow } from '@/components/profile/MenuRow';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -45,9 +46,6 @@ export default function Profile() {
   }, [dispatch]);
 
   const name = user ? `${user.firstName} ${user.lastName}`.trim() : 'Player';
-  const played = playerStats?.totalMatchesPlayed ?? 0;
-  const won = playerStats?.totalMatchesWon ?? 0;
-  const rate = played > 0 ? `${Math.round((won / played) * 100)}%` : '—';
 
   const meta = [user?.email, user?.location].filter(Boolean).join(' · ').toUpperCase();
 
@@ -89,20 +87,26 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* Career strip */}
+        {/* Tournament count: the one figure the career ledger genuinely does
+            not know — a quick match has no TournamentRegistration. Everything
+            else this strip used to show (Matches/Wins/Rate) duplicated the
+            career table below with a tournament-only number; removed. */}
         <View style={{ flexDirection: 'row', borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
-          <StatCell label="Events" value={String(playerStats?.totalTournaments ?? 0)} />
-          <StatCell label="Matches" value={String(played)} />
-          <StatCell label="Wins" value={String(won)} accent />
-          <StatCell label="Rate" value={rate} last />
+          <StatCell label="Events" value={String(playerStats?.totalTournaments ?? 0)} last />
         </View>
 
         <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
+          <BestSportHero bestSport={career.profile?.bestSport ?? null} recent={career.recent ?? []} />
+
           <CareerCard
             profile={career.profile}
             loading={career.loading}
             error={career.error}
             onRetry={career.reload}
+            // BestSportHero directly above already carries this fact — the
+            // same call player/[playerId].tsx makes, and the reason the prop
+            // exists (see CareerCard's showBestSportBadge doc comment).
+            showBestSportBadge={false}
           />
 
           <RecentMatches

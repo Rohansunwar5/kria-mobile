@@ -127,25 +127,91 @@ describe('own profile screen (characterisation)', () => {
     expect(getByText(/recent matches/i)).toBeTruthy();
   });
 
-  // Task 2 deletes this strip on purpose. This assertion pins its current
-  // presence so that deletion is a visible diff here, not a silent one — the
-  // brief for Task 2 says to remove this test once it has served that
-  // purpose.
-  it('shows the four-cell stats strip from playerStats — Events, Matches, Wins, Rate', () => {
+  // Task 2: the tournament-only Matches/Wins/Rate cells came off the strip —
+  // the career ledger below already states the same record, blended across
+  // tournament and quick play, and two numbers for "how many matches" a few
+  // centimetres apart was the bug this task fixes. `playerStats.totalMatchesPlayed`
+  // (20) and `totalMatchesWon` (15) must not appear anywhere on the screen.
+  it('no longer shows Matches, Wins or Rate cells sourced from playerStats', () => {
+    const { queryByText } = render(
+      <Provider store={makeStore(playerStats())}><Profile /></Provider>
+    );
+
+    expect(queryByText('Matches')).toBeNull();
+    expect(queryByText('Wins')).toBeNull();
+    expect(queryByText('Rate')).toBeNull();
+    // 20 and 15 are the playerStats-sourced played/won counts — distinct
+    // from the career fixture's 9/6/3 so a stray match here is unambiguous.
+    expect(queryByText('20')).toBeNull();
+    expect(queryByText('15')).toBeNull();
+  });
+
+  // The tournament count is the one figure the career ledger genuinely does
+  // not know (a quick match has no TournamentRegistration), so it survives.
+  it('still shows the tournament count from playerStats', () => {
     const { getByText } = render(
       <Provider store={makeStore(playerStats())}><Profile /></Provider>
     );
 
     expect(getByText('Events')).toBeTruthy();
     expect(getByText('5')).toBeTruthy();
+  });
 
-    expect(getByText('Matches')).toBeTruthy();
-    expect(getByText('20')).toBeTruthy();
+  it('renders BestSportHero when the server named a best sport', () => {
+    mockUseCareer.mockReturnValue({
+      profile: { ...careerProfile(), bestSport: { sport: 'badminton', played: 31, decided: 31, won: 21, lost: 10, tied: 0, noResult: 0, winRate: 21 / 31 } },
+      recent: [recentMatch()],
+      loading: false,
+      error: false,
+      recentError: false,
+      reload: jest.fn(),
+    });
 
-    expect(getByText('Wins')).toBeTruthy();
-    expect(getByText('15')).toBeTruthy();
+    const { getByText } = render(
+      <Provider store={makeStore(playerStats())}><Profile /></Provider>
+    );
 
-    expect(getByText('Rate')).toBeTruthy();
-    expect(getByText('75%')).toBeTruthy();
+    expect(getByText(/best sport/i)).toBeTruthy();
+  });
+
+  it('renders no BestSportHero when the server named no best sport', () => {
+    mockUseCareer.mockReturnValue({
+      profile: careerProfile(),
+      recent: [recentMatch()],
+      loading: false,
+      error: false,
+      recentError: false,
+      reload: jest.fn(),
+    });
+
+    const { queryByText } = render(
+      <Provider store={makeStore(playerStats())}><Profile /></Provider>
+    );
+
+    expect(queryByText(/best sport/i)).toBeNull();
+  });
+
+  // The career table is the only place a win rate appears now — CareerCard's
+  // own inline "Best sport" badge would otherwise be a second restatement of
+  // the same fact BestSportHero already leads with (showBestSportBadge={false}).
+  it('shows a win rate only in the career table, not a second time via CareerCard\'s badge', () => {
+    mockUseCareer.mockReturnValue({
+      profile: { ...careerProfile(), bestSport: { sport: 'badminton', played: 31, decided: 31, won: 21, lost: 10, tied: 0, noResult: 0, winRate: 21 / 31 } },
+      recent: [recentMatch()],
+      loading: false,
+      error: false,
+      recentError: false,
+      reload: jest.fn(),
+    });
+
+    const { getAllByText } = render(
+      <Provider store={makeStore(playerStats())}><Profile /></Provider>
+    );
+
+    // 68% is BestSportHero's big figure; 67% is the career table's row for
+    // the same sport (6/9 in the fixture). Neither should appear twice —
+    // CareerCard's own badge (also 68%) must be suppressed.
+    expect(getAllByText('68%')).toHaveLength(1);
+    expect(getAllByText('67%')).toHaveLength(1);
   });
 });
