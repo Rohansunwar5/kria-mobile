@@ -26,6 +26,7 @@ export const MIGRATED: string[] = [
   'src/components/home/FilterSheet.tsx',
   'src/components/navigation/FloatingTabBar.tsx',
   'src/components/icons/nav.tsx',
+  'src/components/profile/Achievements.tsx',
 ];
 
 export interface ColourLiteralFinding {
