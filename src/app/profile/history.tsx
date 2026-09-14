@@ -8,6 +8,7 @@ import { Chip, Lbl, ScreenHeader } from '@/components/canvas';
 import { EmptyState, ErrorBlock, Ghost, Skeleton } from '@/components/states';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPlayerTournamentHistory } from '@/store/slices/registrationSlice';
+import { formatMoney } from '@/lib/format';
 
 // TournamentHistory.dc.html — the career ribbon holds only figures the history
 // endpoint actually returns, so no Titles/Finals column (there is no placement
@@ -66,7 +67,7 @@ export default function History() {
       played: tournamentHistory.length,
       matches,
       record: `${won}-${Math.max(matches - won, 0)}`,
-      earned: earned >= 1000 ? `₹${(earned / 1000).toFixed(earned % 1000 === 0 ? 0 : 1)}k` : `₹${earned}`,
+      earned: formatMoney(earned),
     };
   }, [tournamentHistory]);
 

@@ -40,11 +40,21 @@ describe('CareerCard', () => {
     expect(getByText('0%')).toBeTruthy();
   });
 
-  it('shows the best-sport badge when the server named one', () => {
+  it('shows the best-sport badge by default when the server named one', () => {
     const { getByText } = render(
       <CareerCard profile={{ sports: [sport()], bestSport: sport(), achievements: [] }} />
     );
     expect(getByText(/best sport/i)).toBeTruthy();
+  });
+
+  it('hides the best-sport badge when showBestSportBadge is false, even though bestSport is present', () => {
+    // player/[playerId].tsx passes this because BestSportHero already leads
+    // with the same fact directly above the card — without the prop this
+    // badge would be a third restatement of it.
+    const { queryByText } = render(
+      <CareerCard profile={{ sports: [sport()], bestSport: sport(), achievements: [] }} showBestSportBadge={false} />
+    );
+    expect(queryByText(/best sport/i)).toBeNull();
   });
 
   it('shows no badge at all when the server named none', () => {
@@ -69,6 +79,22 @@ describe('CareerCard', () => {
     );
     expect(getByText('13')).toBeTruthy();
     expect(getByText(/1 no-result excluded from win rate/i)).toBeTruthy();
+  });
+
+  it('renders the sport name and Total row title in Anton, not Space Mono', () => {
+    // body-Profile.html renders "Badminton"/"Cricket"/"Total" all in the
+    // Anton `.ant` class at 15px (DESIGN.md's "Row title" tier) — Space Mono
+    // is for numeric cells only.
+    const { getByText } = render(
+      <CareerCard profile={{ sports: [sport(), sport({ sport: 'cricket' })], bestSport: null, achievements: [] }} />
+    );
+    expect(getByText(/^badminton$/i).props.style.fontFamily).toBe('Anton_400Regular');
+    expect(getByText(/^total$/i).props.style.fontFamily).toBe('Anton_400Regular');
+  });
+
+  it('keeps numeric cells in Space Mono', () => {
+    const { getByText } = render(<CareerCard profile={{ sports: [sport()], bestSport: null, achievements: [] }} />);
+    expect(getByText('67%').props.style.fontFamily).toBe('SpaceMono_700Bold');
   });
 
   it('renders a header row of SPORT / PL / W / L / WIN%', () => {

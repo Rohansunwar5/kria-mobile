@@ -98,12 +98,16 @@ function SportTableRow({
         ...(emphasise ? { backgroundColor: theme.brandTint } : null),
       }}
     >
+      {/* Row title tier (DESIGN.md §1): Anton at 15px, matching the artboard
+          (body-Profile.html renders "Badminton"/"Cricket"/"Total" all in
+          `.ant` at 15px) — not Space Mono, which is for numerics only.
+          lineHeight 18 clears the Anton floor (15 * 1.188 = 17.82). */}
       <Text
         style={{
           flex: 1,
-          fontFamily: 'SpaceMono_700Bold',
-          fontSize: emphasise ? 15 : 11,
-          letterSpacing: 0.14 * 11,
+          fontFamily: 'Anton_400Regular',
+          fontSize: 15,
+          lineHeight: 18,
           textTransform: 'uppercase',
           color: emphasise ? theme.brand : theme.text,
         }}
@@ -201,11 +205,22 @@ export function CareerCard({
   loading,
   error,
   onRetry,
+  showBestSportBadge = true,
 }: {
   profile: CareerProfile | null;
   loading?: boolean;
   error?: boolean;
   onRetry?: () => void;
+  /**
+   * Whether to render the inline "Best sport" badge above the table.
+   * Defaults to `true` — on most hosts (e.g. the own-profile tab) this badge
+   * is the ONLY place "best sport" is said, so it must stay on there. Pass
+   * `false` only when the host already carries that same fact more
+   * prominently elsewhere on screen: `player/[playerId].tsx` renders
+   * `BestSportHero` directly above this card, and the badge would just be a
+   * third restatement of a fact the hero already leads with.
+   */
+  showBestSportBadge?: boolean;
 }) {
   const theme = useTheme();
 
@@ -249,10 +264,11 @@ export function CareerCard({
 
     return (
       <View>
-        {/* Shown only when the server named a best sport. The >=10-decided
-            eligibility rule lives on the server alone — re-implementing it
-            here would give the rule two homes and let them drift. */}
-        {profile.bestSport ? <BestSportBadge summary={profile.bestSport} theme={theme} /> : null}
+        {/* Shown only when the server named a best sport AND the host wants
+            it. The >=10-decided eligibility rule lives on the server alone —
+            re-implementing it here would give the rule two homes and let
+            them drift. */}
+        {showBestSportBadge && profile.bestSport ? <BestSportBadge summary={profile.bestSport} theme={theme} /> : null}
         <View style={{ borderRadius: 5, borderWidth: 1.5, borderColor: theme.line, overflow: 'hidden' }}>
           <HeaderRow theme={theme} />
           {profile.sports.map((s) => (

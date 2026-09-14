@@ -1,4 +1,4 @@
-import { computeAge, feeBreakdown, winPercent } from '@/lib/format';
+import { computeAge, feeBreakdown, formatMoney, winPercent } from '@/lib/format';
 
 describe('computeAge', () => {
   it('returns 0 when no dob', () => {
@@ -51,5 +51,34 @@ describe('winPercent', () => {
 
   it('does not need decided to format an ordinary fraction', () => {
     expect(winPercent(0.5)).toBe('50%');
+  });
+});
+
+describe('formatMoney', () => {
+  // This was four verbatim copies (PlayedForCard, CompletedSummary,
+  // HistoryCard, profile/history.tsx) before being pulled out here. These
+  // boundary cases are exactly where duplicated logic tends to have drifted
+  // — pinning them proves the one shared function behaves the same way at
+  // every edge the four copies could disagree on.
+  it('renders a whole thousand as a bare "k", no decimal', () => {
+    expect(formatMoney(1000)).toBe('₹1k');
+  });
+
+  it('renders just under a thousand as a plain rupee figure', () => {
+    expect(formatMoney(999)).toBe('₹999');
+  });
+
+  it('renders zero as ₹0, not a dash or empty string', () => {
+    // The em dash for "no price" is HistoryCard's own call-site behaviour,
+    // not this shared formatter's — this function only ever formats a number.
+    expect(formatMoney(0)).toBe('₹0');
+  });
+
+  it('renders a non-integer thousand with one decimal place', () => {
+    expect(formatMoney(1500)).toBe('₹1.5k');
+  });
+
+  it('renders a non-integer amount under a thousand as-is, uncompacted', () => {
+    expect(formatMoney(42.5)).toBe('₹42.5');
   });
 });

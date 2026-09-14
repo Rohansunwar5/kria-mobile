@@ -49,3 +49,19 @@ export function winPercent(winRate: number | undefined, decided?: number): strin
   if (decided === 0 || winRate === undefined || !Number.isFinite(winRate)) return '0%';
   return `${Math.round(winRate * 100)}%`;
 }
+
+/**
+ * Rupees, compacted above 1000 into `k`, e.g. `₹24k`, `₹1.5k`, `₹850`.
+ * A whole thousand drops the decimal (`₹1k`, not `₹1.0k`); any other
+ * thousand keeps one decimal place.
+ *
+ * This was four verbatim copies (`PlayedForCard`, `CompletedSummary`,
+ * `HistoryCard`, `profile/history.tsx`) before being pulled out here — the
+ * same situation the `unwrap` helper docs already call out for a fourth
+ * copy. `HistoryCard` additionally renders a falsy amount as `'—'`; that is
+ * caller-specific (an unsold player has no price to show, not a zero one)
+ * and stays at the call site rather than moving in here.
+ */
+export function formatMoney(n: number): string {
+  return n >= 1000 ? `₹${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k` : `₹${n}`;
+}

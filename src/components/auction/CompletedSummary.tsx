@@ -3,15 +3,12 @@ import { AuctionTeam } from '@/api/auction';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hazard, Kick, Lbl } from '@/components/canvas';
 import { Ghost } from '@/components/states';
+import { formatMoney } from '@/lib/format';
 
 interface Props {
   tournamentName: string;
   categoryName: string;
   teams: AuctionTeam[];
-}
-
-function money(n: number) {
-  return n >= 1000 ? `₹${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k` : `₹${n}`;
 }
 
 function Cell({ label, value, tone, last }: { label: string; value: string; tone?: string; last?: boolean }) {
@@ -51,7 +48,7 @@ export function CompletedSummary({ tournamentName, categoryName, teams }: Props)
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 14 }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 24, color: '#F97316' }}>{money(spent)}</Text>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 24, color: '#F97316' }}>{formatMoney(spent)}</Text>
         <Lbl style={{ letterSpacing: 0.14 * 9 }}>Total spent across {teams.length} teams</Lbl>
       </View>
 
@@ -76,8 +73,8 @@ export function CompletedSummary({ tournamentName, categoryName, teams }: Props)
               </Text>
             </View>
             <View style={{ flexDirection: 'row', borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)' }}>
-              <Cell label="Spent" value={money(team.totalSpent)} tone="#F97316" />
-              <Cell label="Left" value={money(team.budget)} tone="#16C46A" />
+              <Cell label="Spent" value={formatMoney(team.totalSpent)} tone="#F97316" />
+              <Cell label="Left" value={formatMoney(team.budget)} tone="#16C46A" />
               <Cell label="Players" value={String(team.playersCount)} last />
             </View>
           </View>

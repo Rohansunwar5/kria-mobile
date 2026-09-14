@@ -60,17 +60,32 @@ describe('BestSportHero', () => {
     expect(queryByText(/13/)).toBeNull();
   });
 
-  it('names the sport and shows the cricket-bat glyph for cricket', () => {
+  it('names the sport and shows the shared SPORT_ICON glyph for cricket, not a local cricket-bat', () => {
+    // BestSportHero used to keep its own sport->icon map with cricket ->
+    // 'cricket-bat', disagreeing with the shared `@/lib/sports` map (used by
+    // PlayPortal and HistoryCard) which maps cricket -> 'ball'. Same player,
+    // two different glyphs. This asserts the hero now renders the SAME glyph
+    // the rest of the app uses for cricket.
     const best = sport({ sport: 'cricket' });
     const { getByText, UNSAFE_root } = render(<BestSportHero bestSport={best} recent={[]} />);
     expect(getByText(/cricket/i)).toBeTruthy();
-    expect(UNSAFE_root.findByProps({ d: ICON_PATHS['cricket-bat'][0] })).toBeTruthy();
+    expect(UNSAFE_root.findByProps({ d: ICON_PATHS.ball[0] })).toBeTruthy();
   });
 
   it('shows the shuttlecock glyph for badminton', () => {
     const best = sport({ sport: 'badminton' });
     const { UNSAFE_root } = render(<BestSportHero bestSport={best} recent={[]} />);
     expect(UNSAFE_root.findByProps({ d: ICON_PATHS.shuttlecock[0] })).toBeTruthy();
+  });
+
+  it('falls back to the trophy glyph for a sport the shared SPORT_ICON map has no entry for', () => {
+    // Football has no glyph in `@/lib/sports`' SPORT_ICON (it only covers
+    // badminton/cricket/table_tennis/tennis), so the fallback this component
+    // still needs is for sports the shared map itself doesn't handle yet —
+    // not a second, disagreeing map for the sports it already does.
+    const best = sport({ sport: 'football' });
+    const { UNSAFE_root } = render(<BestSportHero bestSport={best} recent={[]} />);
+    expect(UNSAFE_root.findByProps({ d: ICON_PATHS.trophy[0] })).toBeTruthy();
   });
 
   it('renders the shared FormStrip inside the hero', () => {

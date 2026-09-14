@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native';
-import { Icon, type IconName } from '@/components/icons';
+import { Icon } from '@/components/icons';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 import { winPercent } from '@/lib/format';
-import { SPORT_LABELS } from '@/lib/sports';
+import { SPORT_ICON, SPORT_LABELS } from '@/lib/sports';
 import { FormStrip } from './FormStrip';
 import type { SportSummary, RecentMatch } from '@/api/career';
 
@@ -30,16 +30,6 @@ const RECORD_LINE = (theme: Palette) => ({
   color: theme.textBody,
   marginTop: 4,
 });
-
-/**
- * Glyphs the industrial icon set actually ships (`components/icons/index.tsx`)
- * — `shuttlecock` and `cricket-bat`. Every other sport falls back to `trophy`
- * rather than inventing a name that isn't in the set.
- */
-const SPORT_ICON: Record<string, IconName> = {
-  badminton: 'shuttlecock',
-  cricket: 'cricket-bat',
-};
 
 /**
  * The best-sport hero for the player profile: the kicker, the big win-rate

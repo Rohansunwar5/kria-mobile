@@ -5,14 +5,16 @@ import { StatusPill } from '@/components/StatusPill';
 import { Lbl } from '@/components/canvas';
 import { Icon } from '@/components/icons';
 import { SPORT_ICON } from '@/lib/sports';
+import { formatMoney } from '@/lib/format';
 
 // TournamentHistory.dc.html. The artboard shows a finishing position (2nd, QF,
 // Group); the history endpoint carries no placement, so the tag is the
 // tournament's status and the footer holds what the API does return.
 
+// A falsy amount here means "unsold", not "sold for zero" — the em dash is
+// this card's own call, not part of the shared formatter.
 function money(n?: number) {
-  if (!n) return '—';
-  return n >= 1000 ? `₹${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k` : `₹${n}`;
+  return n ? formatMoney(n) : '—';
 }
 
 function Cell({ label, value, tone, last }: { label: string; value: string; tone?: string; last?: boolean }) {

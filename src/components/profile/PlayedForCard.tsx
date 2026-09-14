@@ -4,6 +4,7 @@ import { Tag } from '@/components/StatusPill';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 import { SPORT_LABELS } from '@/lib/sports';
+import { formatMoney } from '@/lib/format';
 import type { PublicHistoryEntry } from '@/api/profileApi';
 
 // Played-for card, body-Profile.html: a 38px square team swatch, the team
@@ -24,10 +25,6 @@ const LBL = (theme: Palette) => ({
   textTransform: 'uppercase' as const,
   color: theme.textFaint,
 });
-
-function money(n: number): string {
-  return n >= 1000 ? `₹${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k` : `₹${n}`;
-}
 
 function StatCell({ label, value, theme, tone }: { label: string; value: string; theme: Palette; tone?: string }) {
   return (
@@ -108,7 +105,7 @@ export function PlayedForCard({
         {/* soldPrice is tournament-only (Auction) — a badminton entry or a
             quick-play row has none, and an empty "Sold for —" cell would be
             noise rather than information, so the cell itself is omitted. */}
-        {soldPrice ? <StatCell label="Sold for" value={money(soldPrice)} theme={theme} tone={theme.open} /> : null}
+        {soldPrice ? <StatCell label="Sold for" value={formatMoney(soldPrice)} theme={theme} tone={theme.open} /> : null}
       </View>
     </Pressable>
   );

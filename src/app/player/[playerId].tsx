@@ -131,6 +131,10 @@ export default function PlayerProfile() {
             loading={career.loading}
             error={career.error}
             onRetry={career.reload}
+            // BestSportHero directly above already carries this fact — the
+            // badge would be a third restatement of the same "best sport" in
+            // 200px of screen.
+            showBestSportBadge={false}
           />
 
           <Achievements
