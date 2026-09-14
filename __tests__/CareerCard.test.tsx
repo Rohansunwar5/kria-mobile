@@ -17,7 +17,7 @@ const sport = (over: Partial<SportSummary> = {}): SportSummary => ({
 describe('CareerCard', () => {
   it('renders a row per sport', () => {
     const { getByText } = render(
-      <CareerCard profile={{ sports: [sport(), sport({ sport: 'cricket' })], bestSport: null }} />
+      <CareerCard profile={{ sports: [sport(), sport({ sport: 'cricket' })], bestSport: null, achievements: [] }} />
     );
     expect(getByText(/^badminton$/i)).toBeTruthy();
     expect(getByText(/^cricket$/i)).toBeTruthy();
@@ -26,14 +26,14 @@ describe('CareerCard', () => {
   it('formats the win rate as a percentage — the server sends a 0-1 fraction', () => {
     // 8/12 = 0.6666… If this ever renders "0.67" or "67" without a %, the card
     // is treating the fraction as something it is not.
-    const { getByText } = render(<CareerCard profile={{ sports: [sport()], bestSport: null }} />);
+    const { getByText } = render(<CareerCard profile={{ sports: [sport()], bestSport: null, achievements: [] }} />);
     expect(getByText('67%')).toBeTruthy();
   });
 
   it('renders 0% rather than NaN for a sport with nothing decided', () => {
     const { getByText } = render(
       <CareerCard
-        profile={{ sports: [sport({ played: 2, decided: 0, won: 0, lost: 0, tied: 0, noResult: 2, winRate: 0 })], bestSport: null }}
+        profile={{ sports: [sport({ played: 2, decided: 0, won: 0, lost: 0, tied: 0, noResult: 2, winRate: 0 })], bestSport: null, achievements: [] }}
       />
     );
     expect(getByText('0%')).toBeTruthy();
@@ -41,7 +41,7 @@ describe('CareerCard', () => {
 
   it('shows the best-sport badge when the server named one', () => {
     const { getByText } = render(
-      <CareerCard profile={{ sports: [sport()], bestSport: sport() }} />
+      <CareerCard profile={{ sports: [sport()], bestSport: sport(), achievements: [] }} />
     );
     expect(getByText(/best sport/i)).toBeTruthy();
   });
@@ -51,7 +51,7 @@ describe('CareerCard', () => {
     // The card must not re-implement it — it renders a badge iff bestSport is
     // present. No greyed badge, no "keep playing to unlock".
     const { queryByText } = render(
-      <CareerCard profile={{ sports: [sport({ decided: 9, played: 9 })], bestSport: null }} />
+      <CareerCard profile={{ sports: [sport({ decided: 9, played: 9 })], bestSport: null, achievements: [] }} />
     );
     expect(queryByText(/best sport/i)).toBeNull();
   });
@@ -61,7 +61,7 @@ describe('CareerCard', () => {
     // win rate. Showing only one number would misrepresent both.
     const { getByText } = render(
       <CareerCard
-        profile={{ sports: [sport({ played: 13, decided: 12, noResult: 1 })], bestSport: null }}
+        profile={{ sports: [sport({ played: 13, decided: 12, noResult: 1 })], bestSport: null, achievements: [] }}
       />
     );
     expect(getByText('13')).toBeTruthy();
@@ -70,7 +70,7 @@ describe('CareerCard', () => {
 
   it('shows an empty state for a player who has never played', () => {
     const { getByText, queryByText } = render(
-      <CareerCard profile={{ sports: [], bestSport: null }} />
+      <CareerCard profile={{ sports: [], bestSport: null, achievements: [] }} />
     );
     expect(getByText(/no matches yet/i)).toBeTruthy();
     expect(queryByText(/best sport/i)).toBeNull();

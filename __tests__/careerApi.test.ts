@@ -55,5 +55,32 @@ describe('career api', () => {
 
     expect(profile.sports).toEqual([]);
     expect(profile.bestSport).toBeNull();
+    expect(profile.achievements).toEqual([]);
+  });
+
+  it('passes achievements through when the server sends them', async () => {
+    const achievements = [
+      { id: 'first-win', label: 'First Win', earned: true, progress: 1, target: 1 },
+      { id: 'century-club', label: 'Century Club', earned: false, progress: 40, target: 100 },
+    ];
+    mock.onGet('/player/career/p1').reply(200, {
+      data: { data: { sports: [], bestSport: null, achievements } },
+    });
+
+    const profile = await getCareerProfile('p1');
+
+    expect(profile.achievements).toEqual(achievements);
+  });
+
+  it('defaults achievements to [] when an older server omits the field entirely', async () => {
+    // The server derives achievements outside its cache — an older server
+    // simply never sends the key, and the app must render rather than crash.
+    mock.onGet('/player/career/p1').reply(200, {
+      data: { data: { sports: [summary()], bestSport: null } },
+    });
+
+    const profile = await getCareerProfile('p1');
+
+    expect(profile.achievements).toEqual([]);
   });
 });

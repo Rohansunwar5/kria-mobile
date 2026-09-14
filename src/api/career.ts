@@ -20,6 +20,23 @@ export interface SportSummary {
   winRate: number;
 }
 
+/**
+ * One badge on the career profile. The list always contains every
+ * achievement, including locked ones (`earned: false`) — a locked badge is a
+ * UI state to render, not an absence to filter out.
+ *
+ * `progress` is already clamped to `target` server-side: render `progress /
+ * target` directly for the bar and do not re-clamp here, or a badge that
+ * overshot before the server capped it will silently stop tracking a bug.
+ */
+export interface Achievement {
+  id: string;
+  label: string;
+  earned: boolean;
+  progress: number;
+  target: number;
+}
+
 export interface CareerProfile {
   sports: SportSummary[];
   /**
@@ -29,6 +46,14 @@ export interface CareerProfile {
    * re-implement it here, or the two copies will drift.
    */
   bestSport: SportSummary | null;
+  /**
+   * Defaults to `[]` when the server omits the field entirely — an older
+   * server that predates this feature never sends `achievements` at all, and
+   * the app must render rather than crash. The server computes this outside
+   * its cache, which is exactly the kind of field that gets left off an old
+   * response.
+   */
+  achievements: Achievement[];
 }
 
 /**
@@ -47,6 +72,7 @@ export async function getCareerProfile(playerId: string): Promise<CareerProfile>
   return {
     sports: payload?.sports ?? [],
     bestSport: payload?.bestSport ?? null,
+    achievements: payload?.achievements ?? [],
   };
 }
 

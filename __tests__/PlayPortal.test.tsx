@@ -8,6 +8,7 @@ const profile: CareerProfile = {
     { sport: 'badminton', played: 31, decided: 31, won: 21, lost: 10, tied: 0, noResult: 0, winRate: 21 / 31 },
   ],
   bestSport: null,
+  achievements: [],
 };
 
 const recent: RecentMatch[] = [
