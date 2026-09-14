@@ -67,6 +67,7 @@ describe('dark palette', () => {
     expect(dark.mutedTint).toBe('rgba(255,255,255,0.28)');
     expect(dark.brandTint).toBe('rgba(249,115,22,0.12)');
     expect(dark.auctionLine).toBe('rgba(250,76,147,0.45)');
+    expect(dark.failLine).toBe('rgba(255,68,56,0.4)');
     expect(dark.scrim).toBe('rgba(11,11,11,0.72)');
     expect(dark.shadow).toBe('#000');
   });

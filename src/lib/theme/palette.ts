@@ -118,6 +118,8 @@ export interface Palette {
   brandTint: string;
   /** Auction at alpha as a card border. */
   auctionLine: string;
+  /** Fail at alpha as a card border (the destructive-row emphasis on profile). */
+  failLine: string;
   /** The modal backdrop. */
   scrim: string;
   /** Drop shadow — black in every palette; see docblock. */
@@ -152,6 +154,7 @@ export const dark: Palette = {
   mutedTint: 'rgba(255,255,255,0.28)',
   brandTint: 'rgba(249,115,22,0.12)',
   auctionLine: 'rgba(250,76,147,0.45)',
+  failLine: 'rgba(255,68,56,0.4)',
   scrim: 'rgba(11,11,11,0.72)',
   shadow: '#000',
 };

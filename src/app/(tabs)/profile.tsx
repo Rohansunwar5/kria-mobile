@@ -16,21 +16,24 @@ import { fetchPlayerStats, logout } from '@/store/slices/authSlice';
 import { fetchPlayerTournamentHistory } from '@/store/slices/registrationSlice';
 import { useCareer } from '@/lib/useCareer';
 import { groupMenu } from '@/lib/profileMenu';
+import { useTheme } from '@/lib/theme';
+import type { Palette } from '@/lib/theme/palette';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
 
 function StatCell({ label, value, accent, last }: { label: string; value: string; accent?: boolean; last?: boolean }) {
+  const theme = useTheme();
   return (
     <View
       style={{
         flex: 1,
         paddingHorizontal: 10,
         paddingVertical: 11,
-        ...(last ? null : { borderRightWidth: 1.5, borderRightColor: 'rgba(255,255,255,0.12)' }),
+        ...(last ? null : { borderRightWidth: 1.5, borderRightColor: theme.lineSoft }),
       }}
     >
-      <Text style={{ ...LBL, letterSpacing: 0.1 * 9 }}>{label}</Text>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 22, color: accent ? '#F97316' : '#fff', marginTop: 2 }}>
+      <Text style={{ ...LBL(theme), letterSpacing: 0.1 * 9 }}>{label}</Text>
+      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 22, color: accent ? theme.brand : theme.text, marginTop: 2 }}>
         {value}
       </Text>
     </View>
@@ -49,6 +52,7 @@ export default function Profile() {
   // by this screen, so it needs its own dispatch here.
   const { tournamentHistory } = useAppSelector((s) => s.registration);
   const career = useCareer(user?._id);
+  const theme = useTheme();
 
   useEffect(() => {
     dispatch(fetchPlayerStats());
@@ -73,7 +77,7 @@ export default function Profile() {
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14, paddingHorizontal: 16, paddingTop: 10 }}>
             <AvatarPicker name={name} imageUrl={user?.profileImage} size={76} />
             <View style={{ flex: 1, paddingBottom: 3 }}>
-              <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 36, color: '#fff' }}>
+              <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 36, color: theme.text }}>
                 {name}
               </Text>
             </View>
@@ -82,13 +86,13 @@ export default function Profile() {
               accessibilityLabel="Edit profile"
               onPress={() => router.push('/profile/edit')}
               hitSlop={8}
-              style={{ width: 38, height: 38, borderRadius: 4, marginBottom: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
+              style={{ width: 38, height: 38, borderRadius: 4, marginBottom: 4, backgroundColor: theme.fill, borderWidth: 1.5, borderColor: theme.lineSoft, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Icon name="settings" size={17} color="#fff" strokeWidth={1.9} />
+              <Icon name="settings" size={17} color={theme.text} strokeWidth={1.9} />
             </Pressable>
           </View>
           {meta ? (
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, color: '#a3a3a3', paddingHorizontal: 16, paddingTop: 12 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, color: theme.textMeta, paddingHorizontal: 16, paddingTop: 12 }}>
               {meta}
             </Text>
           ) : null}
@@ -101,7 +105,7 @@ export default function Profile() {
             not know — a quick match has no TournamentRegistration. Everything
             else this strip used to show (Matches/Wins/Rate) duplicated the
             career table below with a tournament-only number; removed. */}
-        <View style={{ flexDirection: 'row', borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
+        <View style={{ flexDirection: 'row', borderBottomWidth: 1.5, borderBottomColor: theme.lineSoft }}>
           <StatCell label="Events" value={String(playerStats?.totalTournaments ?? 0)} last />
         </View>
 
@@ -132,27 +136,27 @@ export default function Profile() {
               marginHorizontal: 20,
               marginBottom: 18,
               borderWidth: 1.5,
-              borderColor: '#F97316',
+              borderColor: theme.brand,
               borderRadius: 6,
               padding: 14,
             }}
           >
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }}>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: theme.brand }}>
               Between tournaments
             </Text>
-            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, color: '#fff', marginTop: 4 }}>
+            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, color: theme.text, marginTop: 4 }}>
               Quick matches
             </Text>
           </Pressable>
 
           {user?.titles?.length ? (
             <View style={{ marginBottom: 16 }}>
-              <Text style={{ ...LBL, marginBottom: 8 }}>Honors</Text>
+              <Text style={{ ...LBL(theme), marginBottom: 8 }}>Honors</Text>
               <View style={{ gap: 7 }}>
                 {user.titles.map((t, i) => (
-                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 11, backgroundColor: '#F97316', borderRadius: 6 }}>
-                    <Icon name="trophy" size={17} color="#0B0B0B" strokeWidth={2.2} />
-                    <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: '#0B0B0B' }}>
+                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 11, backgroundColor: theme.brand, borderRadius: 6 }}>
+                    <Icon name="trophy" size={17} color={theme.onBrand} strokeWidth={2.2} />
+                    <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: theme.onBrand }}>
                       {t}
                     </Text>
                   </View>
@@ -163,7 +167,7 @@ export default function Profile() {
 
           {tournamentHistory.length ? (
             <View style={{ marginBottom: 16 }}>
-              <Text style={{ ...LBL, marginBottom: 8 }}>Played for</Text>
+              <Text style={{ ...LBL(theme), marginBottom: 8 }}>Played for</Text>
               <View style={{ gap: 9 }}>
                 {tournamentHistory.map((e) => (
                   <PlayedForCard
@@ -180,8 +184,8 @@ export default function Profile() {
           {/* Grouped, not a flat list of eight rows */}
           {groupMenu().map((group) => (
             <View key={group.title} style={{ marginBottom: 14 }}>
-              <Text style={{ ...LBL, marginBottom: 8 }}>{group.title}</Text>
-              <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden' }}>
+              <Text style={{ ...LBL(theme), marginBottom: 8 }}>{group.title}</Text>
+              <View style={{ backgroundColor: theme.surface, borderWidth: 1.5, borderColor: theme.line, borderRadius: 6, overflow: 'hidden' }}>
                 {group.items.map((item, i) => (
                   <MenuRow
                     key={item.label}
@@ -195,7 +199,7 @@ export default function Profile() {
             </View>
           ))}
 
-          <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,68,56,0.4)', borderRadius: 6, overflow: 'hidden' }}>
+          <View style={{ backgroundColor: theme.surface, borderWidth: 1.5, borderColor: theme.failLine, borderRadius: 6, overflow: 'hidden' }}>
             <MenuRow label="Log out" icon="logout" danger first onPress={() => dispatch(logout())} />
           </View>
         </View>
