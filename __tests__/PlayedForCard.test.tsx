@@ -71,18 +71,19 @@ describe('PlayedForCard', () => {
     expect(onPress).not.toHaveBeenCalled();
   });
 
-  it('omits the third stat cell entirely when there is no auction price', () => {
-    // A badminton entry, or any quick-play row, carries no soldPrice — the
-    // public endpoint strips auctionData outright. An empty "Sold for —"
-    // cell would be noise, so the cell itself must not render.
+  it('omits the third stat cell entirely when no soldPrice prop is given', () => {
+    // The public profile screen (PublicHistoryEntry) has nothing to pass here
+    // — the server's whitelist never includes auction financials. An empty
+    // "Sold for —" cell would be noise, so the cell itself must not render.
     const { queryByText } = render(<PlayedForCard entry={entry()} />);
     expect(queryByText(/sold for/i)).toBeNull();
   });
 
-  it('renders the third cell, formatted, when a source does carry a sold price', () => {
-    const { getByText } = render(
-      <PlayedForCard entry={entry({ auctionData: { soldPrice: 24000 } })} />
-    );
+  it('renders the third cell, formatted, when a caller passes soldPrice', () => {
+    // A caller with a real figure — the player's own authenticated history,
+    // not the public entry — passes it as a prop rather than the card
+    // reading it off `entry`.
+    const { getByText } = render(<PlayedForCard entry={entry()} soldPrice={24000} />);
     expect(getByText(/sold for/i)).toBeTruthy();
     expect(getByText('₹24k')).toBeTruthy();
   });

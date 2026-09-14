@@ -8,10 +8,14 @@ import type { PublicHistoryEntry } from '@/api/profileApi';
 
 // Played-for card, body-Profile.html: a 38px square team swatch, the team
 // name over TOURNAMENT · YEAR, a sport tag, then a Played/Won(/Sold for)
-// stat strip. Renders one `PublicHistoryEntry` — the PUBLIC player profile's
-// history, which the server deliberately strips `auctionData` from (see
-// playerAuth.service.ts `getPublicProfile`). The third stat cell only ever
-// appears once a caller has a source that does carry a sold price.
+// stat strip. `entry` is one `PublicHistoryEntry` — the PUBLIC player
+// profile's history, which the server's `getPublicProfile`
+// (playerAuth.service.ts) builds as an explicit whitelist that never
+// includes auction financials. `soldPrice` is therefore a separate prop
+// rather than something read off `entry`: a caller with that figure (the
+// player's own authenticated history) passes it, the public profile screen
+// has none to pass, and the cell's absence there follows from correct data
+// flow instead of an always-undefined field on the public type.
 
 const LBL = (theme: Palette) => ({
   fontFamily: 'SpaceMono_700Bold' as const,
@@ -36,7 +40,16 @@ function StatCell({ label, value, theme, tone }: { label: string; value: string;
   );
 }
 
-export function PlayedForCard({ entry, onPress }: { entry: PublicHistoryEntry; onPress?: () => void }) {
+export function PlayedForCard({
+  entry,
+  soldPrice,
+  onPress,
+}: {
+  entry: PublicHistoryEntry;
+  /** Auction sale price, when the caller's data source carries one. Absent on the public profile. */
+  soldPrice?: number;
+  onPress?: () => void;
+}) {
   const theme = useTheme();
   const tournament = entry.tournament;
   const team = entry.team;
@@ -44,10 +57,6 @@ export function PlayedForCard({ entry, onPress }: { entry: PublicHistoryEntry; o
 
   const played = entry.stats?.matchesPlayed ?? 0;
   const won = entry.stats?.matchesWon ?? 0;
-  // Not on PublicHistoryEntry today — the server strips financials from this
-  // endpoint — but the field is declared optional there for a source that
-  // does carry it, so this stays the one place that reads it.
-  const sold = entry.auctionData?.soldPrice;
 
   const year = entry.createdAt ? new Date(entry.createdAt).getFullYear() : undefined;
   const sub = [tournament?.name || 'Tournament', year].filter(Boolean).join(' · ').toUpperCase();
@@ -99,7 +108,7 @@ export function PlayedForCard({ entry, onPress }: { entry: PublicHistoryEntry; o
         {/* soldPrice is tournament-only (Auction) — a badminton entry or a
             quick-play row has none, and an empty "Sold for —" cell would be
             noise rather than information, so the cell itself is omitted. */}
-        {sold ? <StatCell label="Sold for" value={money(sold)} theme={theme} tone={theme.open} /> : null}
+        {soldPrice ? <StatCell label="Sold for" value={money(soldPrice)} theme={theme} tone={theme.open} /> : null}
       </View>
     </Pressable>
   );

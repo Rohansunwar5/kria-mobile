@@ -20,13 +20,6 @@ export interface PublicHistoryEntry {
   tournament?: { _id: string; name: string; sport?: string };
   category?: { _id: string; name: string; gender?: string } | null;
   team?: { _id: string; name: string; primaryColor?: string } | null;
-  /**
-   * Not present today — `playerAuth.service.ts`'s `getPublicProfile` strips
-   * financials before this reaches the public endpoint — but declared here,
-   * optional, for a source that does carry it (e.g. the player's own
-   * authenticated history) without widening this to `any`.
-   */
-  auctionData?: { soldPrice?: number };
 }
 
 export interface Team {
