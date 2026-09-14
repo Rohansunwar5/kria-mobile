@@ -9,9 +9,11 @@ import { AvatarPicker } from '@/components/profile/AvatarPicker';
 import { CareerCard } from '@/components/profile/CareerCard';
 import { BestSportHero } from '@/components/profile/BestSportHero';
 import { RecentMatches } from '@/components/profile/RecentMatches';
+import { PlayedForCard } from '@/components/profile/PlayedForCard';
 import { MenuRow } from '@/components/profile/MenuRow';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPlayerStats, logout } from '@/store/slices/authSlice';
+import { fetchPlayerTournamentHistory } from '@/store/slices/registrationSlice';
 import { useCareer } from '@/lib/useCareer';
 import { groupMenu } from '@/lib/profileMenu';
 
@@ -39,10 +41,18 @@ export default function Profile() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, playerStats } = useAppSelector((s) => s.auth);
+  // Authenticated tournament history — the only place `auctionData.soldPrice`
+  // is available (the public profile's payload omits it by whitelist). This
+  // is the same query src/app/profile/history.tsx already runs for this same
+  // player: one TournamentRegistration.find scoped to playerId, plus three
+  // batched lookups for tournaments/categories/teams. Not otherwise loaded
+  // by this screen, so it needs its own dispatch here.
+  const { tournamentHistory } = useAppSelector((s) => s.registration);
   const career = useCareer(user?._id);
 
   useEffect(() => {
     dispatch(fetchPlayerStats());
+    dispatch(fetchPlayerTournamentHistory());
   }, [dispatch]);
 
   const name = user ? `${user.firstName} ${user.lastName}`.trim() : 'Player';
@@ -146,6 +156,22 @@ export default function Profile() {
                       {t}
                     </Text>
                   </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
+
+          {tournamentHistory.length ? (
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ ...LBL, marginBottom: 8 }}>Played for</Text>
+              <View style={{ gap: 9 }}>
+                {tournamentHistory.map((e) => (
+                  <PlayedForCard
+                    key={e._id}
+                    entry={e}
+                    soldPrice={e.auctionData?.soldPrice}
+                    onPress={() => router.push(`/tournament/${e.tournament!._id}`)}
+                  />
                 ))}
               </View>
             </View>

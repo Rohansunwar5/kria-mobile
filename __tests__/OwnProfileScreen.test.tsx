@@ -2,8 +2,10 @@ import { render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer, { type PlayerStats } from '@/store/slices/authSlice';
+import registrationReducer, { type TournamentHistoryEntry } from '@/store/slices/registrationSlice';
 import Profile from '../src/app/(tabs)/profile';
 import type { CareerProfile, RecentMatch } from '@/api/career';
+import { formatMoney } from '@/lib/format';
 
 // Characterisation test: `profile.tsx` had no test at all before this file.
 // It pins what the screen renders TODAY so later tasks that change it (Task 2
@@ -30,6 +32,20 @@ jest.mock('@/store/slices/authSlice', () => {
     __esModule: true,
     default: actual.default,
     fetchPlayerStats: () => ({ type: 'auth/noop' }),
+  };
+});
+
+// Same pattern for the registration slice's `fetchPlayerTournamentHistory` —
+// a real thunk that calls `API.get('/player/auth/tournament-history')`. The
+// reducer stays real so `preloadedState.registration.tournamentHistory` in
+// `makeStore` below is what actually renders.
+jest.mock('@/store/slices/registrationSlice', () => {
+  const actual = jest.requireActual('@/store/slices/registrationSlice');
+  return {
+    ...actual,
+    __esModule: true,
+    default: actual.default,
+    fetchPlayerTournamentHistory: () => ({ type: 'registration/noop' }),
   };
 });
 
@@ -75,16 +91,30 @@ const careerProfile = (): CareerProfile => ({
   achievements: [],
 });
 
+const tournamentHistoryEntry = (over: Partial<TournamentHistoryEntry> = {}): TournamentHistoryEntry => ({
+  _id: 'h1',
+  status: 'active',
+  stats: { matchesPlayed: 9, matchesWon: 7, pointsContributed: 0 },
+  createdAt: '2025-06-01T00:00:00.000Z',
+  tournament: { _id: 't1', name: 'Kria Smash Cup', sport: 'badminton', startDate: '2025-06-01', endDate: '2025-06-05', status: 'completed' },
+  team: { _id: 'tm1', name: 'Koramangala Smashers', primaryColor: '#8B3FD1' },
+  ...over,
+});
+
 const INIT = { type: '@@preload' };
 
-const makeStore = (stats: PlayerStats | null) =>
+const makeStore = (stats: PlayerStats | null, tournamentHistory: TournamentHistoryEntry[] = []) =>
   configureStore({
-    reducer: { auth: authReducer },
+    reducer: { auth: authReducer, registration: registrationReducer },
     preloadedState: {
       auth: {
         ...authReducer(undefined, INIT),
         user: { _id: 'p1', firstName: 'Rohan', lastName: 'Sunwar', email: 'rohan@kria.club', phone: '9000000000', status: 'active' },
         playerStats: stats,
+      },
+      registration: {
+        ...registrationReducer(undefined, INIT),
+        tournamentHistory,
       },
     },
   });
@@ -213,5 +243,34 @@ describe('own profile screen (characterisation)', () => {
     // CareerCard's own badge (also 68%) must be suppressed.
     expect(getAllByText('68%')).toHaveLength(1);
     expect(getAllByText('67%')).toHaveLength(1);
+  });
+
+  // Task 3: the own-profile tab is the one place `auctionData.soldPrice` is
+  // genuinely available (the authenticated registration history carries it;
+  // the public profile's payload omits it by whitelist — see
+  // PlayerProfileAchievements.test.tsx for that side).
+  it('renders a played-for entry with its sold price, formatted with formatMoney', () => {
+    const { getByText } = render(
+      <Provider store={makeStore(playerStats(), [tournamentHistoryEntry({ auctionData: { soldPrice: 25000 } })])}>
+        <Profile />
+      </Provider>
+    );
+
+    expect(getByText('Koramangala Smashers')).toBeTruthy();
+    expect(getByText(formatMoney(25000))).toBeTruthy();
+  });
+
+  // PlayedForCard already omits the "Sold for" cell entirely when the prop
+  // is absent — no dash, no zero. This asserts that behaviour survives here
+  // rather than adding a second guard in profile.tsx that could drift from it.
+  it('omits the sold-price cell for a played-for entry with no auction data', () => {
+    const { getByText, queryByText } = render(
+      <Provider store={makeStore(playerStats(), [tournamentHistoryEntry({ auctionData: undefined })])}>
+        <Profile />
+      </Provider>
+    );
+
+    expect(getByText('Koramangala Smashers')).toBeTruthy();
+    expect(queryByText(/sold for/i)).toBeNull();
   });
 });
