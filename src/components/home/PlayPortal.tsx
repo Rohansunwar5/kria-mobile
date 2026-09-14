@@ -12,6 +12,7 @@ import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMat
 import { scoreLine } from '@/lib/quickCricketView';
 import type { CareerProfile, RecentMatch, SportSummary } from '@/api/career';
 import type { QuickMatch } from '@/api/quickMatch';
+import { FormStrip } from '@/components/profile/FormStrip';
 import { RANKED_SPORTS, TopPlayers } from './TopPlayers';
 
 // PlayFull.dc.html / PlayEmpty.dc.html. The masthead, the portal switch and the
@@ -66,13 +67,6 @@ const RESULT_TAG: Record<RecentMatch['result'], { label: string; variant: TagVar
   tied: { label: 'Tied', variant: 'up' },
   no_result: { label: 'No result', variant: 'end' },
 };
-
-const FORM_TOKEN = (theme: Palette): Record<RecentMatch['result'], { token: string; bg: string; fg: string }> => ({
-  won: { token: 'W', bg: colors.open, fg: theme.onOpen },
-  lost: { token: 'L', bg: colors.fail, fg: theme.onFail },
-  tied: { token: 'T', bg: theme.lineFaint, fg: theme.textBody },
-  no_result: { token: 'NR', bg: theme.lineFaint, fg: theme.textFaint },
-});
 
 function sportIcon(sport: string): IconName {
   return SPORT_ICON[sport] ?? 'trophy';
@@ -191,53 +185,6 @@ function SportCell({
         {winPercent(summary.winRate, summary.decided)}
       </Text>
       <Text style={{ ...MONO(theme), letterSpacing: 0.1 * 10, marginTop: 6 }}>{recordLine(summary)}</Text>
-    </View>
-  );
-}
-
-/** The last six results, newest on the right — letter as well as colour, so it
- *  never depends on hue alone. */
-function FormStrip({ recent }: { recent: RecentMatch[] }) {
-  const theme = useTheme();
-  const formToken = FORM_TOKEN(theme);
-  const form = recent.slice(0, 6).reverse();
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 9,
-        paddingHorizontal: 13,
-        paddingVertical: 11,
-        borderTopWidth: 1.5,
-        borderTopColor: theme.lineFaint,
-      }}
-    >
-      <Text style={{ ...LBL(theme), letterSpacing: 0.12 * 9 }}>Form</Text>
-      <View style={{ flexDirection: 'row', gap: 4 }}>
-        {form.map((m) => {
-          const t = formToken[m.result];
-          return (
-            <View
-              key={m._id}
-              style={{
-                minWidth: 19,
-                height: 19,
-                borderRadius: 3,
-                paddingHorizontal: 3,
-                backgroundColor: t.bg,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: t.fg }}>{t.token}</Text>
-            </View>
-          );
-        })}
-      </View>
-      <View style={{ flex: 1 }} />
-      <Text style={{ ...MONO(theme), letterSpacing: 0.1 * 10 }}>Newest</Text>
-      <Icon name="chevron-right" size={10} color={theme.textFaint} strokeWidth={2.4} />
     </View>
   );
 }
