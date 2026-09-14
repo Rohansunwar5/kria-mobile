@@ -7,6 +7,7 @@ import { colors, useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 import { SPORTS } from '@/lib/tournamentConstants';
 import { SPORT_LABELS } from '@/lib/sports';
+import { winPercent } from '@/lib/format';
 import { useTopPlayers } from '@/lib/useTopPlayers';
 import type { RankedPlayer } from '@/api/rankings';
 
@@ -16,11 +17,9 @@ import type { RankedPlayer } from '@/api/rankings';
 // "all sports" meaning, since win rates across different sports are not
 // comparable, so it is never one of the values the chip can land on.
 //
-// `RANKED_SPORTS[0]` (today 'badminton') is the source of truth for
-// PlayPortal's initial sport — PlayPortal hardcodes that same literal in
-// its own `useState` rather than importing this module just for a default,
-// so the two will silently desync if `SPORTS` is ever reordered.
-const RANKED_SPORTS = SPORTS.slice(1);
+// Exported so PlayPortal can seed its own initial sport from the same
+// source of truth instead of duplicating the literal.
+export const RANKED_SPORTS = SPORTS.slice(1);
 
 function sportLabel(sport: string): string {
   return SPORT_LABELS[sport] ?? sport;
@@ -33,17 +32,10 @@ function nextSport(current: string): string {
   return RANKED_SPORTS[(i + 1) % RANKED_SPORTS.length] ?? RANKED_SPORTS[0];
 }
 
-/** The server sends a 0-1 fraction and owns the number — never recomputed
- *  from won/decided here. */
-function winPercent(winRate: number): string {
-  if (!Number.isFinite(winRate)) return '0%';
-  return `${Math.round(winRate * 100)}%`;
-}
-
 function rowLabel(rank: number, player: RankedPlayer, isViewer: boolean): string {
   const name = `${player.firstName} ${player.lastName}`.trim();
   const you = isViewer ? ', you' : '';
-  return `Rank ${rank}. ${name}${you}. ${player.decided} decided. ${winPercent(player.winRate)} win rate.`;
+  return `Rank ${rank}. ${name}${you}. ${player.decided} decided. ${winPercent(player.winRate, player.decided)} win rate.`;
 }
 
 const HEADING = {
@@ -172,7 +164,7 @@ function PlayerRow({
         </Text>
       </View>
       <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 16, color: colors.white }}>
-        {winPercent(player.winRate)}
+        {winPercent(player.winRate, player.decided)}
       </Text>
     </View>
   );

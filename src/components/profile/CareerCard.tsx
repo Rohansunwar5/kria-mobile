@@ -1,5 +1,6 @@
 import { View, Text } from 'react-native';
 import { Skeleton, EmptyState, ErrorBlock } from '@/components/states';
+import { winPercent } from '@/lib/format';
 import type { CareerProfile, SportSummary } from '@/api/career';
 
 const LBL = {
@@ -11,11 +12,6 @@ const LBL = {
 };
 
 const HAIRLINE = 'rgba(255,255,255,0.12)';
-
-/** The server sends a 0-1 fraction; the UI is the only place it becomes a percentage. */
-function asPercent(winRate: number): string {
-  return `${Math.round(winRate * 100)}%`;
-}
 
 function Figure({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
@@ -62,7 +58,7 @@ function SportRow({ summary, last }: { summary: SportSummary; last?: boolean }) 
             them into one number would misreport both. */}
         <Figure label="Decided" value={String(summary.decided)} />
         <Figure label="W-L-T" value={`${summary.won}-${summary.lost}-${summary.tied}`} />
-        <Figure label="Win" value={asPercent(summary.winRate)} accent />
+        <Figure label="Win" value={winPercent(summary.winRate, summary.decided)} accent />
       </View>
     </View>
   );
@@ -94,7 +90,7 @@ function BestSportBadge({ summary }: { summary: SportSummary }) {
           marginLeft: 8,
         }}
       >
-        {summary.sport} · {asPercent(summary.winRate)}
+        {summary.sport} · {winPercent(summary.winRate, summary.decided)}
       </Text>
     </View>
   );

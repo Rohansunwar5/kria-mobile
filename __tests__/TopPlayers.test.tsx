@@ -120,8 +120,19 @@ describe('TopPlayers', () => {
   it('switches sport via the chip, skipping the All sentinel', () => {
     mockState({ players: [] });
     const onSportChange = jest.fn();
-    const { getByLabelText } = render(<TopPlayers {...props({ sport: 'badminton', onSportChange })} />);
+    const { getByLabelText, rerender } = render(<TopPlayers {...props({ sport: 'badminton', onSportChange })} />);
     fireEvent.press(getByLabelText(/switch sport, currently badminton/i));
     expect(onSportChange).toHaveBeenCalledWith('cricket');
+
+    // The wrap-around (cricket -> badminton) is the hop that actually depends
+    // on skipping the sentinel: an unfiltered cycle over SPORTS
+    // ('All' -> 'badminton' -> 'cricket') would also land on 'cricket' from
+    // the first press above, so that press alone proves nothing about the
+    // sentinel. Only the wrap distinguishes the two implementations, since an
+    // unfiltered cycle wraps cricket back to 'All', not 'badminton'.
+    rerender(<TopPlayers {...props({ sport: 'cricket', onSportChange })} />);
+    fireEvent.press(getByLabelText(/switch sport, currently cricket/i));
+    expect(onSportChange).toHaveBeenCalledWith('badminton');
+    expect(onSportChange).not.toHaveBeenCalledWith('All');
   });
 });

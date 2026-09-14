@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getTopPlayers, type RankedPlayer } from '@/api/rankings';
 
 /**
@@ -10,11 +10,18 @@ import { getTopPlayers, type RankedPlayer } from '@/api/rankings';
  *
  * Reloads whenever `sport` changes, so a tab switch on the leaderboard screen
  * refetches without the caller having to call `reload` itself.
+ *
+ * Also clears `players` the instant `sport` changes (before the new list
+ * arrives) so the previous sport's rows never render for a moment under the
+ * new sport's chip. A manual `reload()` of the SAME sport is deliberately
+ * left alone — clearing there would make an ordinary pull-to-refresh flash
+ * the list empty, which nothing asked for.
  */
 export function useTopPlayers(sport: string) {
   const [players, setPlayers] = useState<RankedPlayer[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const prevSport = useRef(sport);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -30,8 +37,12 @@ export function useTopPlayers(sport: string) {
   }, [sport]);
 
   useEffect(() => {
+    if (prevSport.current !== sport) {
+      prevSport.current = sport;
+      setPlayers([]);
+    }
     load();
-  }, [load]);
+  }, [load, sport]);
 
   return { players, loading, error, reload: load };
 }

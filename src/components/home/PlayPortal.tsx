@@ -7,12 +7,12 @@ import { Skeleton, ErrorBlock, Ghost } from '@/components/states';
 import { colors, useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 import { SPORT_ICON, SPORT_LABELS } from '@/lib/sports';
-import { formatShortDate } from '@/lib/format';
+import { formatShortDate, winPercent } from '@/lib/format';
 import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMatchView';
 import { scoreLine } from '@/lib/quickCricketView';
 import type { CareerProfile, RecentMatch, SportSummary } from '@/api/career';
 import type { QuickMatch } from '@/api/quickMatch';
-import { TopPlayers } from './TopPlayers';
+import { RANKED_SPORTS, TopPlayers } from './TopPlayers';
 
 // PlayFull.dc.html / PlayEmpty.dc.html. The masthead, the portal switch and the
 // strip above this belong to the screen; the portal starts at host/join.
@@ -47,15 +47,6 @@ const CARD = {
   borderRadius: 6,
   backgroundColor: colors.panel,
 };
-
-/**
- * The server sends a 0-1 fraction and owns the number — it is never recomputed
- * from won/decided here. A sport with nothing decided reads 0%, not NaN%.
- */
-function winPercent(summary: SportSummary): string {
-  if (summary.decided === 0 || !Number.isFinite(summary.winRate)) return '0%';
-  return `${Math.round(summary.winRate * 100)}%`;
-}
 
 /**
  * `13W · 12L · 1NR`. No-results are shown and NOT folded into losses: the
@@ -197,7 +188,7 @@ function SportCell({
         <Text style={{ ...LBL(theme), letterSpacing: 0.12 * 9, color: theme.textBody }}>{sportLabel(summary.sport)}</Text>
       </View>
       <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 34, lineHeight: 36, color: colors.white, marginTop: 6 }}>
-        {winPercent(summary)}
+        {winPercent(summary.winRate, summary.decided)}
       </Text>
       <Text style={{ ...MONO(theme), letterSpacing: 0.1 * 10, marginTop: 6 }}>{recordLine(summary)}</Text>
     </View>
@@ -447,7 +438,7 @@ export function PlayPortal({
   recentError,
   onRetry,
 }: PlayPortalProps) {
-  const [topPlayersSport, setTopPlayersSport] = useState('badminton');
+  const [topPlayersSport, setTopPlayersSport] = useState(RANKED_SPORTS[0]);
   const sports = profile ? profile.sports : [];
   const played = sports.reduce((sum, s) => sum + s.played, 0);
   const live = matches.filter((m) => m.status === 'live');

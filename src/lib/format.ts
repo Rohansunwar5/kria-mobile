@@ -35,3 +35,17 @@ export function formatShortDate(value?: string): string {
   if (!value) return 'TBD';
   return new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
+
+/**
+ * Turns a 0-1 win-rate fraction into a rounded percentage string, e.g. `92%`.
+ * The server owns the number — it is never recomputed from won/decided here.
+ *
+ * Renders `0%`, never `NaN%`, for a zero `decided`, a non-finite `winRate`,
+ * or a missing `winRate` — the union of edges the three call sites (Top
+ * players, the PLAY portal's record card, and the career card) used to guard
+ * inconsistently before this was one function.
+ */
+export function winPercent(winRate: number | undefined, decided?: number): string {
+  if (decided === 0 || winRate === undefined || !Number.isFinite(winRate)) return '0%';
+  return `${Math.round(winRate * 100)}%`;
+}
