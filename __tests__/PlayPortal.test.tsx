@@ -2,6 +2,25 @@ import { render } from '@testing-library/react-native';
 import { PlayPortal } from '../src/components/home/PlayPortal';
 import type { CareerProfile, RecentMatch } from '../src/api/career';
 import type { QuickMatch } from '../src/api/quickMatch';
+import type { RankedPlayer } from '../src/api/rankings';
+
+// TopPlayers owns its own fetch via useTopPlayers — stub it here the same
+// way HomeScreen.test.tsx stubs useCareer, so this file stays about the
+// portal's layout rather than exercising a real network call.
+const mockUseTopPlayers = jest.fn();
+jest.mock('../src/lib/useTopPlayers', () => ({
+  useTopPlayers: (sport: string) => mockUseTopPlayers(sport),
+}));
+
+const rankedPlayer: RankedPlayer = {
+  playerId: 'p1',
+  firstName: 'Rohan',
+  lastName: 'Sunwar',
+  played: 24,
+  decided: 24,
+  won: 22,
+  winRate: 0.92,
+};
 
 const profile: CareerProfile = {
   sports: [
@@ -51,6 +70,19 @@ const props = (over = {}) => ({
 });
 
 describe('PlayPortal', () => {
+  beforeEach(() => {
+    mockUseTopPlayers.mockReturnValue({ players: [rankedPlayer], loading: false, error: false, reload: jest.fn() });
+  });
+
+  // Task 3: the Top players board renders below recent matches, reading the
+  // viewer's identity from the same `playerId` prop the live rows already use.
+  it('renders the top players board below recent matches, with the viewer marked', () => {
+    const { getByText } = render(<PlayPortal {...props({ playerId: 'p1' })} />);
+    expect(getByText('Top players')).toBeTruthy();
+    expect(getByText(/rohan sunwar/i)).toBeTruthy();
+    expect(getByText('You')).toBeTruthy();
+  });
+
   it('always offers Host and Join', () => {
     const { getByLabelText } = render(<PlayPortal {...props()} />);
     expect(getByLabelText('Host a match')).toBeTruthy();

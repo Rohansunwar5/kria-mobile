@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { Icon, type IconName } from '@/components/icons';
@@ -11,6 +12,7 @@ import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMat
 import { scoreLine } from '@/lib/quickCricketView';
 import type { CareerProfile, RecentMatch, SportSummary } from '@/api/career';
 import type { QuickMatch } from '@/api/quickMatch';
+import { TopPlayers } from './TopPlayers';
 
 // PlayFull.dc.html / PlayEmpty.dc.html. The masthead, the portal switch and the
 // strip above this belong to the screen; the portal starts at host/join.
@@ -445,6 +447,7 @@ export function PlayPortal({
   recentError,
   onRetry,
 }: PlayPortalProps) {
+  const [topPlayersSport, setTopPlayersSport] = useState('badminton');
   const sports = profile ? profile.sports : [];
   const played = sports.reduce((sum, s) => sum + s.played, 0);
   const live = matches.filter((m) => m.status === 'live');
@@ -558,6 +561,8 @@ export function PlayPortal({
           {recentBody()}
         </View>
       ) : null}
+
+      <TopPlayers sport={topPlayersSport} onSportChange={setTopPlayersSport} viewerId={playerId} />
     </ScrollView>
   );
 }

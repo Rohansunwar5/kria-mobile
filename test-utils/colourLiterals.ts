@@ -27,6 +27,7 @@ export const MIGRATED: string[] = [
   'src/components/navigation/FloatingTabBar.tsx',
   'src/components/icons/nav.tsx',
   'src/components/profile/Achievements.tsx',
+  'src/components/home/TopPlayers.tsx',
 ];
 
 export interface ColourLiteralFinding {
