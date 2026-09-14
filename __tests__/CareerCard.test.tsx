@@ -57,15 +57,65 @@ describe('CareerCard', () => {
   });
 
   it('distinguishes played from decided when a no-result match exists', () => {
-    // no_result matches are stored and counted as played, but excluded from
-    // win rate. Showing only one number would misrepresent both.
+    // The restyled table's columns are SPORT / PL / W / L / WIN% — "decided"
+    // is no longer its own figure, so the played-vs-decided distinction now
+    // has to show up as (a) PL still counting the no-result and (b) the
+    // footnote naming it, rather than as two side-by-side numbers.
     const { getByText } = render(
       <CareerCard
         profile={{ sports: [sport({ played: 13, decided: 12, noResult: 1 })], bestSport: null, achievements: [] }}
       />
     );
     expect(getByText('13')).toBeTruthy();
-    expect(getByText('12')).toBeTruthy();
+    expect(getByText(/1 no-result excluded from win rate/i)).toBeTruthy();
+  });
+
+  it('renders a header row of SPORT / PL / W / L / WIN%', () => {
+    const { getByText } = render(<CareerCard profile={{ sports: [sport()], bestSport: null, achievements: [] }} />);
+    expect(getByText(/^sport$/i)).toBeTruthy();
+    expect(getByText(/^pl$/i)).toBeTruthy();
+    expect(getByText(/^w$/i)).toBeTruthy();
+    expect(getByText(/^l$/i)).toBeTruthy();
+    expect(getByText(/^win%$/i)).toBeTruthy();
+  });
+
+  it('renders a Total row summing played/won/lost, with a win rate from SUMMED won over SUMMED decided — not an average of per-sport rates', () => {
+    // Two sports of deliberately unequal volume: badminton 90 decided (81W/9L,
+    // 90%) and cricket 10 decided (1W/9L, 10%). Averaging the two per-sport
+    // rates gives (90+10)/2 = 50%. Summing first gives 82/100 = 82%. The two
+    // methods disagree specifically because the volumes differ — this is the
+    // numeric evidence that the total is computed the right way.
+    const badminton = sport({ sport: 'badminton', played: 90, decided: 90, won: 81, lost: 9, tied: 0, noResult: 0, winRate: 81 / 90 });
+    const cricket = sport({ sport: 'cricket', played: 10, decided: 10, won: 1, lost: 9, tied: 0, noResult: 0, winRate: 1 / 10 });
+    const { getByText, queryByText } = render(
+      <CareerCard profile={{ sports: [badminton, cricket], bestSport: null, achievements: [] }} />
+    );
+
+    expect(getByText(/^total$/i)).toBeTruthy();
+    expect(getByText('100')).toBeTruthy(); // total played: 90 + 10
+    expect(getByText('82')).toBeTruthy(); // total won: 81 + 1
+    expect(getByText('18')).toBeTruthy(); // total lost: 9 + 9
+    expect(getByText('82%')).toBeTruthy(); // 82 summed-won / 100 summed-decided
+    expect(queryByText('50%')).toBeNull(); // the wrong, averaged answer must never appear
+  });
+
+  it('renders 0%, never NaN%, on the Total row when every sport has nothing decided', () => {
+    const badminton = sport({ sport: 'badminton', played: 2, decided: 0, won: 0, lost: 0, tied: 0, noResult: 2, winRate: 0 });
+    const cricket = sport({ sport: 'cricket', played: 3, decided: 0, won: 0, lost: 0, tied: 0, noResult: 3, winRate: 0 });
+    const { getAllByText, queryByText } = render(
+      <CareerCard profile={{ sports: [badminton, cricket], bestSport: null, achievements: [] }} />
+    );
+
+    expect(queryByText(/nan/i)).toBeNull();
+    // Both per-sport rows and the Total row render 0% — three in total.
+    expect(getAllByText('0%')).toHaveLength(3);
+  });
+
+  it('shows the no-results footnote only when at least one no-result exists', () => {
+    const { queryByText } = render(
+      <CareerCard profile={{ sports: [sport({ noResult: 0 }), sport({ sport: 'cricket', noResult: 0 })], bestSport: null, achievements: [] }} />
+    );
+    expect(queryByText(/no-result/i)).toBeNull();
   });
 
   it('shows an empty state for a player who has never played', () => {
