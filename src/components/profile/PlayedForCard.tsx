@@ -5,18 +5,30 @@ import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 import { SPORT_LABELS } from '@/lib/sports';
 import { formatMoney } from '@/lib/format';
-import type { PublicHistoryEntry } from '@/api/profileApi';
 
 // Played-for card, body-Profile.html: a 38px square team swatch, the team
 // name over TOURNAMENT · YEAR, a sport tag, then a Played/Won(/Sold for)
-// stat strip. `entry` is one `PublicHistoryEntry` — the PUBLIC player
-// profile's history, which the server's `getPublicProfile`
-// (playerAuth.service.ts) builds as an explicit whitelist that never
-// includes auction financials. `soldPrice` is therefore a separate prop
-// rather than something read off `entry`: a caller with that figure (the
-// player's own authenticated history) passes it, the public profile screen
-// has none to pass, and the cell's absence there follows from correct data
-// flow instead of an always-undefined field on the public type.
+// stat strip. `soldPrice` is a separate prop rather than something read off
+// `entry`: a caller with that figure (the player's own authenticated
+// history) passes it, the public profile screen has none to pass, and the
+// cell's absence there follows from correct data flow instead of an
+// always-undefined field on the public type.
+
+// This card is fed by two different history shapes: `PublicHistoryEntry`
+// (@/api/profileApi, from the public player profile — an explicit
+// whitelist that never includes auction financials) and
+// `TournamentHistoryEntry` (@/store/slices/registrationSlice, the
+// authenticated player's own history). Neither type is imported here on
+// purpose — `entry`'s type must depend only on the fields both shapes
+// genuinely provide, not on whichever one happens to be passed, so this
+// contract is stated narrowly rather than borrowed from one caller and
+// held together with the other by structural luck.
+export interface PlayedForEntry {
+  createdAt: string;
+  stats?: { matchesPlayed?: number; matchesWon?: number };
+  tournament?: { _id: string; name: string; sport?: string };
+  team?: { name: string; primaryColor?: string } | null;
+}
 
 const LBL = (theme: Palette) => ({
   fontFamily: 'SpaceMono_700Bold' as const,
@@ -42,7 +54,7 @@ export function PlayedForCard({
   soldPrice,
   onPress,
 }: {
-  entry: PublicHistoryEntry;
+  entry: PlayedForEntry;
   /** Auction sale price, when the caller's data source carries one. Absent on the public profile. */
   soldPrice?: number;
   onPress?: () => void;
