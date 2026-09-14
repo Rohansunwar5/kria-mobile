@@ -7,34 +7,29 @@ import { Icon } from '@/components/icons';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hairlines, Hazard } from '@/components/canvas';
 import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
+import { hue } from '@/components/TournamentArt';
 import { CareerCard } from '@/components/profile/CareerCard';
+import { BestSportHero } from '@/components/profile/BestSportHero';
 import { Achievements } from '@/components/profile/Achievements';
 import { RecentMatches } from '@/components/profile/RecentMatches';
 import { PlayedForCard } from '@/components/profile/PlayedForCard';
 import { getPublicPlayer, type PublicPlayer, type PublicHistoryEntry } from '@/api/profileApi';
 import { useCareer } from '@/lib/useCareer';
+import { useTheme } from '@/lib/theme';
+import type { Palette } from '@/lib/theme/palette';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
-
-function StatCell({ label, value, accent, last }: { label: string; value: string; accent?: boolean; last?: boolean }) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: 10,
-        paddingVertical: 11,
-        ...(last ? null : { borderRightWidth: 1.5, borderRightColor: 'rgba(255,255,255,0.12)' }),
-      }}
-    >
-      <Text style={LBL}>{label}</Text>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 22, color: accent ? '#F97316' : '#fff', marginTop: 2 }}>{value}</Text>
-    </View>
-  );
-}
+const LBL = (theme: Palette) => ({
+  fontFamily: 'SpaceMono_700Bold' as const,
+  fontSize: 9,
+  letterSpacing: 0.1 * 9,
+  textTransform: 'uppercase' as const,
+  color: theme.textFaint,
+});
 
 export default function PlayerProfile() {
   const { playerId } = useLocalSearchParams<{ playerId: string }>();
   const router = useRouter();
+  const theme = useTheme();
 
   const career = useCareer(playerId);
   const [data, setData] = useState<{ player: PublicPlayer; history: PublicHistoryEntry[] } | null>(null);
@@ -54,17 +49,17 @@ export default function PlayerProfile() {
   }, [load]);
 
   const Header = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: theme.lineSoft }}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Go back"
         onPress={() => goBack(router)}
         hitSlop={8}
-        style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
+        style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: theme.fill, borderWidth: 1.5, borderColor: theme.lineSoft, alignItems: 'center', justifyContent: 'center' }}
       >
-        <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
+        <Icon name="chevron-left" size={19} color={theme.text} strokeWidth={2.3} />
       </Pressable>
-      <Text style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: '#fff' }}>Player</Text>
+      <Text style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: theme.text }}>Player</Text>
     </View>
   );
 
@@ -81,7 +76,7 @@ export default function PlayerProfile() {
     );
   }
 
-  const refresh = <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#F97316" />;
+  const refresh = <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={theme.brand} />;
 
   if (!data) {
     return (
@@ -100,16 +95,12 @@ export default function PlayerProfile() {
 
   const { player, history } = data;
   const name = `${player.firstName} ${player.lastName}`.trim();
-  // The public payload strips PII; totals are what is left to show.
-  const played = history.reduce((s, h) => s + (h.stats?.matchesPlayed ?? 0), 0);
-  const won = history.reduce((s, h) => s + (h.stats?.matchesWon ?? 0), 0);
-  const rate = played > 0 ? `${Math.round((won / played) * 100)}%` : '—';
 
   return (
     <Screen>
       {Header}
       <ScrollView refreshControl={refresh} contentContainerStyle={{ paddingBottom: 24 }}>
-        <View style={{ overflow: 'hidden' }}>
+        <View style={{ overflow: 'hidden', backgroundColor: `hsl(${hue(player._id)}, 44%, 13%)` }}>
           <Hairlines />
           <Ghost text={name.split(/\s+/).slice(0, 2).map((w) => w[0]).join('')} size={150} style={{ right: -26, top: -8 }} />
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14, paddingHorizontal: 16, paddingTop: 12 }}>
@@ -119,12 +110,12 @@ export default function PlayerProfile() {
               <InitialsAvatar name={name} size={76} />
             )}
             <View style={{ flex: 1, paddingBottom: 3 }}>
-              <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 36, color: '#fff' }}>
+              <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 36, color: theme.text }}>
                 {name}
               </Text>
             </View>
           </View>
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#a3a3a3', paddingHorizontal: 16, paddingTop: 12 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textMeta, paddingHorizontal: 16, paddingTop: 12 }}>
             {[player.sport, player.location].filter(Boolean).join(' · ') || 'Kria player'}
           </Text>
           <View style={{ marginTop: 13 }}>
@@ -132,14 +123,9 @@ export default function PlayerProfile() {
           </View>
         </View>
 
-        <View style={{ flexDirection: 'row', borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
-          <StatCell label="Events" value={String(history.length)} />
-          <StatCell label="Matches" value={String(played)} />
-          <StatCell label="Wins" value={String(won)} accent />
-          <StatCell label="Rate" value={rate} last />
-        </View>
-
         <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+          <BestSportHero bestSport={career.profile?.bestSport ?? null} recent={career.recent ?? []} />
+
           <CareerCard
             profile={career.profile}
             loading={career.loading}
@@ -162,13 +148,13 @@ export default function PlayerProfile() {
           />
 
           {player.titles.length ? (
-            <View style={{ marginBottom: 16 }}>
-              <Text style={{ ...LBL, letterSpacing: 0.18 * 9, marginBottom: 8 }}>Honors</Text>
+            <View style={{ marginTop: 22 }}>
+              <Text style={{ ...LBL(theme), letterSpacing: 0.18 * 9, marginBottom: 8 }}>Titles</Text>
               <View style={{ gap: 7 }}>
                 {player.titles.map((t, i) => (
-                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 11, backgroundColor: '#F97316', borderRadius: 6 }}>
-                    <Icon name="trophy" size={17} color="#0B0B0B" strokeWidth={2.2} />
-                    <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: '#0B0B0B' }}>
+                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 11, backgroundColor: theme.brand, borderRadius: 6 }}>
+                    <Icon name="trophy" size={17} color={theme.onBrand} strokeWidth={2.2} />
+                    <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: theme.onBrand }}>
                       {t}
                     </Text>
                   </View>
@@ -177,24 +163,26 @@ export default function PlayerProfile() {
             </View>
           ) : null}
 
-          <Text style={{ ...LBL, letterSpacing: 0.18 * 9, marginBottom: 8 }}>Played</Text>
-          {history.length === 0 ? (
-            <EmptyState
-              icon="trophy"
-              title="No events yet"
-              message="Tournaments this player has entered will appear here."
-            />
-          ) : (
-            <View style={{ gap: 9 }}>
-              {history.map((h) => (
-                <PlayedForCard
-                  key={h._id}
-                  entry={h}
-                  onPress={() => router.push({ pathname: '/tournament/[id]', params: { id: h.tournament!._id } })}
-                />
-              ))}
-            </View>
-          )}
+          <View style={{ marginTop: 22 }}>
+            <Text style={{ ...LBL(theme), letterSpacing: 0.18 * 9, marginBottom: 8 }}>Played for</Text>
+            {history.length === 0 ? (
+              <EmptyState
+                icon="trophy"
+                title="No events yet"
+                message="Tournaments this player has entered will appear here."
+              />
+            ) : (
+              <View style={{ gap: 9 }}>
+                {history.map((h) => (
+                  <PlayedForCard
+                    key={h._id}
+                    entry={h}
+                    onPress={() => router.push({ pathname: '/tournament/[id]', params: { id: h.tournament!._id } })}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
         </View>
       </ScrollView>
     </Screen>
