@@ -15,6 +15,11 @@ import type { RankedPlayer } from '@/api/rankings';
 // `SPORTS[0]` is the list screen's 'All' sentinel — a ranking has no
 // "all sports" meaning, since win rates across different sports are not
 // comparable, so it is never one of the values the chip can land on.
+//
+// `RANKED_SPORTS[0]` (today 'badminton') is the source of truth for
+// PlayPortal's initial sport — PlayPortal hardcodes that same literal in
+// its own `useState` rather than importing this module just for a default,
+// so the two will silently desync if `SPORTS` is ever reordered.
 const RANKED_SPORTS = SPORTS.slice(1);
 
 function sportLabel(sport: string): string {

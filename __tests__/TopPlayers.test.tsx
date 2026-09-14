@@ -58,12 +58,19 @@ describe('TopPlayers', () => {
   });
 
   // `winRate` is a 0-1 fraction from the server; the component renders it as
-  // a percentage and never recomputes it from won/decided (22/24 = 91.6%,
-  // which would round differently from the server's own 92%).
+  // a percentage and must never recompute it from won/decided.
+  //
+  // won/decided and winRate are DELIBERATELY chosen so the two derivations
+  // disagree after rounding: 23/24 recomputed is 95.83% -> rounds to 96%,
+  // while the server's own fraction (0.90) renders 90%. Only one of those
+  // can pass. Do not "tidy" these numbers back into agreement — that would
+  // make the test pass against a component that recomputes, which is
+  // exactly the regression this test exists to catch.
   it('renders winRate as a percentage from the fraction, not recomputed from won/decided', () => {
-    mockState({ players: [player({ won: 22, decided: 24, winRate: 0.92 })] });
-    const { getByText } = render(<TopPlayers {...props()} />);
-    expect(getByText('92%')).toBeTruthy();
+    mockState({ players: [player({ won: 23, decided: 24, winRate: 0.9 })] });
+    const { getByText, queryByText } = render(<TopPlayers {...props()} />);
+    expect(getByText('90%')).toBeTruthy();
+    expect(queryByText('96%')).toBeNull();
   });
 
   // The viewer's own row is marked for a screen reader too, not only by the
