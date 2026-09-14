@@ -67,6 +67,7 @@ function SportTableRow({
   winRate,
   decided,
   emphasise,
+  highlightWin,
 }: {
   label: string;
   theme: Palette;
@@ -76,6 +77,15 @@ function SportTableRow({
   winRate: number;
   decided: number;
   emphasise?: boolean;
+  /**
+   * True only for the row whose sport is `profile.bestSport.sport`. This is
+   * a reinforcement of the `BestSportBadge` above the table, not the only
+   * signal for "this is the best sport" — the badge already names it in
+   * text. Do not read the tint as the sole carrier and either strip it (it
+   * is load-bearing alongside the badge) or duplicate a second highlight
+   * elsewhere for the same fact.
+   */
+  highlightWin?: boolean;
 }) {
   return (
     <View
@@ -109,7 +119,15 @@ function SportTableRow({
       <Text style={{ width: COL_L, textAlign: 'right', fontFamily: 'SpaceMono_700Bold', fontSize: 14, color: theme.textFaint }}>
         {lost}
       </Text>
-      <Text style={{ width: COL_WIN, textAlign: 'right', fontFamily: 'SpaceMono_700Bold', fontSize: 14, color: theme.text }}>
+      <Text
+        style={{
+          width: COL_WIN,
+          textAlign: 'right',
+          fontFamily: 'SpaceMono_700Bold',
+          fontSize: 14,
+          color: highlightWin ? theme.open : theme.text,
+        }}
+      >
         {winPercent(winRate, decided)}
       </Text>
     </View>
@@ -248,6 +266,12 @@ export function CareerCard({
                 lost={s.lost}
                 winRate={s.winRate}
                 decided={s.decided}
+                // Keyed off which sport bestSport names, not off winRate —
+                // the server already applied its 10-decided floor to decide
+                // whether bestSport exists at all; re-deriving "best" from
+                // the highest rate here would tint a 3-match 100% row that
+                // floor exists to exclude.
+                highlightWin={profile.bestSport?.sport === s.sport}
               />
             </View>
           ))}

@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react-native';
 import { CareerCard } from '../src/components/profile/CareerCard';
+import { dark } from '../src/lib/theme/palette';
 import type { SportSummary } from '../src/api/career';
 
 const sport = (over: Partial<SportSummary> = {}): SportSummary => ({
@@ -134,5 +135,40 @@ describe('CareerCard', () => {
   it('shows an error state when the fetch failed', () => {
     const { getByText } = render(<CareerCard profile={null} error />);
     expect(getByText(/couldn.t load/i)).toBeTruthy();
+  });
+
+  it("tints the WIN% cell of the row matching bestSport's sport with the open token", () => {
+    const badminton = sport({ sport: 'badminton', played: 10, decided: 10, won: 9, lost: 1, tied: 0, winRate: 0.9 });
+    const cricket = sport({ sport: 'cricket', played: 10, decided: 10, won: 5, lost: 5, tied: 0, winRate: 0.5 });
+    const { getByText } = render(
+      <CareerCard profile={{ sports: [badminton, cricket], bestSport: badminton, achievements: [] }} />
+    );
+    // Asserted on the actually-rendered colour, not on a prop name — a
+    // renamed/removed "highlight" prop that stopped reaching the style
+    // would fail this the same way a colour regression would.
+    expect(getByText('90%').props.style.color).toBe(dark.open);
+  });
+
+  it("leaves every row that is NOT bestSport's sport untinted", () => {
+    const badminton = sport({ sport: 'badminton', played: 10, decided: 10, won: 9, lost: 1, tied: 0, winRate: 0.9 });
+    const cricket = sport({ sport: 'cricket', played: 10, decided: 10, won: 5, lost: 5, tied: 0, winRate: 0.5 });
+    const { getByText } = render(
+      <CareerCard profile={{ sports: [badminton, cricket], bestSport: badminton, achievements: [] }} />
+    );
+    expect(getByText('50%').props.style.color).not.toBe(dark.open);
+    expect(getByText('50%').props.style.color).toBe(dark.text);
+  });
+
+  it('tints no row when bestSport is null — the server withheld it below 10 decided', () => {
+    // Both sports would qualify as "highest rate" if that were the rule
+    // instead of "named by the server" — proving the tint is keyed off
+    // bestSport's presence, not re-derived from winRate here.
+    const badminton = sport({ sport: 'badminton', played: 10, decided: 10, won: 9, lost: 1, tied: 0, winRate: 0.9 });
+    const cricket = sport({ sport: 'cricket', played: 10, decided: 10, won: 5, lost: 5, tied: 0, winRate: 0.5 });
+    const { getByText } = render(
+      <CareerCard profile={{ sports: [badminton, cricket], bestSport: null, achievements: [] }} />
+    );
+    expect(getByText('90%').props.style.color).not.toBe(dark.open);
+    expect(getByText('50%').props.style.color).not.toBe(dark.open);
   });
 });
