@@ -9,6 +9,7 @@ import { Hairlines, Hazard } from '@/components/canvas';
 import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
 import { Tag } from '@/components/StatusPill';
 import { CareerCard } from '@/components/profile/CareerCard';
+import { Achievements } from '@/components/profile/Achievements';
 import { RecentMatches } from '@/components/profile/RecentMatches';
 import { getPublicPlayer, type PublicPlayer, type PublicHistoryEntry } from '@/api/profileApi';
 import { useCareer } from '@/lib/useCareer';
@@ -142,6 +143,13 @@ export default function PlayerProfile() {
         <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
           <CareerCard
             profile={career.profile}
+            loading={career.loading}
+            error={career.error}
+            onRetry={career.reload}
+          />
+
+          <Achievements
+            achievements={career.profile?.achievements ?? []}
             loading={career.loading}
             error={career.error}
             onRetry={career.reload}
