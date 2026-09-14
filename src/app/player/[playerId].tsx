@@ -7,13 +7,12 @@ import { Icon } from '@/components/icons';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hairlines, Hazard } from '@/components/canvas';
 import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
-import { Tag } from '@/components/StatusPill';
 import { CareerCard } from '@/components/profile/CareerCard';
 import { Achievements } from '@/components/profile/Achievements';
 import { RecentMatches } from '@/components/profile/RecentMatches';
+import { PlayedForCard } from '@/components/profile/PlayedForCard';
 import { getPublicPlayer, type PublicPlayer, type PublicHistoryEntry } from '@/api/profileApi';
 import { useCareer } from '@/lib/useCareer';
-import { formatShortDate } from '@/lib/format';
 
 const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
@@ -186,42 +185,13 @@ export default function PlayerProfile() {
               message="Tournaments this player has entered will appear here."
             />
           ) : (
-            <View style={{ gap: 7 }}>
+            <View style={{ gap: 9 }}>
               {history.map((h) => (
-                <Pressable
+                <PlayedForCard
                   key={h._id}
-                  accessibilityRole={h.tournament?._id ? 'button' : undefined}
-                  accessibilityLabel={h.tournament?.name || 'Tournament'}
-                  disabled={!h.tournament?._id}
+                  entry={h}
                   onPress={() => router.push({ pathname: '/tournament/[id]', params: { id: h.tournament!._id } })}
-                  style={{
-                    minHeight: 44,
-                    paddingHorizontal: 13,
-                    paddingVertical: 11,
-                    backgroundColor: '#151515',
-                    borderWidth: 1.5,
-                    borderColor: 'rgba(255,255,255,0.14)',
-                    borderLeftWidth: 4,
-                    borderLeftColor: h.team?.primaryColor || 'rgba(255,255,255,0.14)',
-                    borderRadius: 6,
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, lineHeight: 20, color: '#fff' }}>
-                      {h.tournament?.name || 'Tournament'}
-                    </Text>
-                    {h.team ? <Tag label={h.team.name} variant="up" /> : null}
-                  </View>
-                  <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 5 }}>
-                    {[
-                      h.category?.name,
-                      h.stats?.matchesPlayed ? `${h.stats.matchesWon ?? 0}W of ${h.stats.matchesPlayed}` : null,
-                      formatShortDate(h.createdAt),
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </Text>
-                </Pressable>
+                />
               ))}
             </View>
           )}

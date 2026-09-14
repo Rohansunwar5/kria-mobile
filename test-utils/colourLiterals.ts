@@ -31,6 +31,7 @@ export const MIGRATED: string[] = [
   'src/components/profile/FormStrip.tsx',
   'src/components/profile/CareerCard.tsx',
   'src/components/profile/BestSportHero.tsx',
+  'src/components/profile/PlayedForCard.tsx',
 ];
 
 export interface ColourLiteralFinding {
