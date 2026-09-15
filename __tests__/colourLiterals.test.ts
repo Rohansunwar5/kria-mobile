@@ -2,8 +2,8 @@ import { readFileSync } from 'fs';
 import { MIGRATED, findColourLiterals } from '../test-utils/colourLiterals';
 
 // A ratchet, not a sweep. A file joins MIGRATED when its literals become
-// tokens; from then on this fence stops them coming back. The ~90 files not
-// listed are the remaining backlog and are deliberately unguarded.
+// tokens; from then on this fence stops them coming back. The unmigrated files
+// (currently 103) are the remaining backlog and are deliberately unguarded.
 describe('colour literal fence', () => {
   it('finds a hex literal', () => {
     expect(findColourLiterals("color: '#fff'")).toEqual([{ line: 1, literal: "'#fff'" }]);
