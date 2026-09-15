@@ -49,4 +49,38 @@ describe('useLiveFeed', () => {
     await act(async () => { result.current.refresh(); });
     await waitFor(() => expect(mock.history.get.length).toBe(1));
   });
+
+  // Pull-to-refresh + 15s server cache makes out-of-order resolution likely.
+  // Stale rows look identical to fresh ones, so the failure is invisible.
+  // A later request must win regardless of which response lands first.
+  it('discards stale responses when older request resolves after newer one', async () => {
+    const staleItem = { kind: 'quick', matchId: 'stale', sport: 'badminton', scoreline: '0-0', startedAt: '2026-09-15T10:00:00.000Z' };
+    const freshItem = { kind: 'quick', matchId: 'fresh', sport: 'badminton', scoreline: '11-9', startedAt: '2026-09-15T10:05:00.000Z' };
+
+    type ResolveType = (value: [number, unknown]) => void;
+    let resolveFirst: ResolveType | null = null;
+    let resolveSecond: ResolveType | null = null;
+
+    const firstPromise = new Promise<[number, unknown]>((resolve) => { resolveFirst = resolve; });
+    const secondPromise = new Promise<[number, unknown]>((resolve) => { resolveSecond = resolve; });
+
+    mock.onGet('/live').replyOnce(() => firstPromise);
+    mock.onGet('/live').replyOnce(() => secondPromise);
+
+    const { result } = renderHook(() => useLiveFeed());
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 20));
+      result.current.refresh();
+    });
+
+    await waitFor(() => expect(mock.history.get.length).toBe(2));
+
+    resolveSecond!([200, envelope([freshItem])]);
+    await new Promise((r) => setTimeout(r, 10));
+    resolveFirst!([200, envelope([staleItem])]);
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.items[0]?.matchId).toBe('fresh');
+  });
 });
