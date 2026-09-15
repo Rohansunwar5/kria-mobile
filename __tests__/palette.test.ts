@@ -1,4 +1,4 @@
-import { dark, PALETTES } from '../src/lib/theme/palette';
+import { dark, light, PALETTES } from '../src/lib/theme/palette';
 import { colors } from '../src/lib/theme';
 
 describe('dark palette', () => {
@@ -93,5 +93,62 @@ describe('dark palette', () => {
     expect(dark.openInk).toBe(dark.open);
     expect(dark.auctionInk).toBe(dark.auction);
     expect(dark.failInk).toBe(dark.fail);
+  });
+});
+
+describe('light palette', () => {
+  // Every value here is quoted from the approved artboard body-Light.html.
+  // The user rejected an invented light palette once already; these are not
+  // to be re-derived or "improved" without a new artboard.
+  it('uses the approved paper, surface and ink', () => {
+    expect(light.bg).toBe('#FAFAF8');
+    expect(light.surface).toBe('#FFFFFF');
+    expect(light.text).toBe('#0B0B0B');
+  });
+
+  it('keeps the four text tiers a closed set', () => {
+    expect(light.textBody).toBe('#454545');
+    expect(light.textMeta).toBe('#6B6B6B');
+    expect(light.textFaint).toBe('#8A8A8A');
+  });
+
+  // Dark lays white over ink; light lays ink over paper, at the SAME alpha
+  // rungs. That symmetry is the palette's structure, not a coincidence.
+  it('mirrors the dark alpha ladder with ink instead of white', () => {
+    expect(light.line).toBe('rgba(11,11,11,0.14)');
+    expect(light.lineFaint).toBe('rgba(11,11,11,0.10)');
+    expect(light.keyline).toBe('rgba(11,11,11,0.16)');
+  });
+
+  // The whole point of the ink tokens. Fills stay vivid so the brand keeps
+  // its identity; only the ink darkens.
+  it('keeps accents vivid as fills and darkens them as ink', () => {
+    expect(light.brand).toBe(dark.brand);
+    expect(light.auction).toBe(dark.auction);
+    expect(light.brandInk).toBe('#b24b04');
+    expect(light.openInk).toBe('#248430');
+    expect(light.auctionInk).toBe('#b0416b');
+    expect(light.failInk).toBe('#b54439');
+  });
+
+  // Dark ink on a bright fill reads on either ground, so these do not move.
+  it('leaves on-accent ink and the shadow alone', () => {
+    expect(light.onBrand).toBe(dark.onBrand);
+    expect(light.onOpen).toBe(dark.onOpen);
+    expect(light.onDark).toBe('#FFFFFF');
+    expect(light.shadow).toBe(dark.shadow);
+  });
+
+  // In dark the ladder climbs away from the background (#0B0B0B -> #151515 ->
+  // #1E1E1E). Light cannot climb: surface is already #FFFFFF. So surfaceAlt
+  // steps DOWN into grey. Applying the alpha rule here instead would give an
+  // inset lighter than the card holding it.
+  it('inverts the surface ladder, because light cannot climb past white', () => {
+    expect(light.surfaceAlt).toBe('#F1F1EF');
+  });
+
+  it('registers both palettes', () => {
+    expect(PALETTES.dark).toBe(dark);
+    expect(PALETTES.light).toBe(light);
   });
 });

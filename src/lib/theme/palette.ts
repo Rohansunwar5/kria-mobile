@@ -69,7 +69,7 @@
  * what every future palette has to define.
  */
 
-export type ThemeName = 'dark';
+export type ThemeName = 'dark' | 'light';
 
 export interface Palette {
   /** App background. */
@@ -179,6 +179,85 @@ export const dark: Palette = {
   shadow: '#000',
 };
 
+/**
+ * Quoted from the approved artboard `docs/design-canvas/home-portals/body-Light.html`.
+ * The user rejected an earlier invented light palette; build from the artboard,
+ * never by inverting dark.
+ *
+ * Three structural facts, each of which fails silently if "simplified":
+ *
+ *   - The alpha ladder is dark's, with ink swapped for white at the SAME rungs
+ *     (0.10 / 0.12 / 0.14 / 0.16 / 0.20 / 0.22 / 0.28). Dark lays white over
+ *     ink; light lays ink over paper.
+ *   - `surfaceAlt` is the one token that does NOT follow that rule. In dark the
+ *     ladder climbs away from the background (#0B0B0B -> #151515 -> #1E1E1E).
+ *     Light cannot climb — `surface` is already #FFFFFF — so `surfaceAlt` steps
+ *     DOWN into a tinted grey. Deriving it by the alpha rule produces an inset
+ *     lighter than the card containing it.
+ *   - The accents keep their vivid values as FILLS and darken only as INK. The
+ *     four ink values sit at oklch L=0.540 C=0.150 with the hue preserved,
+ *     which is the transform measured off the artboard's own #b24b04 and
+ *     #248430 rather than a rule invented here. `brandInk` and `openInk` are
+ *     the artboard's literal values; re-deriving `openInk` from the rule alone
+ *     gives #008641 at 4.48:1, which fails the 4.5 floor that #248430 clears.
+ *     Approved beats recomputed. `auctionInk` and `failInk` have no artboard
+ *     value and ARE the rule's output.
+ *
+ * NOT YET A TOKEN — the heavy call-to-action block.
+ *
+ * `FeaturedTournament.tsx` draws a full-width CTA slab. The dark artboard
+ * fills it with `brand` and inks it with `onBrand`; the LIGHT artboard fills
+ * it with ink (`#0B0B0B`) and inks it white, because "a burnt-orange slab on
+ * paper reads as flooded ink; black reads as print". So the roles swap
+ * between palettes and `brand`/`onBrand` cannot express it.
+ *
+ * It wants a `slab` / `onSlab` pair:
+ *     dark  -> slab #F97316, onSlab #0B0B0B
+ *     light -> slab #0B0B0B, onSlab #FFFFFF
+ *
+ * Deliberately NOT added here: there is exactly one call site today, and it
+ * is migrated in the tournament-screens batch, not this one. Add the pair in
+ * that batch, where the call site is in front of you. Until then, do not let
+ * the mechanical brand/onBrand rule touch that block.
+ */
+export const light: Palette = {
+  bg: '#FAFAF8',
+  surface: '#FFFFFF',
+  surfaceAlt: '#F1F1EF',
+  fill: 'rgba(11,11,11,0.075)',
+  fillSoft: 'rgba(11,11,11,0.045)',
+  line: 'rgba(11,11,11,0.14)',
+  lineSoft: 'rgba(11,11,11,0.12)',
+  lineFaint: 'rgba(11,11,11,0.10)',
+  text: '#0B0B0B',
+  textBody: '#454545',
+  textMeta: '#6B6B6B',
+  textFaint: '#8A8A8A',
+  onDark: '#FFFFFF',
+  brand: '#F97316',
+  auction: '#FA4C93',
+  open: '#16C46A',
+  fail: '#FF4438',
+  brandInk: '#b24b04',
+  openInk: '#248430',
+  auctionInk: '#b0416b',
+  failInk: '#b54439',
+  onBrand: '#0B0B0B',
+  onOpen: '#06240F',
+  onAuction: '#240614',
+  onFail: '#2A0703',
+  keyline: 'rgba(11,11,11,0.16)',
+  keylineStrong: 'rgba(11,11,11,0.22)',
+  handle: 'rgba(11,11,11,0.20)',
+  mutedTint: 'rgba(11,11,11,0.28)',
+  brandTint: 'rgba(249,115,22,0.12)',
+  auctionLine: 'rgba(250,76,147,0.45)',
+  failLine: 'rgba(255,68,56,0.4)',
+  scrim: 'rgba(11,11,11,0.72)',
+  shadow: '#000',
+};
+
 export const PALETTES: Record<ThemeName, Palette> = {
   dark,
+  light,
 };
