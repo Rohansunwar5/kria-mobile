@@ -1107,10 +1107,17 @@ In `src/app/profile/settings.tsx`:
 - [ ] **Step 6: Confirm no literal survives**
 
 ```bash
-cd mobile && grep -nE "'#[0-9a-fA-F]{3,8}'|'rgba?\(" src/app/profile/settings.tsx
+cd mobile && grep -nE "['\"]#[0-9a-fA-F]{3,8}['\"]|['\"]rgba?\(" src/app/profile/settings.tsx
 ```
 
 Expected: **no output.** Any line printed is a literal still to convert.
+
+**The character class covers both quote styles on purpose.** An earlier draft of this step
+matched single quotes only, which would have silently passed over the two double-quoted
+literals this very file contained (`"#F97316"` and `"#7d7d7d"` as icon `color` props). The
+real fence in `test-utils/colourLiterals.ts` backreferences the quote character and is not
+blind to them, so nothing would have shipped broken — but the check would have told you the
+file was clean while it was not. Keep both quote styles in every batch that reuses this step.
 
 - [ ] **Step 7: Add the file to the ratchet**
 
