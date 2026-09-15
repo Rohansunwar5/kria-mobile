@@ -14,7 +14,7 @@ import AppearanceSection from '@/components/settings/AppearanceSection';
 
 const LBL = (theme: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: theme.textFaint });
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const theme = useTheme();
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 18 }}>
@@ -177,7 +177,7 @@ export default function Settings() {
                 value={push}
                 onValueChange={togglePush}
                 trackColor={{ false: theme.line, true: theme.brand }}
-                thumbColor={theme.text}
+                thumbColor={theme.onDark}
               />
             </View>
             {pushNote ? (

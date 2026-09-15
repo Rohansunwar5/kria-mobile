@@ -1,5 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { useTheme, useThemeMode, type ThemeMode } from '@/lib/theme';
+import { Section } from '@/app/profile/settings';
 
 /**
  * The single gate on light mode reaching users.
@@ -26,28 +27,8 @@ export default function AppearanceSection({ forceVisible = false }: { forceVisib
   if (!SHOW_APPEARANCE_CONTROL && !forceVisible) return null;
 
   return (
-    <View style={{ marginTop: 22 }}>
-      <Text
-        style={{
-          fontFamily: 'SpaceMono_400Regular',
-          fontSize: 9,
-          letterSpacing: 0.1 * 9,
-          textTransform: 'uppercase',
-          color: theme.textFaint,
-          marginBottom: 8,
-        }}
-      >
-        Appearance
-      </Text>
-      <View
-        style={{
-          backgroundColor: theme.surface,
-          borderRadius: 6,
-          borderWidth: 1.5,
-          borderColor: theme.line,
-          overflow: 'hidden',
-        }}
-      >
+    <Section title="Appearance">
+      <View accessibilityRole="radiogroup">
         {OPTIONS.map((option, index) => {
           const selected = mode === option.mode;
           return (
@@ -104,6 +85,6 @@ export default function AppearanceSection({ forceVisible = false }: { forceVisib
           );
         })}
       </View>
-    </View>
+    </Section>
   );
 }
