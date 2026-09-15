@@ -8,6 +8,7 @@ export default function TabsLayout() {
       tabBar={(props) => <FloatingTabBar {...props} />}
     >
       <Tabs.Screen name="home" options={{ title: 'Home' }} />
+      <Tabs.Screen name="live" options={{ title: 'Live' }} />
       <Tabs.Screen name="profile" options={{ title: 'You' }} />
     </Tabs>
   );
