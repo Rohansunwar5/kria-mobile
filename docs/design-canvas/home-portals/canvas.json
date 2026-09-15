@@ -1,12 +1,78 @@
 {
   "artboards": [
-    { "file": "Main.dc.html", "title": "Home — both portals (tap to switch)", "x": 0, "y": 0, "w": 390, "h": 844, "is_interactive": true },
-    { "file": "Filters.dc.html", "title": "Filter sheet", "x": 470, "y": 0, "w": 390, "h": 844 },
-    { "file": "PlayEmpty.dc.html", "title": "Play — first run", "x": 940, "y": 0, "w": 390, "h": 844 },
-    { "file": "Light.dc.html", "title": "Light mode — second attempt", "x": 1410, "y": 0, "w": 390, "h": 844 },
-    { "file": "NavBar.dc.html", "title": "Floating nav — A or B", "x": 1880, "y": 0, "w": 430, "h": 660 },
-    { "file": "Profile.dc.html", "title": "Player profile", "x": 2390, "y": 0, "w": 390, "h": 1760 },
-    { "file": "PlayFull.dc.html", "title": "Play — full scroll", "x": 2860, "y": 0, "w": 390, "h": 1560 }
+    {
+      "file": "Main.dc.html",
+      "title": "Home — both portals (tap to switch)",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "is_interactive": true
+    },
+    {
+      "file": "Filters.dc.html",
+      "title": "Filter sheet",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "PlayEmpty.dc.html",
+      "title": "Play — first run",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Light.dc.html",
+      "title": "Light mode — second attempt",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "NavBar.dc.html",
+      "title": "Floating nav — A or B",
+      "x": 1880,
+      "y": 0,
+      "w": 430,
+      "h": 660
+    },
+    {
+      "file": "Profile.dc.html",
+      "title": "Player profile",
+      "x": 2390,
+      "y": 0,
+      "w": 390,
+      "h": 1760
+    },
+    {
+      "file": "PlayFull.dc.html",
+      "title": "Play — full scroll",
+      "x": 2860,
+      "y": 0,
+      "w": 390,
+      "h": 1560
+    },
+    {
+      "file": "Explore.dc.html",
+      "title": "Explore — search players and events",
+      "x": 3330,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Live.dc.html",
+      "title": "Live — everything happening now",
+      "x": 3800,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    }
   ],
   "annotations": [
     {
@@ -50,7 +116,23 @@
       "y": -300,
       "w": 390,
       "text": "LIGHT MODE, SECOND ATTEMPT.\n\nThe first was muddy. The error: holding 'one lightness and chroma' across all three hues on paper forces every accent dark and grey at once, and keeping dark mode's big solid accent fills then floods the page with burnt orange.\n\nThe rule that works splits accents by ROLE:\n\n• As a FILL the accent keeps its bright dark-mode hex. A fill carries its own ground, so #F97316 with ink on top is as legible on paper as on black. Live tag, filter button, avatar, the Host circle: unchanged.\n\n• As TEXT on paper, and only there, it drops to the derived dark hue: brand #b24b04 (5.15:1), open #248430 (4.55:1), fail #b54438, auction #ab437b. That is the Rs 750, the 03 count, the PLAYER overline.\n\n• The heavy blocks go INK. The broadcast bar is #0B0B0B with an orange arrow. A burnt-orange slab on paper reads as flooded ink; black reads as print.\n\n• The art strip stays dark. A dark image block on paper is what gives the layout its contrast.\n\nHonest cost: ghost type nearly disappears on paper and does less work here than on black."
+    },
+    {
+      "id": "explore-api",
+      "x": 3330,
+      "y": -300,
+      "w": 390,
+      "text": "EXPLORE — one field, two sources.\n\nALREADY SERVED:\n• Players — GET /player/search. 3-character minimum; it 422s anything shorter, and searchPlayers already resolves that one status to an empty list rather than an error the user cannot act on. Returns _id, firstName, lastName, profileImage.\n\nNEEDS BUILDING:\n• Event search. getAllTournamentsValidator accepts status, sport, city, page and limit — there is NO text query. A search field over events is either a new `q` param or a lie that searches only the first 100 rows. The handover said Explore needed no server work; that was wrong.\n• The sport/city line under each player is NOT in PlayerHit. It needs adding to the search projection, or it comes off the card.\n\nThe filter button sits on the EVENTS heading, not the masthead. It filters events and nothing else — in the masthead it would imply it filters people too. The same sheet as home, unchanged.\n\nOne field rather than a segmented control: making someone choose People-or-Events before typing is a decision they cannot make until they see results."
+    },
+    {
+      "id": "live-api",
+      "x": 3800,
+      "y": -300,
+      "w": 390,
+      "text": "LIVE — the whole platform, and what it costs.\n\nNEEDS BUILDING: a new GET /live, public (no auth — it is a spectator feed). Merges in-progress tournament matches with live quick matches.\n\nTHE INDEX QUESTION, and a correction:\nmatchSchema.index({tournamentId, categoryId, status}) has status THIRD, so querying status alone cannot use it — same shape as the ranking scan in PROJECT-STATE §8a item 4. quickMatchSchema has no status index at all.\n\nBUT item 4's reasoning does NOT transfer. It rejected an index because it 'taxes every insert'. Mongo only touches an index when an indexed field CHANGES, and ball-by-ball scoring writes cricketLiveState / gameScores, never status. A status index costs on insert and on the two status transitions per match — not on the hot scoring path.\n\nSo: PARTIAL indexes, {status:1} with partialFilterExpression {status:'in_progress'} (and 'live' for quick). The index then holds only live rows — tiny and selective. tournament_bracket_slot_unique is already partial, so this is an existing pattern, not a new idea.\n\nFreshness: ~15s Redis cache, fetch on focus, pull to refresh. NO socket subscription on the list — you tap through to /live/[matchId], which already exists. A list re-rendering on every delivery across every match is motion without information.\n\nPRIVACY — A DELIBERATE DECISION, NOT AN OVERSIGHT:\nQuickMatch has no visibility field. A 6-character join code is the only thing keeping a casual match private today. Listing every live quick match here makes them publicly watchable, retroactively, for matches already played, with no opt-out. The user was shown this and chose it.\n\nWhat narrows it in practice: only IN-PROGRESS matches appear, never history, and player names are already public on profile screens. The real change is that a stranger can watch your casual game while it is happening.\n\nQuick matches take the magenta edge, tournament matches the orange one — the ecosystem accent PLAY already uses, so the two kinds separate at a glance without a second word."
     }
   ],
-  "launch": { "view": "canvas" }
+  "launch": {
+    "view": "canvas"
+  }
 }

@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0B0B0B; font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #F97316; text-decoration: none; }
+    a:hover { color: #FA4C93; }
+
+    /* ---- Type layers ---- */
+    .ant { font-family: 'Anton', 'Arial Narrow', Haettenschweiler, Impact, sans-serif; text-transform: uppercase; font-weight: 400; letter-spacing: 0.01em; }
+    .mn { font-family: 'Space Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace; font-variant-numeric: tabular-nums; }
+
+    /* ---- Frame ---- */
+    .scr { width: 390px; height: 844px; background: #0B0B0B; color: #fff; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    .sheet { background: #0B0B0B; color: #fff; overflow: hidden; position: relative; }
+    .safe { height: 44px; flex: none; }
+
+    /* ---- Atmosphere ---- */
+    .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.16; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+    .dots { background-image: radial-gradient(rgba(255,255,255,0.16) 1px, transparent 1px); background-size: 9px 9px; }
+    .hazard { background-image: repeating-linear-gradient(115deg, rgba(249,115,22,0.9) 0 9px, transparent 9px 18px); }
+    .hairlines { background-image: repeating-linear-gradient(115deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 7px); }
+    .ghost { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.09); position: absolute; pointer-events: none; line-height: 0.78; }
+    .ghostfill { font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; color: rgba(255,255,255,0.045); position: absolute; pointer-events: none; line-height: 0.78; }
+
+    /* ---- Blocks (hard-edged, heavy) ---- */
+    .blk { background: #151515; border: 1.5px solid rgba(255,255,255,0.14); border-radius: 6px; }
+    .blk2 { background: #1E1E1E; border: 1.5px solid rgba(255,255,255,0.10); border-radius: 6px; }
+    .blkb { background: #F97316; color: #0B0B0B; border-radius: 6px; }
+    .blkm { background: #FA4C93; color: #0B0B0B; border-radius: 6px; }
+    .edge { border-left: 4px solid #F97316; }
+    .divide { height: 1.5px; background: rgba(255,255,255,0.10); }
+
+    /* ---- Tags & pills ---- */
+    .tag { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; padding: 4px 7px; border-radius: 3px; display: inline-flex; align-items: center; gap: 5px; }
+    .t-live { background: #F97316; color: #0B0B0B; }
+    .t-open { background: #16C46A; color: #06240F; }
+    .t-mag { background: #FA4C93; color: #240614; }
+    .t-up { background: rgba(255,255,255,0.10); color: #d4d4d4; }
+    .t-end { background: rgba(255,255,255,0.06); color: #8a8a8a; }
+    .t-red { background: #FF4438; color: #2A0703; }
+    .t-out { background: transparent; color: #F97316; box-shadow: inset 0 0 0 1.5px #F97316; }
+
+    /* ---- Labels ---- */
+    .kick { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #F97316; }
+    .lbl { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #7d7d7d; }
+    .meta { font-size: 12px; color: #a3a3a3; }
+    .meta2 { font-size: 11px; color: #737373; }
+    .body { font-size: 13px; color: #d4d4d4; line-height: 19px; }
+
+    /* ---- Controls ---- */
+    .btnx { height: 54px; border-radius: 5px; background: #F97316; color: #0B0B0B; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 17px; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 9px; }
+    .btnk { height: 54px; border-radius: 5px; background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.22); color: #fff; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 15px; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .chip { border-radius: 3px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.16); padding: 7px 12px; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #bdbdbd; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .chip-on { background: #F97316; color: #0B0B0B; box-shadow: none; }
+    .chip-mag { background: #FA4C93; color: #240614; box-shadow: none; }
+    .iconbtn { width: 38px; height: 38px; border-radius: 4px; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; flex: none; }
+
+    /* ---- Header ---- */
+    .hdr { display: flex; align-items: center; gap: 12px; padding: 8px 16px 12px; border-bottom: 1.5px solid rgba(255,255,255,0.12); flex: none; position: relative; }
+
+    /* ---- Nav ---- */
+    .tabbar { position: absolute; left: 14px; right: 14px; bottom: 12px; display: flex; gap: 5px; padding: 5px; background: #F97316; border-radius: 7px; box-shadow: 0 10px 26px rgba(0,0,0,0.6); }
+    .tabitem { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 12px 0; border-radius: 4px; font-family: 'Anton', Impact, sans-serif; text-transform: uppercase; font-size: 13px; letter-spacing: 0.05em; color: rgba(11,11,11,0.62); }
+    .tabitem-on { background: #0B0B0B; color: #fff; }
+
+    /* ---- Identity ---- */
+    .avat { border-radius: 4px; background: #F97316; display: flex; align-items: center; justify-content: center; font-family: 'Anton', Impact, sans-serif; color: #0B0B0B; flex: none; }
+    .avatk { border-radius: 4px; background: rgba(255,255,255,0.09); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center; font-family: 'Anton', Impact, sans-serif; color: #d4d4d4; flex: none; }
+
+    /* ---- Rails ---- */
+    .rail { position: absolute; font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.22); writing-mode: vertical-rl; }
+    .apinote { font-family: 'Space Mono', monospace; font-size: 9px; color: #F97316; letter-spacing: 0.04em; }
+  </style>
+</helmet>
+<div class="scr">
+  <div class="ghost" style="font-size:150px;right:-30px;top:170px;transform:rotate(90deg);transform-origin:right top">LIVE</div>
+  <div class="safe"></div>
+
+  <!-- Masthead, identical to home. Live is a tab, not a separate app. -->
+  <div class="hdr">
+    <div class="ant" style="font-size:23px;line-height:21px">Kria</div>
+    <div style="flex:1"></div>
+    <div class="iconbtn" style="position:relative">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.6a6 6 0 1 0-12 0c0 6-2.2 7.4-2.2 7.4h16.4S18 14.6 18 8.6"/><path d="M13.7 19.6a2 2 0 0 1-3.4 0"/></svg>
+    </div>
+    <div class="avat" style="width:38px;height:38px;font-size:14px">RS</div>
+  </div>
+
+  <!-- The rule carries a live segment, as on home. -->
+  <div style="height:2px;flex:none;background:rgba(255,255,255,0.10);position:relative">
+    <div style="position:absolute;left:16px;top:0;width:54px;height:2px;background:#F97316"></div>
+  </div>
+
+  <div class="lbl" style="padding:10px 17px 0;flex:none;letter-spacing:0.14em">
+    <span style="color:#F97316">&#9679;</span>&nbsp; 7 MATCHES HAPPENING NOW
+  </div>
+
+  <div style="flex:1;overflow:hidden;padding:11px 16px 0;display:flex;flex-direction:column;gap:10px">
+
+    <!-- ============ TOURNAMENT MATCH ============ -->
+    <div class="blk edge" style="padding:11px 13px;position:relative">
+      <div class="ghostfill" style="font-size:64px;right:6px;top:-6px">SF</div>
+      <div style="display:flex;align-items:center;gap:7px;position:relative">
+        <div class="tag t-live"><span style="width:5px;height:5px;background:#0B0B0B;border-radius:999px;display:inline-block"></span>Live</div>
+        <div class="lbl" style="letter-spacing:0.12em">Badminton &middot; Semi-final</div>
+      </div>
+      <div class="ant" style="font-size:18px;line-height:20px;margin-top:8px;position:relative">Kria Smash Cup</div>
+
+      <div style="display:flex;align-items:center;margin-top:10px;position:relative">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:#fff">R. Sunwar / A. Menon</div>
+          <div style="font-size:12px;color:#a3a3a3;margin-top:3px">K. Iyer / S. Rao</div>
+        </div>
+        <div class="mn" style="text-align:right;flex:none">
+          <div style="font-size:15px;font-weight:700;color:#fff">21&nbsp;&nbsp;14</div>
+          <div style="font-size:15px;font-weight:700;color:#a3a3a3;margin-top:3px">18&nbsp;&nbsp;11</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ TOURNAMENT MATCH — CRICKET ============ -->
+    <div class="blk edge" style="padding:11px 13px;position:relative">
+      <div style="display:flex;align-items:center;gap:7px">
+        <div class="tag t-live"><span style="width:5px;height:5px;background:#0B0B0B;border-radius:999px;display:inline-block"></span>Live</div>
+        <div class="lbl" style="letter-spacing:0.12em">Cricket &middot; Group B</div>
+      </div>
+      <div class="ant" style="font-size:18px;line-height:20px;margin-top:8px">Monsoon Premier League</div>
+      <div style="display:flex;align-items:flex-end;margin-top:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:#fff">Thunder XI</div>
+          <div class="meta2" style="margin-top:3px">need 61 from 22</div>
+        </div>
+        <div class="mn" style="text-align:right;flex:none">
+          <div style="font-size:19px;font-weight:700;color:#fff">142/4</div>
+          <div style="font-size:11px;color:#a3a3a3;margin-top:2px">16.2 ov</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ QUICK MATCH ============ -->
+    <!-- Magenta edge, not orange: the auction/player accent is what PLAY
+         already uses for the ecosystem side, so the two kinds of live match
+         are separable at a glance without a second word. -->
+    <div class="blk" style="padding:11px 13px;border-left:4px solid #FA4C93">
+      <div style="display:flex;align-items:center;gap:7px">
+        <div class="tag t-mag">Quick</div>
+        <div class="lbl" style="letter-spacing:0.12em">Badminton &middot; Best of 3</div>
+      </div>
+      <div style="display:flex;align-items:center;margin-top:9px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:#fff">A. Kumar</div>
+          <div style="font-size:12px;color:#a3a3a3;margin-top:3px">P. Nair</div>
+        </div>
+        <div class="mn" style="text-align:right;flex:none">
+          <div style="font-size:15px;font-weight:700;color:#fff">11</div>
+          <div style="font-size:15px;font-weight:700;color:#a3a3a3;margin-top:3px">9</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ QUICK MATCH — yours ============ -->
+    <!-- "You" reuses the auction accent exactly as every other list does. -->
+    <div class="blk" style="padding:11px 13px;border-left:4px solid #FA4C93">
+      <div style="display:flex;align-items:center;gap:7px">
+        <div class="tag t-mag">Quick</div>
+        <div class="lbl" style="letter-spacing:0.12em">Cricket &middot; 6 overs</div>
+        <div style="flex:1"></div>
+        <div class="lbl" style="color:#FA4C93;letter-spacing:0.12em">Yours</div>
+      </div>
+      <div style="display:flex;align-items:flex-end;margin-top:9px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:#fff">Sunday Side</div>
+        </div>
+        <div class="mn" style="text-align:right;flex:none">
+          <div style="font-size:19px;font-weight:700;color:#fff">54/2</div>
+          <div style="font-size:11px;color:#a3a3a3;margin-top:2px">5.1 ov</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:7px;flex:none"></div>
+  </div>
+
+  <!-- Floating nav — the shipped pill, Live active. -->
+  <div style="position:absolute;left:14px;right:14px;bottom:20px;height:64px;background:#151515;border:1.5px solid rgba(255,255,255,0.14);border-radius:32px;display:flex;align-items:stretch;z-index:3">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#7d7d7d">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 10.4 12 4.2l8.2 6.2v8.1a1.7 1.7 0 0 1-1.7 1.7H5.5a1.7 1.7 0 0 1-1.7-1.7z"/></svg>
+      <span style="font-size:9px;font-weight:700;letter-spacing:0.03em;color:#7d7d7d">Home</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#7d7d7d">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.3"/><path d="M15.6 15.6 20 20"/></svg>
+      <span style="font-size:9px;font-weight:700;letter-spacing:0.03em;color:#7d7d7d">Explore</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start">
+      <div style="width:54px;height:54px;border-radius:999px;background:#FA4C93;border:5px solid #0B0B0B;margin-top:-30px;display:flex;align-items:center;justify-content:center;color:#240614;box-sizing:content-box">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg>
+      </div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:0.03em;color:#fff;margin-top:4px">Host</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#F97316">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12h3.1l2.3-5.6 3.6 11.2 2.3-5.6h5.7"/></svg>
+      <span style="font-size:9px;font-weight:700;letter-spacing:0.03em;color:#F97316">Live</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#7d7d7d">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.4" r="3.9"/><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"/></svg>
+      <span style="font-size:9px;font-weight:700;letter-spacing:0.03em;color:#7d7d7d">You</span>
+    </div>
+  </div>
+
+  <div class="grain"></div>
+</div>
+</x-dc>
+</body>
+</html>
