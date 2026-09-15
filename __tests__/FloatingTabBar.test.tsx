@@ -44,13 +44,13 @@ describe('FloatingTabBar', () => {
     expect(getByLabelText('You').props.accessibilityState.selected).toBe(false);
   });
 
-  // Explore and Live have no routes yet. They are drawn so the bar matches the
-  // design, but they must announce themselves as disabled rather than look
-  // tappable and do nothing.
-  it('marks the unbuilt slots disabled', () => {
+  // Explore still has no route. It is drawn so the bar matches the design,
+  // but must announce itself as disabled rather than look tappable and do
+  // nothing. Live graduated to a real route in Task 5 of the live-feed plan.
+  it('marks the unbuilt slot disabled', () => {
     const { getByLabelText } = render(<FloatingTabBar {...props()} />);
     expect(getByLabelText('Explore').props.accessibilityState.disabled).toBe(true);
-    expect(getByLabelText('Live').props.accessibilityState.disabled).toBe(true);
+    expect(getByLabelText('Live').props.accessibilityState.disabled).toBe(false);
     expect(getByLabelText('Home').props.accessibilityState.disabled).toBe(false);
   });
 
