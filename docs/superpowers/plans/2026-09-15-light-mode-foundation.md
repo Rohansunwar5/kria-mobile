@@ -45,7 +45,7 @@ Append to `__tests__/palette.test.ts` inside the existing `describe('dark palett
 
 ```typescript
   // An accent is legible as text on ink but not on paper: #F97316 on #FAFAF8
-  // is 2.9:1. The ink tokens are the light palette's answer, and in dark they
+  // is 2.68:1. The ink tokens are the light palette's answer, and in dark they
   // are byte-equal to their accent so this layer stays a no-op until light
   // exists. If one of these ever drifts in dark, a screen changed appearance.
   it('gives every accent an ink twin, byte-equal in dark', () => {
@@ -100,7 +100,7 @@ Add to the `palette.ts` docblock, after the paragraph that explains `text` vs `o
  *     edge, with `onBrand` ink riding on top. `brandInk` is the accent used
  *     as text or an icon directly on the page ground. On `#0B0B0B` the two
  *     can be one value; on `#FAFAF8` they cannot, because `#F97316` as text
- *     on paper is 2.9:1 and fails. Merging the pair is the same mistake as
+ *     on paper is 2.68:1 and fails. Merging the pair is the same mistake as
  *     merging `bg` with `onBrand`, and it fails just as silently.
 ```
 
@@ -120,7 +120,7 @@ git add src/lib/theme/palette.ts __tests__/palette.test.ts
 git commit -m "Give every accent an ink twin, byte-equal in dark
 
 An accent works as text on ink but not on paper — #F97316 on #FAFAF8 is
-2.9:1. One token cannot be both a fill and ink once a light palette
+2.68:1. One token cannot be both a fill and ink once a light palette
 exists. Adding the twins now, byte-equal, keeps this a no-op.
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
@@ -519,7 +519,7 @@ Expected: FAIL on "defines exactly the same token set", naming `failInk`.
 
 ```bash
 git checkout src/lib/theme/palette.ts
-# Mutation B: break contrast — the original 2.9:1 bug this all exists for.
+# Mutation B: break contrast — the original 2.68:1 bug this all exists for.
 sed -i "s/^  brandInk: '#b24b04',$/  brandInk: '#F97316',/" src/lib/theme/palette.ts
 npx jest __tests__/paletteFences.test.ts
 ```
@@ -551,7 +551,7 @@ git commit -m "Fence the palettes on token completeness and contrast
 A token present in dark and missing from light is undefined, which React
 Native renders as transparent — it fails silently and would ship. The
 completeness fence catches that; the contrast fence stops a future edit
-reintroducing the 2.9:1 accent-as-text problem the ink tokens exist for.
+reintroducing the 2.68:1 accent-as-text problem the ink tokens exist for.
 
 Floors are a table rather than copied assertions. textFaint sits at 3.0,
 not 4.5, because palette.ts documents it as the labels/disabled tier and
@@ -1208,7 +1208,7 @@ with:
   their vivid values in both palettes and always carry `onBrand`/`onAuction`/`onOpen`/`onFail`
   as the ink riding on top. For the accent used as text or an icon directly on the page
   ground, use `brandInk`/`auctionInk`/`openInk`/`failInk` — they darken under light because
-  `#F97316` as text on `#FAFAF8` is 2.9:1 and fails. The two are byte-equal in dark, which is
+  `#F97316` as text on `#FAFAF8` is 2.68:1 and fails. The two are byte-equal in dark, which is
   exactly why the distinction is easy to lose: a wrong choice is invisible until someone
   switches theme.
 - **The light palette is the approved artboard `docs/design-canvas/home-portals/body-Light.html`,
@@ -1231,12 +1231,36 @@ cd mobile && grep -niE "no light theme|dark only|dark-only|single palette" DESIG
 
 Expected: **no output.** Rewrite anything that prints.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Correct the contrast figure in two committed code comments**
+
+Two comments quote `#F97316` on `#FAFAF8` as **2.9:1**. That figure was an estimate and it
+is wrong — the measured value is **2.68:1**, established when Task 3's fence mutation
+reported it. The decision it justifies is unchanged (2.68 fails the 4.5 floor exactly as 2.9
+would), but a number stated as fact in a code comment should be the measured one.
 
 ```bash
 cd mobile
-git add DESIGN.md
-git commit -m "Rewrite DESIGN.md section 7 for two palettes
+sed -i 's/2\.9:1/2.68:1/g' src/lib/theme/palette.ts __tests__/palette.test.ts
+grep -rn "2\.68:1" src/lib/theme/palette.ts __tests__/palette.test.ts
+```
+
+Expected: two lines printed, one per file. Then confirm nothing was missed:
+
+```bash
+grep -rn "2\.9:1" src/ __tests__/
+```
+
+Expected: **no output.**
+
+These are comment-only edits. `__tests__/palette.test.ts` is otherwise a pre-existing test
+file — **change only the comment text, never an assertion.**
+
+- [ ] **Step 4: Commit**
+
+```bash
+cd mobile
+git add DESIGN.md src/lib/theme/palette.ts __tests__/palette.test.ts
+git commit -m "Rewrite DESIGN.md section 7 for two palettes, and fix a measured figure
 
 Section 7 said the app has no light theme. That stopped being true when
 the light palette landed, and it is rewritten in the same plan rather
@@ -1246,6 +1270,11 @@ time more than once.
 Adds the fill-vs-ink rule, which is the one distinction that is invisible
 in dark (the pairs are byte-equal there) and wrong-looking the moment
 anyone switches.
+
+Also corrects two code comments that quoted the brand-on-paper contrast as
+2.9:1. That was an estimate; the measured value is 2.68:1. The ink tokens
+are just as justified either way — a number stated as fact in a comment
+should just be the real one.
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ```
