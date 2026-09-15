@@ -1,0 +1,121 @@
+import { renderHook, waitFor, act } from '@testing-library/react-native';
+import MockAdapter from 'axios-mock-adapter';
+import API from '../src/api/axios';
+import { useExploreSearch } from '../src/lib/useExploreSearch';
+
+let mock: MockAdapter;
+
+const players = (items: unknown[]) => ({ data: { data: items } });
+const tournaments = (items: unknown[]) => ({ data: { data: { tournaments: items, pagination: { total: items.length } } } });
+
+const PLAYER = { _id: 'p1', firstName: 'Rohan', lastName: 'Sunwar', sport: 'badminton', location: 'Bangalore' };
+const EVENT = { _id: 't1', name: 'Kria Smash Cup', sport: 'badminton', status: 'registration_open' };
+
+beforeEach(() => { mock = new MockAdapter(API); jest.useFakeTimers(); });
+afterEach(() => { mock.restore(); jest.useRealTimers(); });
+
+async function typeAndSettle(result: { current: { setQuery: (q: string) => void } }, q: string) {
+  await act(async () => { result.current.setQuery(q); });
+  await act(async () => { jest.advanceTimersByTime(350); });
+}
+
+describe('useExploreSearch', () => {
+  it('searches both sources and groups the results', async () => {
+    mock.onGet('/player/search').reply(200, players([PLAYER]));
+    mock.onGet('/tournament').reply(200, tournaments([EVENT]));
+
+    const { result } = renderHook(() => useExploreSearch());
+    await typeAndSettle(result, 'sunw');
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.players).toHaveLength(1);
+    expect(result.current.tournaments).toHaveLength(1);
+  });
+
+  // The server 422s below three characters. Firing anyway would make every
+  // first keystroke a wasted round trip that can only fail.
+  it('does not search below three characters', async () => {
+    mock.onGet('/player/search').reply(200, players([]));
+    mock.onGet('/tournament').reply(200, tournaments([]));
+
+    const { result } = renderHook(() => useExploreSearch());
+    await typeAndSettle(result, 'su');
+
+    expect(mock.history.get).toHaveLength(0);
+  });
+
+  it('debounces rather than firing on every keystroke', async () => {
+    mock.onGet('/player/search').reply(200, players([]));
+    mock.onGet('/tournament').reply(200, tournaments([]));
+
+    const { result } = renderHook(() => useExploreSearch());
+    await act(async () => {
+      result.current.setQuery('sun');
+      result.current.setQuery('sunw');
+      result.current.setQuery('sunwa');
+    });
+    await act(async () => { jest.advanceTimersByTime(350); });
+
+    // One search for the final text, not three.
+    expect(mock.history.get.filter((r) => r.url === '/player/search')).toHaveLength(1);
+  });
+
+  // An empty result and a failed request must not look the same.
+  it('surfaces a failure as an error rather than as no results', async () => {
+    mock.onGet('/player/search').reply(500);
+    mock.onGet('/tournament').reply(500);
+
+    const { result } = renderHook(() => useExploreSearch());
+    await typeAndSettle(result, 'sunw');
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.error).not.toBeNull();
+  });
+
+  // Pull-to-refresh style debounced re-searches make out-of-order resolution
+  // routine: a short query returning slowly after a longer one must not win.
+  // Uses real timers (like useLiveFeed's own race test) so the deferred
+  // promises below can be resolved out of order across two real debounce
+  // windows.
+  it('discards a stale search that resolves after a newer one', async () => {
+    jest.useRealTimers();
+
+    const stale = { _id: 'stale', firstName: 'Stale', lastName: 'Result' };
+    const fresh = { _id: 'fresh', firstName: 'Fresh', lastName: 'Result' };
+
+    type ResolveType = (value: [number, unknown]) => void;
+    let resolveFirst: ResolveType | null = null;
+    let resolveSecond: ResolveType | null = null;
+
+    const firstPromise = new Promise<[number, unknown]>((resolve) => { resolveFirst = resolve; });
+    const secondPromise = new Promise<[number, unknown]>((resolve) => { resolveSecond = resolve; });
+
+    mock.onGet('/tournament').reply(200, tournaments([]));
+    mock.onGet('/player/search').replyOnce(() => firstPromise);
+    mock.onGet('/player/search').replyOnce(() => secondPromise);
+
+    const { result } = renderHook(() => useExploreSearch());
+
+    await act(async () => {
+      result.current.setQuery('sun');
+      await new Promise((r) => setTimeout(r, 350));
+    });
+
+    await act(async () => {
+      result.current.setQuery('sunw');
+      await new Promise((r) => setTimeout(r, 350));
+    });
+
+    await waitFor(() => expect(mock.history.get.filter((r) => r.url === '/player/search')).toHaveLength(2));
+
+    await act(async () => {
+      resolveSecond!([200, players([fresh])]);
+      await new Promise((r) => setTimeout(r, 10));
+      resolveFirst!([200, players([stale])]);
+      await new Promise((r) => setTimeout(r, 10));
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.players[0]?._id).toBe('fresh');
+  });
+});

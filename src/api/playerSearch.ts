@@ -11,6 +11,8 @@ export interface PlayerHit {
   firstName: string;
   lastName: string;
   profileImage?: string;
+  sport?: string;
+  location?: string;
 }
 
 /**
