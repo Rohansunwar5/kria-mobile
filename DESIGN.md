@@ -257,8 +257,32 @@ reads as a progress bar.
 - **No fake chrome.** Never draw an iOS status bar or virtual keyboard — the real ones render on
   top, and the artboards leave that space empty on purpose.
 - Colour is never the only signal: status carries a word as well as a fill.
-- The three accents are tuned for the dark ground only. This app has **no light theme** — don't
-  add one without re-deriving the palette.
+- **The app has two palettes: `dark` (the default) and `light`.** Both live in
+  `src/lib/theme/palette.ts`; reach them only through `useTheme()`, never as a literal.
+- **An accent is a fill; an accent-as-text is an ink.** `brand`/`auction`/`open`/`fail` keep
+  their vivid values in both palettes and always carry `onBrand`/`onAuction`/`onOpen`/`onFail`
+  as the ink riding on top. For the accent used as text or an icon directly on the page
+  ground, use `brandInk`/`auctionInk`/`openInk`/`failInk` — they darken under light because
+  `#F97316` as text on `#FAFAF8` is 2.68:1 and fails. The two are byte-equal in dark, which is
+  exactly why the distinction is easy to lose: a wrong choice is invisible until someone
+  switches theme.
+- **The light palette is the approved artboard `docs/design-canvas/home-portals/body-Light.html`,
+  not an inversion of dark.** An invented light palette was rejected once. The alpha ladder
+  mirrors dark's rungs with ink in place of white; `surfaceAlt` is the sole exception and
+  steps *down* into grey, because light cannot climb past `#FFFFFF`.
+- **The four text tiers stay a closed set in both palettes.** Snap a stray grey to the nearest
+  tier; never add a fifth.
+- Contrast floors are enforced by `__tests__/paletteFences.test.ts`: 4.5:1 for `text`,
+  `textBody`, `textMeta` and the four inks; **3.0:1 for `textFaint`**, which is the
+  labels/disabled tier and sits at 3.30:1 on paper in the approved design. Raising that floor
+  means re-approving the artboard, not editing the fence.
+- **Light mode is built and tested but not user-reachable.** The appearance toggle is disabled
+  (`SHOW_APPEARANCE_CONTROL = false` in `src/components/settings/AppearanceSection.tsx`)
+  because it is only correct on screens with tokenized colours; 103 files still hold hardcoded
+  literals. Migration progress lives in `test-utils/colourLiterals.ts` under `MIGRATED`
+  (17 files migrated so far). Flipping the flag is a deliberate release step in the final
+  migration's commit — `__tests__/appearanceSection.test.tsx` asserts the value and changes
+  in that commit too, so the flip cannot happen by accident.
 
 ---
 
