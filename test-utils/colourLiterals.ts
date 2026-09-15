@@ -34,6 +34,7 @@ export const MIGRATED: string[] = [
   'src/components/profile/PlayedForCard.tsx',
   'src/app/player/[playerId].tsx',
   'src/app/(tabs)/profile.tsx',
+  'src/app/profile/settings.tsx',
 ];
 
 export interface ColourLiteralFinding {

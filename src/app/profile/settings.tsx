@@ -9,14 +9,17 @@ import { ErrorBlock } from '@/components/states';
 import { useAppSelector } from '@/store/hooks';
 import { sendContactMessage, registerFcmToken, unregisterFcmToken } from '@/api/settings';
 import { getPushToken } from '@/lib/pushToken';
+import { useTheme, type Palette } from '@/lib/theme';
+import AppearanceSection from '@/components/settings/AppearanceSection';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = (theme: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: theme.textFaint });
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const theme = useTheme();
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 18 }}>
-      <Text style={{ ...LBL, marginBottom: 8 }}>{title}</Text>
-      <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden' }}>
+      <Text style={{ ...LBL(theme), marginBottom: 8 }}>{title}</Text>
+      <View style={{ backgroundColor: theme.surface, borderWidth: 1.5, borderColor: theme.line, borderRadius: 6, overflow: 'hidden' }}>
         {children}
       </View>
     </View>
@@ -34,6 +37,7 @@ function Row({
   detail?: string;
   onPress: () => void;
 }) {
+  const theme = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
@@ -41,21 +45,22 @@ function Row({
       onPress={onPress}
       style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 13, paddingVertical: 11, minHeight: 52 }}
     >
-      <Icon name={icon} size={17} color="#F97316" strokeWidth={1.9} />
+      <Icon name={icon} size={17} color={theme.brandInk} strokeWidth={1.9} />
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 17, color: '#fff' }}>{title}</Text>
+        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 17, color: theme.text }}>{title}</Text>
         {detail ? (
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: theme.textFaint, marginTop: 4 }}>
             {detail}
           </Text>
         ) : null}
       </View>
-      <Icon name="chevron-right" size={15} color="#7d7d7d" strokeWidth={2.6} />
+      <Icon name="chevron-right" size={15} color={theme.textFaint} strokeWidth={2.6} />
     </Pressable>
   );
 }
 
 function Button({ label, onPress, busy, disabled }: { label: string; onPress: () => void; busy?: boolean; disabled?: boolean }) {
+  const theme = useTheme();
   const off = busy || disabled;
   return (
     <Pressable
@@ -67,12 +72,12 @@ function Button({ label, onPress, busy, disabled }: { label: string; onPress: ()
       style={{
         height: 46,
         borderRadius: 5,
-        backgroundColor: off ? 'rgba(255,255,255,0.10)' : '#F97316',
+        backgroundColor: off ? theme.lineFaint : theme.brand,
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, letterSpacing: 0.04 * 15, color: off ? '#7d7d7d' : '#0B0B0B' }}>
+      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, letterSpacing: 0.04 * 15, color: off ? theme.textFaint : theme.onBrand }}>
         {busy ? 'Working…' : label}
       </Text>
     </Pressable>
@@ -80,14 +85,16 @@ function Button({ label, onPress, busy, disabled }: { label: string; onPress: ()
 }
 
 function Note({ text, tone }: { text: string; tone: 'ok' | 'bad' }) {
+  const theme = useTheme();
   return (
-    <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: tone === 'ok' ? '#16C46A' : '#FF4438', marginTop: 8 }}>
+    <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: tone === 'ok' ? theme.openInk : theme.failInk, marginTop: 8 }}>
       {text}
     </Text>
   );
 }
 
 export default function Settings() {
+  const theme = useTheme();
   const router = useRouter();
   const user = useAppSelector((s) => s.auth.user);
 
@@ -143,17 +150,17 @@ export default function Settings() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: theme.lineSoft }}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
           onPress={() => goBack(router)}
           hitSlop={8}
-          style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: theme.fill, borderWidth: 1.5, borderColor: theme.lineSoft, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
+          <Icon name="chevron-left" size={19} color={theme.text} strokeWidth={2.3} />
         </Pressable>
-        <Text style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: '#fff' }}>Settings</Text>
+        <Text style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: theme.text }}>Settings</Text>
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -161,21 +168,21 @@ export default function Settings() {
           <Section title="Notifications">
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 13, paddingVertical: 12, minHeight: 52 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 14, color: '#fff' }}>Match and auction alerts</Text>
-                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+                <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 14, color: theme.text }}>Match and auction alerts</Text>
+                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: theme.textFaint, marginTop: 4 }}>
                   Draw published · auction starting · your match
                 </Text>
               </View>
               <Switch
                 value={push}
                 onValueChange={togglePush}
-                trackColor={{ false: 'rgba(255,255,255,0.14)', true: '#F97316' }}
-                thumbColor="#fff"
+                trackColor={{ false: theme.line, true: theme.brand }}
+                thumbColor={theme.text}
               />
             </View>
             {pushNote ? (
               <View style={{ paddingHorizontal: 13, paddingBottom: 12 }}>
-                <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#FF4438' }}>{pushNote}</Text>
+                <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: theme.failInk }}>{pushNote}</Text>
               </View>
             ) : null}
           </Section>
@@ -190,6 +197,8 @@ export default function Settings() {
               onPress={() => router.push('/profile/change-password')}
             />
           </Section>
+
+          <AppearanceSection />
 
           <Section title="Get help">
             <View style={{ padding: 13 }}>
