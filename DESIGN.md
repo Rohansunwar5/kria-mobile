@@ -276,6 +276,13 @@ reads as a progress bar.
   `textBody`, `textMeta` and the four inks; **3.0:1 for `textFaint`**, which is the
   labels/disabled tier and sits at 3.30:1 on paper in the approved design. Raising that floor
   means re-approving the artboard, not editing the fence.
+- **Light mode is built and tested but not user-reachable.** The appearance toggle is disabled
+  (`SHOW_APPEARANCE_CONTROL = false` in `src/components/settings/AppearanceSection.tsx`)
+  because it is only correct on screens with tokenized colours; 103 files still hold hardcoded
+  literals. Migration progress lives in `test-utils/colourLiterals.ts` under `MIGRATED`
+  (17 files migrated so far). Flipping the flag is a deliberate release step in the final
+  migration's commit — `__tests__/appearanceSection.test.tsx` asserts the value and changes
+  in that commit too, so the flip cannot happen by accident.
 
 ---
 
