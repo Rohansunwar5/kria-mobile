@@ -126,7 +126,12 @@ describe('light palette', () => {
     expect(light.brand).toBe(dark.brand);
     expect(light.auction).toBe(dark.auction);
     expect(light.brandInk).toBe('#b24b04');
-    expect(light.openInk).toBe('#248430');
+    // Darkened past the artboard's own #248430: __tests__/paletteFences.test.ts
+    // checks every ink against surfaceAlt as well as bg/surface, and #248430
+    // is only 4.20:1 on surfaceAlt (#F1F1EF) — a real AA failure. #1c7e2a is
+    // the same oklch hue/chroma, just darker, and clears 4.5:1 on all three
+    // surfaces (see src/lib/theme/palette.ts's docblock for the ratios).
+    expect(light.openInk).toBe('#1c7e2a');
     expect(light.auctionInk).toBe('#b0416b');
     expect(light.failInk).toBe('#b54439');
   });
