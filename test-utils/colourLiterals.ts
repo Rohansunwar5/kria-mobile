@@ -45,6 +45,7 @@ export const MIGRATED: string[] = [
   'src/app/(tabs)/profile.tsx',
   'src/app/profile/settings.tsx',
   'src/components/settings/AppearanceSection.tsx',
+  'src/components/settings/Section.tsx',
 ];
 
 export interface ColourLiteralFinding {

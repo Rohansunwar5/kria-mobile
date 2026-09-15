@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { useTheme, useThemeMode, type ThemeMode } from '@/lib/theme';
-import { Section } from '@/app/profile/settings';
+import { Section } from '@/components/settings/Section';
 
 /**
  * The single gate on light mode reaching users.

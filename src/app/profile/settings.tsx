@@ -9,22 +9,9 @@ import { ErrorBlock } from '@/components/states';
 import { useAppSelector } from '@/store/hooks';
 import { sendContactMessage, registerFcmToken, unregisterFcmToken } from '@/api/settings';
 import { getPushToken } from '@/lib/pushToken';
-import { useTheme, type Palette } from '@/lib/theme';
+import { useTheme } from '@/lib/theme';
+import { Section, LBL } from '@/components/settings/Section';
 import AppearanceSection from '@/components/settings/AppearanceSection';
-
-const LBL = (theme: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: theme.textFaint });
-
-export function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  const theme = useTheme();
-  return (
-    <View style={{ paddingHorizontal: 16, paddingTop: 18 }}>
-      <Text style={{ ...LBL(theme), marginBottom: 8 }}>{title}</Text>
-      <View style={{ backgroundColor: theme.surface, borderWidth: 1.5, borderColor: theme.line, borderRadius: 6, overflow: 'hidden' }}>
-        {children}
-      </View>
-    </View>
-  );
-}
 
 function Row({
   icon,
