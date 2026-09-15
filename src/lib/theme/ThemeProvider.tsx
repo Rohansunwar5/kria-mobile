@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
 import { PALETTES, dark, type Palette, type ThemeName } from './palette';
 import { getItem, setItem } from '@/lib/secureStore';
@@ -43,14 +43,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>('dark');
   const system = useColorScheme();
 
+  // Set synchronously inside setMode, before the persisted-load promise below
+  // can possibly resolve. An explicit choice must win no matter which settles
+  // first: the mount-time getItem() read and a user tapping the toggle are
+  // racing, and the read is not guaranteed to lose just because it started
+  // first. A ref (not state) is required — it must be readable inside the
+  // effect's already-scheduled `.then` without that callback re-running.
+  const userChose = useRef(false);
+
   useEffect(() => {
     let cancelled = false;
     getItem(THEME_MODE_KEY)
       .then((stored) => {
         // An unrecognised value (corrupted, hand-edited, or written by a
         // future version) falls through to the default rather than bricking
-        // the app on a colour preference.
-        if (!cancelled && isMode(stored)) setModeState(stored);
+        // the app on a colour preference. A value the user has since
+        // overridden falls through for the same reason: this read reflects
+        // whatever was on disk before that choice, so applying it now would
+        // silently revert an action already taken.
+        if (!cancelled && !userChose.current && isMode(stored)) setModeState(stored);
       })
       .catch(() => {
         // A keychain read can fail on a locked device. Dark is already the
@@ -70,6 +81,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       mode,
       resolved,
       setMode: (next: ThemeMode) => {
+        userChose.current = true;
         setModeState(next);
         // Fire-and-forget: the UI must not wait on the keychain to repaint.
         // A failed write costs the preference next launch, not this one.
