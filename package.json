@@ -44,6 +44,7 @@
     "@react-native/jest-preset": "^0.86.3",
     "@testing-library/react-native": "^13.3.3",
     "@types/jest": "29.5.14",
+    "@types/node": "^22.20.2",
     "@types/react": "~19.2.4",
     "axios-mock-adapter": "^2.1.0",
     "eslint": "^9.0.0",
