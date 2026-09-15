@@ -1107,7 +1107,7 @@ In `src/app/profile/settings.tsx`:
 - [ ] **Step 6: Confirm no literal survives**
 
 ```bash
-cd mobile && grep -nE "['\"]#[0-9a-fA-F]{3,8}['\"]|['\"]rgba?\(" src/app/profile/settings.tsx
+cd mobile && grep -nE "['\"]#[0-9a-fA-F]{3,8}['\"]|['\"]rgba?\(|\bcolors\.(ink|panel2|panel|brand|auction|open|fail|line|white)\b|className=[\"'][^\"']*\b(bg|text|border|fill|stroke|from|to|via|ring|divide|placeholder|shadow|outline|accent|caret|decoration)-(ink|panel2|panel|brand|auction|open|fail|line|white|black|transparent)\b" src/app/profile/settings.tsx
 ```
 
 Expected: **no output.** Any line printed is a literal still to convert.
@@ -1118,6 +1118,16 @@ literals this very file contained (`"#F97316"` and `"#7d7d7d"` as icon `color` p
 real fence in `test-utils/colourLiterals.ts` backreferences the quote character and is not
 blind to them, so nothing would have shipped broken — but the check would have told you the
 file was clean while it was not. Keep both quote styles in every batch that reuses this step.
+
+**The grep also covers two channels that are not quoted colour literals at all**, added after
+a whole-branch review found eight files wrongly marked `MIGRATED` because of them: member
+access on the legacy hardcoded `colors` object in `src/lib/theme.ts` (`colors.white`,
+`colors.brand`, ...), and colour-bearing NativeWind classnames (`bg-ink`, `text-white`, ...)
+inside a `className` attribute. Neither is a quoted string containing a colour value, so the
+first half of this grep — and `findColourLiterals` in the real fence — cannot see them. The
+real fence's stronger check lives in `findLegacyColourUsages` (`test-utils/colourLiterals.ts`);
+batches 2-6 must run both, not just the quoted-literal half, before adding a file to
+`MIGRATED`.
 
 - [ ] **Step 7: Add the file to the ratchet**
 
