@@ -32,7 +32,7 @@
  *     edge, with `onBrand` ink riding on top. `brandInk` is the accent used
  *     as text or an icon directly on the page ground. On `#0B0B0B` the two
  *     can be one value; on `#FAFAF8` they cannot, because `#F97316` as text
- *     on paper is 2.9:1 and fails. Merging the pair is the same mistake as
+ *     on paper is 2.68:1 and fails. Merging the pair is the same mistake as
  *     merging `bg` with `onBrand`, and it fails just as silently.
  *
  * The three accents (`brand` / `auction` / `open`) are derived, not picked:

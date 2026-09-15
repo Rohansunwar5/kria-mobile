@@ -85,7 +85,7 @@ describe('dark palette', () => {
   });
 
   // An accent is legible as text on ink but not on paper: #F97316 on #FAFAF8
-  // is 2.9:1. The ink tokens are the light palette's answer, and in dark they
+  // is 2.68:1. The ink tokens are the light palette's answer, and in dark they
   // are byte-equal to their accent so this layer stays a no-op until light
   // exists. If one of these ever drifts in dark, a screen changed appearance.
   it('gives every accent an ink twin, byte-equal in dark', () => {
