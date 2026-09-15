@@ -22,5 +22,5 @@ export const fonts = {
 
 // Single import path for the token layer, alongside the legacy `colors` and
 // `fonts` above (left untouched — 8 files import those).
-export { useTheme, ThemeProvider } from './theme/ThemeProvider';
-export { dark } from './theme/palette';
+export { useTheme, useThemeMode, ThemeProvider, THEME_MODE_KEY, type ThemeMode } from './theme/ThemeProvider';
+export { dark, light, type Palette, type ThemeName } from './theme/palette';
