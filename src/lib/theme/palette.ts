@@ -27,6 +27,14 @@
  *     text sitting on an ink-coloured block (e.g. a dark chip on a light
  *     screen) and stays white regardless of the active palette.
  *
+ *   - `brand` vs `brandInk` (and the three matching pairs) — byte-equal today
+ *     and NOT redundant. `brand` is a fill: a chip, a button, the 4px card
+ *     edge, with `onBrand` ink riding on top. `brandInk` is the accent used
+ *     as text or an icon directly on the page ground. On `#0B0B0B` the two
+ *     can be one value; on `#FAFAF8` they cannot, because `#F97316` as text
+ *     on paper is 2.9:1 and fails. Merging the pair is the same mistake as
+ *     merging `bg` with `onBrand`, and it fails just as silently.
+ *
  * The three accents (`brand` / `auction` / `open`) are derived, not picked:
  * `oklch(0.70 0.19 h)` with only the hue rotated (brand 46, auction 350,
  * open 145) so all three carry equal lightness and chroma and none shouts
@@ -98,6 +106,14 @@ export interface Palette {
   open: string;
   /** Failed payment, lost, destructive. */
   fail: string;
+  /** The brand accent as INK (text, icons) rather than a fill. Darkens under light. */
+  brandInk: string;
+  /** The open accent as ink rather than a fill. Darkens under light. */
+  openInk: string;
+  /** The auction accent as ink rather than a fill. Darkens under light. */
+  auctionInk: string;
+  /** The fail accent as ink rather than a fill. Darkens under light. */
+  failInk: string;
   /** Ink that rides on the brand accent fill. */
   onBrand: string;
   /** Ink that rides on the open accent fill. */
@@ -144,6 +160,10 @@ export const dark: Palette = {
   auction: '#FA4C93',
   open: '#16C46A',
   fail: '#FF4438',
+  brandInk: '#F97316',
+  openInk: '#16C46A',
+  auctionInk: '#FA4C93',
+  failInk: '#FF4438',
   onBrand: '#0B0B0B',
   onOpen: '#06240F',
   onAuction: '#240614',

@@ -83,4 +83,15 @@ describe('dark palette', () => {
       expect(name).not.toMatch(/\s/);
     }
   });
+
+  // An accent is legible as text on ink but not on paper: #F97316 on #FAFAF8
+  // is 2.9:1. The ink tokens are the light palette's answer, and in dark they
+  // are byte-equal to their accent so this layer stays a no-op until light
+  // exists. If one of these ever drifts in dark, a screen changed appearance.
+  it('gives every accent an ink twin, byte-equal in dark', () => {
+    expect(dark.brandInk).toBe(dark.brand);
+    expect(dark.openInk).toBe(dark.open);
+    expect(dark.auctionInk).toBe(dark.auction);
+    expect(dark.failInk).toBe(dark.fail);
+  });
 });
