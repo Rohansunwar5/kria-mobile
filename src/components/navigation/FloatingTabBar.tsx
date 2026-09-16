@@ -18,9 +18,11 @@ type Slot =
   | { kind: 'pending'; icon: NavIconName; label: string };
 
 /**
- * Five slots, but only two routes exist. Explore and Live are drawn so the bar
- * reads as designed and are announced disabled — a control that looks tappable
- * and does nothing is worse than one that says it is not ready.
+ * Five slots: four routes and one action. Every slot the design calls for now
+ * has a real destination — `pending` remains a valid `Slot` kind for a future
+ * slot that ships its chrome before its route (the way Explore and Live both
+ * once did), announced disabled so a control that looks tappable and does
+ * nothing is never mistaken for one that works.
  *
  * Host is an ACTION, not a tab: it pushes /quick/new and never takes the
  * selected state. That is deliberate — the lifted circle always means "create",
@@ -28,7 +30,7 @@ type Slot =
  */
 export const NAV_SLOTS: Slot[] = [
   { kind: 'route', route: 'home', icon: 'home', label: 'Home' },
-  { kind: 'pending', icon: 'search', label: 'Explore' },
+  { kind: 'route', route: 'explore', icon: 'search', label: 'Explore' },
   { kind: 'action', href: '/quick/new', icon: 'plus', label: 'Host', a11y: 'Host a match' },
   { kind: 'route', route: 'live', icon: 'live', label: 'Live' },
   { kind: 'route', route: 'profile', icon: 'user', label: 'You' },
@@ -45,13 +47,15 @@ export const HOST_LIFT = 30;
 const HOST_HIT_SLOP = { top: HOST_LIFT };
 
 /**
- * The second, non-colour signal on the unbuilt slots.
+ * The second, non-colour signal for a `pending` slot, if one is ever drawn.
  *
- * Explore and Live announce themselves disabled to a screen reader, but to a
- * sighted user they were dimmer chrome and nothing else — and DESIGN.md §7 is
- * explicit that colour is never the only signal. A three-dot ellipsis under the
- * label reads as "not yet" at a glance, survives a greyscale screenshot and a
- * colour-blind eye, and stays chrome-sized: 2px tall, no extra text, no badge.
+ * No current slot uses it — Explore and Live were the last two to ship
+ * dimmed, and both have since graduated to real routes — but a disabled slot
+ * would otherwise be dimmer chrome and nothing else to a sighted user, and
+ * DESIGN.md §7 is explicit that colour is never the only signal. A three-dot
+ * ellipsis under the label reads as "not yet" at a glance, survives a
+ * greyscale screenshot and a colour-blind eye, and stays chrome-sized: 2px
+ * tall, no extra text, no badge.
  *
  * Drawn as three views rather than a dashed border because React Native renders
  * `borderStyle: 'dashed'` inconsistently when only one edge has a width.
