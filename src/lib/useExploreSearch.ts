@@ -28,6 +28,13 @@ export function useExploreSearch() {
     }
 
     setLoading(true);
+    // Cleared here, synchronously, and not just in the branches below: a
+    // previous failure must not keep reading as current for the whole
+    // debounce-plus-in-flight window of a retry the user has already typed.
+    // This is about the START of a request, not the commit of its result, so
+    // it is deliberately unguarded by the epoch check below — this call IS
+    // the current epoch at the moment it runs.
+    setError(null);
     try {
       const [playerHits, tournamentHits] = await Promise.all([searchPlayers(q), searchTournaments(q)]);
       // A short query resolving slowly after a longer one is routine with a

@@ -118,4 +118,37 @@ describe('useExploreSearch', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.players[0]?._id).toBe('fresh');
   });
+
+  // Reviewer-found gap: `error` was only ever cleared inside search()'s own
+  // resolution (success or failure), never synchronously at the moment a NEW
+  // search starts. A user who edits the query after a failed search would see
+  // the OLD failure message for the retry's entire in-flight window, even
+  // though a fresh request was already running underneath it.
+  it('clears a stale error when a new search starts, before it resolves', async () => {
+    mock.onGet('/player/search').replyOnce(500);
+    mock.onGet('/tournament').replyOnce(200, tournaments([]));
+
+    const { result } = renderHook(() => useExploreSearch());
+    await typeAndSettle(result, 'sunw');
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.error).not.toBeNull();
+
+    type ResolveType = (value: [number, unknown]) => void;
+    let resolveSecond: ResolveType | null = null;
+    const secondPromise = new Promise<[number, unknown]>((resolve) => { resolveSecond = resolve; });
+    mock.onGet('/player/search').replyOnce(() => secondPromise);
+    mock.onGet('/tournament').reply(200, tournaments([]));
+
+    await typeAndSettle(result, 'sunwa');
+
+    // The retry is still in flight — secondPromise is deliberately unresolved
+    // here. This is exactly the window the reviewer flagged: loading is true,
+    // and the old failure must already be gone rather than lingering until
+    // this request resolves.
+    expect(result.current.loading).toBe(true);
+    expect(result.current.error).toBeNull();
+
+    await act(async () => { resolveSecond!([200, players([])]); });
+  });
 });

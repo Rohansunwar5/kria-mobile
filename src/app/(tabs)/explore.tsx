@@ -129,6 +129,33 @@ export default function ExploreScreen() {
 
   return (
     <Screen>
+      {/* Same masthead live.tsx renders — the brand wordmark cannot appear on
+          three of four tabs and vanish on this one; that reads as an
+          unfinished screen when a user moves Explore <-> Home/Live. Mirrored
+          rather than reinvented, per DESIGN.md's own one-idiom-per-shape rule. */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingBottom: 12,
+          borderBottomWidth: 1.5,
+          borderBottomColor: theme.lineSoft,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: 'Anton_400Regular',
+            textTransform: 'uppercase',
+            fontSize: 23,
+            lineHeight: 28,
+            color: theme.text,
+          }}
+        >
+          Kria
+        </Text>
+      </View>
+
       <View style={{ paddingHorizontal: 16, paddingTop: 13 }}>
         <View
           style={{
