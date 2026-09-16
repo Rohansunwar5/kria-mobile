@@ -14,14 +14,27 @@ const DEBOUNCE_MS = 300;
  * epoch guard below entirely. That let a stale filtered response overwrite a
  * newer query (final-review I2) and let the two states drift so a filter
  * could still be "applied" over a list it no longer shaped (I4). Routing
- * filters through the same debounced, epoch-guarded `search()` as the query
- * itself removes the second source of truth: `tournaments` is always exactly
- * what the current `query` + `filters` pair produced, or is still in flight
- * to become.
+ * filters through the same epoch-guarded `search()` as the query itself
+ * removes the second source of truth: `tournaments` is always exactly what
+ * the current `query` + `filters` pair produced, or is still in flight to
+ * become.
+ *
+ * Query and filters share that one guarded `search()`, but NOT the same
+ * timing. A query edit is a keystroke — still debounced. A filter change
+ * (`setFilters`) is a deliberate Apply/Reset tap, and fires immediately:
+ * routing it through the query's own debounce (an earlier version of this
+ * fix did exactly that) made a button press wait out a keystroke delay it
+ * was never subject to, and left a transient window where the badge already
+ * showed the new count while the visible list was still the old one — the
+ * same mismatch I4 targeted, just momentary instead of permanent.
+ * `filtersRef` lets the debounced query effect (which only re-arms on
+ * `query`) always read whichever filters are CURRENTLY applied when its
+ * timer fires, without needing `filters` in its own dependency array —
+ * that's what keeps a filter change from re-arming a second, redundant wait.
  */
 export function useExploreSearch() {
   const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [filters, setFiltersState] = useState<Filters>(EMPTY_FILTERS);
   const [players, setPlayers] = useState<PlayerHit[]>([]);
   const [tournaments, setTournaments] = useState<TournamentHit[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,6 +42,7 @@ export function useExploreSearch() {
 
   const epochRef = useRef(0);
   const isMountedRef = useRef(true);
+  const filtersRef = useRef<Filters>(EMPTY_FILTERS);
 
   const search = useCallback(async (q: string, f: Filters) => {
     const epoch = ++epochRef.current;
@@ -84,10 +98,35 @@ export function useExploreSearch() {
     };
   }, []);
 
+  // Clearing the search box reads as "start over". The screen's own
+  // `!hasQuery` branch already hides the whole results block — badge
+  // included — at exactly this boundary, so a filter that survived past it
+  // would be invisible and would silently reapply to whatever is typed
+  // next. Reset at the fully-empty query rather than the 3-character search
+  // floor: below the floor but above empty, the Events group (and the
+  // filter control on it) stays visible per the I3 fix, so nothing is
+  // hidden there and nothing needs resetting.
   useEffect(() => {
-    const timer = setTimeout(() => { void search(query, filters); }, DEBOUNCE_MS);
+    if (query.trim().length === 0) {
+      filtersRef.current = EMPTY_FILTERS;
+      setFiltersState(EMPTY_FILTERS);
+    }
+  }, [query]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { void search(query, filtersRef.current); }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [query, filters, search]);
+  }, [query, search]);
+
+  // A deliberate Apply/Reset tap, unlike a query edit, must not wait out the
+  // debounce above — it fires `search` immediately, through the same
+  // epoch-guarded path, so the race protection is unchanged and only the
+  // delay differs by trigger.
+  const setFilters = useCallback((next: Filters) => {
+    filtersRef.current = next;
+    setFiltersState(next);
+    void search(query, next);
+  }, [query, search]);
 
   return { query, setQuery, filters, setFilters, players, tournaments, loading, error };
 }

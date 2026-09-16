@@ -192,4 +192,42 @@ describe('useExploreSearch', () => {
     expect(result.current.error).toBeNull();
     expect(result.current.tournaments).toHaveLength(1);
   });
+
+  // Re-review follow-up (FIX 1): routing filters through the same debounced
+  // effect as query made a deliberate Apply/Reset tap wait out a keystroke
+  // delay it was never subject to before. A filter change must fire
+  // `search` immediately; a plain query change must still wait for the
+  // debounce, so typing does not fire on every keystroke.
+  //
+  // Deliberately no `waitFor` around the timing-sensitive assertions below:
+  // `waitFor` will itself progress fake timers while polling, which would
+  // quietly paper over exactly the regression this test exists to catch.
+  // Every request count is checked synchronously, right after a synchronous
+  // `act()`, with no timer advance in between.
+  it('applies a filter immediately but still debounces a query change', async () => {
+    mock.onGet('/player/search').reply(200, players([]));
+    mock.onGet('/tournament', { params: { q: 'sunw' } }).reply(200, tournaments([]));
+    mock.onGet('/tournament', { params: { q: 'sunw', sport: 'cricket' } }).reply(200, tournaments([EVENT]));
+    mock.onGet('/tournament', { params: { q: 'sunwa', sport: 'cricket' } }).reply(200, tournaments([]));
+
+    const { result } = renderHook(() => useExploreSearch());
+    await typeAndSettle(result, 'sunw');
+
+    const callsAfterInitialSearch = mock.history.get.filter((r) => r.url === '/tournament').length;
+
+    // `await act(async () => ...)` (not a bare sync act) so the dispatch's
+    // own microtask hop into axios-mock-adapter's history has a chance to
+    // run — still with no `setTimeout` advance of any kind, since that is
+    // the one thing a fake-timer macrotask actually needs.
+    await act(async () => { result.current.setFilters({ ...EMPTY_FILTERS, sport: 'cricket' }); });
+    expect(mock.history.get.filter((r) => r.url === '/tournament').length).toBe(callsAfterInitialSearch + 1);
+
+    // Contrast: a plain query edit (filters unchanged) still waits — nothing
+    // new is dispatched until the timer is advanced.
+    await act(async () => { result.current.setQuery('sunwa'); });
+    expect(mock.history.get.filter((r) => r.url === '/tournament').length).toBe(callsAfterInitialSearch + 1);
+
+    await act(async () => { jest.advanceTimersByTime(350); });
+    await waitFor(() => expect(mock.history.get.filter((r) => r.url === '/tournament').length).toBe(callsAfterInitialSearch + 2));
+  });
 });

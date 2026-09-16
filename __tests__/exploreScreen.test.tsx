@@ -228,4 +228,39 @@ describe('Explore screen — filters (I2/I3/I4 root cause)', () => {
     await waitFor(() => expect(screen.getByText('Kria Cup Clash')).toBeTruthy());
     expect(screen.queryByText('Kria Smash Bash')).toBeNull();
   });
+
+  // Re-review follow-up (FIX 2): clearing the query hid the whole results
+  // block — badge included — behind the screen's own `!hasQuery` branch,
+  // while `filters` quietly kept its value. Typing a fresh query afterward
+  // then silently reapplied a filter the user had no way to see or clear.
+  it('resets the filter once the query is cleared', async () => {
+    const CUP_EVENT = { _id: 't5', name: 'Kria Cup Meet', sport: 'badminton', status: 'registration_open' };
+    mock.onGet('/player/search').reply(200, players([]));
+    mock.onGet('/tournament', { params: { q: 'smash' } }).reply(200, tournaments([EVENT, CRICKET_EVENT]));
+    mock.onGet('/tournament', { params: { q: 'smash', sport: 'cricket' } }).reply(200, tournaments([CRICKET_EVENT]));
+    mock.onGet('/tournament', { params: { q: 'cup' } }).reply(200, tournaments([CUP_EVENT]));
+    // Decoy: what a broken reset would still request — the filter carried
+    // forward instead of dropped when the query emptied.
+    mock.onGet('/tournament', { params: { q: 'cup', sport: 'cricket' } }).reply(200, tournaments([CRICKET_EVENT]));
+
+    render(<ExploreScreen />);
+    await typeSearch('smash');
+    await waitFor(() => expect(screen.getByText('Kria Smash Cup')).toBeTruthy());
+
+    await openSheetAndApply('Cricket');
+    await waitFor(() => expect(screen.getByLabelText(/filter events, 1 applied/i)).toBeTruthy());
+
+    // Clear the query entirely — this reads as "start over".
+    fireEvent.press(screen.getByLabelText('Clear search'));
+    await act(async () => { jest.advanceTimersByTime(350); });
+    await waitFor(() => expect(screen.getByText(/search for players or events/i)).toBeTruthy());
+
+    await typeSearch('cup');
+
+    await waitFor(() => expect(screen.getByText('Kria Cup Meet')).toBeTruthy());
+    expect(screen.queryByText('Kria Smash Bash')).toBeNull();
+    // Unfiltered: the badge must show nothing, not a stale "1 applied".
+    expect(screen.getByLabelText('Filter events')).toBeTruthy();
+    expect(screen.queryByLabelText(/applied/i)).toBeNull();
+  });
 });
