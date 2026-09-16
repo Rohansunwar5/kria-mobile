@@ -5,11 +5,14 @@ import {
   getAuctionSoldLog,
   AuctionStatusResponse,
   AuctionSoldLog,
+  AuctionPreAssigned,
 } from '@/api/auction';
 
 interface AuctionState {
   data: AuctionStatusResponse | null;
   soldLog: AuctionSoldLog[];
+  preAssigned: AuctionPreAssigned[];
+  totalRevenue: number;
   loading: boolean;
   error: string | null;
 }
@@ -18,6 +21,8 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
   const [state, setState] = useState<AuctionState>({
     data: null,
     soldLog: [],
+    preAssigned: [],
+    totalRevenue: 0,
     loading: true,
     error: null,
   });
@@ -34,12 +39,6 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
       setLastUpdate(Date.now());
     } catch {
       setState((s) => ({ ...s, loading: false, error: 'Auction unavailable' }));
-    }
-    try {
-      const sold = await getAuctionSoldLog(tournamentId, categoryId);
-      setState((s) => ({ ...s, soldLog: sold.logs || [] }));
-    } catch {
-      // non-fatal; sold log just stays as-is
     }
   }, [tournamentId, categoryId]);
 
@@ -75,6 +74,30 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
       socket.disconnect();
     };
   }, [tournamentId, categoryId, load]);
+
+  // The socket payload carries `logsCount` but never the log rows themselves, so
+  // the list has to be pulled again each time the hammer falls. Keyed on the
+  // count rather than on every update, or a rising bid would refetch it too.
+  // Waits for the first status so this fires exactly once per distinct count.
+  const logsCount = state.data?.auction.logsCount;
+  useEffect(() => {
+    if (!tournamentId || !categoryId || logsCount === undefined) return;
+    let active = true;
+    getAuctionSoldLog(tournamentId, categoryId)
+      .then((sold) => {
+        if (!active) return;
+        setState((s) => ({
+          ...s,
+          soldLog: sold.logs || [],
+          preAssigned: sold.preAssigned || [],
+          totalRevenue: sold.totalRevenue || 0,
+        }));
+      })
+      .catch(() => {
+        // Non-fatal: the live board is still correct, the history just stays put.
+      });
+    return () => { active = false; };
+  }, [tournamentId, categoryId, logsCount]);
 
   return { ...state, connected, lastUpdate, reload: load };
 }

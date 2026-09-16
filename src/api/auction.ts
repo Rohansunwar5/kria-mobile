@@ -3,7 +3,7 @@ import { unwrap } from './unwrap';
 
 export interface AuctionPlayer {
   _id: string;
-  profile: { firstName: string; lastName: string; age: number; gender: string; skillLevel: string; photo?: string };
+  profile: { firstName: string; lastName: string; age: number; gender: string; skillLevel: string; photo?: string | null };
   auctionData: { basePrice: number };
   careerStats?: { matchesPlayed: number; matchesWon: number; pointsContributed: number; tournamentsPlayed: number };
 }
@@ -21,6 +21,26 @@ export interface AuctionTeam {
 }
 
 export interface AuctionBid { teamId: string; teamName: string; amount: number; timestamp: string }
+
+/** A player still waiting in the queue, for the "up next" strip. */
+export interface AuctionUpcoming {
+  registrationId: string;
+  playerName: string;
+  playerPhoto?: string | null;
+  basePrice: number;
+  skillLevel?: string | null;
+  queueIndex: number;
+}
+
+/** Captains and icons handed to a team before bidding, so they never go under the hammer. */
+export interface AuctionPreAssigned {
+  registrationId: string;
+  playerName: string;
+  playerPhoto?: string | null;
+  teamId: string;
+  teamName: string;
+  role: 'captain' | 'icon';
+}
 
 export interface AuctionStatus {
   _id: string;
@@ -42,6 +62,7 @@ export interface AuctionStatus {
   settings: { minBidIncrement: number; bidDurationSeconds: number; hardLimit: number };
   unsoldCount: number;
   rotationCount: number;
+  remainingCount?: number;
 }
 
 export interface AuctionSoldLog {
@@ -54,6 +75,7 @@ export interface AuctionSoldLog {
   auctionType: string;
   recordedBy: string;
   timestamp: string;
+  playerPhoto?: string | null;
 }
 
 export interface AuctionStatusResponse {
@@ -62,12 +84,14 @@ export interface AuctionStatusResponse {
   teams: AuctionTeam[];
   category?: { _id: string; name: string } | null;
   tournament?: { _id: string; name: string } | null;
+  upcoming?: AuctionUpcoming[];
 }
 
 export interface SoldLogResponse {
   logs: AuctionSoldLog[];
   totalSold: number;
   totalRevenue: number;
+  preAssigned?: AuctionPreAssigned[];
 }
 
 export async function getAuctionStatus(tournamentId: string, categoryId: string): Promise<AuctionStatusResponse> {

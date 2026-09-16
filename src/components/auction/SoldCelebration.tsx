@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, View, Text } from 'react-native';
 import { Hairlines, Hazard, Lbl } from '@/components/canvas';
 import { Ghost } from '@/components/states';
+import { Confetti } from '@/components/auction/Confetti';
 
 interface Props {
   playerName: string;
@@ -27,6 +28,7 @@ export function SoldCelebration({ playerName, teamName, teamColor, soldPrice }: 
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0B0B0B', paddingHorizontal: 26, overflow: 'hidden' }}>
       <Hairlines />
       <Ghost text="Sold" size={230} style={{ left: -30 }} />
+      <Confetti />
 
       <Animated.View style={{ transform: [{ scale }], opacity, alignItems: 'center' }}>
         <Lbl style={{ letterSpacing: 0.3 * 9 }}>Sold to</Lbl>

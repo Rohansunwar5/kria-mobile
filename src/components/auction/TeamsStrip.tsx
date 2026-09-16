@@ -1,44 +1,49 @@
 import { View, Text } from 'react-native';
 import { AuctionTeam } from '@/api/auction';
-import { purseHealth, shortMoney } from '@/lib/auctionView';
+import { purseHealth } from '@/lib/auctionView';
+import { InitialsAvatar } from '@/components/InitialsAvatar';
+import { SectionLabel } from '@/components/auction/SectionLabel';
 
-// "Purses left" — one tile per team, the bar coloured by how much is gone.
+const MICRO = { fontFamily: 'SpaceMono_400Regular' as const, fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+
+// One row per team: purse left, what they have spent, how many they hold.
+// Rows rather than tiles — at phone width a tile cannot fit a real team name,
+// and initials alone made this panel unreadable.
 export function TeamsStrip({ teams }: { teams: AuctionTeam[] }) {
   if (teams.length === 0) return null;
 
   return (
     <View>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginBottom: 8 }}>
-        Purses left
-      </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
-        {teams.map((team) => {
+      <SectionLabel label="Purses left" count={teams.length} />
+      <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden' }}>
+        {teams.map((team, i) => {
           const { ratio, color } = purseHealth(team.budget, team.initialBudget);
-          const initials = team.name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
           return (
-            <View
-              key={team._id}
-              style={{
-                flexGrow: 1,
-                flexBasis: '30%',
-                minWidth: 96,
-                paddingHorizontal: 10,
-                paddingVertical: 9,
-                backgroundColor: '#1E1E1E',
-                borderWidth: 1.5,
-                borderColor: 'rgba(255,255,255,0.10)',
-                borderRadius: 6,
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <View style={{ width: 14, height: 14, borderRadius: 2, backgroundColor: team.primaryColor || '#F97316' }} />
-                <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#a3a3a3' }}>
-                  {initials}
-                </Text>
-              </View>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: '#fff' }}>{shortMoney(team.budget)}</Text>
-              <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.10)', marginTop: 6, borderRadius: 2, overflow: 'hidden' }}>
-                <View style={{ width: `${ratio * 100}%`, height: '100%', backgroundColor: color }} />
+            <View key={team._id}>
+              {i > 0 ? <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} /> : null}
+              <View style={{ paddingHorizontal: 13, paddingVertical: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
+                  <InitialsAvatar name={team.name} logo={team.logo} size={26} color={team.primaryColor || '#F97316'} />
+                  <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, color: '#fff' }}>
+                    {team.name}
+                  </Text>
+                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 14, color }}>
+                    ₹{team.budget.toLocaleString('en-IN')}
+                  </Text>
+                </View>
+
+                <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.10)', marginTop: 8, borderRadius: 2, overflow: 'hidden' }}>
+                  <View style={{ width: `${ratio * 100}%`, height: '100%', backgroundColor: color }} />
+                </View>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
+                  <Text style={MICRO}>
+                    Spent <Text style={{ fontFamily: 'SpaceMono_700Bold', color: '#d4d4d4' }}>₹{team.totalSpent.toLocaleString('en-IN')}</Text>
+                  </Text>
+                  <Text style={MICRO}>
+                    Squad <Text style={{ fontFamily: 'SpaceMono_700Bold', color: '#d4d4d4' }}>{team.playersCount}</Text>
+                  </Text>
+                </View>
               </View>
             </View>
           );
