@@ -1,13 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { searchPlayers, type PlayerHit } from '@/api/playerSearch';
 import { searchTournaments, type TournamentHit } from '@/api/tournaments';
+import { EMPTY_FILTERS, type Filters } from '@/lib/tournamentFilters';
 
 // The server 422s below this, so firing at all would only ever fail.
 const MIN_QUERY_LENGTH = 3;
 const DEBOUNCE_MS = 300;
 
+/**
+ * Filters are an INPUT to this hook, not a second fetch layered on top of it
+ * by the screen. They used to live that way — the screen held its own
+ * `filteredEvents` and called `searchTournaments` directly, bypassing the
+ * epoch guard below entirely. That let a stale filtered response overwrite a
+ * newer query (final-review I2) and let the two states drift so a filter
+ * could still be "applied" over a list it no longer shaped (I4). Routing
+ * filters through the same debounced, epoch-guarded `search()` as the query
+ * itself removes the second source of truth: `tournaments` is always exactly
+ * what the current `query` + `filters` pair produced, or is still in flight
+ * to become.
+ */
 export function useExploreSearch() {
   const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [players, setPlayers] = useState<PlayerHit[]>([]);
   const [tournaments, setTournaments] = useState<TournamentHit[]>([]);
   const [loading, setLoading] = useState(false);
@@ -16,7 +30,7 @@ export function useExploreSearch() {
   const epochRef = useRef(0);
   const isMountedRef = useRef(true);
 
-  const search = useCallback(async (q: string) => {
+  const search = useCallback(async (q: string, f: Filters) => {
     const epoch = ++epochRef.current;
 
     if (q.trim().length < MIN_QUERY_LENGTH) {
@@ -36,10 +50,12 @@ export function useExploreSearch() {
     // the current epoch at the moment it runs.
     setError(null);
     try {
-      const [playerHits, tournamentHits] = await Promise.all([searchPlayers(q), searchTournaments(q)]);
+      const [playerHits, tournamentHits] = await Promise.all([searchPlayers(q), searchTournaments(q, f)]);
       // A short query resolving slowly after a longer one is routine with a
       // debounced search. Without this guard the user would see results for
-      // text they have already replaced.
+      // text (or filters) they have already replaced. Filters flow through
+      // this exact same guard as just another argument to `search` — there
+      // is no second, unguarded fetch for them to bypass it through.
       if (epoch !== epochRef.current || !isMountedRef.current) return;
 
       setPlayers(playerHits);
@@ -65,14 +81,13 @@ export function useExploreSearch() {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      epochRef.current = 0;
     };
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => { void search(query); }, DEBOUNCE_MS);
+    const timer = setTimeout(() => { void search(query, filters); }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [query, search]);
+  }, [query, filters, search]);
 
-  return { query, setQuery, players, tournaments, loading, error };
+  return { query, setQuery, filters, setFilters, players, tournaments, loading, error };
 }

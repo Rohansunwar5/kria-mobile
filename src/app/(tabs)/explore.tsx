@@ -1,13 +1,12 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
 import PlayerHitRow from '@/components/explore/PlayerHitRow';
 import EventHitRow from '@/components/explore/EventHitRow';
 import { FilterSheet } from '@/components/home/FilterSheet';
-import { EMPTY_FILTERS, appliedCount, type Filters } from '@/lib/tournamentFilters';
+import { appliedCount, type Filters } from '@/lib/tournamentFilters';
 import { useExploreSearch } from '@/lib/useExploreSearch';
-import { searchTournaments, type TournamentHit } from '@/api/tournaments';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme';
 
@@ -77,30 +76,26 @@ function EventsFilterControl({ theme, count, onPress }: { theme: Palette; count:
  * One field over both players and tournaments — the groups below do the
  * sorting, not a segmented control the user picks before typing.
  *
- * `useExploreSearch()` (Task 3) owns the debounced dual search and does not
- * take filters — it is a fixed interface, not something this screen extends.
- * Filters apply to the Events group only, so they are re-run here as a
- * direct, screen-owned call to `searchTournaments`, keyed off the sheet's
- * Apply button rather than every keystroke. `filteredEvents` overrides the
- * hook's own unfiltered tournament list only while a filtered search is in
- * effect; it resets whenever the query itself changes so a fresh query
- * starts from the hook's plain result until filters are re-applied against it.
+ * `useExploreSearch()` owns query, filters AND the dual search together —
+ * filters are just another input to its one debounced fetch, covered by the
+ * same epoch guard as the query itself. That used to not be true: filters
+ * lived here as a second, screen-owned call to `searchTournaments` that
+ * bypassed the guard entirely, so a stale filtered response could land after
+ * a newer query, and the "N applied" badge could describe a list the filter
+ * never actually produced (final-review findings I2/I4). Folding filters
+ * into the hook leaves `tournaments` as the one and only source for the
+ * Events group: applying a filter re-searches the CURRENT query with it, and
+ * editing the query re-searches with whatever filter is still applied, so
+ * the two can never drift apart again.
  */
 export default function ExploreScreen() {
   const theme = useTheme();
-  const { query, setQuery, players, tournaments, loading, error } = useExploreSearch();
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const { query, setQuery, filters, setFilters, players, tournaments, loading, error } = useExploreSearch();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [filteredEvents, setFilteredEvents] = useState<TournamentHit[] | null>(null);
-  const [filterBusy, setFilterBusy] = useState(false);
 
-  useEffect(() => {
-    setFilteredEvents(null);
-  }, [query]);
+  const events = tournaments;
 
-  const events = filteredEvents ?? tournaments;
-
-  async function applyFilters(next: Filters) {
+  function applyFilters(next: Filters) {
     // FilterSheet's own docblock: the sheet's draft re-seeds from `filters`
     // every time `visible` turns true, and that is safe only because nothing
     // can change `filters` while the sheet stays open. Splitting this into
@@ -110,22 +105,16 @@ export default function ExploreScreen() {
     // both fired before React's next render, keeps that invariant intact.
     setFilters(next);
     setSheetOpen(false);
-
-    if (query.trim().length < 3) return;
-    setFilterBusy(true);
-    try {
-      setFilteredEvents(await searchTournaments(query, next));
-    } catch {
-      // A failed re-filter leaves the previously shown events in place
-      // rather than blanking a screen that was working a moment ago.
-    } finally {
-      setFilterBusy(false);
-    }
   }
 
   const hasQuery = query.trim().length > 0;
-  const hasResults = players.length > 0 || events.length > 0;
-  const busy = loading || filterBusy;
+  const appliedFilterCount = appliedCount(filters);
+  // A filter that matches nothing must not take its own escape hatch down
+  // with it — the Events group, and the Filter control it carries, stays
+  // reachable whenever a filter is applied, even at zero results (I3).
+  const showEvents = events.length > 0 || appliedFilterCount > 0;
+  const hasResults = players.length > 0 || showEvents;
+  const busy = loading;
 
   return (
     <Screen>
@@ -204,7 +193,7 @@ export default function ExploreScreen() {
           <Text style={PROMPT(theme)}>Nothing matched that.</Text>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 110 }} keyboardShouldPersistTaps="handled">
           {players.length > 0 ? (
             <View>
               <GroupHeading theme={theme} label="Players" count={players.length} />
@@ -219,13 +208,13 @@ export default function ExploreScreen() {
             </View>
           ) : null}
 
-          {events.length > 0 ? (
+          {showEvents ? (
             <View>
               <GroupHeading
                 theme={theme}
                 label="Events"
                 count={events.length}
-                right={<EventsFilterControl theme={theme} count={appliedCount(filters)} onPress={() => setSheetOpen(true)} />}
+                right={<EventsFilterControl theme={theme} count={appliedFilterCount} onPress={() => setSheetOpen(true)} />}
               />
               {events.map((hit) => (
                 <EventHitRow key={hit._id} hit={hit} />

@@ -2,6 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react-native';
 import MockAdapter from 'axios-mock-adapter';
 import API from '../src/api/axios';
 import { useExploreSearch } from '../src/lib/useExploreSearch';
+import { EMPTY_FILTERS } from '../src/lib/tournamentFilters';
 
 let mock: MockAdapter;
 
@@ -150,5 +151,45 @@ describe('useExploreSearch', () => {
     expect(result.current.error).toBeNull();
 
     await act(async () => { resolveSecond!([200, players([])]); });
+  });
+
+  // I2/I4 root cause: filters used to live outside this hook entirely, as a
+  // second, screen-owned fetch with no epoch guard of its own. Folding them
+  // in here means every tournament fetch — plain or filtered — goes through
+  // the one debounced, epoch-guarded path.
+  it('includes applied filters in the tournament search', async () => {
+    mock.onGet('/player/search').reply(200, players([]));
+    mock.onGet('/tournament', { params: { q: 'sunw', sport: 'cricket' } }).reply(200, tournaments([EVENT]));
+
+    const { result } = renderHook(() => useExploreSearch());
+    await typeAndSettle(result, 'sunw');
+    await act(async () => { result.current.setFilters({ ...EMPTY_FILTERS, sport: 'cricket' }); });
+    await act(async () => { jest.advanceTimersByTime(350); });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.tournaments).toHaveLength(1);
+  });
+
+  // A fresh query must not silently drop a filter the user already applied —
+  // that drift is exactly what let the badge and the list disagree (I4).
+  it('keeps applying the current filter when the query changes', async () => {
+    mock.onGet('/player/search').reply(200, players([]));
+    mock.onGet('/tournament', { params: { q: 'sunw', sport: 'cricket' } }).reply(200, tournaments([EVENT]));
+    mock.onGet('/tournament', { params: { q: 'sunwa', sport: 'cricket' } }).reply(200, tournaments([EVENT]));
+
+    const { result } = renderHook(() => useExploreSearch());
+    await typeAndSettle(result, 'sunw');
+    await act(async () => { result.current.setFilters({ ...EMPTY_FILTERS, sport: 'cricket' }); });
+    await act(async () => { jest.advanceTimersByTime(350); });
+    await waitFor(() => expect(result.current.tournaments).toHaveLength(1));
+
+    // If the query-changed path fired the search without the filter, this
+    // would hit no registered mock (only the sport:'cricket' variant exists
+    // for 'sunwa') and land as an error instead of a length-1 result.
+    await typeAndSettle(result, 'sunwa');
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.error).toBeNull();
+    expect(result.current.tournaments).toHaveLength(1);
   });
 });

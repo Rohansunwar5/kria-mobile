@@ -7,7 +7,7 @@ export interface TournamentHit {
   name: string;
   sport: string;
   status: string;
-  venue?: { city?: string };
+  venue?: { name?: string; city?: string };
 }
 
 interface TournamentListPayload {

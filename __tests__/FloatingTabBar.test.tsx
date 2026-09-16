@@ -22,6 +22,7 @@ const props = (index = 0): ComponentProps<typeof FloatingTabBar> => ({
     index,
     routes: [
       { key: 'home-1', name: 'home' },
+      { key: 'explore-1', name: 'explore' },
       { key: 'profile-1', name: 'profile' },
     ],
   },
@@ -54,10 +55,16 @@ describe('FloatingTabBar', () => {
     expect(getByLabelText('Home').props.accessibilityState.disabled).toBe(false);
   });
 
+  // Explore is now in `routes` (below) so its own press genuinely
+  // navigates — asserted separately as 'navigates to Explore when pressed'.
+  // Live is the one route this fixture still omits, so pressing it still
+  // exercises the same "route not present in state yet" guard (`if (!route)
+  // return`) this test always meant to cover — no slot is actually `pending`
+  // any more, per NAV_SLOTS' own docblock.
   it('does not navigate when a disabled slot is pressed', () => {
     const p = props();
     const { getByLabelText } = render(<FloatingTabBar {...p} />);
-    fireEvent.press(getByLabelText('Explore'));
+    fireEvent.press(getByLabelText('Live'));
     expect(p.navigation.navigate).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
   });
@@ -67,6 +74,16 @@ describe('FloatingTabBar', () => {
     const { getByLabelText } = render(<FloatingTabBar {...p} />);
     fireEvent.press(getByLabelText('You'));
     expect(p.navigation.navigate).toHaveBeenCalledWith('profile');
+  });
+
+  // M6: this branch's one behavioural change to this component — Explore
+  // graduating from a dimmed, disabled slot to a real route — had nothing
+  // asserting that pressing it actually navigates.
+  it('navigates to Explore when pressed', () => {
+    const p = props(0);
+    const { getByLabelText } = render(<FloatingTabBar {...p} />);
+    fireEvent.press(getByLabelText('Explore'));
+    expect(p.navigation.navigate).toHaveBeenCalledWith('explore');
   });
 
   // Host is an ACTION, not a tab. It pushes rather than switching tabs, which is

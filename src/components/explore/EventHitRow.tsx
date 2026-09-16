@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { router } from 'expo-router';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme';
@@ -17,7 +17,7 @@ const META = (theme: Palette) => ({
  *  bordered, brand-edged card rather than a plain list row. */
 export default function EventHitRow({ hit }: { hit: TournamentHit }) {
   const theme = useTheme();
-  const meta = [hit.sport, hit.venue?.city].filter(Boolean).join(' · ');
+  const meta = [hit.sport, hit.venue?.name, hit.venue?.city].filter(Boolean).join(' · ');
 
   return (
     <Pressable
