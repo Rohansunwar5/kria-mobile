@@ -12,7 +12,7 @@ import { Skeleton, EmptyState } from '@/components/states';
 
 interface RosterPlayer {
   _id: string;
-  profile: { firstName: string; lastName: string; gender: string; skillLevel?: string };
+  profile: { firstName: string; lastName: string; gender: string; skillLevel?: string; photo?: string };
   auctionData?: { soldPrice?: number };
   status: string;
 }
@@ -164,7 +164,7 @@ export function TeamsTab({ myTeam }: { myTeam: Team | null | undefined }) {
                           borderRadius: 6,
                         }}
                       >
-                        <InitialsAvatar name={name} size={32} color={color} />
+                        <InitialsAvatar name={name} logo={p.profile.photo} size={32} color={color} />
                         <View style={{ flex: 1 }}>
                           <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 13, color: '#fff' }}>
                             {name}

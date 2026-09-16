@@ -38,7 +38,7 @@ export interface Team {
 
 export interface RosterPlayer {
   _id: string;
-  profile: { firstName: string; lastName: string; gender?: string; skillLevel?: string };
+  profile: { firstName: string; lastName: string; gender?: string; skillLevel?: string; photo?: string };
   auctionData?: { soldPrice?: number };
   status: string;
   playerId?: string;

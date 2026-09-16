@@ -170,7 +170,7 @@ export default function TeamDetail() {
                       onPress={() => router.push({ pathname: '/player/[playerId]', params: { playerId: p.playerId! } })}
                       style={{ flexDirection: 'row', alignItems: 'center', gap: 11, minHeight: 44, paddingHorizontal: 13, paddingVertical: 10 }}
                     >
-                      <InitialsAvatar name={name} size={32} color={color} />
+                      <InitialsAvatar name={name} logo={p.profile.photo} size={32} color={color} />
                       <View style={{ flex: 1 }}>
                         <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 13, color: '#fff' }}>
                           {name}

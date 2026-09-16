@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, RefreshControl, Image } from 'react-native';
+import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
@@ -104,11 +104,7 @@ export default function PlayerProfile() {
           <Hairlines />
           <Ghost text={name.split(/\s+/).slice(0, 2).map((w) => w[0]).join('')} size={150} style={{ right: -26, top: -8 }} />
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14, paddingHorizontal: 16, paddingTop: 12 }}>
-            {player.profileImage ? (
-              <Image source={{ uri: player.profileImage }} style={{ width: 76, height: 76, borderRadius: 4 }} />
-            ) : (
-              <InitialsAvatar name={name} size={76} />
-            )}
+            <InitialsAvatar name={name} logo={player.profileImage} size={76} />
             <View style={{ flex: 1, paddingBottom: 3 }}>
               <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 36, color: theme.text }}>
                 {name}
