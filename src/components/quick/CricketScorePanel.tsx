@@ -100,12 +100,6 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   const [chosenWicketType, setChosenWicketType] = useState<WicketType | null>(null);
   const [chosenExtrasType, setChosenExtrasType] = useState<ExtrasType | null>(null);
   const [chosenDismissedId, setChosenDismissedId] = useState<string | null>(null);
-  // Which end the LAST wicket vacated. The engine's nextBatsmanNeeded flag
-  // says a replacement is needed but never which end — this is the only
-  // record of that, so the follow-up prompt below reads it rather than
-  // always assuming the striker (see Finding 2: a departed non-striker's id
-  // would otherwise stay wired into every remaining delivery).
-  const [vacatedEnd, setVacatedEnd] = useState<CreaseEnd>('striker');
   // Armed on the extras sheet before the type is picked, so the common
   // extra-only case gains no step. Once set, choosing the runs routes into the
   // wicket flow instead of posting, and `post` merges it into that delivery.
@@ -194,11 +188,22 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
 
   if (promptOutstanding) {
     // Mid-innings, a batsman replacement is needed at whichever end the last
-    // wicket vacated — `need` only says a replacement is needed, never which
-    // end, so `vacatedEnd` (set when the dismissed player was chosen) decides.
+    // wicket vacated. The engine now empties that end itself, so the empty slot
+    // IS the answer — read it rather than guess.
+    //
+    // This used to track the end the dismissed batsman was standing at. That is
+    // a different end whenever an odd number of runs was completed before a
+    // run-out, or the wicket fell on the last ball of an over, because both
+    // swap the batsmen after the dismissal. Only the server sees the state
+    // after that rotation.
+    //
+    // Neither end empty means a wicket recorded before the engine cleared ends;
+    // fall back to the striker, which is what the old code always did.
     const needsBatsmanReplacement = !firstBall && (need === 'batsman' || need === 'both');
-    const needsStriker = firstBall || (needsBatsmanReplacement && vacatedEnd === 'striker');
-    const needsNonStriker = firstBall || (needsBatsmanReplacement && vacatedEnd === 'non-striker');
+    const strikerVacant = !match.liveState?.strikerId;
+    const nonStrikerVacant = !match.liveState?.nonStrikerId;
+    const needsStriker = firstBall || (needsBatsmanReplacement && (strikerVacant || !nonStrikerVacant));
+    const needsNonStriker = firstBall || (needsBatsmanReplacement && nonStrikerVacant);
     const needsBowler = firstBall || need === 'bowler' || need === 'both';
 
     // A replacement must not be the player already standing at the other
@@ -450,10 +455,6 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
                   setMode('wicket-who');
                   return;
                 }
-                // Every other type always dismisses the striker — reset here
-                // in case an earlier run-out/retired-hurt left this pointed
-                // at the non-striker's end.
-                setVacatedEnd('striker');
                 if (FIELDER_TYPES.includes(w.type)) {
                   setChosenWicketType(w.type);
                   setMode('fielder');
@@ -477,7 +478,6 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
                 label={choice.label}
                 disabled={busy}
                 onPress={busy ? undefined : () => {
-                  setVacatedEnd(choice.end);
                   setChosenDismissedId(choice.id);
                   // run_out is also a fielding action; retired_hurt is not.
                   if (chosenWicketType === 'run_out') {

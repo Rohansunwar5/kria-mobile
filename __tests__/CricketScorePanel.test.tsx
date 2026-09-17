@@ -286,11 +286,16 @@ describe('CricketScorePanel', () => {
       wicketType: 'run_out', dismissedPlayerId: 'a2', fielderId: 'b1',
     }));
 
-    // The engine flags nextBatsmanNeeded but never says which end — the
-    // departed non-striker's id is still sitting in liveState.nonStrikerId.
+    // The engine clears the end the dismissed batsman occupied, so
+    // nonStrikerId comes back empty and that empty IS which end to fill.
+    // This fixture used to leave the departed non-striker's id in place,
+    // which was the server bug rather than a state the client should see.
     rerender(
       <CricketScorePanel
-        match={live({ ...midInnings, nextBatsmanNeeded: true }, { sides: threePlayerSide1 })}
+        match={live(
+          { ...midInnings, nextBatsmanNeeded: true, nonStrikerId: undefined },
+          { sides: threePlayerSide1 },
+        )}
         playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
       />
     );
@@ -323,6 +328,27 @@ describe('CricketScorePanel', () => {
     expect(onBall).toHaveBeenCalledWith(expect.objectContaining({
       wicketType: 'retired_hurt', dismissedPlayerId: 'a2',
     }));
+  });
+
+  it('prompts for the STRIKER end when a completed run left the dismissed non-striker there', () => {
+    // The case a client cannot work out for itself. The non-striker is run out,
+    // but a run was completed first, so the batsmen crossed and he was standing
+    // at the striker's end when the wicket fell. The old local guess recorded
+    // where he STARTED and would have prompted for the non-striker end,
+    // replacing the wrong man. The server reports which end it actually
+    // cleared, and that is what this reads.
+    const { getByText, queryByText } = render(
+      <CricketScorePanel
+        match={live(
+          { ...midInnings, nextBatsmanNeeded: true, strikerId: undefined, nonStrikerId: 'a1' },
+          { sides: threePlayerSide1 },
+        )}
+        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()}
+      />
+    );
+
+    expect(getByText(/who is on strike/i)).toBeTruthy();
+    expect(queryByText(/who is at the non-striker/i)).toBeNull();
   });
 
   it('still defaults a plain run-out choosing the striker, replacing the striker end as before', () => {
