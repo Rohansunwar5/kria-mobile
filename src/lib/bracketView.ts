@@ -130,3 +130,33 @@ export function scoreboardLink(match: Match, sport?: string): 'live' | 'result' 
   if (match.status === 'completed' || match.status === 'walkover') return 'result';
   return null;
 }
+
+/**
+ * The side that won the category, or null while nobody has.
+ *
+ * A knockout's last round is named 'Final' by `getRoundNames`, and only that
+ * match has no `nextMatchId` — the generator links every other match forward.
+ * Both are checked: a league carries `bracketRound: 'League'` and no forward
+ * link either, so testing the link alone would crown whoever happened to win
+ * the last fixture of a round robin.
+ *
+ * A tied final has no `winnerId` until an organizer names who went through,
+ * so this stays null rather than inventing a champion.
+ */
+export function championOf(
+  matches: Match[],
+  competitorType: 'player' | 'team',
+  logoById?: Record<string, string | undefined>,
+): Competitor | null {
+  const final = matches.find(
+    (m) =>
+      m.bracketRound === 'Final' &&
+      !m.nextMatchId &&
+      (m.status === 'completed' || m.status === 'walkover') &&
+      !!m.winnerId,
+  );
+  if (!final) return null;
+
+  const { c1, c2 } = getCompetitors(final, competitorType, logoById);
+  return c1.isWinner ? c1 : c2.isWinner ? c2 : null;
+}

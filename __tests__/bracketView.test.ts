@@ -1,4 +1,4 @@
-import { getCompetitors, visibleRounds, sortedRoundNames, leagueStandings } from '@/lib/bracketView';
+import { getCompetitors, visibleRounds, sortedRoundNames, leagueStandings, championOf } from '@/lib/bracketView';
 import { Match } from '@/api/match';
 
 const baseMatch = (over: Partial<Match>): Match => ({
@@ -92,5 +92,49 @@ describe('leagueStandings', () => {
       baseMatch({ _id: 'm1', status: 'scheduled', teams: { team1Id: 'A', team2Id: 'B', team1Name: 'A', team2Name: 'B' } }),
     ];
     expect(leagueStandings(matches, 'team').every((row) => row.played === 0)).toBe(true);
+  });
+});
+
+describe('championOf', () => {
+  const final = (over: Partial<Match> = {}): Match => ({
+    _id: 'f1',
+    bracketRound: 'Final',
+    roundNumber: 3,
+    positionInRound: 0,
+    matchNumber: 7,
+    status: 'completed',
+    winnerId: 't1',
+    teams: { team1Id: 't1', team1Name: 'Konkan Titans', team2Id: 't2', team2Name: 'Deccan Dynamos' },
+    ...over,
+  } as Match);
+
+  it('names the side that won the final', () => {
+    expect(championOf([final()], 'team')?.name).toBe('Konkan Titans');
+  });
+
+  it('is nobody until the final is played', () => {
+    expect(championOf([final({ status: 'scheduled', winnerId: undefined })], 'team')).toBeNull();
+  });
+
+  it('is nobody while the final is still tied and unresolved', () => {
+    // The engine records a tie as no winner. Crowning someone before the
+    // organizer breaks it would be inventing a champion.
+    expect(championOf([final({ winnerId: undefined })], 'team')).toBeNull();
+  });
+
+  it('ignores a league, which has no final to win', () => {
+    // League matches carry bracketRound 'League' and no nextMatchId, so a test
+    // on nextMatchId alone would crown whoever won the last fixture.
+    const league = final({ bracketRound: 'League', roundNumber: 1 });
+    expect(championOf([league], 'team')).toBeNull();
+  });
+
+  it('ignores a final that still feeds another match', () => {
+    expect(championOf([final({ nextMatchId: 'later' })], 'team')).toBeNull();
+  });
+
+  it('picks the final out of a full bracket', () => {
+    const semi = final({ _id: 's1', bracketRound: 'Semi-Final', roundNumber: 2, nextMatchId: 'f1', winnerId: 't1' });
+    expect(championOf([semi, final()], 'team')?.name).toBe('Konkan Titans');
   });
 });

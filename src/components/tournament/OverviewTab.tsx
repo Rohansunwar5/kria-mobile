@@ -6,6 +6,7 @@ import { Tag } from '@/components/StatusPill';
 import { Chip } from '@/components/canvas';
 import { Icon } from '@/components/icons';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
+import { ChampionsBlock } from '@/components/tournament/ChampionsBlock';
 import { Skeleton, EmptyState } from '@/components/states';
 import { STATUS_TAG } from '@/lib/tournamentConstants';
 
@@ -110,6 +111,10 @@ export function OverviewTab({
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 24 }}>
       {user && isTeamDataReady && myTeam ? <YourPlace team={myTeam} assignment={myTeamAssignment} /> : null}
+
+      {/* Above the category list: once a final is won, that is the headline of
+          the whole tournament. Renders nothing until one is. */}
+      <ChampionsBlock categories={categories} />
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
