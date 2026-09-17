@@ -1,6 +1,7 @@
 import {
   oversDisplay, currentRunRate, requiredRunRate, chaseLine,
   dismissalLine, ballChipKind, recentBalls, tallyKey,
+  matchStateNote,
 } from '@/lib/cricketView';
 
 describe('cricketView helpers', () => {
@@ -73,5 +74,30 @@ describe('cricketView helpers', () => {
     const b = tallyKey({ runs: 14, wickets: 0, completedOvers: 2, ballsInCurrentOver: 4, matchStatus: 'in_progress' } as any);
     expect(a).not.toBe(b);
     expect(tallyKey(null as any)).toBe('0|0|0|0|');
+  });
+});
+
+describe('matchStateNote once the match is over', () => {
+  // The engine raises nextBowlerNeeded when an over completes and only THEN
+  // decides the innings ended, so a match that finishes on the last ball of an
+  // over leaves that flag set for good. The scoreboard went on promising that
+  // "scoring resumes once the next bowler is named" under a MATCH COMPLETE
+  // banner. Same for the last wicket and nextBatsmanNeeded.
+  it('says nothing when a completed match still carries nextBowlerNeeded', () => {
+    expect(matchStateNote({ matchStatus: 'completed', nextBowlerNeeded: true })).toBeNull();
+  });
+
+  it('says nothing when a completed match still carries nextBatsmanNeeded', () => {
+    expect(matchStateNote({ matchStatus: 'completed', nextBatsmanNeeded: true })).toBeNull();
+  });
+
+  it('still speaks up for a live match waiting on a bowler', () => {
+    const note = matchStateNote({ matchStatus: 'innings2', nextBowlerNeeded: true });
+    expect(note?.title).toBe('End of over');
+  });
+
+  it('still speaks up for a live match waiting on a batter', () => {
+    const note = matchStateNote({ matchStatus: 'innings2', nextBatsmanNeeded: true });
+    expect(note?.title).toBe('New batter coming in');
   });
 });

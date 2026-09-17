@@ -119,6 +119,12 @@ export function tossLine(match: Pick<CricketMatch, 'cricketSetup' | 'teams'> | n
  *  silently stopped moving. */
 export function matchStateNote(live: Partial<LiveState> | null): { title: string; message: string } | null {
   if (!live) return null;
+  // Nothing is pending once the match is over. The engine raises
+  // nextBowlerNeeded as the over completes and only THEN decides the innings
+  // ended, so a match finishing on the last ball of an over keeps that flag
+  // set for good — and the board promised that scoring would resume,
+  // underneath a MATCH COMPLETE banner.
+  if (live.matchStatus === 'completed') return null;
   if (live.matchStatus === 'innings_break') {
     return {
       title: 'Innings break',
