@@ -18,6 +18,7 @@ import { TournamentHero } from '@/components/tournament/TournamentHero';
 import { DetailTabBar } from '@/components/tournament/DetailTabBar';
 import { OverviewTab } from '@/components/tournament/OverviewTab';
 import { DrawTab } from '@/components/tournament/DrawTab';
+import { AuctionTab } from '@/components/tournament/AuctionTab';
 import { TeamsTab } from '@/components/tournament/TeamsTab';
 import { InfoTab } from '@/components/tournament/InfoTab';
 import { LiveNowBanner } from '@/components/tournament/LiveNowBanner';
@@ -26,14 +27,18 @@ import { Icon } from '@/components/icons';
 import { heroParallax } from '@/lib/motion';
 import { tournamentSports } from '@/lib/sports';
 
-// Eight tabs collapsed to four. Draw absorbs auction + bracket + team league,
+// Eight tabs collapsed to four, then Auction pulled back out to five.
+// Folding it into Draw hid the results: a Draw row points at the auction only
+// while bidding is open, so once the last lot sold there was no way back to
+// who went where. Draw still links a live room, which is the cheap redundancy.
 // Info absorbs awards, Players folds into Teams.
-const TABS = ['overview', 'draw', 'teams', 'info'] as const;
+const TABS = ['overview', 'draw', 'auction', 'teams', 'info'] as const;
 type TabKey = (typeof TABS)[number];
 
 const LABELS: Record<TabKey, string> = {
   overview: 'Overview',
   draw: 'Draw',
+  auction: 'Auction',
   teams: 'Teams',
   info: 'Info',
 };
@@ -159,6 +164,10 @@ export default function TournamentDetail() {
 
         {activeTab === 'draw' && id ? (
           <DrawTab tournamentId={id} categories={categories} isLoading={isRegLoading} sport={tournament.sport} />
+        ) : null}
+
+        {activeTab === 'auction' && id ? (
+          <AuctionTab tournamentId={id} categories={categories} isLoading={isRegLoading} />
         ) : null}
 
         {activeTab === 'teams' ? <TeamsTab myTeam={myTeam} /> : null}
