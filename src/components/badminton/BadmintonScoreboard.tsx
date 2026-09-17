@@ -63,7 +63,7 @@ function SideRow({
         {past ? (
           <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 12, letterSpacing: 0.06 * 12, color: '#7d7d7d' }}>{past}</Text>
         ) : null}
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 48, lineHeight: 44, color: '#fff', minWidth: 56, textAlign: 'right' }}>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 48, lineHeight: 51, color: '#fff', minWidth: 56, textAlign: 'right' }}>
           {live}
         </Text>
       </View>

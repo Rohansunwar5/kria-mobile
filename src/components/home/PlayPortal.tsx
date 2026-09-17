@@ -181,7 +181,7 @@ function SportCell({
         <Icon name={sportIcon(summary.sport)} size={13} color={accent ? colors.auction : theme.textFaint} />
         <Text style={{ ...LBL(theme), letterSpacing: 0.12 * 9, color: theme.textBody }}>{sportLabel(summary.sport)}</Text>
       </View>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 34, lineHeight: 36, color: colors.white, marginTop: 6 }}>
+      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 34, lineHeight: 37, color: colors.white, marginTop: 6 }}>
         {winPercent(summary.winRate, summary.decided)}
       </Text>
       <Text style={{ ...MONO(theme), letterSpacing: 0.1 * 10, marginTop: 6 }}>{recordLine(summary)}</Text>

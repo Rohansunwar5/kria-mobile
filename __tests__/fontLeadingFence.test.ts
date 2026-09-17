@@ -1,7 +1,7 @@
-import { ANTON_MIN_LEADING, analyseSource } from '../test-utils/antonLeading';
+import { ANTON_MIN_LEADING, SPACEMONO_MIN_LEADING, analyseSource } from '../test-utils/fontLeading';
 
 // Unit tests for the fence's analyser. The fence itself
-// (__tests__/antonLeading.test.ts) walks the real source tree and can only ever
+// (__tests__/fontLeading.test.ts) walks the real source tree and can only ever
 // say "clean" or "these lines are wrong" — it cannot prove it would CATCH a
 // given shape. These tests do that, against synthetic source.
 //
@@ -12,7 +12,7 @@ import { ANTON_MIN_LEADING, analyseSource } from '../test-utils/antonLeading';
 
 const style = (body: string) => `<Text style={{ fontFamily: 'Anton_400Regular', ${body} }}>x</Text>`;
 
-describe('anton leading analyser', () => {
+describe('font leading analyser', () => {
   it('passes a literal style that clears the floor', () => {
     expect(analyseSource('a.tsx', style('fontSize: 18, lineHeight: 22'))).toEqual([]);
   });
@@ -100,9 +100,24 @@ describe('anton leading analyser', () => {
     expect(analyseSource('a.tsx', src)).toHaveLength(1);
   });
 
-  it('ignores styles that are not Anton', () => {
+  it('ignores a face the fence does not cover', () => {
+    // SpaceGrotesk has no entry in FENCED_FONTS, so it is not measured. This
+    // used to use SpaceMono as the example, which stopped being true the day
+    // SpaceMono joined the fence — a cricket score was shipping clipped.
     expect(
-      analyseSource('a.tsx', `<Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 18, lineHeight: 9 }}>x</Text>`)
+      analyseSource('a.tsx', `<Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 18, lineHeight: 9 }}>x</Text>`)
+    ).toEqual([]);
+  });
+
+  it('measures SpaceMono against its own floor rather than the Anton one', () => {
+    // 18/19 = 1.056em: under SpaceMono's 1.061 and well under Anton's 1.188.
+    // The floor reported has to be the one the face actually needs.
+    const [finding] = analyseSource('a.tsx', `<Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 18, lineHeight: 19 }}>x</Text>`);
+    expect(finding).toMatchObject({ kind: 'violation', family: 'SpaceMono_700Bold', minLeading: SPACEMONO_MIN_LEADING });
+
+    // 18/20 = 1.111em clears SpaceMono but would still fail Anton.
+    expect(
+      analyseSource('a.tsx', `<Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 18, lineHeight: 20 }}>x</Text>`)
     ).toEqual([]);
   });
 

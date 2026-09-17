@@ -20,7 +20,7 @@ function record(e: LeaderboardEntry) {
 function Leader({ e }: { e: LeaderboardEntry }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 13, backgroundColor: '#F97316' }}>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 34, lineHeight: 30, color: '#0B0B0B' }}>1</Text>
+      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 34, lineHeight: 37, color: '#0B0B0B' }}>1</Text>
       <View style={{ width: 44, height: 44, borderRadius: 4, backgroundColor: '#0B0B0B', alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 16, color: '#F97316' }}>
           {e.playerName.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase()}
@@ -35,7 +35,7 @@ function Leader({ e }: { e: LeaderboardEntry }) {
         </Text>
       </View>
       <View style={{ alignItems: 'flex-end' }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, lineHeight: 24, color: '#0B0B0B' }}>{e.totalPointsScored}</Text>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, lineHeight: 28, color: '#0B0B0B' }}>{e.totalPointsScored}</Text>
         <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, color: 'rgba(11,11,11,0.7)' }}>PTS</Text>
       </View>
     </View>

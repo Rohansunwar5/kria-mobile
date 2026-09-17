@@ -125,7 +125,7 @@ export default function Home() {
         <Image source={require('../../../assets/images/logo.png')} resizeMode="contain" style={{ width: 33, height: 29 }} />
         {/* The canvas draws Kria at 23/21. That is a CSS line box; on iOS the
             line box is compressed to lineHeight and the caps are shaved, which
-            is what __tests__/antonLeading.test.ts fences at 1.188em. 23px needs
+            is what __tests__/fontLeading.test.ts fences at 1.188em. 23px needs
             27.3px, so the leading is 28 and the size is the design's. */}
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 23, lineHeight: 28, color: theme.text }}>
           Kria

@@ -1,5 +1,5 @@
 /**
- * The analyser behind `__tests__/antonLeading.test.ts`.
+ * The analyser behind `__tests__/fontLeading.test.ts`.
  *
  * Anton_400Regular.ttf metrics (unitsPerEm 2048): capHeight 1760 = 0.859em,
  * hhea descent 674 = 0.329em. iOS compresses the line box to `lineHeight` and
@@ -15,6 +15,30 @@
 
 export const ANTON_MIN_LEADING = 1.188;
 
+/**
+ * Space Mono (both weights, unitsPerEm 1000): capHeight 700 = 0.700em,
+ * hhea descent 361 = 0.361em, so the same rule gives 1.061em. Its natural
+ * leading is 1.481em, so a style with no lineHeight is safe here too.
+ *
+ * The fence covered only Anton until a cricket score at 46/42 = 0.913em came
+ * back with its digits shaved on an iPhone. Nine more SpaceMono styles were
+ * sitting at or below the floor at the same time.
+ */
+export const SPACEMONO_MIN_LEADING = 1.061;
+
+/**
+ * The faces this fence measures, with the floor each one needs.
+ *
+ * A face with no entry is simply not checked — adding one is how you bring it
+ * under the fence, and the floor must come from that font's own metrics, not
+ * from a number that looked about right.
+ */
+export const FENCED_FONTS: { family: string; minLeading: number }[] = [
+  { family: 'Anton_400Regular', minLeading: ANTON_MIN_LEADING },
+  { family: 'SpaceMono_700Bold', minLeading: SPACEMONO_MIN_LEADING },
+  { family: 'SpaceMono_400Regular', minLeading: SPACEMONO_MIN_LEADING },
+];
+
 /** The marker that opts a style the analyser cannot measure out of the fence. */
 export const EXEMPT_MARKER = 'anton-leading-exempt';
 
@@ -26,6 +50,8 @@ export type Finding =
       size: number;
       lineHeight: number;
       ratio: number;
+      family: string;
+      minLeading: number;
     }
   | {
       kind: 'unverifiable';
@@ -33,6 +59,7 @@ export type Finding =
       line: number;
       /** The style's own properties, for the failure message. */
       detail: string;
+      family: string;
     };
 
 /**
@@ -128,12 +155,28 @@ function lineOf(src: string, index: number): number {
   return src.slice(0, index).split('\n').length;
 }
 
-/** Findings for one file's source. Empty means every Anton style is accounted for. */
+/** Findings for one file's source. Empty means every fenced style is accounted for. */
 export function analyseSource(file: string, src: string): Finding[] {
   const findings: Finding[] = [];
   const seen = new Set<number>();
 
-  for (let at = src.indexOf('Anton_400Regular'); at !== -1; at = src.indexOf('Anton_400Regular', at + 1)) {
+  for (const { family, minLeading } of FENCED_FONTS) {
+    findings.push(...analyseFamily(file, src, family, minLeading, seen));
+  }
+
+  return findings;
+}
+
+function analyseFamily(
+  file: string,
+  src: string,
+  family: string,
+  minLeading: number,
+  seen: Set<number>,
+): Finding[] {
+  const findings: Finding[] = [];
+
+  for (let at = src.indexOf(family); at !== -1; at = src.indexOf(family, at + 1)) {
     const object = enclosingObject(src, at);
     if (!object || seen.has(object.start)) continue;
     seen.add(object.start);
@@ -153,7 +196,7 @@ export function analyseSource(file: string, src: string): Finding[] {
       // genuinely cannot measure — never for one it can.
       const before = src.slice(Math.max(0, object.start - 240), object.start);
       if (before.includes(EXEMPT_MARKER) || object.text.includes(EXEMPT_MARKER)) continue;
-      findings.push({ kind: 'unverifiable', file, line, detail: own.replace(/\s+/g, ' ').trim() });
+      findings.push({ kind: 'unverifiable', file, line, family, detail: own.replace(/\s+/g, ' ').trim() });
       continue;
     }
 
@@ -162,8 +205,8 @@ export function analyseSource(file: string, src: string): Finding[] {
     const size = Math.max(...sizes);
     const lineHeight = Math.min(...leadings);
     const ratio = lineHeight / size;
-    if (ratio < ANTON_MIN_LEADING) {
-      findings.push({ kind: 'violation', file, line, size, lineHeight, ratio });
+    if (ratio < minLeading) {
+      findings.push({ kind: 'violation', file, line, size, lineHeight, ratio, family, minLeading });
     }
   }
 
@@ -173,6 +216,6 @@ export function analyseSource(file: string, src: string): Finding[] {
 /** One line per finding, for a failure message that says what to do. */
 export function describeFinding(f: Finding): string {
   return f.kind === 'violation'
-    ? `${f.file}:${f.line} ${f.size}/${f.lineHeight} = ${f.ratio.toFixed(3)}em (needs >= ${ANTON_MIN_LEADING})`
-    : `${f.file}:${f.line} cannot be measured — make the sizes integer literals, or mark it "${EXEMPT_MARKER}: <reason>" — { ${f.detail} }`;
+    ? `${f.file}:${f.line} ${f.family} ${f.size}/${f.lineHeight} = ${f.ratio.toFixed(3)}em (needs >= ${f.minLeading})`
+    : `${f.file}:${f.line} ${f.family} cannot be measured — make the sizes integer literals, or mark it "${EXEMPT_MARKER}: <reason>" — { ${f.detail} }`;
 }

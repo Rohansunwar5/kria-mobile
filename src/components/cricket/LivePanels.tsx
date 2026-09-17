@@ -91,7 +91,7 @@ export function PartnershipCard({ partnership }: { partnership: PartnershipInfo 
           <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, lineHeight: 18, color: '#fff' }}>
             {partnership.strikerName} <Text style={{ color: '#7d7d7d' }}>/</Text> {partnership.nonStrikerName}
           </Text>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, lineHeight: 26, color: '#fff' }}>
+          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, lineHeight: 28, color: '#fff' }}>
             {partnership.runs}
             <Text style={{ fontSize: 14, color: '#a3a3a3' }}> ({partnership.balls})</Text>
           </Text>
@@ -177,7 +177,7 @@ export function Innings1Panel({
           </Text>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 22, lineHeight: 22, color: '#fff' }}>
+          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 22, lineHeight: 24, color: '#fff' }}>
             {runs}/{wickets}
           </Text>
           <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: '#a3a3a3', marginTop: 3 }}>{overs} ov</Text>

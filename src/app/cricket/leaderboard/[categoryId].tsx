@@ -151,7 +151,7 @@ export default function CricketLeaderboard() {
             </Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 30, lineHeight: 26, color: '#0B0B0B' }}>{top.value}</Text>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 30, lineHeight: 32, color: '#0B0B0B' }}>{top.value}</Text>
             <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, color: 'rgba(11,11,11,0.7)' }}>{top.unit}</Text>
           </View>
         </View>

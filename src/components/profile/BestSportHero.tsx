@@ -80,7 +80,7 @@ export function BestSportHero({
         <Text style={KICK(theme)}>Best sport · {label}</Text>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14, paddingHorizontal: 14, paddingTop: 8 }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 52, lineHeight: 48, color: theme.text }}>
+        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 52, lineHeight: 56, color: theme.text }}>
           {winPercent(bestSport.winRate, bestSport.decided)}
         </Text>
         <View style={{ paddingBottom: 7 }}>

@@ -85,7 +85,7 @@ export default function Invoices() {
               <Skeleton h={30} w="62%" line />
             </View>
           ) : (
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 38, lineHeight: 40, color: '#0B0B0B', marginTop: 6 }}>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 38, lineHeight: 41, color: '#0B0B0B', marginTop: 6 }}>
               {totals.paid}
             </Text>
           )}

@@ -74,7 +74,7 @@ export function HeroScore({
       {live ? (
         <View style={{ paddingHorizontal: 16, paddingVertical: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 46, lineHeight: 42, color: '#fff' }}>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 46, lineHeight: 49, color: '#fff' }}>
               {live.runs}
               <Text style={{ color: '#F97316' }}>/</Text>
               <Text style={{ fontSize: 32 }}>{live.wickets}</Text>

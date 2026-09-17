@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
 import { execSync } from 'child_process';
-import { analyseSource, describeFinding, ANTON_MIN_LEADING } from '../test-utils/antonLeading';
+import { analyseSource, describeFinding, ANTON_MIN_LEADING } from '../test-utils/fontLeading';
 
 // The fence. Anton clips its capitals on iOS below ANTON_MIN_LEADING — the
 // reasoning and the metrics are on the analyser, which is unit-tested in
-// __tests__/antonLeadingFence.test.ts because a fence cannot prove it would
+// __tests__/fontLeadingFence.test.ts because a fence cannot prove it would
 // catch a shape it never meets.
 //
 // NEVER weaken this to make a screen pass. Raise the lineHeight; the sizes are
