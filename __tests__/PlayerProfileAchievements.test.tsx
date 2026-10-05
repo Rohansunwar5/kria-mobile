@@ -10,6 +10,8 @@ import type { PublicHistoryEntry } from '../src/api/profileApi';
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ playerId: 'p1' }),
   useRouter: () => ({ push: jest.fn() }),
+  // The titles section renders a Badge, which pauses its halo off-screen.
+  useIsFocused: () => true,
 }));
 
 // A `mock`-prefixed variable is allowed inside jest.mock's factory (babel-jest-hoist),

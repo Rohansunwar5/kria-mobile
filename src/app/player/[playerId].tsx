@@ -13,6 +13,7 @@ import { BestSportHero } from '@/components/profile/BestSportHero';
 import { Achievements } from '@/components/profile/Achievements';
 import { RecentMatches } from '@/components/profile/RecentMatches';
 import { PlayedForCard } from '@/components/profile/PlayedForCard';
+import { HonorsList } from '@/components/profile/HonorsList';
 import { getPublicPlayer, type PublicPlayer, type PublicHistoryEntry } from '@/api/profileApi';
 import { useCareer } from '@/lib/useCareer';
 import { useTheme } from '@/lib/theme';
@@ -147,21 +148,7 @@ export default function PlayerProfile() {
             onRetry={career.reload}
           />
 
-          {player.titles.length ? (
-            <View style={{ marginTop: 22 }}>
-              <Text style={{ ...LBL(theme), letterSpacing: 0.18 * 9, marginBottom: 8 }}>Titles</Text>
-              <View style={{ gap: 7 }}>
-                {player.titles.map((t, i) => (
-                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 11, backgroundColor: theme.brand, borderRadius: 6 }}>
-                    <Icon name="trophy" size={17} color={theme.onBrand} strokeWidth={2.2} />
-                    <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: theme.onBrand }}>
-                      {t}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          ) : null}
+          <HonorsList label="Titles" honors={player.honors} titles={player.titles} style={{ marginTop: 22 }} />
 
           <View style={{ marginTop: 22 }}>
             <Text style={{ ...LBL(theme), letterSpacing: 0.18 * 9, marginBottom: 8 }}>Played for</Text>

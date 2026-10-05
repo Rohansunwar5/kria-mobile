@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import API from '@/api/axios';
 import * as storage from '@/lib/storage';
+import type { Honor } from '@/lib/badges';
 
 export type Role = 'player';
 
@@ -17,6 +18,7 @@ interface User {
   location?: string;
   profileImage?: string;
   titles?: string[];
+  honors?: Honor[];
   [key: string]: any;
 }
 

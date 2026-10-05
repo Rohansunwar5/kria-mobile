@@ -1,5 +1,6 @@
 import API from './axios';
 import { unwrap } from './unwrap';
+import type { Honor } from '@/lib/badges';
 
 export interface PublicPlayer {
   _id: string;
@@ -9,6 +10,7 @@ export interface PublicPlayer {
   location?: string;
   profileImage?: string;
   titles: string[];
+  honors?: Honor[];
 }
 
 export interface PublicHistoryEntry {

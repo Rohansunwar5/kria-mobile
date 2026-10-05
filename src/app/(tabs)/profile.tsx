@@ -11,6 +11,7 @@ import { BestSportHero } from '@/components/profile/BestSportHero';
 import { RecentMatches } from '@/components/profile/RecentMatches';
 import { PlayedForCard } from '@/components/profile/PlayedForCard';
 import { MenuRow } from '@/components/profile/MenuRow';
+import { HonorsList } from '@/components/profile/HonorsList';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPlayerStats, logout } from '@/store/slices/authSlice';
 import { fetchPlayerTournamentHistory } from '@/store/slices/registrationSlice';
@@ -149,21 +150,7 @@ export default function Profile() {
             </Text>
           </Pressable>
 
-          {user?.titles?.length ? (
-            <View style={{ marginBottom: 16 }}>
-              <Text style={{ ...LBL(theme), marginBottom: 8 }}>Honors</Text>
-              <View style={{ gap: 7 }}>
-                {user.titles.map((t, i) => (
-                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 11, backgroundColor: theme.brand, borderRadius: 6 }}>
-                    <Icon name="trophy" size={17} color={theme.onBrand} strokeWidth={2.2} />
-                    <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: theme.onBrand }}>
-                      {t}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          ) : null}
+          <HonorsList label="Honors" honors={user?.honors} titles={user?.titles} style={{ marginBottom: 16 }} />
 
           {tournamentHistory.length ? (
             <View style={{ marginBottom: 16 }}>
