@@ -56,7 +56,7 @@ only; client and mobile hold key → name, tier, emblem plus their own SVG rende
 - `grantAward`: when `playerId` is present, `addHonor` instead of `addTitle`. Team-only awards
   write nothing to players (unchanged).
 - Body validation on `POST /tournament/:id/awards`: `title` required, trimmed, 1–60 chars;
-  `badge` required, one of the twelve keys. Invalid → 400.
+  `badge` required, one of the twelve keys. Invalid → 422 (the codebase's `validateRequest` status).
 - Public profile payload (`getPublicProfile`) adds `honors: player.honors || []`. `/player/me`
   returns the whole document already.
 
@@ -85,14 +85,14 @@ only; client and mobile hold key → name, tier, emblem plus their own SVG rende
 
 ## Error handling
 
-- Bad body → 400 from the validator; the modal already alerts `response.data.message`.
+- Bad body → 422 from the validator; the modal already alerts `response.data.message`.
 - Missing `honors` on older documents → treated as `[]` everywhere.
 - Unknown badge key in stored data → renders `champion`, never crashes.
 
 ## Tests
 
 - Server (vitest): grant with badge stores `{ title, badge }` on player and award; unknown badge
-  → 400; 61-char title → 400.
+  → 422; 61-char title → 422.
 - Mobile (jest): `HonorsList` renders badged honours then legacy titles, in order, and renders
   nothing when both are empty.
 
