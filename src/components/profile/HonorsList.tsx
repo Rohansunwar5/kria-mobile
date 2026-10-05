@@ -1,7 +1,18 @@
 import { View, Text, type ViewStyle } from 'react-native';
 import { Badge } from '@/components/profile/Badge';
-import { badgeFor, type Honor } from '@/lib/badges';
+import { badgeFor, type Honor, type Tier } from '@/lib/badges';
 import { useTheme } from '@/lib/theme';
+import type { Palette } from '@/lib/theme/palette';
+
+// The tier word in its tier's colour, through the ink tokens so it stays
+// legible on light surfaces too (DESIGN.md §7). Steel has no accent.
+const TIER_INK: Record<Tier, keyof Palette> = {
+  legendary: 'auctionInk',
+  elite: 'auctionInk',
+  gold: 'brandInk',
+  rare: 'openInk',
+  steel: 'textMeta',
+};
 
 /**
  * The Honours section: organizer-granted honours (badge + title), newest
@@ -42,7 +53,7 @@ export function HonorsList({
             >
               <Badge badge={h.badge} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: theme.textMeta }}>
+                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: theme[TIER_INK[tier]] }}>
                   {tier}
                 </Text>
                 <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: theme.text, marginTop: 2 }}>

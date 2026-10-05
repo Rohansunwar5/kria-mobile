@@ -44,6 +44,9 @@ const EMBLEM: Record<Emblem, Stroke[]> = {
   target: ['M4 4h16v16H4zM8.5 8.5h7v7h-7zM11.3 11.3h1.4v1.4h-1.4z'],
 };
 
+// Gradient ids carry the tier: native scopes defs per <Svg>, but on Expo web
+// every badge shares one DOM, and a shared id would paint them all alike.
+// Same tier → identical defs, so those collisions are harmless.
 const OUTER = 'M120 6 214 60v120l-94 54-94-54V60z';
 const INNER = 'M120 22 200 68v104l-80 46-80-46V68z';
 
@@ -73,27 +76,27 @@ export function Badge({ badge, size = 44 }: { badge?: string; size?: number }) {
         <Animated.View style={[{ position: 'absolute', width: size, height: size }, haloStyle]}>
           <Svg width={size} height={size} viewBox="0 0 240 240">
             <Defs>
-              <RadialGradient id="halo" cx="50%" cy="50%" r="50%">{stops(halo)}</RadialGradient>
+              <RadialGradient id={`badge-halo-${tier}`} cx="50%" cy="50%" r="50%">{stops(halo)}</RadialGradient>
             </Defs>
-            <Circle cx={120} cy={120} r={98} fill="url(#halo)" />
+            <Circle cx={120} cy={120} r={98} fill={`url(#badge-halo-${tier})`} />
           </Svg>
         </Animated.View>
       ) : null}
       <Svg width={size} height={size} viewBox="0 0 240 240">
         <Defs>
-          <LinearGradient id="stroke" x1="0" y1="0" x2="1" y2="1">{stops(TIER_STROKE[tier])}</LinearGradient>
-          <LinearGradient id="plate" x1="0" y1="0" x2="0.6" y2="1">
+          <LinearGradient id={`badge-stroke-${tier}`} x1="0" y1="0" x2="1" y2="1">{stops(TIER_STROKE[tier])}</LinearGradient>
+          <LinearGradient id="badge-plate" x1="0" y1="0" x2="0.6" y2="1">
             <Stop offset={0} stopColor="#1E1E1E" />
             <Stop offset={1} stopColor="#0B0B0B" />
           </LinearGradient>
         </Defs>
-        <Path d={OUTER} fill="url(#plate)" stroke="url(#stroke)" strokeWidth={5} />
-        <Path d={INNER} fill="url(#plate)" fillOpacity={0.65} stroke="url(#stroke)" strokeWidth={1.5} strokeOpacity={0.5} />
+        <Path d={OUTER} fill="url(#badge-plate)" stroke={`url(#badge-stroke-${tier})`} strokeWidth={5} />
+        <Path d={INNER} fill="url(#badge-plate)" fillOpacity={0.65} stroke={`url(#badge-stroke-${tier})`} strokeWidth={1.5} strokeOpacity={0.5} />
         {/* = translate(120,118) scale(3.4) translate(-12,-12) from the design */}
         <G transform="translate(79.2 77.2) scale(3.4)" fill="none" strokeWidth={1.7} strokeLinecap="square" strokeLinejoin="miter">
           {EMBLEM[emblem].map((s, i) =>
             typeof s === 'string' ? (
-              <Path key={i} d={s} stroke="url(#stroke)" />
+              <Path key={i} d={s} stroke={`url(#badge-stroke-${tier})`} />
             ) : (
               <Path key={i} d={s[0]} stroke={s[1]} />
             )
