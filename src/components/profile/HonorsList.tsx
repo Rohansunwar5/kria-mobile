@@ -49,7 +49,7 @@ export function HonorsList({
               key={i}
               accessible
               accessibilityLabel={`${h.title}, ${tier} honour`}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 10, paddingVertical: 8, backgroundColor: theme.surface, borderWidth: 1.5, borderColor: theme.line, borderRadius: 6 }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 12, paddingVertical: 11, backgroundColor: theme.surface, borderWidth: 1.5, borderColor: theme.line, borderRadius: 6 }}
             >
               <Badge badge={h.badge} />
               <View style={{ flex: 1 }}>

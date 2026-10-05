@@ -1,14 +1,13 @@
-import { View } from 'react-native';
-import Svg, { Circle, Defs, G, LinearGradient, Path, RadialGradient, Stop } from 'react-native-svg';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import { View, StyleSheet } from 'react-native';
+import Svg, { Circle, ClipPath, Defs, G, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Animated, { useAnimatedProps, useAnimatedStyle } from 'react-native-reanimated';
 import { useIsFocused } from 'expo-router';
 import { badgeFor, type Emblem, type Tier } from '@/lib/badges';
-import { useHaloPulse } from '@/lib/motion';
+import { useBadgeLoop } from '@/lib/motion';
 
 // Fixed art, identical in both palettes: a badge is an object, not chrome, so
 // these are deliberately not theme tokens (the same call as a seeded hue).
-// Source: Kria Award Badges.dc.html. At profile-row size the design drops the
-// orbit ring, sparks, facets and sweep — frame, emblem and halo only.
+// Source: Kria Award Badges.dc.html.
 type StopDef = [offset: number, color: string, opacity?: number];
 
 const TIER_STROKE: Record<Tier, StopDef[]> = {
@@ -19,11 +18,38 @@ const TIER_STROKE: Record<Tier, StopDef[]> = {
   steel: [[0, '#EDEDED'], [0.5, '#9A9A9A'], [1, '#3A3A3A']],
 };
 
-// The design's 44px row draws a halo for the top three tiers only.
-const TIER_HALO: Partial<Record<Tier, StopDef[]>> = {
-  legendary: [[0, '#F97316', 0.95], [0.6, '#FA4C93', 0.35], [1, '#FA4C93', 0]],
-  elite: [[0, '#FA4C93', 0.9], [1, '#FA4C93', 0]],
-  gold: [[0, '#F97316', 0.9], [1, '#F97316', 0]],
+/**
+ * Motion per tier, as the design's CSS periods (ms). Rarer = more motion — the
+ * rarity hierarchy is the point (user call, 2026-10-05, overriding DESIGN.md
+ * §6's one-idle-animation rule for this component). Steel stays still.
+ */
+const TIER_FX: Record<Tier, { aura?: number; ring?: number; sparks?: number; sweep?: number; double?: true; twinkle?: true }> = {
+  legendary: { aura: 3200, ring: 22000, sparks: 15000, sweep: 3400, double: true, twinkle: true },
+  elite: { aura: 3400, ring: 20000, sweep: 4200 },
+  gold: { aura: 3500, sweep: 4400 },
+  rare: { aura: 4200 },
+  steel: {},
+};
+
+// The aura is drawn past the badge box (AURA_SPAN × size) behind the frame.
+// The hexagon covers its middle, so the stops keep it strong out to where the
+// hexagon ends (~0.56 of the radius) and fade from there.
+const AURA_SPAN = 1.4;
+const AURA: Partial<Record<Tier, StopDef[]>> = {
+  legendary: [[0, '#F97316', 0.95], [0.6, '#FA4C93', 0.6], [1, '#FA4C93', 0]],
+  elite: [[0, '#FA4C93', 0.9], [0.6, '#FA4C93', 0.5], [1, '#FA4C93', 0]],
+  gold: [[0, '#F97316', 0.9], [0.6, '#F97316', 0.45], [1, '#F97316', 0]],
+  rare: [[0, '#16C46A', 0.8], [0.6, '#16C46A', 0.4], [1, '#16C46A', 0]],
+};
+
+// Glow inside the face, over the plate, so every tier reads lit from within.
+const INNER_GLOW: Record<Tier, string> = {
+  legendary: '#FA4C93', elite: '#FA4C93', gold: '#F97316', rare: '#16C46A', steel: '#C9C9C9',
+};
+
+const RING: Partial<Record<Tier, [color: string, dash: string]>> = {
+  legendary: ['#FA4C93', '3 13'],
+  elite: ['#FF8FC0', '4 12'],
 };
 
 // 24×24 emblem strokes. A string strokes in the tier gradient; a tuple keeps
@@ -44,27 +70,107 @@ const EMBLEM: Record<Emblem, Stroke[]> = {
   target: ['M4 4h16v16H4zM8.5 8.5h7v7h-7zM11.3 11.3h1.4v1.4h-1.4z'],
 };
 
-// Gradient ids carry the tier: native scopes defs per <Svg>, but on Expo web
-// every badge shares one DOM, and a shared id would paint them all alike.
-// Same tier → identical defs, so those collisions are harmless.
 const OUTER = 'M120 6 214 60v120l-94 54-94-54V60z';
 const INNER = 'M120 22 200 68v104l-80 46-80-46V68z';
+const SPARK = 'M0-9 7 0 0 9-7 0z';
+const SPARKS_AT = [[120, 6], [219, 177], [21, 177]] as const;
+// [x, y, scale, period, delay] — the design's three legendary twinkles.
+const TWINKLES = [[196, 44, 0.5, 1900, 0], [44, 196, 0.42, 2400, 500], [206, 150, 0.36, 2100, 900]] as const;
+
+const AnimatedRect = Animated.createAnimatedComponent(Rect);
+
+// Every layer is positioned. Web paints positioned elements above unpositioned
+// ones regardless of source order (that is how the old halo ended up over the
+// plate on web and under it on native); all-positioned, both platforms paint
+// in source order: back to front as written below.
+const fill = StyleSheet.absoluteFill;
 
 const stops = (s: StopDef[]) =>
   s.map(([offset, color, opacity = 1]) => (
     <Stop key={offset} offset={offset} stopColor={color} stopOpacity={opacity} />
   ));
 
+const Art = ({ size, children }: { size: number; children: React.ReactNode }) => (
+  <Svg width={size} height={size} viewBox="0 0 240 240">{children}</Svg>
+);
+
+function Aura({ tier, size, period, on }: { tier: Tier; size: number; period: number; on: boolean }) {
+  const v = useBadgeLoop('pulse', on, period);
+  const style = useAnimatedStyle(() => ({
+    opacity: 0.55 + v.value * 0.45,
+    transform: [{ scale: 0.94 + v.value * 0.12 }],
+  }));
+  const span = size * AURA_SPAN;
+  const inset = (size - span) / 2;
+  return (
+    <Animated.View testID="badge-aura" style={[{ position: 'absolute', left: inset, top: inset, width: span, height: span }, style]}>
+      <Art size={span}>
+        <Defs>
+          <RadialGradient id={`badge-aura-${tier}`} cx="50%" cy="50%" r="50%">{stops(AURA[tier]!)}</RadialGradient>
+        </Defs>
+        <Circle cx={120} cy={120} r={120} fill={`url(#badge-aura-${tier})`} />
+      </Art>
+    </Animated.View>
+  );
+}
+
+function Spinner({ testID, size, period, on, reverse, children }: { testID: string; size: number; period: number; on: boolean; reverse?: boolean; children: React.ReactNode }) {
+  const v = useBadgeLoop('spin', on, period);
+  const style = useAnimatedStyle(() => ({ transform: [{ rotate: `${(reverse ? -360 : 360) * v.value}deg` }] }));
+  return (
+    <Animated.View testID={testID} style={[fill, style]}>
+      <Art size={size}>{children}</Art>
+    </Animated.View>
+  );
+}
+
+function Sweep({ size, period, double, on }: { size: number; period: number; double?: boolean; on: boolean }) {
+  const a = useBadgeLoop('sweep', on, period);
+  const b = useBadgeLoop('sweep', on && !!double, period, 220);
+  // The design's band travels translateX(-170 → 300) from x = -40.
+  const pa = useAnimatedProps(() => ({ x: -210 + a.value * 470 }));
+  const pb = useAnimatedProps(() => ({ x: -210 + b.value * 470 }));
+  return (
+    <View testID="badge-sweep" style={fill}>
+      <Art size={size}>
+        <Defs>
+          <ClipPath id="badge-clip"><Path d={OUTER} /></ClipPath>
+          <LinearGradient id="badge-shine" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset={0} stopColor="#FFFFFF" stopOpacity={0} />
+            <Stop offset={0.5} stopColor="#FFFFFF" stopOpacity={0.55} />
+            <Stop offset={1} stopColor="#FFFFFF" stopOpacity={0} />
+          </LinearGradient>
+        </Defs>
+        <G clipPath="url(#badge-clip)">
+          {/* skewX(-9.46°) = the design's band leaning 40 units over its 240 height */}
+          <G transform="skewX(-9.46)">
+            <AnimatedRect x={-210} y={0} width={60} height={240} fill="url(#badge-shine)" animatedProps={pa} />
+            {double ? <AnimatedRect x={-210} y={0} width={44} height={240} fill="url(#badge-shine)" opacity={0.5} animatedProps={pb} /> : null}
+          </G>
+        </G>
+      </Art>
+    </View>
+  );
+}
+
+function Twinkle({ size, x, y, scale, period, delay, on }: { size: number; x: number; y: number; scale: number; period: number; delay: number; on: boolean }) {
+  const v = useBadgeLoop('pulse', on, period, delay);
+  const style = useAnimatedStyle(() => ({ opacity: 0.15 + v.value * 0.85 }));
+  return (
+    <Animated.View testID="badge-twinkle" style={[fill, style]}>
+      <Art size={size}>
+        <Path d={SPARK} transform={`translate(${x} ${y}) scale(${scale})`} fill="#FFD37A" />
+      </Art>
+    </Animated.View>
+  );
+}
+
 /** One honour badge. Unknown or missing key → champion art. Decorative: the row carries the label. */
 export function Badge({ badge, size = 44 }: { badge?: string; size?: number }) {
   const { tier, emblem } = badgeFor(badge);
-  const halo = TIER_HALO[tier];
-  const focused = useIsFocused();
-  const pulse = useHaloPulse(!!halo && focused);
-  const haloStyle = useAnimatedStyle(() => ({
-    opacity: 0.3 + pulse.value * 0.48,
-    transform: [{ scale: 0.94 + pulse.value * 0.12 }],
-  }));
+  const fx = TIER_FX[tier];
+  const on = useIsFocused();
+  const ring = RING[tier];
 
   return (
     <View
@@ -72,37 +178,56 @@ export function Badge({ badge, size = 44 }: { badge?: string; size?: number }) {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      {halo ? (
-        <Animated.View style={[{ position: 'absolute', width: size, height: size }, haloStyle]}>
-          <Svg width={size} height={size} viewBox="0 0 240 240">
-            <Defs>
-              <RadialGradient id={`badge-halo-${tier}`} cx="50%" cy="50%" r="50%">{stops(halo)}</RadialGradient>
-            </Defs>
-            <Circle cx={120} cy={120} r={98} fill={`url(#badge-halo-${tier})`} />
-          </Svg>
-        </Animated.View>
+      {fx.aura ? <Aura tier={tier} size={size} period={fx.aura} on={on} /> : null}
+      {ring && fx.ring ? (
+        <Spinner testID="badge-ring" size={size} period={fx.ring} on={on}>
+          <Circle cx={120} cy={120} r={114} fill="none" stroke={ring[0]} strokeWidth={2} strokeDasharray={ring[1]} strokeOpacity={0.85} />
+        </Spinner>
       ) : null}
-      <Svg width={size} height={size} viewBox="0 0 240 240">
-        <Defs>
-          <LinearGradient id={`badge-stroke-${tier}`} x1="0" y1="0" x2="1" y2="1">{stops(TIER_STROKE[tier])}</LinearGradient>
-          <LinearGradient id="badge-plate" x1="0" y1="0" x2="0.6" y2="1">
-            <Stop offset={0} stopColor="#1E1E1E" />
-            <Stop offset={1} stopColor="#0B0B0B" />
-          </LinearGradient>
-        </Defs>
-        <Path d={OUTER} fill="url(#badge-plate)" stroke={`url(#badge-stroke-${tier})`} strokeWidth={5} />
-        <Path d={INNER} fill="url(#badge-plate)" fillOpacity={0.65} stroke={`url(#badge-stroke-${tier})`} strokeWidth={1.5} strokeOpacity={0.5} />
-        {/* = translate(120,118) scale(3.4) translate(-12,-12) from the design */}
-        <G transform="translate(79.2 77.2) scale(3.4)" fill="none" strokeWidth={1.7} strokeLinecap="square" strokeLinejoin="miter">
-          {EMBLEM[emblem].map((s, i) =>
-            typeof s === 'string' ? (
-              <Path key={i} d={s} stroke={`url(#badge-stroke-${tier})`} />
-            ) : (
-              <Path key={i} d={s[0]} stroke={s[1]} />
-            )
-          )}
-        </G>
-      </Svg>
+      {fx.sparks ? (
+        <Spinner testID="badge-sparks" size={size} period={fx.sparks} on={on} reverse>
+          {SPARKS_AT.map(([x, y]) => (
+            <Path key={`${x},${y}`} d={SPARK} transform={`translate(${x} ${y})`} fill="#F97316" />
+          ))}
+        </Spinner>
+      ) : null}
+      <View testID="badge-frame" style={fill}>
+        <Art size={size}>
+          {/* Gradient ids carry the tier: native scopes defs per <Svg>, but on
+              Expo web every badge shares one DOM, and a shared id would paint
+              them all alike. Same tier → identical defs, so those collide harmlessly. */}
+          <Defs>
+            <LinearGradient id={`badge-stroke-${tier}`} x1="0" y1="0" x2="1" y2="1">{stops(TIER_STROKE[tier])}</LinearGradient>
+            <LinearGradient id="badge-plate" x1="0" y1="0" x2="0.6" y2="1">
+              <Stop offset={0} stopColor="#1E1E1E" />
+              <Stop offset={1} stopColor="#0B0B0B" />
+            </LinearGradient>
+            <RadialGradient id={`badge-inner-${tier}`} cx="50%" cy="50%" r="50%">
+              <Stop offset={0} stopColor={INNER_GLOW[tier]} stopOpacity={0.45} />
+              <Stop offset={1} stopColor={INNER_GLOW[tier]} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Path d={OUTER} fill="url(#badge-plate)" stroke={`url(#badge-stroke-${tier})`} strokeWidth={5} />
+          <Path d={INNER} fill="url(#badge-plate)" fillOpacity={0.65} stroke={`url(#badge-stroke-${tier})`} strokeWidth={1.5} strokeOpacity={0.5} />
+          <Path d={INNER} fill={`url(#badge-inner-${tier})`} />
+          {/* = translate(120,118) scale(3.4) translate(-12,-12) from the design */}
+          <G transform="translate(79.2 77.2) scale(3.4)" fill="none" strokeWidth={1.7} strokeLinecap="square" strokeLinejoin="miter">
+            {EMBLEM[emblem].map((s, i) =>
+              typeof s === 'string' ? (
+                <Path key={i} d={s} stroke={`url(#badge-stroke-${tier})`} />
+              ) : (
+                <Path key={i} d={s[0]} stroke={s[1]} />
+              )
+            )}
+          </G>
+        </Art>
+      </View>
+      {fx.sweep ? <Sweep size={size} period={fx.sweep} double={fx.double} on={on} /> : null}
+      {fx.twinkle
+        ? TWINKLES.map(([x, y, scale, period, delay]) => (
+            <Twinkle key={`${x},${y}`} size={size} x={x} y={y} scale={scale} period={period} delay={delay} on={on} />
+          ))
+        : null}
     </View>
   );
 }

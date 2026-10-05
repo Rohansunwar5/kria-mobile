@@ -64,7 +64,7 @@ describe('HonorsList', () => {
   it('gives each tier its own gradient ids', () => {
     const legendary = gradientIds(render(<HonorsList label="H" honors={[{ title: 'A', badge: 'season-mvp' }]} />).toJSON());
     const steel = gradientIds(render(<HonorsList label="H" honors={[{ title: 'B', badge: 'first-cap' }]} />).toJSON());
-    const tierOnly = (ids: string[]) => ids.filter((id) => id !== 'badge-plate');
+    const tierOnly = (ids: string[]) => ids.filter((id) => id !== 'badge-plate' && id !== 'badge-shine');
     expect(tierOnly(legendary).length).toBeGreaterThan(0);
     expect(tierOnly(legendary).filter((id) => tierOnly(steel).includes(id))).toEqual([]);
   });

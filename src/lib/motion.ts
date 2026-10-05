@@ -24,7 +24,6 @@ export const DUR = {
   sweepPass: 1400,
   shimmerRest: 4100,
   ambient: 14000,
-  halo: 1800,
 } as const;
 
 export const OUT = Easing.out(Easing.cubic);
@@ -154,26 +153,52 @@ export function useShimmer(active: boolean, index = 0) {
   return v;
 }
 
+type BadgeLoop = 'pulse' | 'spin' | 'sweep';
+// Where each loop rests under reduce-motion or off-screen: a pulse mid-breath
+// (the glow is still drawn — the badge is complete without motion), a spin
+// unturned, a sweep parked off the face.
+const LOOP_REST: Record<BadgeLoop, number> = { pulse: 0.5, spin: 0, sweep: 0 };
+
 /**
- * Award-badge halo: opacity/scale breathing on the three top tiers, reversing
- * so the loop has no seam. Rests at the midpoint, so under reduce-motion or on
- * an unfocused screen the halo is still drawn — the badge is complete without
- * motion.
+ * Award-badge loops (src/components/profile/Badge.tsx), 0→1, timed by the
+ * design's CSS periods in Kria Award Badges.dc.html.
  */
-export function useHaloPulse(active: boolean) {
+export function useBadgeLoop(kind: BadgeLoop, active: boolean, period: number, delay = 0) {
   const reduced = useReducedMotion();
-  const v = useSharedValue(0.5);
+  const v = useSharedValue(LOOP_REST[kind]);
   useEffect(() => {
     if (reduced || !active) {
       cancelAnimation(v);
-      v.value = 0.5;
+      v.value = LOOP_REST[kind];
       return;
     }
-    v.value = withSequence(
-      withTiming(0, { duration: DUR.halo / 2, easing: INOUT }),
-      withRepeat(withTiming(1, { duration: DUR.halo, easing: INOUT }), -1, true)
-    );
+    if (kind === 'spin') {
+      // Linear on purpose: a spin that eases reads as a wobble.
+      v.value = withRepeat(withTiming(1, { duration: period, easing: Easing.linear }), -1, false);
+    } else if (kind === 'sweep') {
+      // One pass over 60% of the period, then parked off the face (k-sweep).
+      v.value = withDelay(
+        delay,
+        withRepeat(
+          withSequence(
+            withTiming(1, { duration: period * 0.6, easing: INOUT }),
+            withDelay(period * 0.4, withTiming(0, { duration: 0 }))
+          ),
+          -1,
+          false
+        )
+      );
+    } else {
+      // Breathing, reversing so the loop has no seam (k-pulse, k-twinkle).
+      v.value = withDelay(
+        delay,
+        withSequence(
+          withTiming(0, { duration: period / 4, easing: INOUT }),
+          withRepeat(withTiming(1, { duration: period / 2, easing: INOUT }), -1, true)
+        )
+      );
+    }
     return () => cancelAnimation(v);
-  }, [active, reduced, v]);
+  }, [kind, active, reduced, period, delay, v]);
   return v;
 }
