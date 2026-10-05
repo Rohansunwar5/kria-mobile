@@ -24,6 +24,7 @@ export const DUR = {
   sweepPass: 1400,
   shimmerRest: 4100,
   ambient: 14000,
+  halo: 1800,
 } as const;
 
 export const OUT = Easing.out(Easing.cubic);
@@ -150,5 +151,29 @@ export function useShimmer(active: boolean, index = 0) {
     );
     return () => cancelAnimation(v);
   }, [active, reduced, index, v]);
+  return v;
+}
+
+/**
+ * Award-badge halo: opacity/scale breathing on the three top tiers, reversing
+ * so the loop has no seam. Rests at the midpoint, so under reduce-motion or on
+ * an unfocused screen the halo is still drawn — the badge is complete without
+ * motion.
+ */
+export function useHaloPulse(active: boolean) {
+  const reduced = useReducedMotion();
+  const v = useSharedValue(0.5);
+  useEffect(() => {
+    if (reduced || !active) {
+      cancelAnimation(v);
+      v.value = 0.5;
+      return;
+    }
+    v.value = withSequence(
+      withTiming(0, { duration: DUR.halo / 2, easing: INOUT }),
+      withRepeat(withTiming(1, { duration: DUR.halo, easing: INOUT }), -1, true)
+    );
+    return () => cancelAnimation(v);
+  }, [active, reduced, v]);
   return v;
 }
