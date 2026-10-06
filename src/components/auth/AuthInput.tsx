@@ -19,8 +19,9 @@ export function AuthInput({ label, error, secureToggle, icon, labelRight, right,
   const [hidden, setHidden] = useState(true);
   const focus = useSharedValue(0);
 
-  // Drive the full box style inline (borderWidth + color + fill) so it renders
-  // reliably on web/native instead of depending on NativeWind class merging.
+  // Drive the full box style inline (layout + border + fill). The box is a
+  // Reanimated Animated.View, which NativeWind does not interop, so a
+  // className on it is silently dropped — that stacked the icon above the text.
   const [focused, setFocused] = useState(false);
   const boxStyle = useAnimatedStyle(() => ({
     borderWidth: 1.5,
@@ -48,7 +49,7 @@ export function AuthInput({ label, error, secureToggle, icon, labelRight, right,
         </Text>
         {labelRight}
       </View>
-      <Animated.View style={boxStyle} className="flex-row items-center px-3.5">
+      <Animated.View style={[{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14 }, boxStyle]}>
         {icon ? (
           <View style={{ marginRight: 10 }}>
             <Icon name={icon} size={16} color={error ? '#FF4438' : focused ? '#F97316' : '#7d7d7d'} strokeWidth={2} />

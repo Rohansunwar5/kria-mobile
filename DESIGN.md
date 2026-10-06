@@ -1,11 +1,12 @@
 # Kria Player — design system
 
-The visual language for the player app. This file is the **reference**; the build handoff is
-[`docs/design-canvas/IMPLEMENTATION.md`](docs/design-canvas/IMPLEMENTATION.md), and the screen
-designs are the 31 artboards in [`docs/design-canvas/`](docs/design-canvas/) (open
-`docs/design-canvas/kria-player-app-screens.html` in a browser to view them all on one canvas),
-plus the 7 in [`docs/design-canvas/home-portals/`](docs/design-canvas/home-portals/) covering the
-two-portal home, the filter sheet, the floating nav and the player profile.
+The visual language for the player app. This file is the **reference**.
+
+**The artboards were retired on 2026-10-06** once the screens they drew were built — the code and
+this file are now the source of truth. Every `docs/design-canvas/...` path below (and in code
+comments) names an artboard that lives on in git history; restore the whole set with
+`git checkout 6c83edc -- docs/design-canvas`. That includes the build handoff
+(`IMPLEMENTATION.md`), the 31 screen artboards and the 7 in `home-portals/`.
 
 The old `Main`, `Profile` and `PlayerProfile` artboards were deleted when `home-portals/`
 superseded them — that is why the entry artboard is no longer named `Main`.

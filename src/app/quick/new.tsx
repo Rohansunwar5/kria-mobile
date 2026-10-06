@@ -1,420 +1,176 @@
-import { useState } from 'react';
-import { ScrollView, View, Text, TextInput, Pressable, ActivityIndicator } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ScrollView, View, Text, Pressable, ActivityIndicator, BackHandler, KeyboardAvoidingView, Platform } from 'react-native';
+import Animated, { FadeInLeft, FadeInRight, useAnimatedStyle } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Screen } from '@/components/Screen';
-import { createQuickMatch, type CreateQuickMatchBody } from '@/api/quickMatch';
-import { searchPlayers, type PlayerHit } from '@/api/playerSearch';
+import { Icon } from '@/components/icons';
+import { FormatStep, PlayersStep, ReviewStep, RoleStep, SportStep } from '@/components/quick/HostSteps';
+import { createQuickMatch } from '@/api/quickMatch';
 import { useAppSelector } from '@/store/hooks';
-import { buildCricketCreateBody, validateCricketConfig } from '@/lib/quickCricketCreate';
+import { useTheme } from '@/lib/theme';
+import { DUR, OUT, usePress } from '@/lib/motion';
+import { validateCricketConfig } from '@/lib/quickCricketCreate';
+import { INITIAL_DRAFT, STEPS, buildCreateBody, playersBlocker, type HostDraft, type SlotDraft, type Step } from '@/lib/quickHostWizard';
 
-const LBL = {
-  fontFamily: 'SpaceMono_700Bold' as const,
-  fontSize: 9,
-  letterSpacing: 0.1 * 9,
-  textTransform: 'uppercase' as const,
-  color: '#7d7d7d',
-};
-
-const INPUT = {
-  fontFamily: 'SpaceGrotesk_500Medium' as const,
-  fontSize: 15,
-  color: '#fff',
-  borderWidth: 1.5,
-  borderColor: 'rgba(255,255,255,0.14)',
-  borderRadius: 4,
-  paddingHorizontal: 12,
-  paddingVertical: 10,
-  marginTop: 6,
-};
-
-/** One editable slot. `playerId` absent means it is a placeholder that a join
- *  code can fill; `displayName` is required either way, because
- *  createQuickMatchValidator enforces notEmpty() on it unconditionally. */
-type SlotDraft = { playerId?: string; displayName: string; locked?: boolean };
-
-/** Deliberately non-generic. A generic over the literal unions would need the
- *  call sites to pass `as const` arrays, which are readonly and then do not
- *  satisfy a mutable `T[]` prop. Plain numbers, cast at the setter. */
-function Chips({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: number[];
-  value: number;
-  onChange: (next: number) => void;
-}) {
-  return (
-    <View style={{ marginTop: 16 }}>
-      <Text style={LBL}>{label}</Text>
-      <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
-        {options.map((option) => {
-          const on = option === value;
-          return (
-            <Pressable
-              key={String(option)}
-              onPress={() => onChange(option)}
-              style={{
-                paddingHorizontal: 16,
-                paddingVertical: 9,
-                borderRadius: 4,
-                backgroundColor: on ? '#F97316' : 'rgba(255,255,255,0.08)',
-              }}
-            >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: on ? '#0B0B0B' : '#d4d4d4' }}>
-                {String(option)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
-  );
-}
-
-function SlotEditor({
-  slot,
-  onChange,
-  alreadyPicked,
-}: {
-  slot: SlotDraft;
-  onChange: (next: SlotDraft) => void;
-  alreadyPicked: string[];
-}) {
-  const [query, setQuery] = useState('');
-  const [hits, setHits] = useState<PlayerHit[]>([]);
-  const [searching, setSearching] = useState(false);
-
-  const runSearch = async (text: string) => {
-    setQuery(text);
-    if (text.trim().length < 3) {
-      setHits([]);
-      return;
-    }
-    setSearching(true);
-    try {
-      const found = await searchPlayers(text.trim());
-      setHits(found.filter((hit) => !alreadyPicked.includes(hit._id)));
-    } catch {
-      setHits([]);
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  if (slot.locked) {
-    return (
-      <View style={{ marginTop: 12 }}>
-        <Text style={LBL}>You</Text>
-        <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 15, color: '#fff', marginTop: 6 }}>
-          {slot.displayName}
-        </Text>
-      </View>
-    );
+function copyFor(step: Step, d: HostDraft): { title: string; sub: string } {
+  switch (step) {
+    case 'sport':
+      return { title: 'What are we playing?', sub: 'Pick a sport to set the match up.' };
+    case 'role':
+      return { title: 'Are you in the match?', sub: 'Only the people playing get it on their record.' };
+    case 'format':
+      return { title: 'Set the format', sub: 'Already set to the usual game. Change anything you like.' };
+    case 'players':
+      return d.sport === 'badminton'
+        ? { title: "Who's playing?", sub: 'Find someone on Kria, or just type a name.' }
+        : { title: 'Name the teams', sub: 'Or skip it — they go out as Team A and Team B.' };
+    case 'review':
+      return { title: 'Ready to go?', sub: 'Tap anything to change it.' };
   }
-
-  return (
-    <View style={{ marginTop: 12 }}>
-      <Text style={LBL}>{slot.playerId ? 'Registered player' : 'Name or find a player'}</Text>
-      <TextInput
-        value={slot.displayName}
-        onChangeText={(displayName) => onChange({ playerId: slot.playerId, displayName })}
-        placeholder="Player name"
-        placeholderTextColor="#5a5a5a"
-        style={INPUT}
-      />
-
-      {slot.playerId ? (
-        <Pressable onPress={() => onChange({ displayName: '' })} style={{ marginTop: 6 }}>
-          <Text style={{ ...LBL, color: '#FF4438' }}>Clear</Text>
-        </Pressable>
-      ) : (
-        <>
-          <TextInput
-            value={query}
-            onChangeText={runSearch}
-            placeholder="Search registered players (3+ letters)"
-            placeholderTextColor="#5a5a5a"
-            autoCapitalize="none"
-            style={{ ...INPUT, fontSize: 13 }}
-          />
-          {searching ? <ActivityIndicator color="#F97316" style={{ marginTop: 8 }} /> : null}
-          {hits.map((hit) => (
-            <Pressable
-              key={hit._id}
-              onPress={() => {
-                onChange({ playerId: hit._id, displayName: `${hit.firstName} ${hit.lastName}` });
-                setQuery('');
-                setHits([]);
-              }}
-              style={{ paddingVertical: 10, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}
-            >
-              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: '#fff' }}>
-                {`${hit.firstName} ${hit.lastName}`}
-              </Text>
-            </Pressable>
-          ))}
-        </>
-      )}
-    </View>
-  );
 }
+
+const pad = (n: number) => String(n).padStart(2, '0');
 
 export default function NewQuickMatchScreen() {
+  const t = useTheme();
+  const insets = useSafeAreaInsets();
   const { user } = useAppSelector((s) => s.auth);
-  const hostName = user ? `${user.firstName} ${user.lastName}` : 'You';
+  const host: SlotDraft = { playerId: user?._id, displayName: user ? `${user.firstName} ${user.lastName}` : 'You' };
 
-  // Badminton stays the default so anyone ignoring the sport choice gets
-  // today's flow unchanged.
-  const [sport, setSport] = useState<'badminton' | 'cricket'>('badminton');
-  // Is the host playing, or only keeping score? Career credit is written from
-  // sides[].slots[].playerId, so this decides whether the host earns figures
-  // for the match. Defaults to true, which is the behaviour badminton has
-  // always had — so a host who ignores this control gets exactly what they
-  // got before.
-  const [hostPlays, setHostPlays] = useState(true);
-  const [maxOvers, setMaxOvers] = useState(8);
-  const [squadSize, setSquadSize] = useState(6);
-
-  const [doubles, setDoubles] = useState(false);
-  const [bestOf, setBestOf] = useState<1 | 3 | 5>(3);
-  const [pointsToWin, setPointsToWin] = useState<11 | 15 | 21>(21);
-  const [side1Name, setSide1Name] = useState('Side 1');
-  const [side2Name, setSide2Name] = useState('Side 2');
-  const [partner, setPartner] = useState<SlotDraft>({ displayName: 'Partner' });
-  const [opponent1, setOpponent1] = useState<SlotDraft>({ displayName: 'Opponent' });
-  const [opponent2, setOpponent2] = useState<SlotDraft>({ displayName: 'Opponent 2' });
+  const [draft, setDraft] = useState<HostDraft>(INITIAL_DRAFT);
+  const patch = (next: Partial<HostDraft>) => setDraft((d) => ({ ...d, ...next }));
+  const [index, setIndex] = useState(0);
+  const [forward, setForward] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [problem, setProblem] = useState('');
+  const { press, onPressIn, onPressOut } = usePress();
+  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: 1 - press.value * 0.015 }] }));
 
-  // Locked only while the host is playing — the slot is theirs and not
-  // reassignable. When they are only scoring it becomes an ordinary
-  // placeholder someone else can be searched into or can claim by code.
-  const hostSlot: SlotDraft = hostPlays
-    ? { playerId: user?._id, displayName: hostName, locked: true }
-    : { displayName: 'Player 1' };
-  // Only the slots actually in play for the current doubles/singles choice —
-  // a previously-picked opponent 2 must stop being excluded from search the
-  // moment doubles is turned off, since they are no longer in the match.
-  const side1Slots = doubles ? [hostSlot, partner] : [hostSlot];
-  const side2Slots = doubles ? [opponent1, opponent2] : [opponent1];
-  const picked = [...side1Slots, ...side2Slots]
-    .map((slot) => slot.playerId)
-    .filter((id): id is string => Boolean(id));
+  const step = STEPS[index];
+  const go = (to: number) => {
+    setForward(to > index);
+    setProblem('');
+    setIndex(to);
+  };
+  const back = () => (index === 0 ? router.back() : go(index - 1));
 
-  const postAndGo = async (body: CreateQuickMatchBody) => {
+  // Android's back button walks the steps too; only step 1 leaves the screen.
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (index === 0) return false;
+      go(index - 1);
+      return true;
+    });
+    return () => sub.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  const start = async () => {
+    if (draft.sport === 'cricket') {
+      const invalid = validateCricketConfig(draft);
+      if (invalid) return setProblem(invalid);
+    }
     setSubmitting(true);
     setProblem('');
     try {
-      const created = await createQuickMatch(body);
+      const created = await createQuickMatch(buildCreateBody(draft, host));
       router.replace({ pathname: '/quick/[id]', params: { id: created._id } });
     } catch (err) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setProblem(message ? message : 'Could not create the match. Please try again.');
+      setProblem(message || 'Could not create the match. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const submit = async () => {
-    if (sport === 'cricket') {
-      const validationError = validateCricketConfig({ maxOvers, squadSize });
-      if (validationError) {
-        setProblem(validationError);
-        return;
-      }
-      await postAndGo(buildCricketCreateBody({
-        side1Name: side1Name.trim(),
-        side2Name: side2Name.trim(),
-        maxOvers,
-        squadSize,
-        hostPlayerId: user?._id,
-        hostName,
-        hostPlays,
-      }));
-      return;
-    }
-
-    // displayName is required on EVERY slot, including ones carrying a
-    // playerId — an empty one is a 422 from the server.
-    const named = [...side1Slots, ...side2Slots].every((slot) => slot.displayName.trim().length > 0);
-    if (!named) {
-      setProblem('Every slot needs a name.');
-      return;
-    }
-
-    const body: CreateQuickMatchBody = {
-      sport: 'badminton',
-      sides: [
-        { name: side1Name.trim(), slots: side1Slots.map((s) => ({ playerId: s.playerId, displayName: s.displayName.trim() })) },
-        { name: side2Name.trim(), slots: side2Slots.map((s) => ({ playerId: s.playerId, displayName: s.displayName.trim() })) },
-      ],
-      matchConfig: { bestOf, pointsToWin },
-    };
-
-    await postAndGo(body);
+  const next = () => {
+    if (step === 'review') return start();
+    const blocker = step === 'players' ? playersBlocker(draft, host) : null;
+    if (blocker) return setProblem(blocker);
+    go(index + 1);
   };
+
+  const { title, sub } = copyFor(step, draft);
+  // Sport and role are one-tap questions: the answer is the button.
+  const cta = step === 'sport' || step === 'role' ? null : step === 'review' ? 'Start match' : 'Continue';
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 48 }}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={{ ...LBL, letterSpacing: 0.22 * 9 }}>Back</Text>
-        </Pressable>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 28, color: '#fff', marginTop: 10 }}>
-          New quick match
-        </Text>
-
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 18 }}>
-          {(['badminton', 'cricket'] as const).map((option) => (
-            <Pressable
-              key={option}
-              onPress={() => setSport(option)}
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                borderRadius: 4,
-                alignItems: 'center',
-                backgroundColor: sport === option ? '#F97316' : 'rgba(255,255,255,0.08)',
-              }}
-            >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: sport === option ? '#0B0B0B' : '#d4d4d4' }}>
-                {option === 'badminton' ? 'Badminton' : 'Cricket'}
-              </Text>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={{ paddingHorizontal: 16, paddingTop: 4 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={back} hitSlop={8} style={{ width: 44, height: 44, justifyContent: 'center' }}>
+              <Icon name="arrow-left" size={22} color={t.text} />
             </Pressable>
-          ))}
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, color: t.textMeta }}>
+              {`${pad(index + 1)} / ${pad(STEPS.length)}`}
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 4, marginTop: 2 }}>
+            {STEPS.map((s, n) => (
+              <View key={s} style={{ flex: 1, height: 4, borderRadius: 1, backgroundColor: n <= index ? t.brand : t.fill }} />
+            ))}
+          </View>
         </View>
 
-        <Text style={{ ...LBL, marginTop: 18 }}>Your role</Text>
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-          {([true, false] as const).map((playing) => (
-            <Pressable
-              key={String(playing)}
-              onPress={() => setHostPlays(playing)}
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                borderRadius: 4,
-                alignItems: 'center',
-                backgroundColor: hostPlays === playing ? '#F97316' : 'rgba(255,255,255,0.08)',
-              }}
-            >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: hostPlays === playing ? '#0B0B0B' : '#d4d4d4' }}>
-                {playing ? "I'm playing" : "I'm just scoring"}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: '#7d7d7d', marginTop: 6 }}>
-          {hostPlays
-            ? 'You take a slot and the match counts towards your record.'
-            : 'You score only — the match will not count towards your record.'}
-        </Text>
-
-        {sport === 'badminton' ? (
-          <>
-            <View style={{ flexDirection: 'row', gap: 8, marginTop: 18 }}>
-              {[false, true].map((isDoubles) => (
-                <Pressable
-                  key={String(isDoubles)}
-                  onPress={() => setDoubles(isDoubles)}
-                  style={{
-                    flex: 1,
-                    paddingVertical: 12,
-                    borderRadius: 4,
-                    alignItems: 'center',
-                    backgroundColor: doubles === isDoubles ? '#F97316' : 'rgba(255,255,255,0.08)',
-                  }}
-                >
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: doubles === isDoubles ? '#0B0B0B' : '#d4d4d4' }}>
-                    {isDoubles ? 'Doubles' : 'Singles'}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <Chips label="Games" options={[1, 3, 5]} value={bestOf} onChange={(next) => setBestOf(next as 1 | 3 | 5)} />
-            <Chips label="Points to win" options={[11, 15, 21]} value={pointsToWin} onChange={(next) => setPointsToWin(next as 11 | 15 | 21)} />
-          </>
-        ) : (
-          <>
-            <View style={{ marginTop: 16 }}>
-              <Text style={LBL}>Overs</Text>
-              <TextInput
-                value={String(maxOvers)}
-                onChangeText={(text) => setMaxOvers(Number.parseInt(text, 10) || 0)}
-                keyboardType="number-pad"
-                style={INPUT}
-                placeholderTextColor="#5a5a5a"
-              />
-            </View>
-            <View style={{ marginTop: 16 }}>
-              <Text style={LBL}>Squad size</Text>
-              <TextInput
-                value={String(squadSize)}
-                onChangeText={(text) => setSquadSize(Number.parseInt(text, 10) || 0)}
-                keyboardType="number-pad"
-                style={INPUT}
-                placeholderTextColor="#5a5a5a"
-              />
-              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 12, color: '#7d7d7d', marginTop: 6 }}>
-                Players per side — sets the batting order length
-              </Text>
-            </View>
-          </>
-        )}
-
-        <View style={{ marginTop: 22 }}>
-          <Text style={LBL}>Side 1</Text>
-          <TextInput value={side1Name} onChangeText={setSide1Name} style={INPUT} placeholderTextColor="#5a5a5a" />
-          {sport === 'badminton' ? (
-            <>
-              <SlotEditor slot={hostSlot} onChange={() => undefined} alreadyPicked={picked} />
-              {doubles ? <SlotEditor slot={partner} onChange={setPartner} alreadyPicked={picked} /> : null}
-            </>
-          ) : null}
-        </View>
-
-        <View style={{ marginTop: 22 }}>
-          <Text style={LBL}>Side 2</Text>
-          <TextInput value={side2Name} onChangeText={setSide2Name} style={INPUT} placeholderTextColor="#5a5a5a" />
-          {sport === 'badminton' ? (
-            <>
-              <SlotEditor slot={opponent1} onChange={setOpponent1} alreadyPicked={picked} />
-              {doubles ? <SlotEditor slot={opponent2} onChange={setOpponent2} alreadyPicked={picked} /> : null}
-            </>
-          ) : null}
-        </View>
-
-        {problem ? (
-          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#FF4438', marginTop: 16 }}>
-            {problem}
-          </Text>
-        ) : null}
-
-        <Pressable
-          onPress={submit}
-          disabled={submitting}
-          style={{
-            marginTop: 24,
-            backgroundColor: '#F97316',
-            opacity: submitting ? 0.5 : 1,
-            borderRadius: 4,
-            paddingVertical: 15,
-            alignItems: 'center',
-          }}
+        <Animated.View
+          key={step}
+          entering={(forward ? FadeInRight : FadeInLeft).duration(DUR.sweep).easing(OUT)}
+          style={{ flex: 1 }}
         >
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
-            Start match
-          </Text>
-        </Pressable>
+          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 22, paddingBottom: 32 }}>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: t.brandInk }}>
+              New quick match
+            </Text>
+            <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 32, lineHeight: 39, textTransform: 'uppercase', color: t.text, marginTop: 6 }}>
+              {title}
+            </Text>
+            <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: t.textMeta, marginTop: 4, marginBottom: 24 }}>
+              {sub}
+            </Text>
 
-        <Text style={{ ...LBL, marginTop: 14, letterSpacing: 0.1 * 9 }}>
-          Slots left as names can be claimed later with the join code.
-        </Text>
-      </ScrollView>
+            {step === 'sport' ? <SportStep draft={draft} onPick={(sport) => { patch({ sport }); go(1); }} /> : null}
+            {step === 'role' ? <RoleStep draft={draft} onPick={(hostPlays) => { patch({ hostPlays }); go(2); }} /> : null}
+            {step === 'format' ? <FormatStep draft={draft} patch={patch} /> : null}
+            {step === 'players' ? <PlayersStep draft={draft} patch={patch} host={host} /> : null}
+            {step === 'review' ? <ReviewStep draft={draft} host={host} onEdit={go} /> : null}
+          </ScrollView>
+        </Animated.View>
+
+        {cta ? (
+          <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 + insets.bottom, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg }}>
+            {problem ? (
+              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk, marginBottom: 10 }}>{problem}</Text>
+            ) : null}
+            <Animated.View style={pressStyle}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={next}
+                onPressIn={onPressIn}
+                onPressOut={onPressOut}
+                disabled={submitting}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 10,
+                  minHeight: 52,
+                  borderRadius: 5,
+                  backgroundColor: t.brand,
+                  opacity: submitting ? 0.5 : 1,
+                }}
+              >
+                {submitting ? <ActivityIndicator color={t.onBrand} /> : null}
+                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, letterSpacing: 0.14 * 13, textTransform: 'uppercase', color: t.onBrand }}>
+                  {cta}
+                </Text>
+                {submitting ? null : <Icon name="arrow-right" size={18} color={t.onBrand} />}
+              </Pressable>
+            </Animated.View>
+          </View>
+        ) : null}
+      </KeyboardAvoidingView>
     </Screen>
   );
 }

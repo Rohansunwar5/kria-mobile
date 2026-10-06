@@ -16,10 +16,15 @@ export default function Register() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { isLoading, error, registrationStep } = useAppSelector((s) => s.auth);
-  // Onboarding captures the name on its own screen; arriving straight from
-  // login it is blank, so the field is always shown rather than branched.
+  // The server requires both names, so they are two fields — one "Full name"
+  // box hid that, and a one-word name left the button dead with no reason
+  // given. Onboarding captures the name on its own screen and the store keeps
+  // one `fullName`, split back here exactly as (onboarding)/auth.tsx does;
+  // arriving straight from login it is blank.
   const onboardingName = useAppSelector((s) => s.onboarding.fullName);
-  const [fullName, setFullName] = useState(onboardingName || '');
+  const [firstIn, ...restIn] = (onboardingName || '').trim().split(/\s+/);
+  const [firstName, setFirstName] = useState(firstIn || '');
+  const [lastName, setLastName] = useState(restIn.join(' '));
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [agreed, setAgreed] = useState(false);
@@ -28,13 +33,13 @@ export default function Register() {
     if (registrationStep === 2) router.replace('/(auth)/verify-otp');
   }, [registrationStep, router]);
 
-  const [firstName, ...restName] = fullName.trim().split(/\s+/);
-  const lastName = restName.join(' ');
   const emailOk = EMAIL.test(email);
-  const ready = !!firstName && !!lastName && emailOk && phone.replace(/\D/g, '').length >= 10 && agreed;
+  const ready = !!firstName.trim() && !!lastName.trim() && emailOk && phone.replace(/\D/g, '').length >= 10 && agreed;
 
   const submit = () =>
-    dispatch(registerUser({ data: { firstName, lastName, email, phone: phone.replace(/\s/g, '') } }));
+    dispatch(registerUser({
+      data: { firstName: firstName.trim(), lastName: lastName.trim(), email, phone: phone.replace(/\s/g, '') },
+    }));
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
@@ -67,7 +72,8 @@ export default function Register() {
           </Text>
 
           <View style={{ paddingTop: 26 }}>
-            <AuthInput label="Full name" icon="person" placeholder="Your name" value={fullName} onChangeText={setFullName} />
+            <AuthInput label="First name" icon="person" placeholder="First name" autoComplete="given-name" value={firstName} onChangeText={setFirstName} />
+            <AuthInput label="Last name" icon="person" placeholder="Last name" autoComplete="family-name" value={lastName} onChangeText={setLastName} />
 
             <AuthInput
               label="Email"

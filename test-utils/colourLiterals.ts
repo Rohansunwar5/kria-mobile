@@ -52,6 +52,8 @@ export const MIGRATED: string[] = [
   'src/components/explore/PlayerHitRow.tsx',
   'src/components/explore/EventHitRow.tsx',
   'src/components/profile/HonorsList.tsx',
+  'src/app/quick/new.tsx',
+  'src/components/quick/HostSteps.tsx',
 ];
 
 export interface ColourLiteralFinding {
