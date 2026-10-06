@@ -96,18 +96,22 @@ export function formatChips(d: HostDraft): string[] {
   return [d.doubles ? 'Doubles' : 'Singles', BEST_OF[d.bestOf].label, `${d.pointsToWin} points`];
 }
 
+/** Both sports open in the waiting room, so the code is shared before play. */
 export function buildCreateBody(d: HostDraft, host: SlotDraft): CreateQuickMatchBody {
   const [name1, name2] = teamNames(d, host);
   if (d.sport === 'cricket') {
-    return buildCricketCreateBody({
-      side1Name: name1,
-      side2Name: name2,
-      maxOvers: d.maxOvers,
-      squadSize: d.squadSize,
-      hostPlayerId: host.playerId,
-      hostName: host.displayName,
-      hostPlays: d.hostPlays,
-    });
+    return {
+      ...buildCricketCreateBody({
+        side1Name: name1,
+        side2Name: name2,
+        maxOvers: d.maxOvers,
+        squadSize: d.squadSize,
+        hostPlayerId: host.playerId,
+        hostName: host.displayName,
+        hostPlays: d.hostPlays,
+      }),
+      waitForPlayers: true,
+    };
   }
   const out = (slots: SlotDraft[]) => slots.map((s) => ({ playerId: s.playerId, displayName: s.displayName.trim() }));
   const [s1, s2] = activeSlots(d, host);
@@ -115,5 +119,6 @@ export function buildCreateBody(d: HostDraft, host: SlotDraft): CreateQuickMatch
     sport: 'badminton',
     sides: [{ name: name1, slots: out(s1) }, { name: name2, slots: out(s2) }],
     matchConfig: { bestOf: d.bestOf, pointsToWin: d.pointsToWin },
+    waitForPlayers: true,
   };
 }

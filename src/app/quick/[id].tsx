@@ -5,23 +5,26 @@ import { Skeleton, ErrorBlock } from '@/components/states';
 import { MatchPanel } from '@/components/quick/MatchPanel';
 import { CricketSetupPanel } from '@/components/quick/CricketSetupPanel';
 import { CricketScorePanel } from '@/components/quick/CricketScorePanel';
+import { StartBar, WaitingRoom } from '@/components/quick/WaitingRoom';
 import { useQuickMatch } from '@/lib/useQuickMatch';
 import { panelFor } from '@/lib/quickCricketView';
+import { isHost } from '@/lib/quickMatchView';
 import { useAppSelector } from '@/store/hooks';
+import { goBack } from '@/lib/nav';
 
 export default function QuickMatchScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAppSelector((s) => s.auth);
   const {
     match, loading, error, busy, reload,
-    point, undo, cancel, removePlayer,
+    point, undo, start, cancel, removePlayer,
     toss, lineup, ball, undoBall,
   } = useQuickMatch(id);
 
   return (
     <Screen>
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 14 }}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
+        <Pressable onPress={() => goBack(router, '/quick')} hitSlop={12}>
           <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
             Back
           </Text>
@@ -47,6 +50,16 @@ export default function QuickMatchScreen() {
           <View style={{ paddingHorizontal: 20 }}>
             <ErrorBlock label="Quick match" onRetry={reload} />
           </View>
+        ) : null}
+
+        {match && panelFor(match) === 'waiting' ? (
+          <WaitingRoom
+            match={match}
+            playerId={user?._id}
+            busy={busy}
+            onCancel={cancel}
+            onRemovePlayer={removePlayer}
+          />
         ) : null}
 
         {match && panelFor(match) === 'badminton' ? (
@@ -82,6 +95,10 @@ export default function QuickMatchScreen() {
           />
         ) : null}
       </ScrollView>
+
+      {match && panelFor(match) === 'waiting' && isHost(match, user?._id) ? (
+        <StartBar busy={busy} onStart={start} />
+      ) : null}
     </Screen>
   );
 }

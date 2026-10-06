@@ -124,6 +124,8 @@ describe('freeSlots', () => {
 describe('labels', () => {
   it('maps status to a Tag variant', () => {
     expect(statusVariant('live')).toBe('live');
+    // Green "open", as an entry-open tournament reads — not grey "ended".
+    expect(statusVariant('waiting')).toBe('open');
     expect(statusVariant('completed')).toBe('end');
     expect(statusVariant('cancelled')).toBe('fail');
   });

@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { claimQuickMatchSlot, getQuickMatchByCode, type QuickMatch } from '@/api/quickMatch';
 import { freeSlots } from '@/lib/quickMatchView';
+import { goBack } from '@/lib/nav';
 
 /** The server's code alphabet — no 0, O, 1 or I, because codes get read aloud
  *  and retyped. Anything else a keyboard offers is dropped on entry. */
@@ -73,7 +74,7 @@ export default function JoinQuickMatchScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 48 }}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
+        <Pressable onPress={() => goBack(router, '/quick')} hitSlop={12}>
           <Text style={{ ...LBL, letterSpacing: 0.22 * 9 }}>Back</Text>
         </Pressable>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 28, color: '#fff', marginTop: 10 }}>

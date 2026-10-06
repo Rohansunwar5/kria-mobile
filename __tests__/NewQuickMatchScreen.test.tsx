@@ -3,7 +3,7 @@ import NewQuickMatchScreen from '../src/app/quick/new';
 import { createQuickMatch } from '@/api/quickMatch';
 import { router } from 'expo-router';
 
-jest.mock('expo-router', () => ({ router: { back: jest.fn(), replace: jest.fn() } }));
+jest.mock('expo-router', () => ({ router: { back: jest.fn(), replace: jest.fn(), canGoBack: () => true } }));
 jest.mock('@/store/hooks', () => ({
   useAppSelector: (pick: (s: unknown) => unknown) =>
     pick({ auth: { user: { _id: 'h1', firstName: 'Arjun', lastName: 'Mehta' } } }),
@@ -56,7 +56,7 @@ describe('New quick match wizard', () => {
     fireEvent.press(screen.getByText('Continue'));
 
     expect(screen.getByText('Ready to go?')).toBeTruthy();
-    fireEvent.press(screen.getByText('Start match'));
+    fireEvent.press(screen.getByText('Create match'));
 
     await waitFor(() => expect(router.replace).toHaveBeenCalled());
     expect(createQuickMatch).toHaveBeenCalledWith({
@@ -66,6 +66,7 @@ describe('New quick match wizard', () => {
         { name: 'Rahul Singh', slots: [{ playerId: undefined, displayName: 'Rahul Singh' }] },
       ],
       matchConfig: { bestOf: 3, pointsToWin: 21 },
+      waitForPlayers: true,
     });
   });
 
@@ -75,7 +76,7 @@ describe('New quick match wizard', () => {
     fireEvent.press(screen.getByLabelText('Name Opponents'));
     fireEvent.changeText(screen.getByPlaceholderText('Rahul Singh'), 'Smashers');
     fireEvent.press(screen.getByText('Continue'));
-    fireEvent.press(screen.getByText('Start match'));
+    fireEvent.press(screen.getByText('Create match'));
 
     await waitFor(() => expect(createQuickMatch).toHaveBeenCalled());
     const body = (createQuickMatch as jest.Mock).mock.calls[0][0];

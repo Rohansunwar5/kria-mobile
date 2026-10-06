@@ -388,7 +388,10 @@ export function PlayPortal({
   const [topPlayersSport, setTopPlayersSport] = useState(RANKED_SPORTS[0]);
   const sports = profile ? profile.sports : [];
   const played = sports.reduce((sum, s) => sum + s.played, 0);
-  const live = matches.filter((m) => m.status === 'live');
+  // Unfinished matches: in play, or in the waiting room. A finished one is a
+  // ledger row instead; a waiting one has no row anywhere else.
+  const live = matches.filter((m) => m.status === 'live' || m.status === 'waiting');
+  const inPlay = live.filter((m) => m.status === 'live').length;
   const ledger = recent ?? [];
   const hasRecord = sports.length > 0;
 
@@ -495,7 +498,7 @@ export function PlayPortal({
 
       {showRecent ? (
         <View>
-          <SectionHeading title="Recent matches" meta={live.length > 0 ? `${live.length} live` : undefined} metaAccent />
+          <SectionHeading title="Recent matches" meta={inPlay > 0 ? `${inPlay} live` : undefined} metaAccent />
           {recentBody()}
         </View>
       ) : null}

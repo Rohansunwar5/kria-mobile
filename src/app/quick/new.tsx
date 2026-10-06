@@ -8,6 +8,7 @@ import { Icon } from '@/components/icons';
 import { FormatStep, PlayersStep, ReviewStep, RoleStep, SportStep } from '@/components/quick/HostSteps';
 import { createQuickMatch } from '@/api/quickMatch';
 import { useAppSelector } from '@/store/hooks';
+import { goBack } from '@/lib/nav';
 import { useTheme } from '@/lib/theme';
 import { DUR, OUT, usePress } from '@/lib/motion';
 import { validateCricketConfig } from '@/lib/quickCricketCreate';
@@ -26,7 +27,7 @@ function copyFor(step: Step, d: HostDraft): { title: string; sub: string } {
         ? { title: "Who's playing?", sub: 'Find someone on Kria, or just type a name.' }
         : { title: 'Name the teams', sub: 'Or skip it — they go out as Team A and Team B.' };
     case 'review':
-      return { title: 'Ready to go?', sub: 'Tap anything to change it.' };
+      return { title: 'Ready to go?', sub: "Tap anything to change it. Next, you get a code to share with your players." };
   }
 }
 
@@ -53,7 +54,7 @@ export default function NewQuickMatchScreen() {
     setProblem('');
     setIndex(to);
   };
-  const back = () => (index === 0 ? router.back() : go(index - 1));
+  const back = () => (index === 0 ? goBack(router, '/quick') : go(index - 1));
 
   // Android's back button walks the steps too; only step 1 leaves the screen.
   useEffect(() => {
@@ -93,7 +94,7 @@ export default function NewQuickMatchScreen() {
 
   const { title, sub } = copyFor(step, draft);
   // Sport and role are one-tap questions: the answer is the button.
-  const cta = step === 'sport' || step === 'role' ? null : step === 'review' ? 'Start match' : 'Continue';
+  const cta = step === 'sport' || step === 'role' ? null : step === 'review' ? 'Create match' : 'Continue';
 
   return (
     <Screen>

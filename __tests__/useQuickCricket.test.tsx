@@ -12,6 +12,12 @@ jest.mock('expo-router', () => ({
   useFocusEffect: (callback: () => void) => require('react').useEffect(callback, [callback]),
 }));
 
+// The hook also subscribes to live updates; keep that off the network here.
+// What the subscription does is covered in useQuickMatchLive.test.tsx.
+jest.mock('@/lib/socket', () => ({
+  socket: { connected: true, connect: jest.fn(), disconnect: jest.fn(), emit: jest.fn(), on: jest.fn(), off: jest.fn() },
+}));
+
 const mock = new MockAdapter(API);
 const envelope = (payload: unknown) => ({ data: { data: payload } });
 

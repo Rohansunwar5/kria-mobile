@@ -140,7 +140,8 @@ export function cricketOutcomeLabel(match: QuickMatch): string | null {
  * renders an `app/` screen, so a ternary living in the JSX would be uncovered.
  * The screen keeps only the act of rendering.
  */
-export function panelFor(match: QuickMatch): 'badminton' | 'cricket-setup' | 'cricket-score' {
+export function panelFor(match: QuickMatch): 'waiting' | 'badminton' | 'cricket-setup' | 'cricket-score' {
+  if (match.status === 'waiting') return 'waiting';
   if (match.sport !== 'cricket') return 'badminton';
   return setupStage(match) === 'ready' ? 'cricket-score' : 'cricket-setup';
 }

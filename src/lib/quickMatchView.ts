@@ -44,6 +44,7 @@ export function freeSlots(match: QuickMatch): QuickMatchSlot[] {
 
 export function statusVariant(status: QuickMatch['status']): TagVariant {
   if (status === 'live') return 'live';
+  if (status === 'waiting') return 'open';
   if (status === 'cancelled') return 'fail';
   return 'end';
 }

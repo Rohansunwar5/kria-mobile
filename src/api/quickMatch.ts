@@ -26,7 +26,9 @@ export interface QuickMatch {
   hostId: string;
   sport: 'badminton' | 'cricket';
   joinCode: string;
-  status: 'live' | 'completed' | 'cancelled';
+  /** `waiting`: the waiting room — players claim names, nothing is scored
+   *  until the host starts it. */
+  status: 'waiting' | 'live' | 'completed' | 'cancelled';
   sides: QuickMatchSide[];
   outcome?: 'side1' | 'side2' | 'tied' | 'no_result';
   lockedAt?: string;
@@ -116,6 +118,8 @@ export interface CreateQuickMatchBody {
     maxOversPerBowler?: number;
     playersPerTeam?: number;
   };
+  /** Open in the waiting room instead of live. */
+  waitForPlayers?: boolean;
 }
 
 const asMatch = (res: unknown) => unwrap(res) as QuickMatch;
@@ -161,6 +165,10 @@ export async function recordQuickPoint(id: string, side: 1 | 2): Promise<QuickMa
 
 export async function undoQuickPoint(id: string): Promise<QuickMatch> {
   return asMatch(await API.post(`/quick-match/${id}/badminton/undo`));
+}
+
+export async function startQuickMatch(id: string): Promise<QuickMatch> {
+  return asMatch(await API.post(`/quick-match/${id}/start`));
 }
 
 export async function cancelQuickMatch(id: string): Promise<QuickMatch> {

@@ -143,6 +143,23 @@ describe('PlayPortal', () => {
     expect(getByText('live')).toBeTruthy();
   });
 
+  // A player who backs out of the waiting room must still find their way back,
+  // and a finished-match ledger row will not exist for it yet. It is not
+  // "live", though, so it must not be counted as such.
+  it('shows a waiting quick match with the live ones, without counting it as live', () => {
+    const waiting = quickMatch({
+      status: 'waiting',
+      sides: [
+        { sideId: 's1', name: 'Falcons', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
+        { sideId: 's2', name: 'Titans', slots: [{ slotId: 'b', displayName: 'Dev' }] },
+      ],
+    });
+    const { getByText, queryByText } = render(<PlayPortal {...props({ matches: [waiting] })} />);
+    expect(getByText(/falcons v titans/i)).toBeTruthy();
+    expect(getByText('waiting')).toBeTruthy();
+    expect(queryByText(/\d+ live/)).toBeNull();
+  });
+
   // A quick match that has finished is already represented by a ledger row —
   // it must not also produce a live row, or the same result would appear twice.
   it('renders no live row for a completed or cancelled quick match, while ledger rows still show', () => {

@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
+import { socket } from '@/lib/socket';
 import {
   cancelQuickMatch,
   getQuickMatch,
@@ -7,6 +8,7 @@ import {
   recordQuickLineup,
   recordQuickPoint,
   recordQuickToss,
+  startQuickMatch,
   removeQuickMatchPlayer,
   undoQuickBall,
   undoQuickPoint,
@@ -26,11 +28,11 @@ import {
  * from its own response — there is no refetch after a mutation and no window
  * where the screen shows a stale score.
  *
- * Liveness is refetch-on-focus plus the caller's pull-to-refresh. Quick matches
- * emit no socket events, and the host — the only person who can score — already
- * holds fresh state. `ponytail:` if a watching participant ever needs live
- * updates, the fix is server-side emits in the quick scoring services, not
- * polling here.
+ * Liveness: the server pushes every saved change to the match room as
+ * `quick:update` (QuickMatchService._broadcast), so a joined player or a
+ * spectator sees each point as the host scores it. Focus and pull-to-refresh
+ * still re-read, and a reconnect re-reads too, because whatever was pushed
+ * while the connection was down is gone.
  */
 export function useQuickMatch(id?: string) {
   const [match, setMatch] = useState<QuickMatch | null>(null);
@@ -58,6 +60,36 @@ export function useQuickMatch(id?: string) {
     }, [load])
   );
 
+  useEffect(() => {
+    if (!id) return;
+    const onUpdate = (payload?: { match?: QuickMatch }) => {
+      const next = payload?.match;
+      if (!next || next._id !== id) return;
+      // The push never carries the join code (any socket can join a match
+      // room), so the host keeps the one their own read returned.
+      setMatch((prev) => ({ ...next, joinCode: prev?.joinCode ?? next.joinCode }));
+    };
+    const join = () => socket.emit('join:match', { matchId: id });
+    const onConnect = () => {
+      join();
+      load();
+    };
+
+    if (!socket.connected) socket.connect();
+    join();
+    socket.on('quick:update', onUpdate);
+    socket.on('connect', onConnect);
+
+    return () => {
+      socket.emit('leave:match', { matchId: id });
+      socket.off('quick:update', onUpdate);
+      socket.off('connect', onConnect);
+      // Full-screen route, like the live scoreboard and the auction — never
+      // mounted alongside them, so it can own connect/disconnect.
+      socket.disconnect();
+    };
+  }, [id, load]);
+
   /** Runs one host action and adopts the match it returns. `busy` disables
    *  every control while it is in flight, so a double tap cannot score twice —
    *  there is no optimistic-concurrency guard on the server. */
@@ -82,6 +114,11 @@ export function useQuickMatch(id?: string) {
   const undo = useCallback(() => {
     if (!id) return;
     return run(() => undoQuickPoint(id));
+  }, [id, run]);
+
+  const start = useCallback(() => {
+    if (!id) return;
+    return run(() => startQuickMatch(id));
   }, [id, run]);
 
   const cancel = useCallback(() => {
@@ -116,7 +153,7 @@ export function useQuickMatch(id?: string) {
 
   return {
     match, loading, error, busy, reload: load,
-    point, undo, cancel, removePlayer,
+    point, undo, start, cancel, removePlayer,
     toss, lineup, ball, undoBall,
   };
 }

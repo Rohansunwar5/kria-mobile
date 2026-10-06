@@ -87,6 +87,7 @@ describe('buildCreateBody', () => {
         { name: 'Rahul Singh', slots: [{ playerId: 'p2', displayName: 'Rahul Singh' }] },
       ],
       matchConfig: { bestOf: 3, pointsToWin: 11 },
+      waitForPlayers: true,
     });
   });
 
@@ -96,5 +97,11 @@ describe('buildCreateBody', () => {
     expect(body.sides[0].slots[0]).toEqual({ playerId: 'h1', displayName: 'Arjun Mehta' });
     expect(body.sides[1].slots).toHaveLength(3);
     expect(body.matchConfig).toEqual({ maxOvers: 5, playersPerTeam: 3 });
+  });
+
+  // Both sports open in the waiting room, so the code is shared before play.
+  it('asks for the waiting room, whatever the sport', () => {
+    expect(buildCreateBody(draft(), host).waitForPlayers).toBe(true);
+    expect(buildCreateBody(draft({ sport: 'cricket' }), host).waitForPlayers).toBe(true);
   });
 });

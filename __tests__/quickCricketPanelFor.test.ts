@@ -12,6 +12,12 @@ const cricket = (setup: QuickCricketSetup): QuickMatch => ({
 } as QuickMatch);
 
 describe('panelFor', () => {
+  it('sends a waiting match to the waiting room, whatever the sport', () => {
+    const ready = cricket({ toss: { recorded: true }, lineupsSet: true, side1Lineup: [], side2Lineup: [] });
+    expect(panelFor({ ...ready, status: 'waiting' })).toBe('waiting');
+    expect(panelFor({ ...ready, status: 'waiting', sport: 'badminton' } as QuickMatch)).toBe('waiting');
+  });
+
   it('sends a badminton match to the badminton panel', () => {
     const m = {
       ...cricket({ toss: { recorded: true }, lineupsSet: true, side1Lineup: [], side2Lineup: [] }),
