@@ -57,6 +57,8 @@ export interface QuickMatch {
   /** Set when a quick knockout created this match; the knockout manages it. */
   knockoutId?: string;
   fixtureId?: string;
+  /** A tied knockout match: the side the host said went through. */
+  tieWinnerSideId?: string;
 }
 
 export type WicketType =

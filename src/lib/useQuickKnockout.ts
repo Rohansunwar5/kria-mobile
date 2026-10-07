@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
 import {
-  addKnockoutPlayer, cancelQuickKnockout, drawQuickKnockout, getQuickKnockout, grantKnockoutAward,
-  pairKnockoutPlayers, removeKnockoutPlayer, startQuickKnockout, unpairKnockoutPlayers, type QuickKnockout,
+  addKnockoutPlayer, addKnockoutTeam, cancelQuickKnockout, drawQuickKnockout, getQuickKnockout, grantKnockoutAward,
+  moveKnockoutPlayer, pairKnockoutPlayers, removeKnockoutPlayer, removeKnockoutTeam, renameKnockoutTeam, startQuickKnockout, unpairKnockoutPlayers, type QuickKnockout,
 } from '@/api/quickKnockout';
 
 const serverMessage = (err: unknown) =>
@@ -87,6 +87,10 @@ export function useQuickKnockout(id?: string) {
     removePlayer: (playerKey: string) => withId((k) => removeKnockoutPlayer(k, playerKey)),
     pair: (a: string, b: string) => withId((k) => pairKnockoutPlayers(k, [a, b])),
     unpair: (pairId: string) => withId((k) => unpairKnockoutPlayers(k, pairId)),
+    moveToTeam: (playerKey: string, teamId: string | null) => withId((k) => moveKnockoutPlayer(k, playerKey, teamId)),
+    addTeam: () => withId(addKnockoutTeam),
+    removeTeam: (teamId: string) => withId((k) => removeKnockoutTeam(k, teamId)),
+    renameTeam: (teamId: string, name: string) => withId((k) => renameKnockoutTeam(k, teamId, name)),
     draw: () => withId(drawQuickKnockout),
     start: () => withId(startQuickKnockout),
     cancel: () => withId(cancelQuickKnockout),

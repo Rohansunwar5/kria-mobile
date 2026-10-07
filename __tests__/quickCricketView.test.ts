@@ -263,6 +263,11 @@ describe('cricketOutcomeLabel', () => {
     expect(cricketOutcomeLabel(m)).toBe('Tied');
   });
 
+  it('names the team a tied knockout match sent through', () => {
+    const m = { ...ready(), status: 'completed', outcome: 'tied', tieWinnerSideId: 's2' } as QuickMatch;
+    expect(cricketOutcomeLabel(m)).toBe('Tied · Blues went through');
+  });
+
   it('reports a cancelled match', () => {
     const m = { ...ready(), status: 'cancelled' } as QuickMatch;
     expect(cricketOutcomeLabel(m)).toBe('Cancelled');

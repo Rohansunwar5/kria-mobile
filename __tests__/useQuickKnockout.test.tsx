@@ -74,3 +74,15 @@ it('leaves the room on close', async () => {
   unmount();
   expect(server.emit).toHaveBeenCalledWith('leave:match', { matchId: 'k1' });
 });
+
+it('arranges cricket teams through the endpoints', async () => {
+  const { result } = await opened();
+  mock.onAny().reply(200, envelope(knockout({ sport: 'cricket' })));
+  await act(async () => { await result.current.moveToTeam('a', 't1'); });
+  await act(async () => { await result.current.addTeam(); });
+  await act(async () => { await result.current.renameTeam('t1', 'Royals'); });
+  await act(async () => { await result.current.removeTeam('t1'); });
+  expect(mock.history.patch.map((r) => r.url)).toEqual(['/quick-knockout/k1/players/a', '/quick-knockout/k1/teams/t1']);
+  expect(mock.history.post.map((r) => r.url)).toEqual(['/quick-knockout/k1/teams']);
+  expect(mock.history.delete.map((r) => r.url)).toEqual(['/quick-knockout/k1/teams/t1']);
+});

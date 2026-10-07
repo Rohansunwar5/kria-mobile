@@ -127,7 +127,11 @@ export function cricketOutcomeLabel(match: QuickMatch): string | null {
   const [side1, side2] = match.sides;
   if (match.outcome === 'side1') return `${side1.name} won`;
   if (match.outcome === 'side2') return `${side2.name} won`;
-  if (match.outcome === 'tied') return 'Tied';
+  if (match.outcome === 'tied') {
+    // A tied knockout match goes on with the team the host picked.
+    const through = match.sides.find((s) => s.sideId === match.tieWinnerSideId);
+    return through ? `Tied · ${through.name} went through` : 'Tied';
+  }
   // A quick cricket match can end tied with no winner; `no_result` is not
   // written by any path today but the branch keeps the return total.
   return 'No result';

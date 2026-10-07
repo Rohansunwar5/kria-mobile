@@ -9,22 +9,44 @@ function playersOf(k: QuickKnockout, entrantId?: string): KnockoutPlayer[] {
     .filter((p): p is KnockoutPlayer => Boolean(p));
 }
 
+const teamName = (k: QuickKnockout, entrantId?: string) => (k.teams ?? []).find((t) => t.teamId === entrantId)?.name ?? '';
+
 /** "Arjun Mehta" alone, "Arjun & Priya" as a pair — the name a match side carries. */
 export function entrantName(k: QuickKnockout, entrantId?: string): string {
+  if (k.sport === 'cricket') return teamName(k, entrantId);
   const players = playersOf(k, entrantId);
   if (players.length === 1) return players[0].displayName;
   return players.map((p) => firstName(p.displayName)).join(' & ');
 }
 
-/** First names only, for the narrow bracket boxes. */
+/** First names only, for the narrow bracket boxes; a cricket team keeps its name. */
 export function entrantShortName(k: QuickKnockout, entrantId?: string): string {
+  if (k.sport === 'cricket') return teamName(k, entrantId);
   return playersOf(k, entrantId).map((p) => firstName(p.displayName)).join(' & ');
 }
 
 export const isKnockoutHost = (k: QuickKnockout, playerId?: string) => Boolean(playerId) && k.hostId === playerId;
 
+/** "Singles", "Doubles", or "Cricket · 8 overs" — the line under a knockout's name. */
+export function formatLabel(k: QuickKnockout): string {
+  if (k.sport === 'cricket') return `Cricket · ${k.matchConfig.maxOvers} overs`;
+  return k.format === 'doubles' ? 'Doubles' : 'Singles';
+}
+
+/** A cricket team's players, or the Any-team pool when `teamId` is absent. */
+export const teamPlayers = (k: QuickKnockout, teamId?: string) => k.players.filter((p) => p.teamId === teamId);
+
 /** Mirrors the server's refusals, so Draw can say why it is disabled. */
 export function drawBlocker(k: QuickKnockout): string | null {
+  if (k.sport === 'cricket') {
+    // The draw deals the loose players (Any team, plus its own earlier
+    // placements) to the smallest teams first, so it fails only when there
+    // are too few to lift every team to 2.
+    const fixed = k.players.filter((p) => p.teamId && !p.drawn);
+    const loose = k.players.length - fixed.length;
+    const short = (k.teams ?? []).reduce((n, t) => n + Math.max(0, 2 - fixed.filter((p) => p.teamId === t.teamId).length), 0);
+    return short > loose ? 'Every team needs at least 2 players.' : null;
+  }
   if (k.format === 'doubles' && k.players.length % 2 !== 0) return 'Add one more player or remove one to draw.';
   const entrants = k.format === 'doubles' ? k.players.length / 2 : k.players.length;
   if (entrants < 3) return 'A knockout needs at least 3 entrants.';
@@ -58,3 +80,7 @@ export const QUICK_AWARD_BADGES = {
 
 export const awardablePlayers = (k: QuickKnockout, hostId: string) =>
   k.players.filter((p) => p.playerId && p.playerId !== hostId);
+
+/** The badges this knockout's host may give: cricket has no Ace Serve. Mirrors the server's knockoutSports. */
+export const awardBadges = (k: QuickKnockout): [string, string][] =>
+  Object.entries(QUICK_AWARD_BADGES).filter(([key]) => k.sport !== 'cricket' || key !== 'ace-serve');
