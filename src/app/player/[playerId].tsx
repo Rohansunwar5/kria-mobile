@@ -146,6 +146,7 @@ export default function PlayerProfile() {
             loading={career.loading}
             error={career.recentError}
             onRetry={career.reload}
+            onSeeAll={() => router.push({ pathname: '/matches/[playerId]', params: { playerId: playerId } })}
           />
 
           <HonorsList label="Titles" honors={player.honors} titles={player.titles} style={{ marginTop: 22 }} />

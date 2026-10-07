@@ -61,6 +61,7 @@ export const MIGRATED: string[] = [
   'src/components/knockout/BracketTree.tsx',
   'src/components/knockout/KnockoutAwards.tsx',
   'src/app/knockout/[id].tsx',
+  'src/app/matches/[playerId].tsx',
 ];
 
 export interface ColourLiteralFinding {

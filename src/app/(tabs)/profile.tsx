@@ -129,6 +129,7 @@ export default function Profile() {
             loading={career.loading}
             error={career.recentError}
             onRetry={career.reload}
+            onSeeAll={() => router.push({ pathname: '/matches/[playerId]', params: { playerId: user?._id ?? '' } })}
           />
 
           <Pressable

@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { RecentMatches } from '../src/components/profile/RecentMatches';
 import type { RecentMatch } from '../src/api/career';
 
@@ -85,5 +85,30 @@ describe('RecentMatches', () => {
     // when in fact the request broke — the one confusion worth a test.
     const { getByText } = render(<RecentMatches matches={null} error />);
     expect(getByText(/couldn’t load recent matches/i)).toBeTruthy();
+  });
+});
+
+describe('RecentMatches see all', () => {
+  const ten = Array.from({ length: 10 }, (_, i) => row({ _id: `r${i}`, title: `Match ${i}` }));
+
+  it('shows five rows and a See all button when more were loaded', () => {
+    const onSeeAll = jest.fn();
+    const { getAllByText, queryByText, getByText } = render(<RecentMatches matches={ten} onSeeAll={onSeeAll} />);
+    expect(getAllByText(/^match \d$/i)).toHaveLength(5);
+    expect(queryByText(/^match 5$/i)).toBeNull();
+    fireEvent.press(getByText(/see all/i));
+    expect(onSeeAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('has no See all at five or fewer', () => {
+    const { getAllByText, queryByText } = render(<RecentMatches matches={ten.slice(0, 5)} onSeeAll={jest.fn()} />);
+    expect(getAllByText(/^match \d$/i)).toHaveLength(5);
+    expect(queryByText(/see all/i)).toBeNull();
+  });
+
+  it('shows every row and no See all with the cap off', () => {
+    const { getAllByText, queryByText } = render(<RecentMatches matches={ten} onSeeAll={jest.fn()} all />);
+    expect(getAllByText(/^match \d$/i)).toHaveLength(10);
+    expect(queryByText(/see all/i)).toBeNull();
   });
 });

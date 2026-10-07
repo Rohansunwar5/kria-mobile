@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Skeleton, ErrorBlock } from '@/components/states';
 import type { RecentMatch } from '@/api/career';
 
@@ -9,6 +9,8 @@ const LBL = {
   textTransform: 'uppercase' as const,
   color: '#7d7d7d',
 };
+
+const CAP = 5;
 
 const HAIRLINE = 'rgba(255,255,255,0.12)';
 
@@ -111,11 +113,17 @@ export function RecentMatches({
   loading,
   error,
   onRetry,
+  onSeeAll,
+  all,
 }: {
   matches: RecentMatch[] | null;
   loading?: boolean;
   error?: boolean;
   onRetry?: () => void;
+  /** Called by the See all button, shown when more than `CAP` matches were loaded. */
+  onSeeAll?: () => void;
+  /** Cap off: render every row (the All matches screen). */
+  all?: boolean;
 }) {
   if (!error && !loading && matches && matches.length === 0) return null;
 
@@ -141,11 +149,23 @@ export function RecentMatches({
       );
     }
 
+    const shown = all ? matches : matches.slice(0, CAP);
     return (
       <View>
-        {matches.map((m, i) => (
-          <Row key={m._id} match={m} last={i === matches.length - 1} />
+        {shown.map((m, i) => (
+          <Row key={m._id} match={m} last={i === shown.length - 1} />
         ))}
+        {!all && onSeeAll && matches.length > CAP ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="See all matches"
+            onPress={onSeeAll}
+            hitSlop={8}
+            style={{ alignSelf: 'flex-start', paddingVertical: 10 }}
+          >
+            <Text style={{ ...LBL, color: '#fff' }}>See all</Text>
+          </Pressable>
+        ) : null}
       </View>
     );
   };
