@@ -27,7 +27,9 @@ export function KnockoutAwards({ knockout: k, hostId, busy, onAward }: {
       ) : (
         <>
           {k.awards.map((a, i) => (
-            <Text key={`${a.playerId}-${a.badge}-${i}`} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.text, marginTop: 8 }}>{a.title}</Text>
+            <Text key={`${a.playerId}-${a.badge}-${i}`} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.text, marginTop: 8 }}>
+              {[k.players.find((p) => p.playerId === a.playerId)?.displayName, a.title].filter(Boolean).join(' · ')}
+            </Text>
           ))}
           {k.awards.length < MAX_AWARDS ? (
             <>

@@ -198,6 +198,9 @@ export function KnockoutDrawBar({ knockout: k, busy, onDraw, onStart }: { knocko
   const insets = useSafeAreaInsets();
   const blocker = drawBlocker(k);
   const drawn = k.entrants.length > 0;
+  // Pressable writes `disabled` over accessibilityState.disabled, so the
+  // blocked state goes through `disabled` for a screen reader to hear it.
+  const off = Boolean(busy) || (!drawn && Boolean(blocker));
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12 + insets.bottom, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg, gap: 8 }}>
       {blocker ? <Text style={{ ...body(t), fontSize: 12, lineHeight: 17 }}>{blocker}</Text> : null}
@@ -208,9 +211,10 @@ export function KnockoutDrawBar({ knockout: k, busy, onDraw, onStart }: { knocko
       ) : null}
       <Pressable
         accessibilityRole="button"
-        onPress={drawn ? onStart : () => { if (!blocker) onDraw(); }}
-        disabled={busy}
-        style={{ minHeight: 52, borderRadius: 5, backgroundColor: t.brand, alignItems: 'center', justifyContent: 'center', opacity: busy || (!drawn && blocker) ? 0.45 : 1 }}
+        onPress={drawn ? onStart : onDraw}
+        disabled={off}
+        accessibilityState={{ disabled: off }}
+        style={{ minHeight: 52, borderRadius: 5, backgroundColor: t.brand, alignItems: 'center', justifyContent: 'center', opacity: off ? 0.45 : 1 }}
       >
         <Text style={{ ...button, fontSize: 13, color: t.onBrand }}>{drawn ? 'Start knockout' : 'Draw'}</Text>
       </Pressable>

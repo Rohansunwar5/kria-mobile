@@ -1,4 +1,4 @@
-import { ScrollView } from 'react-native';
+import { Alert, ScrollView, type AlertButton } from 'react-native';
 import { fireEvent, render, screen, within } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import KnockoutScreen from '../src/app/knockout/[id]';
@@ -34,7 +34,15 @@ jest.mock('@/lib/useQuickKnockout', () => ({
   }),
 }));
 
+const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
 beforeEach(() => jest.clearAllMocks());
+
+/** Presses Cancel knockout and returns the confirmation's buttons. */
+function askToCancel() {
+  fireEvent.press(screen.getByText('Cancel knockout'));
+  expect(alert).toHaveBeenCalledTimes(1);
+  return (alert.mock.calls[0][2] ?? []) as AlertButton[];
+}
 
 it('waiting: the host gets the draw bar pinned outside the scroll', () => {
   mockViewer = 'h1'; mockStatus = 'waiting';
@@ -50,6 +58,23 @@ it('waiting: a joined player gets no draw bar', () => {
   mockViewer = 'p2'; mockStatus = 'waiting';
   render(<KnockoutScreen />);
   expect(screen.queryByText('Start knockout')).toBeNull();
+  expect(screen.queryByText('Cancel knockout')).toBeNull();
+});
+
+it('waiting: the host can cancel, once they confirm', () => {
+  mockViewer = 'h1'; mockStatus = 'waiting';
+  render(<KnockoutScreen />);
+  const buttons = askToCancel();
+  expect(mockActions.cancel).not.toHaveBeenCalled();
+  buttons.find((b) => b.text === 'Cancel knockout' && b.style === 'destructive')!.onPress!();
+  expect(mockActions.cancel).toHaveBeenCalledTimes(1);
+});
+
+it('live: dismissing the confirmation keeps the knockout going', () => {
+  mockViewer = 'h1'; mockStatus = 'live';
+  render(<KnockoutScreen />);
+  askToCancel().find((b) => b.style === 'cancel')!.onPress?.();
+  expect(mockActions.cancel).not.toHaveBeenCalled();
 });
 
 it('live: the tree opens a match', () => {

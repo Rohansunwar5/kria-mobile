@@ -230,8 +230,9 @@ export function MatchPanel({
                 key={slot.slotId}
                 style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8 }}
               >
-                <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: slot.playerId ? '#fff' : '#7d7d7d' }}>
-                  {slot.playerId ? slot.displayName : `${slot.displayName} · open`}
+                {/* A knockout's guests are named players, not slots waiting for a joiner. */}
+                <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: slot.playerId || managed ? '#fff' : '#7d7d7d' }}>
+                  {slot.playerId || managed ? slot.displayName : `${slot.displayName} · open`}
                 </Text>
                 {host && !managed && match.status === 'live' && slot.playerId && String(slot.playerId) !== String(match.hostId) ? (
                   <Pressable

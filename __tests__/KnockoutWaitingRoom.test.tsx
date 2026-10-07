@@ -78,6 +78,7 @@ describe('draw bar', () => {
     const onDraw = jest.fn();
     render(<KnockoutDrawBar knockout={knockout()} onDraw={onDraw} onStart={jest.fn()} />);
     expect(screen.getByText('Add one more player or remove one to draw.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Draw' }).props.accessibilityState.disabled).toBe(true);
     fireEvent.press(screen.getByText('Draw'));
     expect(onDraw).not.toHaveBeenCalled();
   });
@@ -87,6 +88,7 @@ describe('draw bar', () => {
     const onStart = jest.fn();
     const drawn = knockout({ format: 'singles', entrants: [{ entrantId: 'e1', playerKeys: ['a'] }, { entrantId: 'e2', playerKeys: ['b'] }, { entrantId: 'e3', playerKeys: ['c'] }] });
     render(<KnockoutDrawBar knockout={drawn} onDraw={onDraw} onStart={onStart} />);
+    expect(screen.getByRole('button', { name: 'Start knockout' }).props.accessibilityState.disabled).toBe(false);
     fireEvent.press(screen.getByText('Reshuffle'));
     fireEvent.press(screen.getByText('Start knockout'));
     expect(onDraw).toHaveBeenCalledTimes(1);

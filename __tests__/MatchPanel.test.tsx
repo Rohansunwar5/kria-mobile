@@ -174,11 +174,15 @@ describe('inside a knockout', () => {
     expect(outside.queryByTestId('cancel')).toBeTruthy();
     expect(outside.queryByTestId('join-code')).toBeTruthy();
     expect(outside.queryByText('Remove')).toBeTruthy();
+    expect(outside.queryByText('Open · open')).toBeTruthy();
     outside.unmount();
 
-    const { queryByTestId, queryByText } = panel(base({ sides, knockoutId: 'k1', fixtureId: 'f1' }), 'h1');
+    const { getByText, queryByTestId, queryByText } = panel(base({ sides, knockoutId: 'k1', fixtureId: 'f1' }), 'h1');
     expect(queryByTestId('cancel')).toBeNull();
     expect(queryByTestId('join-code')).toBeNull();
     expect(queryByText('Remove')).toBeNull();
+    // A guest the host named is playing, not a slot waiting to be filled.
+    expect(queryByText('Open · open')).toBeNull();
+    expect(getByText('Open')).toBeTruthy();
   });
 });

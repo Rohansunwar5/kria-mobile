@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, Pressable, RefreshControl } from 'react-native';
+import { Alert, ScrollView, View, Text, Pressable, RefreshControl } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
@@ -20,6 +20,13 @@ export default function KnockoutScreen() {
   const ko = useQuickKnockout(id);
   const k = ko.knockout;
   const host = k ? isKnockoutHost(k, user?._id) : false;
+
+  // One tap would end it for everyone, unfinished matches included.
+  const confirmCancel = () =>
+    Alert.alert('Cancel this knockout?', 'Every unfinished match is cancelled too. This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Cancel knockout', style: 'destructive', onPress: ko.cancel },
+    ]);
 
   return (
     <Screen>
@@ -59,13 +66,13 @@ export default function KnockoutScreen() {
             <BracketTree knockout={k} onOpenMatch={(matchId) => router.push({ pathname: '/quick/[id]', params: { id: matchId } })} />
 
             {host && k.status === 'completed' ? <KnockoutAwards knockout={k} hostId={user!._id} busy={ko.busy} onAward={ko.award} /> : null}
-
-            {host && k.status === 'live' ? (
-              <Pressable accessibilityRole="button" onPress={ko.cancel} disabled={ko.busy} style={{ marginHorizontal: 20, marginTop: 24, minHeight: 48, borderRadius: 5, borderWidth: 1.5, borderColor: t.fail, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.failInk }}>Cancel knockout</Text>
-              </Pressable>
-            ) : null}
           </>
+        ) : null}
+
+        {host && k && (k.status === 'waiting' || k.status === 'live') ? (
+          <Pressable accessibilityRole="button" onPress={confirmCancel} disabled={ko.busy} style={{ marginHorizontal: 20, marginTop: 24, minHeight: 48, borderRadius: 5, borderWidth: 1.5, borderColor: t.fail, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.failInk }}>Cancel knockout</Text>
+          </Pressable>
         ) : null}
 
         {ko.problem ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk, marginTop: 16, paddingHorizontal: 20 }}>{ko.problem}</Text> : null}

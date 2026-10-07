@@ -25,10 +25,10 @@ it('gives an award: pick a player, pick a badge', () => {
   expect(onAward).toHaveBeenCalledWith('p2', 'fair-play');
 });
 
-it('lists given awards and stops at 3', () => {
+it('lists given awards with who got each, and stops at 3', () => {
   const awards = [1, 2, 3].map((n) => ({ playerId: 'p2', badge: 'fair-play', title: `Award ${n}` }));
   render(<KnockoutAwards knockout={k({ awards })} hostId="h1" onAward={jest.fn()} />);
-  expect(screen.getByText('Award 3')).toBeTruthy();
+  expect(screen.getByText('Rahul Singh · Award 3')).toBeTruthy();
   expect(screen.queryByText('Give award')).toBeNull();
 });
 
