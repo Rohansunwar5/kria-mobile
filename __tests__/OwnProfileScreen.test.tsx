@@ -1,9 +1,10 @@
-import { render } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer, { type PlayerStats } from '@/store/slices/authSlice';
 import registrationReducer, { type TournamentHistoryEntry } from '@/store/slices/registrationSlice';
 import Profile from '../src/app/(tabs)/profile';
+import type { QuickKnockout } from '@/api/quickKnockout';
 import type { CareerProfile, RecentMatch } from '@/api/career';
 import { formatMoney } from '@/lib/format';
 
@@ -16,8 +17,15 @@ import { formatMoney } from '@/lib/format';
 
 // Same shape as HomeScreen.test.tsx: no navigation container around a bare
 // screen render, so every push is a no-op.
+const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: mockPush }),
+}));
+
+// The Knockouts section loads through this; never let it reach axios.
+const mockListKnockouts = jest.fn();
+jest.mock('@/api/quickKnockout', () => ({
+  listMyQuickKnockouts: () => mockListKnockouts(),
 }));
 
 // The screen dispatches `fetchPlayerStats()` on mount (a real thunk that
@@ -119,8 +127,28 @@ const makeStore = (stats: PlayerStats | null, tournamentHistory: TournamentHisto
     },
   });
 
+const knockout = (over: Partial<QuickKnockout> = {}): QuickKnockout => ({
+  _id: 'k1',
+  hostId: 'someone',
+  name: 'Friday Cup',
+  sport: 'badminton',
+  format: 'singles',
+  matchConfig: { bestOf: 3, pointsToWin: 21 },
+  status: 'live',
+  players: [],
+  pairs: [],
+  entrants: [],
+  fixtures: [],
+  roundNames: [],
+  awards: [],
+  createdAt: '2026-10-01T00:00:00.000Z',
+  ...over,
+});
+
 describe('own profile screen (characterisation)', () => {
   beforeEach(() => {
+    mockPush.mockClear();
+    mockListKnockouts.mockResolvedValue([]);
     mockUseCareer.mockReturnValue({
       profile: careerProfile(),
       recent: [recentMatch()],
@@ -272,5 +300,61 @@ describe('own profile screen (characterisation)', () => {
 
     expect(getByText('Koramangala Smashers')).toBeTruthy();
     expect(queryByText(/sold for/i)).toBeNull();
+  });
+
+  describe('Knockouts section', () => {
+    const four = [
+      knockout({ _id: 'k1', name: 'Cup One', hostId: 'p1' }),
+      knockout({
+        _id: 'k2',
+        name: 'Cup Two',
+        format: 'doubles',
+        status: 'completed',
+        players: [{ playerKey: 'a', displayName: 'Arjun Mehta' }],
+        entrants: [{ entrantId: 'e1', playerKeys: ['a'] }],
+        championEntrantId: 'e1',
+      }),
+      knockout({ _id: 'k3', name: 'Cup Three' }),
+      knockout({ _id: 'k4', name: 'Cup Four' }),
+    ];
+
+    it('shows the 3 latest with a Host tag, singles/doubles and the champion', async () => {
+      mockListKnockouts.mockResolvedValue(four);
+      const { findByText, getByText, queryByText } = render(
+        <Provider store={makeStore(playerStats())}><Profile /></Provider>
+      );
+      expect(await findByText('Cup One')).toBeTruthy();
+      expect(getByText('Cup Two')).toBeTruthy();
+      expect(getByText('Cup Three')).toBeTruthy();
+      expect(queryByText('Cup Four')).toBeNull();
+      expect(getByText('Host')).toBeTruthy(); // only k1 is hosted by p1
+      expect(getByText(/doubles/i)).toBeTruthy();
+      expect(getByText(/Arjun Mehta/)).toBeTruthy();
+    });
+
+    it('opens a knockout and the full list', async () => {
+      mockListKnockouts.mockResolvedValue(four);
+      const { findByText, getByLabelText } = render(
+        <Provider store={makeStore(playerStats())}><Profile /></Provider>
+      );
+      fireEvent.press(await findByText('Cup Two'));
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/knockout/[id]', params: { id: 'k2' } });
+      fireEvent.press(getByLabelText('See all knockouts'));
+      expect(mockPush).toHaveBeenCalledWith('/knockout');
+    });
+
+    it('has no See all for 3 or fewer, and is hidden when there are none', async () => {
+      mockListKnockouts.mockResolvedValue(four.slice(0, 3));
+      const first = render(<Provider store={makeStore(playerStats())}><Profile /></Provider>);
+      await first.findByText('Cup One');
+      expect(first.queryByLabelText('See all knockouts')).toBeNull();
+      first.unmount();
+
+      mockListKnockouts.mockResolvedValue([]);
+      const second = render(<Provider store={makeStore(playerStats())}><Profile /></Provider>);
+      await second.findByText('Rohan Sunwar');
+      expect(mockListKnockouts).toHaveBeenCalled();
+      expect(second.queryByText('Knockouts')).toBeNull();
+    });
   });
 });

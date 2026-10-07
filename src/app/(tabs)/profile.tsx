@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
@@ -10,11 +10,13 @@ import { CareerCard } from '@/components/profile/CareerCard';
 import { BestSportHero } from '@/components/profile/BestSportHero';
 import { RecentMatches } from '@/components/profile/RecentMatches';
 import { PlayedForCard } from '@/components/profile/PlayedForCard';
+import { KnockoutRow } from '@/components/knockout/KnockoutRow';
 import { MenuRow } from '@/components/profile/MenuRow';
 import { HonorsList } from '@/components/profile/HonorsList';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPlayerStats, logout } from '@/store/slices/authSlice';
 import { fetchPlayerTournamentHistory } from '@/store/slices/registrationSlice';
+import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
 import { useCareer } from '@/lib/useCareer';
 import { groupMenu } from '@/lib/profileMenu';
 import { useTheme } from '@/lib/theme';
@@ -54,6 +56,12 @@ export default function Profile() {
   const { tournamentHistory } = useAppSelector((s) => s.registration);
   const career = useCareer(user?._id);
   const theme = useTheme();
+  const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
+
+  // A failed load just leaves the section hidden; the list screen has the retry.
+  useEffect(() => {
+    listMyQuickKnockouts().then(setKnockouts, () => {});
+  }, []);
 
   useEffect(() => {
     dispatch(fetchPlayerStats());
@@ -131,6 +139,22 @@ export default function Profile() {
             onRetry={career.reload}
             onSeeAll={() => router.push({ pathname: '/matches/[playerId]', params: { playerId: user?._id ?? '' } })}
           />
+
+          {knockouts.length ? (
+            <View style={{ marginTop: 22, marginBottom: 6 }}>
+              <Text style={{ ...LBL(theme), letterSpacing: 0.18 * 9, marginBottom: 10 }}>Knockouts</Text>
+              <View style={{ gap: 9 }}>
+                {knockouts.slice(0, 3).map((k) => (
+                  <KnockoutRow key={k._id} knockout={k} viewerId={user?._id} onPress={() => router.push({ pathname: '/knockout/[id]', params: { id: k._id } })} />
+                ))}
+              </View>
+              {knockouts.length > 3 ? (
+                <Pressable accessibilityRole="button" accessibilityLabel="See all knockouts" onPress={() => router.push('/knockout')} hitSlop={8} style={{ alignSelf: 'flex-start', paddingVertical: 10 }}>
+                  <Text style={{ ...LBL(theme), color: theme.text }}>See all</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
 
           <Pressable
             onPress={() => router.push('/quick')}
