@@ -54,6 +54,9 @@ export interface QuickMatch {
   liveState?: LiveState;
   /** Cricket only. Written at completion. */
   inningsScores?: QuickInningsScore[];
+  /** Set when a quick knockout created this match; the knockout manages it. */
+  knockoutId?: string;
+  fixtureId?: string;
 }
 
 export type WicketType =

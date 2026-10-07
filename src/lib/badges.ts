@@ -21,6 +21,8 @@ export const BADGES: Record<string, BadgeDef> = {
   'fair-play': { tier: 'rare', emblem: 'flag' },
   'iron-player': { tier: 'steel', emblem: 'medal' },
   'first-cap': { tier: 'steel', emblem: 'target' },
+  // Quick knockout champion. Never organizer-selectable (server ORGANIZER_BADGE_KEYS).
+  'knockout-winner': { tier: 'steel', emblem: 'trophy' },
 };
 
 /** Legacy `titles` (the auto "Winner of …" strings) and any key this build has never seen. */
