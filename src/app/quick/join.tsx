@@ -29,6 +29,12 @@ const normalise = (input: string) =>
     .join('')
     .slice(0, CODE_LENGTH);
 
+const KNOCKOUT_CLOSED: Record<Exclude<QuickKnockout['status'], 'waiting'>, string> = {
+  live: 'This knockout has already started.',
+  completed: 'This knockout has finished.',
+  cancelled: 'This knockout was cancelled.',
+};
+
 const serverMessage = (err: unknown, fallback: string) => {
   const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
   return message ? message : fallback;
@@ -198,12 +204,13 @@ export default function JoinQuickMatchScreen() {
             <Text style={{ ...LBL, marginTop: 4 }}>
               {`Hosted by ${knockout.players.find((p) => p.playerId === knockout.hostId)?.displayName ?? 'the host'} · ${knockout.players.length} in so far`}
             </Text>
-            {knockout.status !== 'waiting' ? (
-              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#d4d4d4', marginTop: 12 }}>This knockout has already started.</Text>
-            ) : knockout.players.some((p) => p.playerId === user?._id) ? (
+            {/* Someone already in can always open it; only a newcomer cares whether it has begun. */}
+            {user?._id && knockout.players.some((p) => p.playerId === user._id) ? (
               <Pressable onPress={() => router.replace({ pathname: '/knockout/[id]', params: { id: knockout._id } })} style={{ marginTop: 14, backgroundColor: '#F97316', borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>
                 <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>You are in · Open</Text>
               </Pressable>
+            ) : knockout.status !== 'waiting' ? (
+              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#d4d4d4', marginTop: 12 }}>{KNOCKOUT_CLOSED[knockout.status]}</Text>
             ) : (
               <>
                 <Pressable disabled={busy} onPress={() => enterKnockout(() => joinQuickKnockout(code))} style={{ marginTop: 14, backgroundColor: '#F97316', opacity: busy ? 0.5 : 1, borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>

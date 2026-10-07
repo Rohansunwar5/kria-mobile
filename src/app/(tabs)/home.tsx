@@ -94,12 +94,14 @@ export default function Home() {
   // on the PLAY tab is the one reason to cross over unprompted, so it has to be
   // right *before* you look at it.
   const loadMatches = useCallback(async () => {
-    try {
-      setMatches(await listMyQuickMatches());
-      setKnockouts(await listMyQuickKnockouts().catch(() => []));
-    } catch {
-      // A failed list leaves the dot as it was. The portal owns the retry.
-    }
+    // Side by side, each failing on its own: a failed match list leaves the
+    // dot as it was (the portal owns the retry) and still lets knockouts show.
+    const [mine, knockoutsNow] = await Promise.all([
+      listMyQuickMatches().catch(() => null),
+      listMyQuickKnockouts().catch(() => []),
+    ]);
+    if (mine) setMatches(mine);
+    setKnockouts(knockoutsNow);
   }, []);
 
   useFocusEffect(useCallback(() => { loadMatches(); }, [loadMatches]));

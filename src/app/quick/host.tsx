@@ -21,8 +21,9 @@ export default function HostChooser() {
         <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 32, lineHeight: 39, textTransform: 'uppercase', color: t.text }}>
           What are you hosting?
         </Text>
-        <ChoiceCard icon="shuttlecock" title="Quick match" hint="One match: singles, doubles or cricket." selected={false} onPress={() => router.push('/quick/new')} />
-        <ChoiceCard icon="bracket" title="Knockout" hint="A badminton knockout for 3 to 16 entrants." selected={false} onPress={() => router.push('/knockout/new')} />
+        {/* replace, not push: Back from either wizard skips the chooser. */}
+        <ChoiceCard icon="shuttlecock" title="Quick match" hint="One match: singles, doubles or cricket." selected={false} onPress={() => router.replace('/quick/new')} />
+        <ChoiceCard icon="bracket" title="Knockout" hint="A badminton knockout for 3 to 16 entrants." selected={false} onPress={() => router.replace('/knockout/new')} />
       </ScrollView>
     </Screen>
   );

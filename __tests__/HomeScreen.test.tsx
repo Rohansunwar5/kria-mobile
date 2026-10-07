@@ -4,6 +4,8 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/store/slices/authSlice';
 import tournamentReducer, { type Tournament } from '@/store/slices/tournamentSlice';
 import Home from '../src/app/(tabs)/home';
+import { listMyQuickKnockouts } from '../src/api/quickKnockout';
+import { listMyQuickMatches } from '../src/api/quickMatch';
 
 // This test is about the portal switch, not about loading. Stub the thunk so
 // nothing reaches axios, and give the screen a real store — the repo builds
@@ -249,5 +251,19 @@ describe('Home', () => {
     fireEvent.press(getByText(/show \d+ events?/i));
 
     expect(mockFetchPublicTournaments).not.toHaveBeenCalled();
+  });
+
+  // The two lists load side by side; a failed match list must not take the
+  // knockouts down with it.
+  it('still lists your knockouts when the quick-match list fails', async () => {
+    (listMyQuickMatches as jest.Mock).mockRejectedValueOnce(new Error('offline'));
+    (listMyQuickKnockouts as jest.Mock).mockResolvedValueOnce([
+      { _id: 'k1', name: 'Sunday Smash', status: 'live', format: 'singles', players: [] },
+    ]);
+    const { getByLabelText, findByText } = await renderHome();
+
+    fireEvent.press(getByLabelText(PLAY_TAB));
+
+    expect(await findByText('Sunday Smash')).toBeTruthy();
   });
 });

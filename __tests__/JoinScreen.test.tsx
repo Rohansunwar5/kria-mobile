@@ -41,6 +41,27 @@ it('a knockout code: take a name the host typed', async () => {
   await waitFor(() => expect(claimKnockoutGuest).toHaveBeenCalledWith('KX4P9M', 'g'));
 });
 
+it('a knockout you are already in opens, whatever its status', async () => {
+  const mine = { ...knockout, status: 'live', players: [...knockout.players, { playerKey: 'r', playerId: 'p5', displayName: 'Rahul Singh' }] };
+  (resolveQuickCode as jest.Mock).mockResolvedValue({ kind: 'knockout', data: mine });
+  await lookUp('KX4P9M');
+  fireEvent.press(await screen.findByText('You are in · Open'));
+  expect(router.replace).toHaveBeenCalledWith({ pathname: '/knockout/[id]', params: { id: 'k1' } });
+  expect(screen.queryByText('This knockout has already started.')).toBeNull();
+});
+
+it.each([
+  ['live', 'This knockout has already started.'],
+  ['completed', 'This knockout has finished.'],
+  ['cancelled', 'This knockout was cancelled.'],
+])('a %s knockout you are not in says so, with no way to join', async (status, message) => {
+  (resolveQuickCode as jest.Mock).mockResolvedValue({ kind: 'knockout', data: { ...knockout, status } });
+  await lookUp('KX4P9M');
+  expect(await screen.findByText(message)).toBeTruthy();
+  expect(screen.queryByText('Join as Rahul Singh')).toBeNull();
+  expect(screen.queryByText('Sam')).toBeNull();
+});
+
 it('a match code keeps the slot picker', async () => {
   (resolveQuickCode as jest.Mock).mockResolvedValue({
     kind: 'match',
