@@ -7,6 +7,7 @@ import { FilterSheet } from '@/components/home/FilterSheet';
 import { PlayPortal } from '@/components/home/PlayPortal';
 import { PortalSwitch } from '@/components/home/PortalSwitch';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
+import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
 import { hasLiveQuickMatch, openForEntryCount, portalStrip, type Portal } from '@/lib/homePortal';
 import { useCareer } from '@/lib/useCareer';
@@ -72,6 +73,7 @@ export default function Home() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [portal, setPortal] = useState<Portal>('events');
   const [matches, setMatches] = useState<QuickMatch[]>([]);
+  const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
 
   const load = () =>
     dispatch(
@@ -94,6 +96,7 @@ export default function Home() {
   const loadMatches = useCallback(async () => {
     try {
       setMatches(await listMyQuickMatches());
+      setKnockouts(await listMyQuickKnockouts().catch(() => []));
     } catch {
       // A failed list leaves the dot as it was. The portal owns the retry.
     }
@@ -198,6 +201,7 @@ export default function Home() {
             profile={career.profile}
             recent={career.recent}
             matches={matches}
+            knockouts={knockouts}
             playerId={user?._id}
             loading={career.loading}
             error={career.error}

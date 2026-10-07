@@ -162,3 +162,23 @@ describe('MatchPanel', () => {
     expect(queryByTestId('remove-h1')).toBeNull();
   });
 });
+
+describe('inside a knockout', () => {
+  it('offers no cancel, no remove and no join code', () => {
+    const sides = [
+      { sideId: 's1', name: 'Reds', slots: [{ slotId: 'sl1', playerId: 'h1', displayName: 'Host' }] },
+      { sideId: 's2', name: 'Blues', slots: [{ slotId: 'sl2', playerId: 'p2', displayName: 'Rahul' }, { slotId: 'sl3', displayName: 'Open' }] },
+    ];
+    // Control: the same match outside a knockout does show all three.
+    const outside = panel(base({ sides }), 'h1');
+    expect(outside.queryByTestId('cancel')).toBeTruthy();
+    expect(outside.queryByTestId('join-code')).toBeTruthy();
+    expect(outside.queryByText('Remove')).toBeTruthy();
+    outside.unmount();
+
+    const { queryByTestId, queryByText } = panel(base({ sides, knockoutId: 'k1', fixtureId: 'f1' }), 'h1');
+    expect(queryByTestId('cancel')).toBeNull();
+    expect(queryByTestId('join-code')).toBeNull();
+    expect(queryByText('Remove')).toBeNull();
+  });
+});

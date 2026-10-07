@@ -145,6 +145,8 @@ export function MatchPanel({
   busy?: boolean;
 }) {
   const host = isHost(match, playerId);
+  // A knockout manages its own matches: no cancel, removal or sharing here.
+  const managed = Boolean(match.knockoutId);
   const game = currentGame(match);
   const won = gamesWon(match);
   const result = outcomeLabel(match);
@@ -195,13 +197,13 @@ export function MatchPanel({
       {host ? (
         <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
           <Action testID="undo" label="Undo" onPress={onUndo} disabled={busy || !undoable} tone="quiet" />
-          {match.status === 'live' ? (
+          {match.status === 'live' && !managed ? (
             <Action testID="cancel" label="Cancel match" onPress={onCancel} disabled={busy} tone="danger" />
           ) : null}
         </View>
       ) : null}
 
-      {host && match.status === 'live' && open.length > 0 ? (
+      {host && !managed && match.status === 'live' && open.length > 0 ? (
         <View style={{ marginTop: 22, borderTopWidth: 1.5, borderTopColor: HAIRLINE, paddingTop: 14 }}>
           <Text style={LBL}>Share this code to fill the open slots</Text>
           <Text
@@ -231,7 +233,7 @@ export function MatchPanel({
                 <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: slot.playerId ? '#fff' : '#7d7d7d' }}>
                   {slot.playerId ? slot.displayName : `${slot.displayName} · open`}
                 </Text>
-                {host && match.status === 'live' && slot.playerId && String(slot.playerId) !== String(match.hostId) ? (
+                {host && !managed && match.status === 'live' && slot.playerId && String(slot.playerId) !== String(match.hostId) ? (
                   <Pressable
                     testID={`remove-${slot.playerId}`}
                     onPress={() => onRemovePlayer(String(slot.playerId))}

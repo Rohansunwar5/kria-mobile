@@ -1,15 +1,25 @@
 import { ScrollView } from 'react-native';
 import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { router } from 'expo-router';
 import QuickMatchScreen from '../src/app/quick/[id]';
 
 jest.mock('expo-router', () => ({
-  router: { back: jest.fn(), replace: jest.fn(), canGoBack: () => true },
+  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: () => true },
   useLocalSearchParams: () => ({ id: 'm1' }),
 }));
 
 let mockViewer = 'h1';
+let mockKnockoutId: string | undefined;
 jest.mock('@/store/hooks', () => ({
   useAppSelector: (pick: (s: unknown) => unknown) => pick({ auth: { user: { _id: mockViewer } } }),
+}));
+
+jest.mock('@/api/quickKnockout', () => ({
+  getQuickKnockout: jest.fn(async () => ({
+    name: 'Cup',
+    roundNames: ['Semi-Final', 'Final'],
+    fixtures: [{ fixtureId: 'f1', round: 2, position: 0, bye: false }],
+  })),
 }));
 
 const mockStart = jest.fn();
@@ -24,6 +34,8 @@ jest.mock('@/lib/useQuickMatch', () => ({
       gameScores: [],
       matchConfig: { bestOf: 3, pointsToWin: 21 },
       createdAt: '2026-10-06T00:00:00.000Z',
+      knockoutId: mockKnockoutId,
+      fixtureId: mockKnockoutId ? 'f1' : undefined,
     },
     loading: false, error: false, busy: false, reload: jest.fn(),
     point: jest.fn(), undo: jest.fn(), start: mockStart, cancel: jest.fn(), removePlayer: jest.fn(),
@@ -31,7 +43,7 @@ jest.mock('@/lib/useQuickMatch', () => ({
   }),
 }));
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; });
 
 describe('a waiting match', () => {
   it('opens in the waiting room, not on the scoreboard, and the host starts it', () => {
@@ -60,5 +72,22 @@ describe('a waiting match', () => {
 
     expect(screen.getByText('Waiting for Arjun Mehta to start')).toBeTruthy();
     expect(screen.queryByText('Start match')).toBeNull();
+  });
+});
+
+describe('a knockout match', () => {
+  it('links back to its bracket', () => {
+    mockViewer = 'h1';
+    mockKnockoutId = 'k1';
+    render(<QuickMatchScreen />);
+    fireEvent.press(screen.getByLabelText('Back to bracket'));
+    expect(router.push).toHaveBeenCalledWith({ pathname: '/knockout/[id]', params: { id: 'k1' } });
+  });
+
+  it('names the knockout and round in the bar', async () => {
+    mockViewer = 'h1';
+    mockKnockoutId = 'k1';
+    render(<QuickMatchScreen />);
+    expect(await screen.findByText('Cup · Final · ← Bracket')).toBeTruthy();
   });
 });

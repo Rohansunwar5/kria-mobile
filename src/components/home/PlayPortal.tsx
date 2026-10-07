@@ -12,6 +12,7 @@ import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMat
 import { scoreLine } from '@/lib/quickCricketView';
 import type { CareerProfile, RecentMatch, SportSummary } from '@/api/career';
 import type { QuickMatch } from '@/api/quickMatch';
+import type { QuickKnockout } from '@/api/quickKnockout';
 import { FormStrip } from '@/components/profile/FormStrip';
 import { RANKED_SPORTS, TopPlayers } from './TopPlayers';
 
@@ -284,6 +285,24 @@ function LiveRow({ match, playerId }: { match: QuickMatch; playerId?: string }) 
   );
 }
 
+function KnockoutRow({ knockout }: { knockout: QuickKnockout }) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push({ pathname: '/knockout/[id]', params: { id: knockout._id } })}
+      style={{ ...CARD, borderLeftWidth: 4, borderLeftColor: colors.brand, paddingHorizontal: 13, paddingVertical: 11, marginBottom: 9, minHeight: 44 }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+        <Tag label={knockout.status} variant={knockout.status === 'live' ? 'live' : 'open'} dot={knockout.status === 'live'} />
+        <Tag label="Knockout" variant="up" />
+      </View>
+      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: colors.white, marginTop: 8 }}>{knockout.name}</Text>
+      <Text style={MONO(theme)}>{`${knockout.format} · ${knockout.players.length} players`}</Text>
+    </Pressable>
+  );
+}
+
 /**
  * One ledger row. `title` and `scoreline` are both optional — the participation
  * ledger outlives the matches it describes — so a missing title is NAMED rather
@@ -354,6 +373,8 @@ export interface PlayPortalProps {
    */
   matches: QuickMatch[];
   playerId?: string;
+  /** Unfinished knockouts you host or play in. */
+  knockouts?: QuickKnockout[];
   loading: boolean;
   /**
    * The career-profile request actually FAILED. A missing `profile` is not the
@@ -380,6 +401,7 @@ export function PlayPortal({
   recent,
   matches,
   playerId,
+  knockouts = [],
   loading,
   error,
   recentError,
@@ -391,7 +413,9 @@ export function PlayPortal({
   // Unfinished matches: in play, or in the waiting room. A finished one is a
   // ledger row instead; a waiting one has no row anywhere else.
   const live = matches.filter((m) => m.status === 'live' || m.status === 'waiting');
-  const inPlay = live.filter((m) => m.status === 'live').length;
+  const openKnockouts = knockouts.filter((x) => x.status === 'waiting' || x.status === 'live');
+  // Only live knockouts count towards "N live"; waiting ones are listed, not counted.
+  const inPlay = live.filter((m) => m.status === 'live').length + openKnockouts.filter((x) => x.status === 'live').length;
   const ledger = recent ?? [];
   const hasRecord = sports.length > 0;
 
@@ -465,6 +489,9 @@ export function PlayPortal({
 
     return (
       <View style={{ paddingHorizontal: 16 }}>
+        {openKnockouts.map((x) => (
+          <KnockoutRow key={x._id} knockout={x} />
+        ))}
         {live.map((m) => (
           <LiveRow key={m._id} match={m} playerId={playerId} />
         ))}
@@ -479,7 +506,7 @@ export function PlayPortal({
   // block already says so in words, so the feed is omitted rather than given a
   // second empty state saying the same sentence again. A genuine failure is the
   // exception — that has to be said out loud.
-  const showRecent = loading || recentError || live.length > 0 || ledger.length > 0;
+  const showRecent = loading || recentError || openKnockouts.length > 0 || live.length > 0 || ledger.length > 0;
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>

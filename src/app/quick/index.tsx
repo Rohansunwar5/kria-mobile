@@ -4,6 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { Skeleton, EmptyState, ErrorBlock } from '@/components/states';
 import { Tag } from '@/components/StatusPill';
+import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
 import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMatchView';
 import { scoreLine } from '@/lib/quickCricketView';
@@ -52,9 +53,26 @@ function MatchRow({ match, playerId }: { match: QuickMatch; playerId?: string })
   );
 }
 
+function KnockoutListRow({ knockout }: { knockout: QuickKnockout }) {
+  return (
+    <Pressable
+      onPress={() => router.push({ pathname: '/knockout/[id]', params: { id: knockout._id } })}
+      style={{ borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', borderLeftWidth: 4, borderLeftColor: '#F97316', borderRadius: 6, backgroundColor: '#151515', padding: 14, marginBottom: 10 }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Tag label={knockout.status} variant={knockout.status === 'live' ? 'live' : knockout.status === 'waiting' ? 'open' : statusVariant(knockout.status === 'cancelled' ? 'cancelled' : 'completed')} dot={knockout.status === 'live'} />
+        <Tag label="Knockout" variant="up" />
+      </View>
+      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: '#fff', marginTop: 8 }}>{knockout.name}</Text>
+      <Text style={{ ...LBL, marginTop: 4 }}>{`${knockout.format} · ${knockout.players.length} players`}</Text>
+    </Pressable>
+  );
+}
+
 export default function QuickMatchesScreen() {
   const { user } = useAppSelector((s) => s.auth);
   const [matches, setMatches] = useState<QuickMatch[]>([]);
+  const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -62,7 +80,9 @@ export default function QuickMatchesScreen() {
     setLoading(true);
     setError(false);
     try {
-      setMatches(await listMyQuickMatches());
+      const [mine, ko] = await Promise.all([listMyQuickMatches(), listMyQuickKnockouts()]);
+      setMatches(mine);
+      setKnockouts(ko);
     } catch {
       setError(true);
     } finally {
@@ -113,7 +133,7 @@ export default function QuickMatchesScreen() {
 
         {error && matches.length === 0 ? <ErrorBlock label="Quick matches" onRetry={load} /> : null}
 
-        {!loading && !error && matches.length === 0 ? (
+        {!loading && !error && matches.length === 0 && knockouts.length === 0 ? (
           <EmptyState
             title="No quick matches yet"
             message="Host a casual match, share the code, and it counts towards your career record."
@@ -122,6 +142,7 @@ export default function QuickMatchesScreen() {
           />
         ) : null}
 
+        {knockouts.map((k) => <KnockoutListRow key={k._id} knockout={k} />)}
         {matches.map((match) => (
           <MatchRow key={match._id} match={match} playerId={user?._id} />
         ))}

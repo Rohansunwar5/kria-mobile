@@ -43,6 +43,7 @@ jest.mock('expo-router', () => ({
   useFocusEffect: (callback: () => void) => require('react').useEffect(callback, [callback]),
 }));
 
+jest.mock('../src/api/quickKnockout', () => ({ listMyQuickKnockouts: jest.fn(async () => []) }));
 jest.mock('../src/api/quickMatch', () => ({ listMyQuickMatches: jest.fn(async () => []) }));
 jest.mock('../src/lib/useCareer', () => ({
   useCareer: () => ({ profile: { sports: [], bestSport: null }, recent: [], loading: false, error: false, recentError: false, reload: jest.fn() }),

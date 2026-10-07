@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react-native';
 import { PlayPortal } from '../src/components/home/PlayPortal';
 import type { CareerProfile, RecentMatch } from '../src/api/career';
+import type { QuickKnockout } from '../src/api/quickKnockout';
 import type { QuickMatch } from '../src/api/quickMatch';
 import type { RankedPlayer } from '../src/api/rankings';
 
@@ -54,6 +55,13 @@ const quickMatch = (over: Partial<QuickMatch> = {}): QuickMatch => ({
     { sideId: 's1', name: 'Rohan', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
     { sideId: 's2', name: 'Dev', slots: [{ slotId: 'b', playerId: 'p2', displayName: 'Dev' }] },
   ],
+  ...over,
+});
+
+const knockout = (over: Partial<QuickKnockout> = {}): QuickKnockout => ({
+  _id: 'k1', hostId: 'p1', name: 'Sunday Smash', sport: 'badminton', format: 'singles', status: 'live',
+  matchConfig: { bestOf: 1, pointsToWin: 21 }, players: [], pairs: [], entrants: [], fixtures: [], roundNames: [], awards: [],
+  createdAt: '2026-10-07T00:00:00.000Z',
   ...over,
 });
 
@@ -198,5 +206,20 @@ describe('PlayPortal', () => {
     const asParticipant = render(<PlayPortal {...props({ matches: [live], playerId: 'p2', recent: [] })} />);
     expect(asParticipant.getByText('Playing')).toBeTruthy();
     expect(asParticipant.queryByText('Hosting')).toBeNull();
+  });
+
+  it('lists an unfinished knockout you are in', () => {
+    const { getByText } = render(<PlayPortal {...props({ knockouts: [knockout()] })} />);
+    expect(getByText('Sunday Smash')).toBeTruthy();
+    expect(getByText('Knockout')).toBeTruthy();
+  });
+
+  it('counts a live knockout in "N live" but not a waiting one', () => {
+    const live = render(<PlayPortal {...props({ knockouts: [knockout()] })} />);
+    expect(live.getByText('1 live')).toBeTruthy();
+    live.unmount();
+    const waiting = render(<PlayPortal {...props({ knockouts: [knockout({ status: 'waiting' })] })} />);
+    expect(waiting.getByText('Sunday Smash')).toBeTruthy();
+    expect(waiting.queryByText(/^\d+ live$/)).toBeNull();
   });
 });
