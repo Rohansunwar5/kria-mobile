@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { ScrollView, View, Text, TextInput, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { Screen } from '@/components/Screen';
-import { claimQuickMatchSlot, getQuickMatchByCode, type QuickMatch } from '@/api/quickMatch';
+import { claimQuickMatchSlot, type QuickMatch } from '@/api/quickMatch';
+import { claimKnockoutGuest, joinQuickKnockout, resolveQuickCode, type QuickKnockout } from '@/api/quickKnockout';
+import { useAppSelector } from '@/store/hooks';
 import { freeSlots } from '@/lib/quickMatchView';
 import { goBack } from '@/lib/nav';
 
@@ -38,14 +40,33 @@ export default function JoinQuickMatchScreen() {
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
 
+  const { user } = useAppSelector((s) => s.auth);
+  const [knockout, setKnockout] = useState<QuickKnockout | null>(null);
+
   const lookup = async () => {
     setBusy(true);
     setProblem('');
     try {
-      setMatch(await getQuickMatchByCode(code));
+      const found = await resolveQuickCode(code);
+      setMatch(found.kind === 'match' ? found.data : null);
+      setKnockout(found.kind === 'knockout' ? found.data : null);
     } catch (err) {
       setMatch(null);
-      setProblem(serverMessage(err, 'No match found for that code.'));
+      setKnockout(null);
+      setProblem(serverMessage(err, 'No match or knockout found for that code.'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const enterKnockout = async (action: () => Promise<QuickKnockout>) => {
+    setBusy(true);
+    setProblem('');
+    try {
+      const joined = await action();
+      router.replace({ pathname: '/knockout/[id]', params: { id: joined._id } });
+    } catch (err) {
+      setProblem(serverMessage(err, 'Could not join that knockout.'));
     } finally {
       setBusy(false);
     }
@@ -116,7 +137,7 @@ export default function JoinQuickMatchScreen() {
           }}
         >
           <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
-            Find match
+            Find
           </Text>
         </Pressable>
 
@@ -164,6 +185,40 @@ export default function JoinQuickMatchScreen() {
                       );
                     })}
                   </View>
+                ))}
+              </>
+            )}
+          </View>
+        ) : null}
+
+        {knockout ? (
+          <View style={{ marginTop: 26, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, padding: 14 }}>
+            <Text style={{ ...LBL, color: '#16C46A' }}>{`Knockout · ${knockout.format}`}</Text>
+            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#fff', marginTop: 6 }}>{knockout.name}</Text>
+            <Text style={{ ...LBL, marginTop: 4 }}>
+              {`Hosted by ${knockout.players.find((p) => p.playerId === knockout.hostId)?.displayName ?? 'the host'} · ${knockout.players.length} in so far`}
+            </Text>
+            {knockout.status !== 'waiting' ? (
+              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#d4d4d4', marginTop: 12 }}>This knockout has already started.</Text>
+            ) : knockout.players.some((p) => p.playerId === user?._id) ? (
+              <Pressable onPress={() => router.replace({ pathname: '/knockout/[id]', params: { id: knockout._id } })} style={{ marginTop: 14, backgroundColor: '#F97316', borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>
+                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>You are in · Open</Text>
+              </Pressable>
+            ) : (
+              <>
+                <Pressable disabled={busy} onPress={() => enterKnockout(() => joinQuickKnockout(code))} style={{ marginTop: 14, backgroundColor: '#F97316', opacity: busy ? 0.5 : 1, borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>
+                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
+                    {`Join as ${user ? `${user.firstName} ${user.lastName}` : 'yourself'}`}
+                  </Text>
+                </Pressable>
+                {knockout.players.some((p) => !p.playerId) ? (
+                  <Text style={{ ...LBL, marginTop: 16 }}>Already added by the host? Tap your name</Text>
+                ) : null}
+                {knockout.players.filter((p) => !p.playerId).map((p) => (
+                  <Pressable key={p.playerKey} disabled={busy} onPress={() => enterKnockout(() => claimKnockoutGuest(code, p.playerKey))}
+                    style={{ marginTop: 8, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 4, paddingVertical: 12, paddingHorizontal: 12 }}>
+                    <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: '#fff' }}>{p.displayName}</Text>
+                  </Pressable>
                 ))}
               </>
             )}
