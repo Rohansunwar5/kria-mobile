@@ -124,36 +124,42 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
         {host && doubles ? <Text style={label(t)}>Tap two players to pair them</Text> : null}
       </View>
 
-{k.sport === 'cricket' ? (        <CricketTeams          knockout={k} playerId={playerId} busy={busy}          onRemove={onRemove} onMove={onMove} onAddTeam={onAddTeam} onRemoveTeam={onRemoveTeam} onRenameTeam={onRenameTeam}        />      ) : (        <>
-      {hostPairs.map((pair) => {
-        const [a, b] = pair.playerKeys.map(byKey);
-        return (
-          <View key={pair.pairId} style={{ marginTop: 8, borderRadius: 6, borderWidth: 1.5, borderColor: t.brand, paddingHorizontal: 8 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6 }}>
-              <Text style={{ ...label(t), color: t.brandInk }}>Pair</Text>
-              {host ? (
-                <Pressable accessibilityRole="button" accessibilityLabel={`Split ${a.displayName} and ${b.displayName}`} onPress={() => onUnpair(pair.pairId)} disabled={busy} hitSlop={8} style={{ minHeight: 32, justifyContent: 'center' }}>
-                  <Text style={{ ...label(t), color: t.textMeta }}>Split</Text>
-                </Pressable>
-              ) : null}
-            </View>
-            <PlayerLine player={a} viewerId={playerId} />
-            <PlayerLine player={b} viewerId={playerId} />
-          </View>
-        );
-      })}
-
-      {(doubles ? unpairedPlayers(k) : k.players).map((p) => (
-        <PlayerLine
-          key={p.playerKey}
-          player={p}
-          viewerId={playerId}
-          tone={selected === p.playerKey ? 'selected' : undefined}
-          a11y={host && doubles ? `Select ${p.displayName}` : undefined}
-          onPress={host && doubles && !busy ? () => tapToPair(p.playerKey) : undefined}
-          onRemove={host && !busy ? () => onRemove(p.playerKey) : undefined}
+      {k.sport === 'cricket' ? (
+        <CricketTeams
+          knockout={k} playerId={playerId} busy={busy}
+          onRemove={onRemove} onMove={onMove} onAddTeam={onAddTeam} onRemoveTeam={onRemoveTeam} onRenameTeam={onRenameTeam}
         />
-      ))}
+      ) : (
+        <>
+          {hostPairs.map((pair) => {
+            const [a, b] = pair.playerKeys.map(byKey);
+            return (
+              <View key={pair.pairId} style={{ marginTop: 8, borderRadius: 6, borderWidth: 1.5, borderColor: t.brand, paddingHorizontal: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6 }}>
+                  <Text style={{ ...label(t), color: t.brandInk }}>Pair</Text>
+                  {host ? (
+                    <Pressable accessibilityRole="button" accessibilityLabel={`Split ${a.displayName} and ${b.displayName}`} onPress={() => onUnpair(pair.pairId)} disabled={busy} hitSlop={8} style={{ minHeight: 32, justifyContent: 'center' }}>
+                      <Text style={{ ...label(t), color: t.textMeta }}>Split</Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+                <PlayerLine player={a} viewerId={playerId} />
+                <PlayerLine player={b} viewerId={playerId} />
+              </View>
+            );
+          })}
+
+          {(doubles ? unpairedPlayers(k) : k.players).map((p) => (
+            <PlayerLine
+              key={p.playerKey}
+              player={p}
+              viewerId={playerId}
+              tone={selected === p.playerKey ? 'selected' : undefined}
+              a11y={host && doubles ? `Select ${p.displayName}` : undefined}
+              onPress={host && doubles && !busy ? () => tapToPair(p.playerKey) : undefined}
+              onRemove={host && !busy ? () => onRemove(p.playerKey) : undefined}
+            />
+          ))}
         </>
       )}
 
