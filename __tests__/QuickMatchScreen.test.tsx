@@ -1,7 +1,8 @@
 import { ScrollView } from 'react-native';
-import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import QuickMatchScreen from '../src/app/quick/[id]';
+import { getQuickKnockout } from '@/api/quickKnockout';
 
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), dismissTo: jest.fn(), canGoBack: () => true },
@@ -11,6 +12,8 @@ jest.mock('expo-router', () => ({
 let mockViewer = 'h1';
 let mockKnockoutId: string | undefined;
 let mockProblem = '';
+let mockStatus = 'waiting';
+let mockFetched: Record<string, unknown> = {};
 jest.mock('@/store/hooks', () => ({
   useAppSelector: (pick: (s: unknown) => unknown) => pick({ auth: { user: { _id: mockViewer } } }),
 }));
@@ -18,8 +21,13 @@ jest.mock('@/store/hooks', () => ({
 jest.mock('@/api/quickKnockout', () => ({
   getQuickKnockout: jest.fn(async () => ({
     name: 'Cup',
+    hostId: 'h1',
+    status: 'live',
+    awardsEligible: true,
+    awards: [],
     roundNames: ['Semi-Final', 'Final'],
     fixtures: [{ fixtureId: 'f1', round: 2, position: 0, bye: false }],
+    ...mockFetched,
   })),
 }));
 
@@ -27,7 +35,7 @@ const mockStart = jest.fn();
 jest.mock('@/lib/useQuickMatch', () => ({
   useQuickMatch: () => ({
     match: {
-      _id: 'm1', hostId: 'h1', sport: 'badminton', joinCode: 'ABC234', status: 'waiting',
+      _id: 'm1', hostId: 'h1', sport: 'badminton', joinCode: 'ABC234', status: mockStatus,
       sides: [
         { sideId: 's1', name: 'Arjun', slots: [{ slotId: 'a1', playerId: 'h1', displayName: 'Arjun Mehta' }] },
         { sideId: 's2', name: 'Rahul', slots: [{ slotId: 'b1', playerId: 'p2', displayName: 'Rahul Singh' }] },
@@ -44,7 +52,7 @@ jest.mock('@/lib/useQuickMatch', () => ({
   }),
 }));
 
-beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; });
+beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; mockStatus = 'waiting'; mockFetched = {}; });
 
 describe('a waiting match', () => {
   it('opens in the waiting room, not on the scoreboard, and the host starts it', () => {
@@ -101,5 +109,52 @@ describe('a knockout match', () => {
     mockKnockoutId = 'k1';
     render(<QuickMatchScreen />);
     expect(await screen.findByText('Cup · Final · ← Bracket')).toBeTruthy();
+  });
+
+  describe('awards auto-open', () => {
+    /** Renders live, then flips the match to completed in place. */
+    async function finish(viewer: string, fetched: Record<string, unknown> = { status: 'completed' }) {
+      mockViewer = viewer; mockKnockoutId = 'k1'; mockStatus = 'live'; mockFetched = fetched;
+      const view = render(<QuickMatchScreen />);
+      await screen.findByText('Cup · Final · ← Bracket');
+      mockStatus = 'completed';
+      view.rerender(<QuickMatchScreen />);
+      return view;
+    }
+
+    it('opens the awards screen when the host sees the final finish', async () => {
+      await finish('h1');
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith({ pathname: '/knockout/awards/[id]', params: { id: 'k1' } }));
+      expect(router.push).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not open for a player who is not the host', async () => {
+      await finish('p2');
+      await waitFor(() => expect(getQuickKnockout).toHaveBeenCalledTimes(2));
+      expect(router.push).not.toHaveBeenCalled();
+    });
+
+    it('does not open when the knockout is not finished, not eligible, or already has awards', async () => {
+      const cases = [
+        { status: 'live' },
+        { status: 'completed', awardsEligible: false },
+        { status: 'completed', awards: [{ playerId: 'p2', badge: 'fair-play', title: 'x' }] },
+      ];
+      for (const fetched of cases) {
+        jest.clearAllMocks();
+        const view = await finish('h1', fetched);
+        await waitFor(() => expect(getQuickKnockout).toHaveBeenCalledTimes(2));
+        expect(router.push).not.toHaveBeenCalled();
+        view.unmount();
+      }
+    });
+
+    it('does not open when an already-finished final is opened later', async () => {
+      mockViewer = 'h1'; mockKnockoutId = 'k1'; mockStatus = 'completed'; mockFetched = { status: 'completed' };
+      render(<QuickMatchScreen />);
+      await screen.findByText('Cup · Final · ← Bracket');
+      expect(getQuickKnockout).toHaveBeenCalledTimes(1); // the bar title only
+      expect(router.push).not.toHaveBeenCalled();
+    });
   });
 });

@@ -5,7 +5,6 @@ import { Icon } from '@/components/icons';
 import { Skeleton, ErrorBlock } from '@/components/states';
 import { Badge } from '@/components/profile/Badge';
 import { BracketTree } from '@/components/knockout/BracketTree';
-import { KnockoutAwards } from '@/components/knockout/KnockoutAwards';
 import { KnockoutDrawBar, KnockoutWaitingRoom } from '@/components/knockout/KnockoutWaitingRoom';
 import { useQuickKnockout } from '@/lib/useQuickKnockout';
 import { championName, isKnockoutHost } from '@/lib/quickKnockoutView';
@@ -63,9 +62,14 @@ export default function KnockoutScreen() {
               </View>
             ) : null}
 
+            {host && k.status === 'completed' && k.awardsEligible && k.awards.length < 3 ? (
+              <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/knockout/awards/[id]', params: { id: k._id } })} style={{ marginHorizontal: 20, marginTop: 12, minHeight: 48, borderRadius: 5, backgroundColor: t.brand, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.onBrand }}>Give awards</Text>
+              </Pressable>
+            ) : null}
+
             <BracketTree knockout={k} onOpenMatch={(matchId) => router.push({ pathname: '/quick/[id]', params: { id: matchId } })} />
 
-            {host && k.status === 'completed' ? <KnockoutAwards knockout={k} hostId={user!._id} busy={ko.busy} onAward={ko.award} /> : null}
           </>
         ) : null}
 

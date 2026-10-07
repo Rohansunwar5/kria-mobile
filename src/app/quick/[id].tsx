@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View, Text, Pressable, RefreshControl } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Screen } from '@/components/Screen';
@@ -10,6 +10,7 @@ import { StartBar, WaitingRoom } from '@/components/quick/WaitingRoom';
 import { getQuickKnockout } from '@/api/quickKnockout';
 import { useQuickMatch } from '@/lib/useQuickMatch';
 import { panelFor } from '@/lib/quickCricketView';
+import { isKnockoutHost } from '@/lib/quickKnockoutView';
 import { isHost } from '@/lib/quickMatchView';
 import { useAppSelector } from '@/store/hooks';
 import { goBack } from '@/lib/nav';
@@ -40,6 +41,23 @@ export default function QuickMatchScreen() {
       .catch(() => undefined);
     return () => { alive = false; };
   }, [knockoutId, fixtureId]);
+
+  // Awards open themselves only when this screen watches the final finish; the
+  // ref keeps an already-finished final, opened later, from counting.
+  const status = match?.status;
+  const prevStatus = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const wasLive = prevStatus.current === 'live';
+    prevStatus.current = status;
+    if (!wasLive || status !== 'completed' || !knockoutId) return;
+    getQuickKnockout(String(knockoutId))
+      .then((k) => {
+        if (isKnockoutHost(k, user?._id) && k.status === 'completed' && k.awardsEligible && k.awards.length === 0) {
+          router.push({ pathname: '/knockout/awards/[id]', params: { id: String(knockoutId) } });
+        }
+      })
+      .catch(() => undefined);
+  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps -- fires on the status change only
 
   return (
     <Screen>

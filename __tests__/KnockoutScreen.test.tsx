@@ -84,9 +84,17 @@ it('live: the tree opens a match', () => {
   expect(router.push).toHaveBeenCalledWith({ pathname: '/quick/[id]', params: { id: 'm2' } });
 });
 
-it('completed: champion banner and the host’s awards', () => {
+it('completed: champion banner, and the host gets a Give awards button, not inline chips', () => {
   mockViewer = 'h1'; mockStatus = 'completed';
   render(<KnockoutScreen />);
   expect(screen.getByText('Arjun won Cup')).toBeTruthy();
-  expect(screen.getByText('Give award')).toBeTruthy();
+  expect(screen.queryByText('Fair Play')).toBeNull();
+  fireEvent.press(screen.getByText('Give awards'));
+  expect(router.push).toHaveBeenCalledWith({ pathname: '/knockout/awards/[id]', params: { id: 'k1' } });
+});
+
+it('completed: a joined player gets no Give awards button', () => {
+  mockViewer = 'p2'; mockStatus = 'completed';
+  render(<KnockoutScreen />);
+  expect(screen.queryByText('Give awards')).toBeNull();
 });

@@ -59,7 +59,7 @@ export const MIGRATED: string[] = [
   'src/app/knockout/new.tsx',
   'src/components/knockout/KnockoutWaitingRoom.tsx',
   'src/components/knockout/BracketTree.tsx',
-  'src/components/knockout/KnockoutAwards.tsx',
+  'src/app/knockout/awards/[id].tsx',
   'src/app/knockout/[id].tsx',
   'src/app/knockout/index.tsx',
   'src/components/knockout/KnockoutRow.tsx',
