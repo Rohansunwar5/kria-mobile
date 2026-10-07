@@ -57,6 +57,7 @@ export const MIGRATED: string[] = [
   'src/components/quick/WaitingRoom.tsx',
   'src/app/quick/host.tsx',
   'src/app/knockout/new.tsx',
+  'src/components/knockout/KnockoutWaitingRoom.tsx',
 ];
 
 export interface ColourLiteralFinding {
