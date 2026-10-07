@@ -79,3 +79,31 @@ it('an unknown code says so', async () => {
   await lookUp('ZZZZZZ');
   expect(await screen.findByText('No match or knockout has that code.')).toBeTruthy();
 });
+
+const cricket = {
+  _id: 'k2', hostId: 'h1', name: 'Sunday Cup', sport: 'cricket', format: 'teams', status: 'waiting',
+  matchConfig: { maxOvers: 8, playersPerTeam: 2 },
+  teams: [{ teamId: 't1', name: 'Strikers' }, { teamId: 't2', name: 'Royals' }, { teamId: 't3', name: 'Team 3' }],
+  players: [
+    { playerKey: 'a', playerId: 'h1', displayName: 'Arjun Mehta', teamId: 't1' },
+    { playerKey: 'g', displayName: 'Sam', teamId: 't1' },
+  ],
+};
+
+it('a cricket knockout: pick a team, then join it', async () => {
+  (resolveQuickCode as jest.Mock).mockResolvedValue({ kind: 'knockout', data: cricket });
+  await lookUp('KX4P9M');
+  expect(await screen.findByText('Knockout · Cricket · 8 overs')).toBeTruthy();
+  fireEvent.press(screen.getByText('Royals'));
+  fireEvent.press(screen.getByText('Join as Rahul Singh'));
+  await waitFor(() => expect(joinQuickKnockout).toHaveBeenCalledWith('KX4P9M', 't2'));
+});
+
+it('a cricket knockout: no pick joins Any team, and a full team cannot be picked', async () => {
+  (resolveQuickCode as jest.Mock).mockResolvedValue({ kind: 'knockout', data: cricket });
+  await lookUp('KX4P9M');
+  expect(await screen.findByText('Full')).toBeTruthy();
+  fireEvent.press(screen.getByText('Strikers'));
+  fireEvent.press(screen.getByText('Join as Rahul Singh'));
+  await waitFor(() => expect(joinQuickKnockout).toHaveBeenCalledWith('KX4P9M'));
+});

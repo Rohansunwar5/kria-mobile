@@ -7,6 +7,7 @@ import { claimKnockoutGuest, joinQuickKnockout, resolveQuickCode, type QuickKnoc
 import { useAppSelector } from '@/store/hooks';
 import { freeSlots } from '@/lib/quickMatchView';
 import { goBack } from '@/lib/nav';
+import { formatLabel, teamPlayers } from '@/lib/quickKnockoutView';
 
 /** The server's code alphabet — no 0, O, 1 or I, because codes get read aloud
  *  and retyped. Anything else a keyboard offers is dropped on entry. */
@@ -48,10 +49,12 @@ export default function JoinQuickMatchScreen() {
 
   const { user } = useAppSelector((s) => s.auth);
   const [knockout, setKnockout] = useState<QuickKnockout | null>(null);
+  const [teamId, setTeamId] = useState<string | null>(null);
 
   const lookup = async () => {
     setBusy(true);
     setProblem('');
+    setTeamId(null);
     try {
       const found = await resolveQuickCode(code);
       setMatch(found.kind === 'match' ? found.data : null);
@@ -199,7 +202,7 @@ export default function JoinQuickMatchScreen() {
 
         {knockout ? (
           <View style={{ marginTop: 26, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, padding: 14 }}>
-            <Text style={{ ...LBL, color: '#16C46A' }}>{`Knockout · ${knockout.format}`}</Text>
+            <Text style={{ ...LBL, color: '#16C46A' }}>{`Knockout · ${formatLabel(knockout)}`}</Text>
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#fff', marginTop: 6 }}>{knockout.name}</Text>
             <Text style={{ ...LBL, marginTop: 4 }}>
               {`Hosted by ${knockout.players.find((p) => p.playerId === knockout.hostId)?.displayName ?? 'the host'} · ${knockout.players.length} in so far`}
@@ -213,7 +216,40 @@ export default function JoinQuickMatchScreen() {
               <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#d4d4d4', marginTop: 12 }}>{KNOCKOUT_CLOSED[knockout.status]}</Text>
             ) : (
               <>
-                <Pressable disabled={busy} onPress={() => enterKnockout(() => joinQuickKnockout(code))} style={{ marginTop: 14, backgroundColor: '#F97316', opacity: busy ? 0.5 : 1, borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>
+                {knockout.sport === 'cricket' ? (
+                  <>
+                    <Text style={{ ...LBL, marginTop: 14 }}>Pick your team</Text>
+                    {(knockout.teams ?? []).map((team) => {
+                      const count = teamPlayers(knockout, team.teamId).length;
+                      const full = count >= (knockout.matchConfig.playersPerTeam ?? 0);
+                      const on = teamId === team.teamId;
+                      return (
+                        <Pressable
+                          key={team.teamId}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: on, disabled: full }}
+                          disabled={full || busy}
+                          onPress={() => setTeamId(team.teamId)}
+                          style={{ marginTop: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1.5, borderColor: on ? '#F97316' : 'rgba(255,255,255,0.14)', borderRadius: 4, paddingVertical: 12, paddingHorizontal: 12, opacity: full ? 0.45 : 1 }}
+                        >
+                          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: '#fff' }}>{team.name}</Text>
+                          <Text style={LBL}>{full ? 'Full' : `${count}/${knockout.matchConfig.playersPerTeam}`}</Text>
+                        </Pressable>
+                      );
+                    })}
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: teamId === null }}
+                      disabled={busy}
+                      onPress={() => setTeamId(null)}
+                      style={{ marginTop: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1.5, borderColor: teamId === null ? '#F97316' : 'rgba(255,255,255,0.14)', borderRadius: 4, paddingVertical: 12, paddingHorizontal: 12 }}
+                    >
+                      <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: '#fff' }}>Any team</Text>
+                      <Text style={LBL}>The draw places you</Text>
+                    </Pressable>
+                  </>
+                ) : null}
+                <Pressable disabled={busy} onPress={() => enterKnockout(() => (teamId ? joinQuickKnockout(code, teamId) : joinQuickKnockout(code)))} style={{ marginTop: 14, backgroundColor: '#F97316', opacity: busy ? 0.5 : 1, borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>
                   <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
                     {`Join as ${user ? `${user.firstName} ${user.lastName}` : 'yourself'}`}
                   </Text>
