@@ -87,7 +87,7 @@ function Row({ match, last }: { match: RecentMatch; last?: boolean }) {
         ) : null}
         {/* Naming the context matters: a quick match and a tournament match
             carry very different weight, and the feed blends both. */}
-        <Text style={{ ...LBL, marginTop: 3 }}>{match.context}</Text>
+        <Text style={{ ...LBL, marginTop: 3 }}>{match.knockout ? ['Knockout', match.knockout.name, match.knockout.round].filter(Boolean).join(' · ') : match.context}</Text>
       </View>
 
       <Text style={{ ...LBL, color: '#a0a0a0' }}>{shortDate(match.playedAt)}</Text>

@@ -52,4 +52,17 @@ describe('RecentMatches shows who played and the score', () => {
     expect(getByText(/^tournament$/i)).toBeTruthy();
     expect(getByText('Alpha vs Bravo')).toBeTruthy();
   });
+
+  it('names the knockout and round in place of "quick"', () => {
+    const { getByText, queryByText } = render(
+      <RecentMatches matches={[row({ knockout: { name: 'Sunday Cup', round: 'Final' } })]} />
+    );
+    expect(getByText('Knockout · Sunday Cup · Final')).toBeTruthy();
+    expect(queryByText(/^quick$/i)).toBeNull();
+  });
+
+  it('drops the round part when the server sent none', () => {
+    const { getByText } = render(<RecentMatches matches={[row({ knockout: { name: 'Sunday Cup' } })]} />);
+    expect(getByText('Knockout · Sunday Cup')).toBeTruthy();
+  });
 });

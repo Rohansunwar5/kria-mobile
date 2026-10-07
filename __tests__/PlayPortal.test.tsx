@@ -117,6 +117,15 @@ describe('PlayPortal', () => {
     expect(getByText(/match unavailable/i)).toBeTruthy();
   });
 
+  it('tags a knockout match as knockout rather than quick', () => {
+    const ko: RecentMatch[] = [
+      { _id: 'r3', matchId: 'm3', sport: 'badminton', context: 'quick', result: 'won', playedAt: '2026-09-01T00:00:00.000Z', title: 'A v B', knockout: { name: 'Sunday Cup', round: 'Final' } },
+    ];
+    const { getByText, queryByText } = render(<PlayPortal {...props({ recent: ko })} />);
+    expect(getByText(/^knockout$/i)).toBeTruthy();
+    expect(queryByText(/^quick$/i)).toBeNull();
+  });
+
   // DESIGN.md §5: an empty state names what would appear and offers the one
   // action that fills it — which is Host, already at the top. It must not offer
   // a second competing action.

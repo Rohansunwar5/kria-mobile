@@ -316,7 +316,7 @@ function LedgerRow({ match }: { match: RecentMatch }) {
     <View style={{ ...CARD, paddingHorizontal: 13, paddingVertical: 11, marginBottom: 9 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
         <Tag label={tag.label} variant={tag.variant} />
-        <Tag label={match.context} variant="up" />
+        <Tag label={match.knockout ? 'knockout' : match.context} variant="up" />
         <View style={{ flex: 1 }} />
         <Text style={MONO(theme)}>{formatShortDate(match.playedAt)}</Text>
       </View>

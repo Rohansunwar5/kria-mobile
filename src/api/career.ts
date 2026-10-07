@@ -98,6 +98,8 @@ export interface RecentMatch {
   title?: string;
   /** "21-15, 21-18" or "150/6 (20.0) vs 151/4 (19.2)". Absent for a walkover. */
   scoreline?: string;
+  /** Set when the match was a quick-knockout fixture. Older servers omit it. */
+  knockout?: { name: string; round?: string };
 }
 
 /**
