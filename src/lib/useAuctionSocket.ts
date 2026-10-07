@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { socket } from '@/lib/socket';
+import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
 import {
   getAuctionStatus,
   getAuctionSoldLog,
@@ -56,7 +56,7 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
     const onDisconnect = () => setConnected(false);
 
     load();
-    if (!socket.connected) socket.connect();
+    acquireSocket();
     join();
     socket.on('auction:update', apply);
     socket.on('connect', onReconnect);
@@ -68,10 +68,7 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
       socket.off('auction:update', apply);
       socket.off('connect', onReconnect);
       socket.off('disconnect', onDisconnect);
-      // Sole socket consumer in the app today, so disconnecting on unmount is safe.
-      // If another feature (e.g. live bracket/scoreboard) starts sharing this singleton,
-      // move connection lifecycle to an app-level owner instead of disconnecting here.
-      socket.disconnect();
+      releaseSocket();
     };
   }, [tournamentId, categoryId, load]);
 

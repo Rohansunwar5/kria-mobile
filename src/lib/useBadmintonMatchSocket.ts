@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { socket } from '@/lib/socket';
+import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
 import { getBadmintonMatch, type BadmintonMatch, type GameScore } from '@/api/badmintonMatch';
 import { rallyFrom, type Rally } from '@/lib/badmintonLive';
 
@@ -65,7 +65,7 @@ export function useBadmintonMatchSocket(matchId?: string) {
     const onDisconnect = () => setConnected(false);
 
     reload();
-    if (!socket.connected) socket.connect();
+    acquireSocket();
     join();
     socket.on('score:update', onScore);
     socket.on('connect', onConnect);
@@ -77,9 +77,7 @@ export function useBadmintonMatchSocket(matchId?: string) {
       socket.off('score:update', onScore);
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
-      // Auction and live-scoreboard are separate full-screen routes and are
-      // never mounted together, so each can own connect/disconnect safely.
-      socket.disconnect();
+      releaseSocket();
     };
   }, [matchId, reload, apply]);
 

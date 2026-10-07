@@ -15,6 +15,7 @@ jest.mock('expo-router', () => ({
 // The hook also subscribes to live updates; keep that off the network here.
 // What the subscription does is covered in useQuickMatchLive.test.tsx.
 jest.mock('@/lib/socket', () => ({
+  acquireSocket: jest.fn(), releaseSocket: jest.fn(),
   socket: { connected: true, connect: jest.fn(), disconnect: jest.fn(), emit: jest.fn(), on: jest.fn(), off: jest.fn() },
 }));
 

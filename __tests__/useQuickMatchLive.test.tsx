@@ -14,6 +14,7 @@ jest.mock('expo-router', () => ({
 jest.mock('@/lib/socket', () => {
   const handlers: Record<string, ((...a: unknown[]) => void)[]> = {};
   return {
+    acquireSocket: jest.fn(), releaseSocket: jest.fn(),
     socket: {
       connected: true,
       connect: jest.fn(),

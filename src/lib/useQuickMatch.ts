@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { socket } from '@/lib/socket';
+import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
 import {
   cancelQuickMatch,
   getQuickMatch,
@@ -75,7 +75,7 @@ export function useQuickMatch(id?: string) {
       load();
     };
 
-    if (!socket.connected) socket.connect();
+    acquireSocket();
     join();
     socket.on('quick:update', onUpdate);
     socket.on('connect', onConnect);
@@ -84,9 +84,7 @@ export function useQuickMatch(id?: string) {
       socket.emit('leave:match', { matchId: id });
       socket.off('quick:update', onUpdate);
       socket.off('connect', onConnect);
-      // Full-screen route, like the live scoreboard and the auction — never
-      // mounted alongside them, so it can own connect/disconnect.
-      socket.disconnect();
+      releaseSocket();
     };
   }, [id, load]);
 

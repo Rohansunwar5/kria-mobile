@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { socket } from '@/lib/socket';
+import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
 import { getMatch, getLiveState, getScorecard, CricketMatch, LiveState, Scorecard } from '@/api/cricketMatch';
 import { tallyKey } from '@/lib/cricketView';
 
@@ -65,7 +65,7 @@ export function useCricketMatchSocket(matchId?: string) {
     const onReconnect = () => { join(); reload(); };
 
     reload();
-    if (!socket.connected) socket.connect();
+    acquireSocket();
     join();
     socket.on('ball:recorded', onBall);
     socket.on('connect', onReconnect);
@@ -76,9 +76,7 @@ export function useCricketMatchSocket(matchId?: string) {
       socket.emit('leave:match', { matchId });
       socket.off('ball:recorded', onBall);
       socket.off('connect', onReconnect);
-      // The auction and live-scoreboard routes are never mounted simultaneously
-      // (separate full-screen routes), so each can own connect/disconnect safely.
-      socket.disconnect();
+      releaseSocket();
     };
   }, [matchId, reload, loadScorecard]);
 
