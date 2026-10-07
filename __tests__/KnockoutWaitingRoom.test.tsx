@@ -16,7 +16,10 @@ const knockout = (over: Partial<QuickKnockout> = {}): QuickKnockout => ({
   pairs: [], entrants: [], fixtures: [], roundNames: [], awards: [], createdAt: '2026-10-07T00:00:00.000Z',
   ...over,
 });
-const handlers = () => ({ onAddGuest: jest.fn(), onAddPlayer: jest.fn(), onRemove: jest.fn(), onPair: jest.fn(), onUnpair: jest.fn() });
+const handlers = () => ({
+  onAddGuest: jest.fn(), onAddPlayer: jest.fn(), onRemove: jest.fn(), onPair: jest.fn(), onUnpair: jest.fn(),
+  onMove: jest.fn(), onAddTeam: jest.fn(), onRemoveTeam: jest.fn(), onRenameTeam: jest.fn(),
+});
 
 describe('host', () => {
   it('shows the code, shares it, and lists who is in', () => {
@@ -94,4 +97,15 @@ describe('draw bar', () => {
     expect(onDraw).toHaveBeenCalledTimes(1);
     expect(onStart).toHaveBeenCalledTimes(1);
   });
+});
+
+it('a cricket knockout shows team cards instead of the player list', () => {
+  const cricket = knockout({
+    sport: 'cricket', format: 'teams', matchConfig: { maxOvers: 8, playersPerTeam: 6 },
+    teams: [{ teamId: 't1', name: 'Strikers' }, { teamId: 't2', name: 'Team 2' }, { teamId: 't3', name: 'Team 3' }],
+  });
+  render(<KnockoutWaitingRoom knockout={cricket} playerId="h1" {...handlers()} />);
+  expect(screen.getByText('Knockout · Cricket · 8 overs')).toBeTruthy();
+  expect(screen.getByText('Any team')).toBeTruthy();
+  expect(screen.queryByText('Tap two players to pair them')).toBeNull();
 });

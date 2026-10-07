@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
 import { Tag, type TagVariant } from '@/components/StatusPill';
-import { championName } from '@/lib/quickKnockoutView';
+import { championName, formatLabel } from '@/lib/quickKnockoutView';
 import { useTheme } from '@/lib/theme';
 import type { QuickKnockout } from '@/api/quickKnockout';
 
@@ -31,7 +31,7 @@ export function KnockoutRow({ knockout: k, viewerId, onPress }: { knockout: Quic
         <Tag label={s.label} variant={s.variant} dot={s.dot} />
       </View>
       <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textFaint }}>
-        {k.format}{champion ? ` · Champion ${champion}` : ''}
+        {formatLabel(k)}{champion ? ` · Champion ${champion}` : ''}
       </Text>
     </Pressable>
   );

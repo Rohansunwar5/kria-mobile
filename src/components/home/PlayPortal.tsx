@@ -13,6 +13,7 @@ import { scoreLine } from '@/lib/quickCricketView';
 import type { CareerProfile, RecentMatch, SportSummary } from '@/api/career';
 import type { QuickMatch } from '@/api/quickMatch';
 import type { QuickKnockout } from '@/api/quickKnockout';
+import { formatLabel as knockoutFormatLabel } from '@/lib/quickKnockoutView';
 import { FormStrip } from '@/components/profile/FormStrip';
 import { RANKED_SPORTS, TopPlayers } from './TopPlayers';
 
@@ -298,7 +299,7 @@ function KnockoutRow({ knockout }: { knockout: QuickKnockout }) {
         <Tag label="Knockout" variant="up" />
       </View>
       <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: colors.white, marginTop: 8 }}>{knockout.name}</Text>
-      <Text style={MONO(theme)}>{`${knockout.format} · ${knockout.players.length} players`}</Text>
+      <Text style={MONO(theme)}>{`${knockoutFormatLabel(knockout)} · ${knockout.players.length} players`}</Text>
     </Pressable>
   );
 }

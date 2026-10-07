@@ -6,33 +6,14 @@ import { Tag } from '@/components/StatusPill';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 import { searchPlayers, type PlayerHit } from '@/api/playerSearch';
-import type { KnockoutPlayer, QuickKnockout } from '@/api/quickKnockout';
-import { bracketColumns, drawBlocker, entrantShortName, isKnockoutHost, unpairedPlayers } from '@/lib/quickKnockoutView';
+import type { QuickKnockout } from '@/api/quickKnockout';
+import { PlayerLine } from './PlayerLine';
+import { CricketTeams } from './CricketTeams';
+import { bracketColumns, drawBlocker, entrantShortName, formatLabel, isKnockoutHost, unpairedPlayers } from '@/lib/quickKnockoutView';
 
 const label = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
 const body = (t: Palette) => ({ fontFamily: 'SpaceGrotesk_400Regular' as const, fontSize: 13, lineHeight: 19, color: t.textMeta });
 const button = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
-
-function PlayerLine({ player, viewerId, tone, onPress, onRemove, a11y }: {
-  player: KnockoutPlayer; viewerId?: string; tone?: 'selected'; onPress?: () => void; onRemove?: () => void; a11y?: string;
-}) {
-  const t = useTheme();
-  const tag = player.playerId && player.playerId === viewerId ? (['You', 'auction'] as const)
-    : player.playerId ? (['Joined', 'open'] as const) : (['Guest', 'end'] as const);
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 48, borderBottomWidth: 1.5, borderBottomColor: t.lineSoft, backgroundColor: tone === 'selected' ? t.brandTint : undefined }}>
-      <Pressable accessibilityRole="button" accessibilityLabel={a11y} disabled={!onPress} onPress={onPress} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48, paddingHorizontal: 4 }}>
-        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.text }}>{player.displayName}</Text>
-        <Tag label={tag[0]} variant={tag[1]} />
-      </Pressable>
-      {onRemove ? (
-        <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${player.displayName}`} onPress={onRemove} hitSlop={8} style={{ width: 40, height: 44, alignItems: 'center', justifyContent: 'center' }}>
-          <Icon name="close" size={16} color={t.textMeta} />
-        </Pressable>
-      ) : null}
-    </View>
-  );
-}
 
 /** Type a guest's name, or 3+ letters to find a Kria player. */
 function AddPlayer({ onAddGuest, onAddPlayer, excludeIds }: { onAddGuest: (name: string) => void; onAddPlayer: (id: string) => void; excludeIds: string[] }) {
@@ -78,7 +59,7 @@ function AddPlayer({ onAddGuest, onAddPlayer, excludeIds }: { onAddGuest: (name:
   );
 }
 
-export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, onAddPlayer, onRemove, onPair, onUnpair }: {
+export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, onAddPlayer, onRemove, onPair, onUnpair, onMove, onAddTeam, onRemoveTeam, onRenameTeam }: {
   knockout: QuickKnockout;
   playerId?: string;
   busy?: boolean;
@@ -87,6 +68,10 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
   onRemove: (playerKey: string) => void;
   onPair: (a: string, b: string) => void;
   onUnpair: (pairId: string) => void;
+  onMove: (playerKey: string, teamId: string | null) => void;
+  onAddTeam: () => void;
+  onRemoveTeam: (teamId: string) => void;
+  onRenameTeam: (teamId: string, name: string) => void;
 }) {
   const t = useTheme();
   const host = isKnockoutHost(k, playerId);
@@ -111,7 +96,7 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
     <View style={{ paddingHorizontal: 20 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Tag label="waiting" variant="open" />
-        <Text style={label(t)}>{`Knockout · ${k.format}`}</Text>
+        <Text style={label(t)}>{`Knockout · ${formatLabel(k)}`}</Text>
       </View>
       <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 28, lineHeight: 34, textTransform: 'uppercase', color: t.text, marginTop: 10 }}>{k.name}</Text>
 
@@ -128,7 +113,8 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
         <View style={{ marginTop: 16, padding: 16, borderRadius: 6, borderWidth: 1.5, borderColor: t.line, backgroundColor: t.surface }}>
           <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 20, lineHeight: 24, textTransform: 'uppercase', color: t.text }}>{`Waiting for ${hostName} to start`}</Text>
           <Text style={{ ...body(t), marginTop: 6 }}>
-            {doubles ? 'Your partner is decided by the host or the draw.' : 'The bracket appears here once the host draws it.'}
+            {k.sport === 'cricket' ? 'The host or the draw settles the teams.'
+              : doubles ? 'Your partner is decided by the host or the draw.' : 'The bracket appears here once the host draws it.'}
           </Text>
         </View>
       )}
@@ -138,6 +124,7 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
         {host && doubles ? <Text style={label(t)}>Tap two players to pair them</Text> : null}
       </View>
 
+{k.sport === 'cricket' ? (        <CricketTeams          knockout={k} playerId={playerId} busy={busy}          onRemove={onRemove} onMove={onMove} onAddTeam={onAddTeam} onRemoveTeam={onRemoveTeam} onRenameTeam={onRenameTeam}        />      ) : (        <>
       {hostPairs.map((pair) => {
         const [a, b] = pair.playerKeys.map(byKey);
         return (
@@ -167,6 +154,8 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
           onRemove={host && !busy ? () => onRemove(p.playerKey) : undefined}
         />
       ))}
+        </>
+      )}
 
       {host ? <AddPlayer onAddGuest={onAddGuest} onAddPlayer={onAddPlayer} excludeIds={k.players.map((p) => p.playerId).filter((x): x is string => Boolean(x))} /> : null}
 

@@ -7,7 +7,7 @@ import { Badge } from '@/components/profile/Badge';
 import { BracketTree } from '@/components/knockout/BracketTree';
 import { KnockoutDrawBar, KnockoutWaitingRoom } from '@/components/knockout/KnockoutWaitingRoom';
 import { useQuickKnockout } from '@/lib/useQuickKnockout';
-import { championName, isKnockoutHost } from '@/lib/quickKnockoutView';
+import { championName, formatLabel, isKnockoutHost } from '@/lib/quickKnockoutView';
 import { useAppSelector } from '@/store/hooks';
 import { useTheme } from '@/lib/theme';
 import { goBack } from '@/lib/nav';
@@ -43,6 +43,7 @@ export default function KnockoutScreen() {
           <KnockoutWaitingRoom
             knockout={k} playerId={user?._id} busy={ko.busy}
             onAddGuest={ko.addGuest} onAddPlayer={ko.addPlayer} onRemove={ko.removePlayer} onPair={ko.pair} onUnpair={ko.unpair}
+            onMove={ko.moveToTeam} onAddTeam={ko.addTeam} onRemoveTeam={ko.removeTeam} onRenameTeam={ko.renameTeam}
           />
         ) : null}
 
@@ -50,7 +51,7 @@ export default function KnockoutScreen() {
           <>
             <View style={{ paddingHorizontal: 20 }}>
               <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: t.brandInk }}>
-                {`Knockout · ${k.format} · ${k.status}`}
+                {`Knockout · ${formatLabel(k)} · ${k.status}`}
               </Text>
               <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 28, lineHeight: 34, textTransform: 'uppercase', color: t.text, marginTop: 6 }}>{k.name}</Text>
             </View>

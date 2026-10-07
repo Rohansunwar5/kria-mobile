@@ -5,6 +5,7 @@ import { Screen } from '@/components/Screen';
 import { Skeleton, EmptyState, ErrorBlock } from '@/components/states';
 import { Tag } from '@/components/StatusPill';
 import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
+import { formatLabel as knockoutFormatLabel } from '@/lib/quickKnockoutView';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
 import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMatchView';
 import { scoreLine } from '@/lib/quickCricketView';
@@ -64,7 +65,7 @@ function KnockoutListRow({ knockout }: { knockout: QuickKnockout }) {
         <Tag label="Knockout" variant="up" />
       </View>
       <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: '#fff', marginTop: 8 }}>{knockout.name}</Text>
-      <Text style={{ ...LBL, marginTop: 4 }}>{`${knockout.format} · ${knockout.players.length} players`}</Text>
+      <Text style={{ ...LBL, marginTop: 4 }}>{`${knockoutFormatLabel(knockout)} · ${knockout.players.length} players`}</Text>
     </Pressable>
   );
 }
