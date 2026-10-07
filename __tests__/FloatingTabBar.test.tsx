@@ -88,11 +88,11 @@ describe('FloatingTabBar', () => {
 
   // Host is an ACTION, not a tab. It pushes rather than switching tabs, which is
   // why it never takes the selected state.
-  it('pushes the new-quick-match route from Host', () => {
+  it('pushes the host chooser from Host', () => {
     const p = props();
     const { getByLabelText } = render(<FloatingTabBar {...p} />);
     fireEvent.press(getByLabelText('Host a match'));
-    expect(mockPush).toHaveBeenCalledWith('/quick/new');
+    expect(mockPush).toHaveBeenCalledWith('/quick/host');
     expect(p.navigation.navigate).not.toHaveBeenCalled();
   });
 

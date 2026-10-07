@@ -114,7 +114,7 @@ function HostJoin() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Host a match"
-            onPress={() => router.push('/quick/new')}
+            onPress={() => router.push('/quick/host')}
             style={{
               flex: 1.25,
               minHeight: 48,

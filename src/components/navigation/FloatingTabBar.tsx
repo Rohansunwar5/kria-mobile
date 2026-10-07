@@ -24,14 +24,14 @@ type Slot =
  * once did), announced disabled so a control that looks tappable and does
  * nothing is never mistaken for one that works.
  *
- * Host is an ACTION, not a tab: it pushes /quick/new and never takes the
+ * Host is an ACTION, not a tab: it pushes /quick/host and never takes the
  * selected state. That is deliberate — the lifted circle always means "create",
  * so the lift never competes with which tab you are on.
  */
 export const NAV_SLOTS: Slot[] = [
   { kind: 'route', route: 'home', icon: 'home', label: 'Home' },
   { kind: 'route', route: 'explore', icon: 'search', label: 'Explore' },
-  { kind: 'action', href: '/quick/new', icon: 'plus', label: 'Host', a11y: 'Host a match' },
+  { kind: 'action', href: '/quick/host', icon: 'plus', label: 'Host', a11y: 'Host a match' },
   { kind: 'route', route: 'live', icon: 'live', label: 'Live' },
   { kind: 'route', route: 'profile', icon: 'user', label: 'You' },
 ];

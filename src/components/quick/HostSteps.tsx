@@ -61,7 +61,7 @@ function Tag({ text, tone }: { text: string; tone: 'brand' | 'quiet' }) {
 }
 
 /** A big one-tap answer. Tapping it is the answer — the screen advances. */
-function ChoiceCard({ icon, title, hint, selected, onPress }: {
+export function ChoiceCard({ icon, title, hint, selected, onPress }: {
   icon: IconName;
   title: string;
   hint: string;
@@ -106,7 +106,7 @@ function ChoiceCard({ icon, title, hint, selected, onPress }: {
   );
 }
 
-function Segmented<T extends string | number | boolean>({ title, options, value, onChange, hint }: {
+export function Segmented<T extends string | number | boolean>({ title, options, value, onChange, hint }: {
   title: string;
   options: { value: T; label: string; sub?: string }[];
   value: T;

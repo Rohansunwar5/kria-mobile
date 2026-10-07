@@ -101,6 +101,9 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="quick/new" />
         <Stack.Screen name="quick/join" />
         <Stack.Screen name="quick/[id]" />
+        <Stack.Screen name="quick/host" />
+        <Stack.Screen name="knockout/new" />
+        <Stack.Screen name="knockout/[id]" />
         <Stack.Screen name="team-league/[tournamentId]/[categoryId]" />
         <Stack.Screen name="checkout/[tournamentId]/[categoryId]" />
         <Stack.Screen name="category/[categoryId]" />
