@@ -42,22 +42,26 @@ export default function QuickMatchScreen() {
     return () => { alive = false; };
   }, [knockoutId, fixtureId]);
 
-  // Awards open themselves only when this screen watches the final finish; the
-  // ref keeps an already-finished final, opened later, from counting.
+  // Awards open themselves only when this host's screen watches the final
+  // finish; the ref keeps an already-finished final, opened later, from counting.
   const status = match?.status;
+  const hostId = user?._id;
+  const viewerIsHost = Boolean(match && isHost(match, hostId));
   const prevStatus = useRef<string | undefined>(undefined);
   useEffect(() => {
     const wasLive = prevStatus.current === 'live';
     prevStatus.current = status;
-    if (!wasLive || status !== 'completed' || !knockoutId) return;
+    if (!wasLive || status !== 'completed' || !knockoutId || !viewerIsHost) return;
+    let alive = true;
     getQuickKnockout(String(knockoutId))
       .then((k) => {
-        if (isKnockoutHost(k, user?._id) && k.status === 'completed' && k.awardsEligible && k.awards.length === 0) {
+        if (alive && isKnockoutHost(k, hostId) && k.status === 'completed' && k.awardsEligible && k.awards.length === 0) {
           router.push({ pathname: '/knockout/awards/[id]', params: { id: String(knockoutId) } });
         }
       })
       .catch(() => undefined);
-  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps -- fires on the status change only
+    return () => { alive = false; };
+  }, [status, knockoutId, viewerIsHost, hostId]);
 
   return (
     <Screen>

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View, Text, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
 import { Hairlines, Hazard } from '@/components/canvas';
@@ -59,9 +59,9 @@ export default function Profile() {
   const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
 
   // A failed load just leaves the section hidden; the list screen has the retry.
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     listMyQuickKnockouts().then(setKnockouts, () => {});
-  }, []);
+  }, []));
 
   useEffect(() => {
     dispatch(fetchPlayerStats());

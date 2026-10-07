@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@testing-library/react-native';
+import { act, render, fireEvent } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer, { type PlayerStats } from '@/store/slices/authSlice';
@@ -18,8 +18,16 @@ import { formatMoney } from '@/lib/format';
 // Same shape as HomeScreen.test.tsx: no navigation container around a bare
 // screen render, so every push is a no-op.
 const mockPush = jest.fn();
+// useFocusEffect runs its callback on mount, like a focused screen; the test
+// calls the latest one again to stand in for coming back to the tab.
+let mockFocus: (() => void) | undefined;
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
+  useFocusEffect: (cb: () => void) => {
+    mockFocus = cb;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('react').useEffect(cb, [cb]);
+  },
 }));
 
 // The Knockouts section loads through this; never let it reach axios.
@@ -341,6 +349,18 @@ describe('own profile screen (characterisation)', () => {
       expect(mockPush).toHaveBeenCalledWith({ pathname: '/knockout/[id]', params: { id: 'k2' } });
       fireEvent.press(getByLabelText('See all knockouts'));
       expect(mockPush).toHaveBeenCalledWith('/knockout');
+    });
+
+    it('loads again each time the tab is focused', async () => {
+      mockListKnockouts.mockClear();
+      mockListKnockouts.mockResolvedValue([]);
+      const view = render(<Provider store={makeStore(playerStats())}><Profile /></Provider>);
+      await view.findByText('Rohan Sunwar');
+      expect(view.queryByText('Cup One')).toBeNull();
+      mockListKnockouts.mockResolvedValue(four);
+      await act(async () => { mockFocus!(); });
+      expect(await view.findByText('Cup One')).toBeTruthy();
+      expect(mockListKnockouts).toHaveBeenCalledTimes(2);
     });
 
     it('has no See all for 3 or fewer, and is hidden when there are none', async () => {

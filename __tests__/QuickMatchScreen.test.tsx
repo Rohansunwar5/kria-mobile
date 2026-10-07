@@ -1,5 +1,5 @@
 import { ScrollView } from 'react-native';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import QuickMatchScreen from '../src/app/quick/[id]';
 import { getQuickKnockout } from '@/api/quickKnockout';
@@ -128,9 +128,23 @@ describe('a knockout match', () => {
       expect(router.push).toHaveBeenCalledTimes(1);
     });
 
-    it('does not open for a player who is not the host', async () => {
+    it('does not open, or even fetch, for a player who is not the host', async () => {
       await finish('p2');
-      await waitFor(() => expect(getQuickKnockout).toHaveBeenCalledTimes(2));
+      expect(getQuickKnockout).toHaveBeenCalledTimes(1); // the bar title only
+      expect(router.push).not.toHaveBeenCalled();
+    });
+
+    it('does not open if the host left before the answer came', async () => {
+      mockViewer = 'h1'; mockKnockoutId = 'k1'; mockStatus = 'live'; mockFetched = {};
+      const view = render(<QuickMatchScreen />);
+      await screen.findByText('Cup · Final · ← Bracket');
+      let answer: (k: unknown) => void = () => undefined;
+      (getQuickKnockout as jest.Mock).mockImplementationOnce(() => new Promise((r) => { answer = r; }));
+      mockStatus = 'completed';
+      view.rerender(<QuickMatchScreen />);
+      expect(getQuickKnockout).toHaveBeenCalledTimes(2);
+      view.unmount();
+      await act(async () => { answer({ hostId: 'h1', status: 'completed', awardsEligible: true, awards: [] }); });
       expect(router.push).not.toHaveBeenCalled();
     });
 
