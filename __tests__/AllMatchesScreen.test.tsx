@@ -29,10 +29,11 @@ describe('AllMatches screen', () => {
 
   it('asks for 50 and renders every row', async () => {
     mockGetRecent.mockResolvedValue(rows(12));
-    const { findAllByText, getByText } = render(<AllMatches />);
+    const { findAllByText, getByText, queryByText } = render(<AllMatches />);
     expect(await findAllByText(/^match \d+$/i)).toHaveLength(12);
     expect(mockGetRecent).toHaveBeenCalledWith('p1', 50);
     expect(getByText(/all matches/i)).toBeTruthy();
+    expect(queryByText('Recent matches')).toBeNull(); // the title already says it
   });
 
   it('goes back from the header button', async () => {
@@ -45,8 +46,10 @@ describe('AllMatches screen', () => {
 
   it('shows an error and retries', async () => {
     mockGetRecent.mockRejectedValueOnce(new Error('x')).mockResolvedValueOnce(rows(2));
-    const { findByText, findAllByText } = render(<AllMatches />);
-    fireEvent.press(await findByText(/retry/i));
+    const { findByText, findAllByText, queryByText } = render(<AllMatches />);
+    const retry = await findByText(/retry/i);
+    expect(queryByText(/pull to refresh/i)).toBeNull(); // this screen has none
+    fireEvent.press(retry);
     expect(await findAllByText(/^match \d+$/i)).toHaveLength(2);
     await waitFor(() => expect(mockGetRecent).toHaveBeenCalledTimes(2));
   });

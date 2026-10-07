@@ -47,7 +47,7 @@ export default function AllMatches() {
         >
           <Icon name="chevron-left" size={19} color={theme.text} strokeWidth={2.3} />
         </Pressable>
-        <Text style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: theme.text }}>All matches</Text>
+        <Text style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: theme.text }}>All matches</Text>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}>
         <RecentMatches matches={matches} loading={!matches && !error} error={error} onRetry={load} all />

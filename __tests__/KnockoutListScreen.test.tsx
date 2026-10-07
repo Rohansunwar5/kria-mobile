@@ -52,6 +52,18 @@ describe('My knockouts screen', () => {
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/knockout/[id]', params: { id: 'k4' } });
   });
 
+  it('announces status, Host and champion on each row', async () => {
+    const done: QuickKnockout = {
+      ...ko(2), hostId: 'someone', status: 'completed',
+      players: [{ playerKey: 'a', displayName: 'Arjun Mehta' }],
+      entrants: [{ entrantId: 'e1', playerKeys: ['a'] }], championEntrantId: 'e1',
+    };
+    mockList.mockResolvedValue([ko(1), done]);
+    const { findByLabelText } = render(ui());
+    expect(await findByLabelText('Open knockout Cup 1, Live, Host')).toBeTruthy();
+    expect(await findByLabelText('Open knockout Cup 2, Ended, champion Arjun Mehta')).toBeTruthy();
+  });
+
   it('goes back from the header button', async () => {
     mockList.mockResolvedValue([ko(1)]);
     const { getByLabelText, findByText } = render(ui());

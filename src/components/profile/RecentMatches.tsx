@@ -122,7 +122,7 @@ export function RecentMatches({
   onRetry?: () => void;
   /** Called by the See all button, shown when more than `CAP` matches were loaded. */
   onSeeAll?: () => void;
-  /** Cap off: render every row (the All matches screen). */
+  /** Cap off: render every row, with no heading of its own (the All matches screen). */
   all?: boolean;
 }) {
   if (!error && !loading && matches && matches.length === 0) return null;
@@ -133,7 +133,7 @@ export function RecentMatches({
         <ErrorBlock
           label="Recent"
           title="Couldn’t load recent matches"
-          message="Pull to refresh, or try again in a moment."
+          message={all ? 'Try again in a moment.' : 'Pull to refresh, or try again in a moment.'}
           onRetry={onRetry}
         />
       );
@@ -172,7 +172,7 @@ export function RecentMatches({
 
   return (
     <View style={{ marginTop: 22 }}>
-      <Text style={{ ...LBL, letterSpacing: 0.18 * 9, marginBottom: 10 }}>Recent matches</Text>
+      {all ? null : <Text style={{ ...LBL, letterSpacing: 0.18 * 9, marginBottom: 10 }}>Recent matches</Text>}
       {body()}
     </View>
   );

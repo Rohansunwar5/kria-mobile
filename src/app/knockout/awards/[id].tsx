@@ -27,7 +27,7 @@ export default function KnockoutAwardsScreen() {
 
   const toBracket = () => router.dismissTo({ pathname: '/knockout/[id]', params: { id } });
   const host = k ? isKnockoutHost(k, user?._id) : false;
-  const canGive = Boolean(k) && host && k!.awardsEligible && k!.awards.length < MAX_AWARDS;
+  const canGive = Boolean(k) && host && k!.status === 'completed' && k!.awardsEligible && k!.awards.length < MAX_AWARDS;
   const ready = Boolean(playerId && badge) && !ko.busy;
 
   const label = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint };
@@ -65,6 +65,8 @@ export default function KnockoutAwardsScreen() {
 
             {!k.awardsEligible ? (
               <Text style={{ ...body, marginTop: 16 }}>Awards need at least 4 Kria players in the knockout.</Text>
+            ) : k.status === 'completed' && k.awards.length >= MAX_AWARDS ? (
+              <Text style={{ ...body, marginTop: 16 }}>All {MAX_AWARDS} awards given.</Text>
             ) : null}
 
             {canGive ? (
@@ -72,7 +74,7 @@ export default function KnockoutAwardsScreen() {
                 <Text style={{ ...label, marginTop: 24 }}>Who gets it?</Text>
                 <View style={{ gap: 8, marginTop: 10 }}>
                   {awardablePlayers(k, user!._id).map((p) => (
-                    <Pressable key={p.playerKey} accessibilityRole="button" onPress={() => setPlayerId(p.playerId!)} style={{ ...choice(playerId === p.playerId), minHeight: 48, paddingHorizontal: 14, justifyContent: 'center' }}>
+                    <Pressable key={p.playerKey} accessibilityRole="button" accessibilityState={{ selected: playerId === p.playerId }} onPress={() => setPlayerId(p.playerId!)} style={{ ...choice(playerId === p.playerId), minHeight: 48, paddingHorizontal: 14, justifyContent: 'center' }}>
                       <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: playerId === p.playerId ? t.text : t.textBody }}>{p.displayName}</Text>
                     </Pressable>
                   ))}
@@ -81,7 +83,7 @@ export default function KnockoutAwardsScreen() {
                 <Text style={{ ...label, marginTop: 24 }}>Which award?</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
                   {Object.entries(QUICK_AWARD_BADGES).map(([key, name]) => (
-                    <Pressable key={key} accessibilityRole="button" onPress={() => setBadge(key)} style={{ ...choice(badge === key), width: '48%', padding: 12, alignItems: 'center', gap: 8 }}>
+                    <Pressable key={key} accessibilityRole="button" accessibilityState={{ selected: badge === key }} onPress={() => setBadge(key)} style={{ ...choice(badge === key), width: '48%', padding: 12, alignItems: 'center', gap: 8 }}>
                       <Badge badge={key} size={56} />
                       <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: badge === key ? t.text : t.textBody }}>{name}</Text>
                     </Pressable>
@@ -92,16 +94,18 @@ export default function KnockoutAwardsScreen() {
           </View>
         ) : null}
 
-        {ko.problem ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk, marginTop: 16, paddingHorizontal: 20 }}>{ko.problem}</Text> : null}
       </ScrollView>
 
       {k && host ? (
         <View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12 + insets.bottom, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg, gap: 8 }}>
+          {ko.problem ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk }}>{ko.problem}</Text> : null}
           {canGive ? (
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Give award"
-              onPress={() => { ko.award(playerId!, badge!); setPlayerId(null); setBadge(null); }}
+              onPress={async () => {
+                if (await ko.award(playerId!, badge!)) { setPlayerId(null); setBadge(null); }
+              }}
               disabled={!ready}
               accessibilityState={{ disabled: !ready }}
               style={{ minHeight: 52, borderRadius: 5, backgroundColor: t.brand, alignItems: 'center', justifyContent: 'center', opacity: ready ? 1 : 0.45 }}

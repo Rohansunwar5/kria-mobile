@@ -59,21 +59,24 @@ export function useQuickKnockout(id?: string) {
     };
   }, [id, load]);
 
-  const run = useCallback(async (action: () => Promise<QuickKnockout>) => {
+  /** Resolves true when the server accepted the action. */
+  const run = useCallback(async (action: () => Promise<QuickKnockout>): Promise<boolean> => {
     setBusy(true);
     setProblem('');
     try {
       const next = await action();
       setKnockout((prev) => ({ ...next, joinCode: next.joinCode ?? prev?.joinCode }));
+      return true;
     } catch (err) {
       setProblem(serverMessage(err));
+      return false;
     } finally {
       setBusy(false);
     }
   }, []);
 
   const withId = useCallback(
-    (fn: (knockoutId: string) => Promise<QuickKnockout>) => (id ? run(() => fn(id)) : Promise.resolve()),
+    (fn: (knockoutId: string) => Promise<QuickKnockout>) => (id ? run(() => fn(id)) : Promise.resolve(false)),
     [id, run],
   );
 

@@ -1,5 +1,5 @@
 import { ScrollView } from 'react-native';
-import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, within } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import AwardsScreen from '../src/app/knockout/awards/[id]';
 import type { QuickKnockout } from '@/api/quickKnockout';
@@ -29,7 +29,7 @@ const k = (over: Partial<QuickKnockout> = {}): QuickKnockout => ({
 
 let mockKo: QuickKnockout = k();
 let mockProblem = '';
-const mockAward = jest.fn();
+const mockAward = jest.fn(async () => true);
 jest.mock('@/lib/useQuickKnockout', () => ({
   useQuickKnockout: () => ({ knockout: mockKo, loading: false, error: false, busy: false, problem: mockProblem, reload: jest.fn(), award: mockAward }),
 }));
@@ -77,6 +77,8 @@ it('reads Done once an award exists, and lists who got it', () => {
 it('stops at 3 awards: no picker, only Done', () => {
   mockKo = k({ awards: given(3) });
   render(<AwardsScreen />);
+  expect(screen.getByText('All 3 awards given.')).toBeTruthy();
+  expect(screen.queryByText('Who gets it?')).toBeNull();
   expect(screen.getByText('Rahul Singh · Award 3')).toBeTruthy();
   expect(screen.queryByText('Give award')).toBeNull();
   expect(screen.getByText('Done')).toBeTruthy();
@@ -90,10 +92,42 @@ it('explains when awards are not available', () => {
   expect(screen.getByText('Done')).toBeTruthy();
 });
 
-it('shows why an award was refused', () => {
+it('shows why an award was refused, in the pinned bar', () => {
   mockProblem = 'That player already has this award.';
   render(<AwardsScreen />);
+  const [page] = screen.UNSAFE_getAllByType(ScrollView);
   expect(screen.getByText('That player already has this award.')).toBeTruthy();
+  expect(within(page).queryByText('That player already has this award.')).toBeNull();
+});
+
+it('keeps the picks when an award is refused, and clears them once it is given', async () => {
+  render(<AwardsScreen />);
+  fireEvent.press(screen.getByText('Rahul Singh'));
+  fireEvent.press(screen.getByText('Fair Play'));
+  mockAward.mockResolvedValueOnce(false);
+  await act(async () => { fireEvent.press(screen.getByText('Give award')); });
+  expect(giveDisabled()).toBe(false);
+  mockAward.mockResolvedValueOnce(true);
+  await act(async () => { fireEvent.press(screen.getByText('Give award')); });
+  expect(giveDisabled()).toBe(true);
+});
+
+it('does not offer awards until the knockout is finished', () => {
+  mockKo = k({ status: 'live' });
+  render(<AwardsScreen />);
+  expect(screen.queryByText('Who gets it?')).toBeNull();
+  expect(screen.queryByText('Give award')).toBeNull();
+});
+
+it('marks the chosen player and award as selected', () => {
+  render(<AwardsScreen />);
+  const selected = (text: string) => screen.getByText(text).parent!.parent!.props.accessibilityState;
+  expect(selected('Rahul Singh')).toEqual({ selected: false });
+  fireEvent.press(screen.getByText('Rahul Singh'));
+  fireEvent.press(screen.getByText('Fair Play'));
+  expect(selected('Rahul Singh')).toEqual({ selected: true });
+  expect(selected('Fair Play')).toEqual({ selected: true });
+  expect(selected('Ace Serve')).toEqual({ selected: false });
 });
 
 it('is for the host only', () => {
