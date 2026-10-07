@@ -80,7 +80,7 @@ export default function QuickMatchesScreen() {
     setLoading(true);
     setError(false);
     try {
-      const [mine, ko] = await Promise.all([listMyQuickMatches(), listMyQuickKnockouts()]);
+      const [mine, ko] = await Promise.all([listMyQuickMatches(), listMyQuickKnockouts().catch(() => [] as QuickKnockout[])]);
       setMatches(mine);
       setKnockouts(ko);
     } catch {
