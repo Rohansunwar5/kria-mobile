@@ -4,12 +4,13 @@ import { router } from 'expo-router';
 import QuickMatchScreen from '../src/app/quick/[id]';
 
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: () => true },
+  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), dismissTo: jest.fn(), canGoBack: () => true },
   useLocalSearchParams: () => ({ id: 'm1' }),
 }));
 
 let mockViewer = 'h1';
 let mockKnockoutId: string | undefined;
+let mockProblem = '';
 jest.mock('@/store/hooks', () => ({
   useAppSelector: (pick: (s: unknown) => unknown) => pick({ auth: { user: { _id: mockViewer } } }),
 }));
@@ -37,13 +38,13 @@ jest.mock('@/lib/useQuickMatch', () => ({
       knockoutId: mockKnockoutId,
       fixtureId: mockKnockoutId ? 'f1' : undefined,
     },
-    loading: false, error: false, busy: false, reload: jest.fn(),
+    loading: false, error: false, busy: false, problem: mockProblem, reload: jest.fn(),
     point: jest.fn(), undo: jest.fn(), start: mockStart, cancel: jest.fn(), removePlayer: jest.fn(),
     toss: jest.fn(), lineup: jest.fn(), ball: jest.fn(), undoBall: jest.fn(),
   }),
 }));
 
-beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; });
+beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; });
 
 describe('a waiting match', () => {
   it('opens in the waiting room, not on the scoreboard, and the host starts it', () => {
@@ -76,12 +77,23 @@ describe('a waiting match', () => {
 });
 
 describe('a knockout match', () => {
+  // The bracket is usually right underneath: go back down to it rather than
+  // stacking a second copy on top.
   it('links back to its bracket', () => {
     mockViewer = 'h1';
     mockKnockoutId = 'k1';
     render(<QuickMatchScreen />);
     fireEvent.press(screen.getByLabelText('Back to bracket'));
-    expect(router.push).toHaveBeenCalledWith({ pathname: '/knockout/[id]', params: { id: 'k1' } });
+    expect(router.dismissTo).toHaveBeenCalledWith({ pathname: '/knockout/[id]', params: { id: 'k1' } });
+    expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it('says why an undo was refused', () => {
+    mockViewer = 'h1';
+    mockKnockoutId = 'k1';
+    mockProblem = 'The next match has already started.';
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('The next match has already started.')).toBeTruthy();
   });
 
   it('names the knockout and round in the bar', async () => {

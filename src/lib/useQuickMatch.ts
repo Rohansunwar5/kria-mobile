@@ -39,6 +39,9 @@ export function useQuickMatch(id?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Why the last action was refused ('' when it was not). A refused undo
+  // otherwise looks like a button that does nothing.
+  const [problem, setProblem] = useState('');
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -93,11 +96,13 @@ export function useQuickMatch(id?: string) {
    *  there is no optimistic-concurrency guard on the server. */
   const run = useCallback(async (action: () => Promise<QuickMatch>) => {
     setBusy(true);
+    setProblem('');
     try {
       setMatch(await action());
-    } catch {
-      // The server refused (a completed match, a spent snapshot). Re-read
-      // rather than leaving the screen showing state the server rejected.
+    } catch (err) {
+      // The server refused (a completed match, a spent snapshot). Say why,
+      // and re-read rather than leaving the screen showing state the server rejected.
+      setProblem((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Something went wrong. Please try again.');
       await load();
     } finally {
       setBusy(false);
@@ -150,7 +155,7 @@ export function useQuickMatch(id?: string) {
   }, [id, run]);
 
   return {
-    match, loading, error, busy, reload: load,
+    match, loading, error, busy, problem, reload: load,
     point, undo, start, cancel, removePlayer,
     toss, lineup, ball, undoBall,
   };

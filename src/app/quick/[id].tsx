@@ -18,7 +18,7 @@ export default function QuickMatchScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAppSelector((s) => s.auth);
   const {
-    match, loading, error, busy, reload,
+    match, loading, error, busy, problem, reload,
     point, undo, start, cancel, removePlayer,
     toss, lineup, ball, undoBall,
   } = useQuickMatch(id);
@@ -62,13 +62,21 @@ export default function QuickMatchScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Back to bracket"
-            onPress={() => router.push({ pathname: '/knockout/[id]', params: { id: String(match.knockoutId) } })}
+            // Back down to the bracket underneath (or in its place, if the match
+            // was opened directly) — never a second bracket on top.
+            onPress={() => router.dismissTo({ pathname: '/knockout/[id]', params: { id: String(match.knockoutId) } })}
             style={{ marginHorizontal: 20, marginBottom: 12, minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8 }}
           >
             <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.14 * 10, textTransform: 'uppercase', color: '#F97316' }}>
               {barTitle ? `${barTitle} · ← Bracket` : '← Bracket'}
             </Text>
           </Pressable>
+        ) : null}
+
+        {problem ? (
+          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#FF4438', marginBottom: 12, paddingHorizontal: 20 }}>
+            {problem}
+          </Text>
         ) : null}
 
         {loading && !match ? (

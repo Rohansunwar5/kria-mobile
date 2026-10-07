@@ -122,3 +122,20 @@ describe('useQuickMatch — start', () => {
     expect(result.current.match?.status).toBe('live');
   });
 });
+
+describe('useQuickMatch — a refused action', () => {
+  it('keeps the server’s reason, and clears it when the next action starts', async () => {
+    mock.onGet('/quick-match/m1').reply(200, envelope(match({ status: 'completed' })));
+    mock.onPost('/quick-match/m1/badminton/undo').reply(400, { message: 'The next match has already started.' });
+    const { result } = renderHook(() => useQuickMatch('m1'));
+    await waitFor(() => expect(result.current.match).not.toBeNull());
+    expect(result.current.problem).toBe('');
+
+    await act(async () => { await result.current.undo(); });
+    expect(result.current.problem).toBe('The next match has already started.');
+
+    mock.onPost('/quick-match/m1/badminton/point').reply(200, envelope(match()));
+    await act(async () => { await result.current.point(1); });
+    expect(result.current.problem).toBe('');
+  });
+});
