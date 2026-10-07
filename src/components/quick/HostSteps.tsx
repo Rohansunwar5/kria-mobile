@@ -156,7 +156,7 @@ export function Segmented<T extends string | number | boolean>({ title, options,
 }
 
 /** − value + with presets. Bounded, so a cricket config can never be invalid. */
-function Stepper({ title, value, min, max, presets, onChange, hint }: {
+export function Stepper({ title, value, min, max, presets, onChange, hint }: {
   title: string;
   value: number;
   min: number;

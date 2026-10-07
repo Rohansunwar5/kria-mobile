@@ -11,6 +11,8 @@ jest.mock('@/api/quickKnockout', () => ({ createQuickKnockout: jest.fn(async () 
 
 it('walks format → name → review and creates the knockout', async () => {
   render(<NewKnockoutScreen />);
+  expect(screen.getByText('Pick a sport')).toBeTruthy();
+  fireEvent.press(screen.getByText('Continue'));
   expect(screen.getByText('Set the format')).toBeTruthy();
   fireEvent.press(screen.getByText('Doubles'));
   fireEvent.press(screen.getByText('Continue'));
@@ -32,7 +34,24 @@ it('leaves the name out when the host keeps the default', async () => {
   render(<NewKnockoutScreen />);
   fireEvent.press(screen.getByText('Continue'));
   fireEvent.press(screen.getByText('Continue'));
+  fireEvent.press(screen.getByText('Continue'));
   fireEvent.press(screen.getByText('Create knockout'));
   await waitFor(() => expect(createQuickKnockout).toHaveBeenCalled());
   expect((createQuickKnockout as jest.Mock).mock.calls.at(-1)[0]).not.toHaveProperty('name');
+});
+
+it('creates a cricket knockout with overs, squad and teams', async () => {
+  render(<NewKnockoutScreen />);
+  fireEvent.press(screen.getByText('Cricket'));
+  fireEvent.press(screen.getByText('Continue'));
+  expect(screen.getByText('Overs per innings')).toBeTruthy();
+  expect(screen.queryByText('Points per game')).toBeNull();
+  fireEvent.press(screen.getByLabelText('More teams'));
+  fireEvent.press(screen.getByText('Continue'));
+  fireEvent.press(screen.getByText('Continue'));
+  expect(screen.getByText('8 overs · up to 6 a side · 5 teams')).toBeTruthy();
+  fireEvent.press(screen.getByText('Create knockout'));
+  await waitFor(() => expect(createQuickKnockout).toHaveBeenLastCalledWith({
+    sport: 'cricket', matchConfig: { maxOvers: 8, playersPerTeam: 6 }, teamCount: 5,
+  }));
 });
