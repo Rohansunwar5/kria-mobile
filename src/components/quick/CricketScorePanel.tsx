@@ -107,6 +107,9 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   const [pendingExtras, setPendingExtras] = useState<{ extrasType: ExtrasType; extrasRuns: number } | null>(null);
 
   const isHost = Boolean(playerId) && playerId === match.hostId;
+  // Same rule as badminton's MatchPanel: a knockout match is run by its
+  // knockout, so it has no join code to hand out and no cancel of its own.
+  const managed = Boolean(match.knockoutId);
 
   const score = scoreLine(match);
   const chase = chaseLine(match);
@@ -116,7 +119,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   // the code — the panel showed everything except the one thing needed to
   // invite anyone.
   const openSlots = freeSlots(match);
-  const joinCodeRow = isHost && match.status === 'live' && openSlots.length > 0 && match.joinCode ? (
+  const joinCodeRow = isHost && !managed && match.status === 'live' && openSlots.length > 0 && match.joinCode ? (
     <View style={{ paddingHorizontal: 20, paddingTop: 12 }}>
       <Text style={LBL}>Share this code to fill the open slots</Text>
       <Text
@@ -176,7 +179,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   // true (the non-host and completed/cancelled branches above already
   // returned), so it needs no visibility guard of its own — only the busy one
   // every control here takes at its call site.
-  const cancelRow = (
+  const cancelRow = managed ? null : (
     <View style={{ marginTop: 4 }}>
       <Btn label="Cancel match" danger disabled={busy} onPress={busy ? undefined : () => onCancel()} />
     </View>

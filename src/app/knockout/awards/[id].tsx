@@ -7,7 +7,7 @@ import { Icon } from '@/components/icons';
 import { Skeleton, ErrorBlock } from '@/components/states';
 import { Badge } from '@/components/profile/Badge';
 import { useQuickKnockout } from '@/lib/useQuickKnockout';
-import { QUICK_AWARD_BADGES, awardablePlayers, championName, isKnockoutHost } from '@/lib/quickKnockoutView';
+import { awardBadges, awardablePlayers, championName, isKnockoutHost } from '@/lib/quickKnockoutView';
 import { useAppSelector } from '@/store/hooks';
 import { useTheme } from '@/lib/theme';
 import { goBack } from '@/lib/nav';
@@ -82,7 +82,7 @@ export default function KnockoutAwardsScreen() {
 
                 <Text style={{ ...label, marginTop: 24 }}>Which award?</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
-                  {Object.entries(QUICK_AWARD_BADGES).map(([key, name]) => (
+                  {awardBadges(k).map(([key, name]) => (
                     <Pressable key={key} accessibilityRole="button" accessibilityState={{ selected: badge === key }} onPress={() => setBadge(key)} style={{ ...choice(badge === key), width: '48%', padding: 12, alignItems: 'center', gap: 8 }}>
                       <Badge badge={key} size={56} />
                       <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: badge === key ? t.text : t.textBody }}>{name}</Text>

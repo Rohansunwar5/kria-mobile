@@ -1,8 +1,8 @@
-import { ScrollView } from 'react-native';
+import { Alert, ScrollView } from 'react-native';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import QuickMatchScreen from '../src/app/quick/[id]';
-import { getQuickKnockout } from '@/api/quickKnockout';
+import { getQuickKnockout, settleKnockoutTie } from '@/api/quickKnockout';
 
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), dismissTo: jest.fn(), canGoBack: () => true },
@@ -13,12 +13,13 @@ let mockViewer = 'h1';
 let mockKnockoutId: string | undefined;
 let mockProblem = '';
 let mockStatus = 'waiting';
-let mockFetched: Record<string, unknown> = {};
+let mockFetched: Record<string, unknown> = {}; let mockMatchOver: Record<string, unknown> = {};
 jest.mock('@/store/hooks', () => ({
   useAppSelector: (pick: (s: unknown) => unknown) => pick({ auth: { user: { _id: mockViewer } } }),
 }));
 
 jest.mock('@/api/quickKnockout', () => ({
+  settleKnockoutTie: jest.fn(),
   getQuickKnockout: jest.fn(async () => ({
     name: 'Cup',
     hostId: 'h1',
@@ -45,6 +46,7 @@ jest.mock('@/lib/useQuickMatch', () => ({
       createdAt: '2026-10-06T00:00:00.000Z',
       knockoutId: mockKnockoutId,
       fixtureId: mockKnockoutId ? 'f1' : undefined,
+      ...mockMatchOver,
     },
     loading: false, error: false, busy: false, problem: mockProblem, reload: jest.fn(),
     point: jest.fn(), undo: jest.fn(), start: mockStart, cancel: jest.fn(), removePlayer: jest.fn(),
@@ -52,7 +54,7 @@ jest.mock('@/lib/useQuickMatch', () => ({
   }),
 }));
 
-beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; mockStatus = 'waiting'; mockFetched = {}; });
+beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; mockStatus = 'waiting'; mockFetched = {}; mockMatchOver = {}; });
 
 describe('a waiting match', () => {
   it('opens in the waiting room, not on the scoreboard, and the host starts it', () => {
@@ -170,5 +172,50 @@ describe('a knockout match', () => {
       expect(getQuickKnockout).toHaveBeenCalledTimes(1); // the bar title only
       expect(router.push).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('a tied knockout match', () => {
+  const tied = {
+    sport: 'cricket', outcome: 'tied',
+    cricketSetup: { toss: { recorded: true, winnerTeamId: 's1', decision: 'bat' }, lineupsSet: true, side1Lineup: [], side2Lineup: [] },
+    liveState: { matchStatus: 'completed', currentInnings: 2, runs: 0, wickets: 0, completedOvers: 1, ballsInCurrentOver: 0 },
+  };
+  beforeEach(() => { mockKnockoutId = 'k1'; mockStatus = 'completed'; mockMatchOver = tied; });
+  const confirmEveryAlert = () => jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => { buttons?.[1]?.onPress?.(); });
+
+  it('asks the host who goes through, and records the pick after confirming', async () => {
+    mockViewer = 'h1';
+    confirmEveryAlert();
+    (settleKnockoutTie as jest.Mock).mockResolvedValue({ _id: 'k1', status: 'live', awardsEligible: true, awards: [] });
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Tied — who goes through?')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Rahul goes through'));
+    await waitFor(() => expect(settleKnockoutTie).toHaveBeenCalledWith('k1', { fixtureId: 'f1', entrantId: 's2' }));
+    expect(router.push).not.toHaveBeenCalledWith(expect.objectContaining({ pathname: '/knockout/awards/[id]' }));
+  });
+
+  it('opens the awards when the pick decides the final', async () => {
+    mockViewer = 'h1';
+    confirmEveryAlert();
+    (settleKnockoutTie as jest.Mock).mockResolvedValue({ _id: 'k1', status: 'completed', awardsEligible: true, awards: [] });
+    render(<QuickMatchScreen />);
+    fireEvent.press(screen.getByLabelText('Arjun goes through'));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith({ pathname: '/knockout/awards/[id]', params: { id: 'k1' } }));
+  });
+
+  it('tells a player who is not the host to wait', () => {
+    mockViewer = 'p2';
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Tied — waiting for the host to pick who goes through')).toBeTruthy();
+    expect(screen.queryByLabelText('Rahul goes through')).toBeNull();
+  });
+
+  it('shows who went through once picked', () => {
+    mockViewer = 'h1';
+    mockMatchOver = { ...tied, tieWinnerSideId: 's2' };
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Tied · Rahul went through')).toBeTruthy();
+    expect(screen.queryByText('Tied — who goes through?')).toBeNull();
   });
 });

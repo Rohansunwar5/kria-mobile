@@ -7,7 +7,8 @@ import { MatchPanel } from '@/components/quick/MatchPanel';
 import { CricketSetupPanel } from '@/components/quick/CricketSetupPanel';
 import { CricketScorePanel } from '@/components/quick/CricketScorePanel';
 import { StartBar, WaitingRoom } from '@/components/quick/WaitingRoom';
-import { getQuickKnockout } from '@/api/quickKnockout';
+import { getQuickKnockout, settleKnockoutTie } from '@/api/quickKnockout';
+import { TiePick } from '@/components/knockout/TiePick';
 import { useQuickMatch } from '@/lib/useQuickMatch';
 import { panelFor } from '@/lib/quickCricketView';
 import { isKnockoutHost } from '@/lib/quickKnockoutView';
@@ -62,6 +63,29 @@ export default function QuickMatchScreen() {
       .catch(() => undefined);
     return () => { alive = false; };
   }, [status, knockoutId, viewerIsHost, hostId]);
+
+  // A tied knockout match waits for the host to say who went through. When
+  // that pick decides the final, it is the moment the knockout finishes, so
+  // the awards open here — the completion watcher above saw no champion.
+  const [tieBusy, setTieBusy] = useState(false);
+  const [tieProblem, setTieProblem] = useState('');
+  const tieOpen = Boolean(match?.knockoutId && match.status === 'completed' && match.outcome === 'tied' && !match.tieWinnerSideId);
+  const pickTie = async (sideId: string) => {
+    if (!match?.knockoutId || !match.fixtureId) return;
+    setTieBusy(true);
+    setTieProblem('');
+    try {
+      const k = await settleKnockoutTie(String(match.knockoutId), { fixtureId: match.fixtureId, entrantId: sideId });
+      reload();
+      if (k.status === 'completed' && k.awardsEligible && k.awards.length === 0) {
+        router.push({ pathname: '/knockout/awards/[id]', params: { id: String(match.knockoutId) } });
+      }
+    } catch (err) {
+      setTieProblem((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Could not record that. Please try again.');
+    } finally {
+      setTieBusy(false);
+    }
+  };
 
   return (
     <Screen>
@@ -156,6 +180,16 @@ export default function QuickMatchScreen() {
             onUndo={undoBall}
             onCancel={cancel}
           />
+        ) : null}
+
+        {match && tieOpen ? (
+          <TiePick match={match} isHost={isHost(match, user?._id)} busy={tieBusy} onPick={pickTie} />
+        ) : null}
+
+        {tieProblem ? (
+          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#FF4438', marginTop: 12, paddingHorizontal: 20 }}>
+            {tieProblem}
+          </Text>
         ) : null}
       </ScrollView>
 

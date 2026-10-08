@@ -137,3 +137,10 @@ it('is for the host only', () => {
   expect(screen.queryByText('Give award')).toBeNull();
   expect(screen.getByLabelText('Back')).toBeTruthy();
 });
+
+it('a cricket knockout offers its three badges, without Ace Serve', () => {
+  mockKo = k({ sport: 'cricket', format: 'teams', matchConfig: { maxOvers: 8, playersPerTeam: 6 } });
+  render(<AwardsScreen />);
+  expect(screen.getByText('Fair Play')).toBeTruthy();
+  expect(screen.queryByText('Ace Serve')).toBeNull();
+});

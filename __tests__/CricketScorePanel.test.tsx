@@ -379,4 +379,15 @@ describe('CricketScorePanel', () => {
     expect(getByText(/who is on strike/i)).toBeTruthy();
     expect(queryByText(/who is at the non-striker/i)).toBeNull();
   });
+
+  it('a knockout match offers no cancel and no join code — the knockout manages it', () => {
+    const plain = render(<CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()} />);
+    expect(plain.queryByText('Cancel match')).toBeTruthy();
+    expect(plain.queryByTestId('join-code')).toBeTruthy();
+    plain.unmount();
+
+    const managed = render(<CricketScorePanel match={live(midInnings, { knockoutId: 'k1' })} playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()} />);
+    expect(managed.queryByText('Cancel match')).toBeNull();
+    expect(managed.queryByTestId('join-code')).toBeNull();
+  });
 });
