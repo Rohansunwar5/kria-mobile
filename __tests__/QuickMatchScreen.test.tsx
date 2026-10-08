@@ -247,6 +247,13 @@ describe('a live cricket match', () => {
     expect(screen.getByText('5 overs a side')).toBeTruthy();
   });
 
+  it('says "1 over a side" for a one-over match', () => {
+    mockViewer = 'h1';
+    mockMatchOver = { ...cricket, matchConfig: { maxOvers: 1 } };
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('1 over a side')).toBeTruthy();
+  });
+
   it('pins the pad outside the scroll for the host', () => {
     mockViewer = 'h1';
     render(<QuickMatchScreen />);

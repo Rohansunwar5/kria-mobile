@@ -27,7 +27,7 @@ export function CricketSetupPanel({ match, playerId, busy, onToss, onLineup }: {
   const t = useTheme();
   const [tossWinner, setTossWinner] = useState<string | null>(null);
   const isHost = Boolean(playerId) && playerId === match.hostId;
-  if (!isHost) return null;
+  if (!isHost || match.status !== 'live') return null;
 
   if (setupStage(match) === 'needs_toss') {
     const winner = match.sides.find((s) => s.sideId === tossWinner);

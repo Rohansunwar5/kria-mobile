@@ -21,6 +21,11 @@ const tossed = (side1Lineup: unknown[] = []) => match({
 const panel = (m: QuickMatch, over: Record<string, unknown> = {}) =>
   render(<CricketSetupPanel match={m} playerId="host" busy={false} onToss={jest.fn()} onLineup={jest.fn()} {...over} />);
 
+it('renders nothing for the host once the match is cancelled', () => {
+  const { toJSON } = panel(match({ status: 'cancelled' }));
+  expect(toJSON()).toBeNull();
+});
+
 describe('the toss', () => {
   it('offers both sides as cards with their player counts', () => {
     panel(match());

@@ -27,7 +27,7 @@ export function QuickCricketLive({ match, scorecard, playerId }: { match: QuickM
   const [section, setSection] = useState<Section | null>(null);
   const toss = tossLine(match);
 
-  if (panelFor(match) === 'cricket-setup') {
+  if (match.status === 'live' && panelFor(match) === 'cricket-setup') {
     return (
       <View style={{ paddingHorizontal: 16, gap: 12 }}>
         <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.textBody }}>{toss ?? 'Waiting for the toss'}</Text>

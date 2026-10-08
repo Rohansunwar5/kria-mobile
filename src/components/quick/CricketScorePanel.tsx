@@ -27,7 +27,7 @@ function Key({ text, face = 'word', height = 48, brand, onPress }: {
       onPress={onPress}
       style={{ flex: 1, minHeight: height, paddingHorizontal: 6, borderRadius: 5, borderWidth: 1.5, borderColor: brand ? t.brand : t.line, backgroundColor: t.surface, alignItems: 'center', justifyContent: 'center' }}
     >
-      <Text numberOfLines={1} style={{ ...FACES[face], color: brand ? t.brandInk : t.text }}>{text}</Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ ...FACES[face], color: brand ? t.brandInk : t.text }}>{text}</Text>
     </Pressable>
   );
 }

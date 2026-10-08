@@ -109,7 +109,7 @@ export default function QuickMatchScreen() {
           </Text>
           {cricket?.matchConfig?.maxOvers ? (
             <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
-              {`${cricket.matchConfig.maxOvers} overs a side`}
+              {`${cricket.matchConfig.maxOvers} ${cricket.matchConfig.maxOvers === 1 ? 'over' : 'overs'} a side`}
             </Text>
           ) : null}
         </View>
@@ -177,13 +177,13 @@ export default function QuickMatchScreen() {
           />
         ) : null}
 
-        {cricket ? <QuickCricketLive match={cricket} scorecard={scorecard} playerId={user?._id} /> : null}
-
-        {match && panelFor(match) === 'cricket-setup' ? (
-          <View style={{ marginTop: 16 }}>
+        {match && match.status === 'live' && panelFor(match) === 'cricket-setup' && isHost(match, user?._id) ? (
+          <View style={{ marginBottom: 16 }}>
             <CricketSetupPanel match={match} playerId={user?._id} busy={busy} onToss={toss} onLineup={lineup} />
           </View>
         ) : null}
+
+        {cricket ? <QuickCricketLive match={cricket} scorecard={scorecard} playerId={user?._id} /> : null}
 
         {cricket ? <CricketHostTools match={cricket} playerId={user?._id} busy={busy} onCancel={cancel} /> : null}
 

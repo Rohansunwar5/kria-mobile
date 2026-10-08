@@ -63,6 +63,12 @@ it('says a cancelled match was cancelled', () => {
   expect(screen.getByText('Match cancelled')).toBeTruthy();
 });
 
+it('a match cancelled before the toss says so, not that it awaits the toss', () => {
+  render(<QuickCricketLive match={match({ status: 'cancelled', liveState: undefined, cricketSetup: { toss: { recorded: false }, lineupsSet: false, side1Lineup: [], side2Lineup: [] } })} scorecard={null} />);
+  expect(screen.getByText('Match cancelled')).toBeTruthy();
+  expect(screen.queryByText('Waiting for the toss')).toBeNull();
+});
+
 it('before the toss, shows the squads and marks the viewer', () => {
   const setup = { toss: { recorded: false }, lineupsSet: false, side1Lineup: [], side2Lineup: [] };
   render(<QuickCricketLive match={match({ cricketSetup: setup, liveState: undefined })} scorecard={null} playerId="p3" />);
