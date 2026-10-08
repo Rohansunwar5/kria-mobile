@@ -5,11 +5,14 @@ import { Screen } from '@/components/Screen';
 import { Skeleton, ErrorBlock } from '@/components/states';
 import { MatchPanel } from '@/components/quick/MatchPanel';
 import { CricketSetupPanel } from '@/components/quick/CricketSetupPanel';
-import { CricketScorePanel } from '@/components/quick/CricketScorePanel';
+import { CricketHostTools, CricketScorePanel } from '@/components/quick/CricketScorePanel';
+import { QuickCricketLive } from '@/components/quick/QuickCricketLive';
+import { Tag } from '@/components/StatusPill';
 import { StartBar, WaitingRoom } from '@/components/quick/WaitingRoom';
 import { getQuickKnockout, settleKnockoutTie } from '@/api/quickKnockout';
 import { TiePick } from '@/components/knockout/TiePick';
 import { useQuickMatch } from '@/lib/useQuickMatch';
+import { useQuickScorecard } from '@/lib/useQuickScorecard';
 import { panelFor } from '@/lib/quickCricketView';
 import { isKnockoutHost } from '@/lib/quickKnockoutView';
 import { isHost } from '@/lib/quickMatchView';
@@ -24,6 +27,11 @@ export default function QuickMatchScreen() {
     point, undo, start, cancel, removePlayer,
     toss, lineup, ball, undoBall,
   } = useQuickMatch(id);
+  const scorecard = useQuickScorecard(match);
+  // A cricket match past its waiting room gets the live view, the sides in
+  // the header, and, for its host, the pinned pad.
+  const cricket = match && match.sport === 'cricket' && match.status !== 'waiting' ? match : null;
+  const padShown = Boolean(cricket && panelFor(cricket) === 'cricket-score' && cricket.status === 'live' && isHost(cricket, user?._id));
 
   // Bar title: "<knockout> · <round>". Keyed on the ids so a live score update
   // does not refetch; a failed fetch leaves just "← Bracket".
@@ -89,15 +97,23 @@ export default function QuickMatchScreen() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 14 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 14 }}>
         <Pressable onPress={() => goBack(router, '/quick')} hitSlop={12}>
           <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
             Back
           </Text>
         </Pressable>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, color: '#fff', marginLeft: 14 }}>
-          Quick match
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#fff' }}>
+            {cricket ? `${cricket.sides[0].name} v ${cricket.sides[1].name}` : 'Quick match'}
+          </Text>
+          {cricket?.matchConfig?.maxOvers ? (
+            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+              {`${cricket.matchConfig.maxOvers} overs a side`}
+            </Text>
+          ) : null}
+        </View>
+        {cricket?.status === 'live' ? <Tag label="Live" variant="live" dot /> : null}
       </View>
 
       <ScrollView
@@ -119,7 +135,7 @@ export default function QuickMatchScreen() {
           </Pressable>
         ) : null}
 
-        {problem ? (
+        {problem && !padShown ? (
           <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#FF4438', marginBottom: 12, paddingHorizontal: 20 }}>
             {problem}
           </Text>
@@ -161,26 +177,15 @@ export default function QuickMatchScreen() {
           />
         ) : null}
 
+        {cricket ? <QuickCricketLive match={cricket} scorecard={scorecard} playerId={user?._id} /> : null}
+
         {match && panelFor(match) === 'cricket-setup' ? (
-          <CricketSetupPanel
-            match={match}
-            playerId={user?._id}
-            busy={busy}
-            onToss={toss}
-            onLineup={lineup}
-          />
+          <View style={{ marginTop: 16 }}>
+            <CricketSetupPanel match={match} playerId={user?._id} busy={busy} onToss={toss} onLineup={lineup} />
+          </View>
         ) : null}
 
-        {match && panelFor(match) === 'cricket-score' ? (
-          <CricketScorePanel
-            match={match}
-            playerId={user?._id}
-            busy={busy}
-            onBall={ball}
-            onUndo={undoBall}
-            onCancel={cancel}
-          />
-        ) : null}
+        {cricket ? <CricketHostTools match={cricket} playerId={user?._id} busy={busy} onCancel={cancel} /> : null}
 
         {match && tieOpen ? (
           <TiePick match={match} isHost={isHost(match, user?._id)} busy={tieBusy} onPick={pickTie} />
@@ -192,6 +197,10 @@ export default function QuickMatchScreen() {
           </Text>
         ) : null}
       </ScrollView>
+
+      {padShown && match ? (
+        <CricketScorePanel match={match} playerId={user?._id} busy={busy} problem={problem} onBall={ball} onUndo={undoBall} />
+      ) : null}
 
       {match && panelFor(match) === 'waiting' && isHost(match, user?._id) ? (
         <StartBar busy={busy} onStart={start} />

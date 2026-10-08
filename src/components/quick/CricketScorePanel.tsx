@@ -1,46 +1,84 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { View, Text, Pressable } from 'react-native';
-import type { BallEntry, QuickMatch, WicketType } from '@/api/quickMatch';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { BallEntry, QuickMatch, QuickMatchSlot, WicketType } from '@/api/quickMatch';
 import { freeSlots } from '@/lib/quickMatchView';
-import {
-  battingSideId,
-  bowlingSideId,
-  canUndoBall,
-  chaseLine,
-  cricketOutcomeLabel,
-  isFirstBallOfInnings,
-  scoreLine,
-  whoIsNeeded,
-} from '@/lib/quickCricketView';
+import { battingSideId, bowlingSideId, canUndoBall, isFirstBallOfInnings, whoIsNeeded } from '@/lib/quickCricketView';
+import { useTheme } from '@/lib/theme';
+import type { Palette } from '@/lib/theme/palette';
 
-const LBL = {
-  fontFamily: 'SpaceMono_700Bold' as const,
-  fontSize: 9,
-  letterSpacing: 0.1 * 9,
-  textTransform: 'uppercase' as const,
-  color: '#7d7d7d',
-};
+const label = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
+const button = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
 
-const HAIRLINE = 'rgba(255,255,255,0.12)';
+// Key faces, as literal objects so the font-leading fence can read them.
+const RUN_FACE = { fontFamily: 'Anton_400Regular' as const, fontSize: 24, lineHeight: 29, textTransform: 'uppercase' as const };
+const WORD_FACE = { fontFamily: 'Anton_400Regular' as const, fontSize: 16, lineHeight: 20, textTransform: 'uppercase' as const };
+const NAME_FACE = { fontFamily: 'SpaceGrotesk_700Bold' as const, fontSize: 14 };
+const FACES = { run: RUN_FACE, word: WORD_FACE, name: NAME_FACE };
 
-function Btn({ label, onPress, disabled, accent, danger }: {
-  label: string; onPress?: () => void; disabled?: boolean; accent?: boolean; danger?: boolean;
+/** One key on the pad. `onPress` is undefined while busy, as every control here has always been. */
+function Key({ text, face = 'word', height = 48, brand, onPress }: {
+  text: string; face?: keyof typeof FACES; height?: number; brand?: boolean; onPress?: () => void;
 }) {
+  const t = useTheme();
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
-      style={{
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderWidth: 1,
-        borderColor: danger ? '#FF4438' : accent ? '#F97316' : HAIRLINE,
-        opacity: disabled ? 0.4 : 1,
-      }}
+      style={{ flex: 1, minHeight: height, paddingHorizontal: 6, borderRadius: 5, borderWidth: 1.5, borderColor: brand ? t.brand : t.line, backgroundColor: t.surface, alignItems: 'center', justifyContent: 'center' }}
     >
-      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, color: danger ? '#FF4438' : '#fff' }}>
-        {label}
-      </Text>
+      <Text numberOfLines={1} style={{ ...FACES[face], color: brand ? t.brandInk : t.text }}>{text}</Text>
     </Pressable>
+  );
+}
+
+/** Keys in rows of `cols`; a short last row keeps the same key width. */
+function Grid({ cols, keys }: { cols: number; keys: ReactNode[] }) {
+  const rows: ReactNode[][] = [];
+  keys.forEach((key, i) => {
+    if (i % cols === 0) rows.push([]);
+    rows[rows.length - 1].push(key);
+  });
+  return (
+    <View style={{ gap: 8 }}>
+      {rows.map((row, r) => (
+        <View key={r} style={{ flexDirection: 'row', gap: 8 }}>
+          {row}
+          {Array.from({ length: cols - row.length }, (_, i) => <View key={`gap-${i}`} style={{ flex: 1 }} />)}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/**
+ * The host's match-level controls, in the screen's scroll rather than the pad:
+ * the join code while a slot is open, and Cancel. A knockout match has
+ * neither — the knockout manages it, as badminton's MatchPanel rules.
+ */
+export function CricketHostTools({ match, playerId, busy, onCancel }: {
+  match: QuickMatch; playerId?: string; busy: boolean; onCancel: () => void;
+}) {
+  const t = useTheme();
+  const isHost = Boolean(playerId) && playerId === match.hostId;
+  if (!isHost || match.knockoutId || match.status !== 'live') return null;
+  const code = freeSlots(match).length > 0 ? match.joinCode : undefined;
+  return (
+    <View style={{ paddingHorizontal: 16, marginTop: 24, gap: 14 }}>
+      {code ? (
+        <View>
+          <Text style={label(t)}>Share this code to fill the open slots</Text>
+          <Text testID="join-code" selectable style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 24, letterSpacing: 0.2 * 24, color: t.brandInk, marginTop: 4 }}>{code}</Text>
+        </View>
+      ) : null}
+      <Pressable
+        accessibilityRole="button"
+        onPress={busy ? undefined : onCancel}
+        style={{ minHeight: 48, borderRadius: 5, borderWidth: 1.5, borderColor: t.fail, alignItems: 'center', justifyContent: 'center', opacity: busy ? 0.5 : 1 }}
+      >
+        <Text style={{ ...button, color: t.failInk }}>Cancel match</Text>
+      </Pressable>
+    </View>
   );
 }
 
@@ -79,22 +117,26 @@ type EntryMode = 'closed' | 'extras' | 'extras-runs' | 'wicket' | 'wicket-who' |
 type CreaseEnd = 'striker' | 'non-striker';
 
 /**
- * The score panel: header, then either a name-picking prompt (first ball of
- * an innings, or whenever the engine asks for a new batsman/bowler) or the
- * run-entry controls. `recordBall` needs batsmanOnStrikeId/nonStrikerId/
- * bowlerId on every delivery, and mid-innings they come from `liveState` —
- * but on the very first ball, and again whenever `nextBatsmanNeeded` /
- * `nextBowlerNeeded` fires, there is no id to read yet, so this panel
- * collects them locally before any run button is reachable.
+ * The host's scoring pad, pinned under the screen's scroll: a name-picking
+ * prompt (first ball of an innings, or whenever the engine asks for a new
+ * batsman/bowler), the run keys, or one entry step at a time. `recordBall`
+ * needs batsmanOnStrikeId/nonStrikerId/bowlerId on every delivery; mid-innings
+ * they come from `liveState`, but on the first ball and whenever
+ * `nextBatsmanNeeded` / `nextBowlerNeeded` fires there is no id to read yet,
+ * so the pad collects them before any run key is reachable. The score itself
+ * shows in QuickCricketLive; Cancel and the join code in CricketHostTools.
  */
-export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCancel }: {
+export function CricketScorePanel({ match, playerId, busy, problem, onBall, onUndo }: {
   match: QuickMatch;
   playerId?: string;
   busy: boolean;
+  /** A refused delivery's reason, shown where the host is looking. */
+  problem?: string;
   onBall: (entry: BallEntry) => void;
   onUndo: () => void;
-  onCancel: () => void;
 }) {
+  const t = useTheme();
+  const insets = useSafeAreaInsets();
   const [pending, setPending] = useState<Pending>({});
   const [mode, setMode] = useState<EntryMode>('closed');
   const [chosenWicketType, setChosenWicketType] = useState<WicketType | null>(null);
@@ -107,84 +149,28 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
   const [pendingExtras, setPendingExtras] = useState<{ extrasType: ExtrasType; extrasRuns: number } | null>(null);
 
   const isHost = Boolean(playerId) && playerId === match.hostId;
-  // Same rule as badminton's MatchPanel: a knockout match is run by its
-  // knockout, so it has no join code to hand out and no cancel of its own.
-  const managed = Boolean(match.knockoutId);
+  if (!isHost || match.status !== 'live') return null;
 
-  const score = scoreLine(match);
-  const chase = chaseLine(match);
-
-  // Same gate as badminton's MatchPanel: the host, a live match, and a slot
-  // still to fill. Without it a cricket host had to leave the match to find
-  // the code — the panel showed everything except the one thing needed to
-  // invite anyone.
-  const openSlots = freeSlots(match);
-  const joinCodeRow = isHost && !managed && match.status === 'live' && openSlots.length > 0 && match.joinCode ? (
-    <View style={{ paddingHorizontal: 20, paddingTop: 12 }}>
-      <Text style={LBL}>Share this code to fill the open slots</Text>
-      <Text
-        testID="join-code"
-        style={{
-          fontFamily: 'SpaceMono_700Bold',
-          fontSize: 24,
-          letterSpacing: 0.2 * 24,
-          color: '#F97316',
-          marginTop: 4,
-        }}
-      >
-        {match.joinCode}
-      </Text>
-    </View>
-  ) : null;
-
-  const header = (
-    <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 4 }}>
-      <Text style={LBL}>Score</Text>
-      {score ? (
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 28, color: '#fff' }}>
-          {score}
-        </Text>
-      ) : null}
-      {chase ? (
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: '#F97316' }}>
-          {chase}
-        </Text>
-      ) : null}
-      {joinCodeRow}
+  // Dimmed while a delivery is in flight; every key's onPress is already
+  // undefined then.
+  const shell = (title: string | null, body: ReactNode, context?: string) => (
+    <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 + insets.bottom, gap: 10, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg, opacity: busy ? 0.5 : 1 }}>
+      {problem ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk }}>{problem}</Text> : null}
+      {context ? <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: t.textMeta }}>{context}</Text> : null}
+      {title ? <Text style={label(t)}>{title}</Text> : null}
+      {body}
     </View>
   );
-
-  const outcome = cricketOutcomeLabel(match);
-  if (outcome) {
-    return (
-      <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 14 }}>
-        {header}
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, color: '#fff' }}>
-          {outcome}
-        </Text>
-      </View>
-    );
-  }
-
-  if (!isHost) {
-    return <View>{header}</View>;
-  }
+  const nameKeys = (slots: QuickMatchSlot[], pick: (slotId: string) => void) => (
+    <Grid cols={2} keys={slots.map((slot) => (
+      <Key key={slot.slotId} text={slot.displayName} face="name" height={52} onPress={busy ? undefined : () => pick(slot.slotId)} />
+    ))} />
+  );
 
   const battingSide = battingSideId(match);
   const bowlingSide = bowlingSideId(match);
   const battingLineup = match.sides.find((s) => s.sideId === battingSide)?.slots ?? [];
   const bowlingLineup = match.sides.find((s) => s.sideId === bowlingSide)?.slots ?? [];
-
-  // Reachable only once `isHost` and `match.status === 'live'` are both known
-  // true (the non-host and completed/cancelled branches above already
-  // returned), so it needs no visibility guard of its own — only the busy one
-  // every control here takes at its call site.
-  const cancelRow = managed ? null : (
-    <View style={{ marginTop: 4 }}>
-      <Btn label="Cancel match" danger disabled={busy} onPress={busy ? undefined : () => onCancel()} />
-    </View>
-  );
-
   const need = whoIsNeeded(match);
   const firstBall = isFirstBallOfInnings(match);
   const promptOutstanding = firstBall || need !== null;
@@ -223,67 +209,21 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
       slotId !== excluded && !dismissed.includes(slotId);
 
     if (needsStriker && !pending.strikerId) {
-      return (
-        <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 14 }}>
-          {header}
-          <Text style={LBL}>Who is on strike?</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {battingLineup
-              .filter((slot) => available(slot.slotId, excludedFromStriker))
-              .map((slot) => (
-                <Btn
-                  key={slot.slotId}
-                  label={slot.displayName}
-                  disabled={busy}
-                  onPress={busy ? undefined : () => setPending((p) => ({ ...p, strikerId: slot.slotId }))}
-                />
-              ))}
-          </View>
-          {cancelRow}
-        </View>
-      );
+      return shell('Who is on strike?', nameKeys(
+        battingLineup.filter((slot) => available(slot.slotId, excludedFromStriker)),
+        (slotId) => setPending((p) => ({ ...p, strikerId: slotId })),
+      ));
     }
 
     if (needsNonStriker && !pending.nonStrikerId) {
-      return (
-        <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 14 }}>
-          {header}
-          <Text style={LBL}>Who is at the non-striker&apos;s end?</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {battingLineup
-              .filter((slot) => available(slot.slotId, excludedFromNonStriker))
-              .map((slot) => (
-                <Btn
-                  key={slot.slotId}
-                  label={slot.displayName}
-                  disabled={busy}
-                  onPress={busy ? undefined : () => setPending((p) => ({ ...p, nonStrikerId: slot.slotId }))}
-                />
-              ))}
-          </View>
-          {cancelRow}
-        </View>
-      );
+      return shell('Who is at the non-striker\'s end?', nameKeys(
+        battingLineup.filter((slot) => available(slot.slotId, excludedFromNonStriker)),
+        (slotId) => setPending((p) => ({ ...p, nonStrikerId: slotId })),
+      ));
     }
 
     if (needsBowler && !pending.bowlerId) {
-      return (
-        <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 14 }}>
-          {header}
-          <Text style={LBL}>Who is bowling?</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {bowlingLineup.map((slot) => (
-              <Btn
-                key={slot.slotId}
-                label={slot.displayName}
-                disabled={busy}
-                onPress={busy ? undefined : () => setPending((p) => ({ ...p, bowlerId: slot.slotId }))}
-              />
-            ))}
-          </View>
-          {cancelRow}
-        </View>
-      );
+      return shell('Who is bowling?', nameKeys(bowlingLineup, (slotId) => setPending((p) => ({ ...p, bowlerId: slotId }))));
     }
   }
 
@@ -335,7 +275,7 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
     }
   };
 
-  const backBtn = <Btn label="Back" disabled={busy} onPress={busy ? undefined : back} />;
+  const backKey = <Key key="back" text="Back" onPress={busy ? undefined : back} />;
 
   const post = (extra: Partial<BallEntry>) => {
     if (!strikerId || !nonStrikerId || !bowlerId) return;
@@ -363,157 +303,113 @@ export function CricketScorePanel({ match, playerId, busy, onBall, onUndo, onCan
     nonStrikerId && nonStrikerName ? { id: nonStrikerId, label: nonStrikerName, end: 'non-striker' as const } : null,
   ].filter((choice): choice is { id: string; label: string; end: CreaseEnd } => choice !== null);
 
-  return (
-    <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 14 }}>
-      {header}
-      {strikerName ? (
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#7d7d7d' }}>
-          {`${strikerName} on strike`}
-        </Text>
-      ) : null}
+  const bowlerName = bowlingLineup.find((s) => s.slotId === bowlerId)?.displayName;
+  const context = [strikerName && `${strikerName} on strike`, bowlerName && `${bowlerName} bowling`].filter(Boolean).join(' · ');
 
-      {mode !== 'extras-runs' ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-          {[0, 1, 2, 3, 4, 6].map((n) => (
-            <Btn
-              key={n}
-              label={String(n)}
-              accent={n === 4 || n === 6}
-              disabled={busy}
-              onPress={busy ? undefined : () => post({ runs: n })}
-            />
-          ))}
-        </View>
-      ) : null}
+  if (mode === 'extras') {
+    return shell('Extra — which kind?', (
+      <Grid cols={3} keys={[
+        backKey,
+        // A run-out off a wide or a bye is routine in casual play, and the
+        // server has always accepted both fields on one ball. Armed here rather
+        // than asked afterwards so the extra-only case takes the same taps.
+        <Key key="also" text={alsoWicket ? '✓ Wicket too' : '+ Wicket too'} onPress={busy ? undefined : () => setAlsoWicket((on) => !on)} />,
+        ...EXTRAS.map((e) => (
+          <Key key={e.type} text={e.label} onPress={busy ? undefined : () => { setChosenExtrasType(e.type); setMode('extras-runs'); }} />
+        )),
+      ]} />
+    ), context);
+  }
 
-      {mode === 'closed' ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-          <Btn label="Extras" disabled={busy} onPress={busy ? undefined : () => setMode('extras')} />
-          <Btn label="Wicket" disabled={busy} onPress={busy ? undefined : () => setMode('wicket')} />
-          {canUndoBall(match) ? (
-            <Btn label="Undo" disabled={busy} onPress={busy ? undefined : () => onUndo()} />
-          ) : null}
-        </View>
-      ) : null}
+  if (mode === 'extras-runs' && chosenExtrasType) {
+    const kind = EXTRAS.find((e) => e.type === chosenExtrasType)?.label ?? 'Extra';
+    return shell(`${kind} — how many runs?`, (
+      <Grid cols={4} keys={[
+        backKey,
+        ...EXTRAS_RUNS.map((n) => (
+          <Key key={n} text={String(n)} face="run" height={56} onPress={busy ? undefined : () => {
+            if (!alsoWicket) {
+              post({ extrasType: chosenExtrasType, extrasRuns: n });
+              return;
+            }
+            setPendingExtras({ extrasType: chosenExtrasType, extrasRuns: n });
+            setMode('wicket');
+          }} />
+        )),
+      ]} />
+    ), context);
+  }
 
-      {mode === 'extras' ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
-          {/* A run-out off a wide or a bye is routine in casual play, and the
-              server has always accepted both fields on one ball — only this
-              panel forced a choice, so the host recorded the wicket and lost
-              the extra. Armed here rather than asked afterwards so the
-              extra-only case still takes the same number of taps. */}
-          <Btn
-            label={alsoWicket ? '✓ Wicket too' : '+ Wicket too'}
-            disabled={busy}
-            onPress={busy ? undefined : () => setAlsoWicket((on) => !on)}
-          />
-          {backBtn}
-          {EXTRAS.map((e) => (
-            <Btn
-              key={e.type}
-              label={e.label}
-              disabled={busy}
-              onPress={busy ? undefined : () => {
-                setChosenExtrasType(e.type);
-                setMode('extras-runs');
-              }}
-            />
-          ))}
-        </View>
-      ) : null}
+  if (mode === 'wicket') {
+    return shell('How out?', (
+      <Grid cols={3} keys={[
+        backKey,
+        ...WICKETS.map((w) => (
+          <Key key={w.type} text={w.label} onPress={busy ? undefined : () => {
+            if (EITHER_END_TYPES.includes(w.type)) {
+              setChosenWicketType(w.type);
+              setMode('wicket-who');
+              return;
+            }
+            if (FIELDER_TYPES.includes(w.type)) {
+              setChosenWicketType(w.type);
+              setMode('fielder');
+              return;
+            }
+            post({ wicketType: w.type, dismissedPlayerId: strikerId });
+          }} />
+        )),
+      ]} />
+    ), context);
+  }
 
-      {mode === 'extras-runs' && chosenExtrasType ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
-          {backBtn}
-          {EXTRAS_RUNS.map((n) => (
-            <Btn
-              key={n}
-              label={String(n)}
-              disabled={busy}
-              onPress={busy ? undefined : () => {
-                if (!alsoWicket) {
-                  post({ extrasType: chosenExtrasType, extrasRuns: n });
-                  return;
-                }
-                setPendingExtras({ extrasType: chosenExtrasType, extrasRuns: n });
-                setMode('wicket');
-              }}
-            />
-          ))}
-        </View>
-      ) : null}
+  if (mode === 'wicket-who' && chosenWicketType) {
+    return shell('Who was dismissed?', (
+      <Grid cols={2} keys={[
+        backKey,
+        ...dismissedChoices.map((choice) => (
+          <Key key={choice.id} text={choice.label} face="name" height={52} onPress={busy ? undefined : () => {
+            setChosenDismissedId(choice.id);
+            // run_out is also a fielding action; retired_hurt is not.
+            if (chosenWicketType === 'run_out') {
+              setMode('fielder');
+              return;
+            }
+            post({ wicketType: chosenWicketType, dismissedPlayerId: choice.id });
+          }} />
+        )),
+      ]} />
+    ), context);
+  }
 
-      {mode === 'wicket' ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
-          {backBtn}
-          {WICKETS.map((w) => (
-            <Btn
-              key={w.type}
-              label={w.label}
-              disabled={busy}
-              onPress={busy ? undefined : () => {
-                if (EITHER_END_TYPES.includes(w.type)) {
-                  setChosenWicketType(w.type);
-                  setMode('wicket-who');
-                  return;
-                }
-                if (FIELDER_TYPES.includes(w.type)) {
-                  setChosenWicketType(w.type);
-                  setMode('fielder');
-                  return;
-                }
-                post({ wicketType: w.type, dismissedPlayerId: strikerId });
-              }}
-            />
-          ))}
-        </View>
-      ) : null}
+  if (mode === 'fielder' && chosenWicketType) {
+    return shell('Who fielded?', (
+      <Grid cols={2} keys={[
+        backKey,
+        ...bowlingLineup.map((slot) => (
+          <Key key={slot.slotId} text={slot.displayName} face="name" height={52} onPress={busy ? undefined : () => post({
+            wicketType: chosenWicketType,
+            dismissedPlayerId: chosenDismissedId ?? strikerId,
+            fielderId: slot.slotId,
+          })} />
+        )),
+      ]} />
+    ), context);
+  }
 
-      {mode === 'wicket-who' && chosenWicketType ? (
-        <View style={{ gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
-          <Text style={LBL}>Who was dismissed?</Text>
-          {backBtn}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {dismissedChoices.map((choice) => (
-              <Btn
-                key={choice.id}
-                label={choice.label}
-                disabled={busy}
-                onPress={busy ? undefined : () => {
-                  setChosenDismissedId(choice.id);
-                  // run_out is also a fielding action; retired_hurt is not.
-                  if (chosenWicketType === 'run_out') {
-                    setMode('fielder');
-                    return;
-                  }
-                  post({ wicketType: chosenWicketType, dismissedPlayerId: choice.id });
-                }}
-              />
-            ))}
-          </View>
-        </View>
-      ) : null}
-
-      {mode === 'fielder' && chosenWicketType ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, borderTopWidth: 1, borderTopColor: HAIRLINE, paddingTop: 12 }}>
-          {backBtn}
-          {bowlingLineup.map((slot) => (
-            <Btn
-              key={slot.slotId}
-              label={slot.displayName}
-              disabled={busy}
-              onPress={busy ? undefined : () => post({
-                wicketType: chosenWicketType,
-                dismissedPlayerId: chosenDismissedId ?? strikerId,
-                fielderId: slot.slotId,
-              })}
-            />
-          ))}
-        </View>
-      ) : null}
-
-      {cancelRow}
+  return shell(null, (
+    <View style={{ gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        {[0, 1, 2, 3].map((n) => <Key key={n} text={String(n)} face="run" height={56} onPress={busy ? undefined : () => post({ runs: n })} />)}
+      </View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        {[4, 6].map((n) => <Key key={n} text={String(n)} face="run" height={56} brand onPress={busy ? undefined : () => post({ runs: n })} />)}
+      </View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Key text="Extras" onPress={busy ? undefined : () => setMode('extras')} />
+        <Key text="Wicket" onPress={busy ? undefined : () => setMode('wicket')} />
+        {canUndoBall(match) ? <Key text="Undo" onPress={busy ? undefined : () => onUndo()} /> : null}
+      </View>
     </View>
-  );
+  ), context);
 }

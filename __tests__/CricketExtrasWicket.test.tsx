@@ -30,7 +30,7 @@ const panel = (onBall = jest.fn()) => ({
   ...render(
     <CricketScorePanel
       match={live(midInnings)}
-      playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+      playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()}
     />
   ),
 });

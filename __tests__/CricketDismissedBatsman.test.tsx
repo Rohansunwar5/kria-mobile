@@ -41,7 +41,7 @@ const midInnings = {
 const panel = (liveState: Record<string, unknown>) => render(
   <CricketScorePanel
     match={live(liveState)}
-    playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()}
+    playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()}
   />
 );
 

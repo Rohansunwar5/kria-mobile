@@ -27,18 +27,10 @@ const midInnings = {
 };
 
 describe('CricketScorePanel', () => {
-  it('shows the score line', () => {
-    const { getByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()} />
-    );
-
-    expect(getByText('42/3 (6.2)')).toBeTruthy();
-  });
-
   it('posts a plain delivery from the run buttons, using the ids in liveState', () => {
     const onBall = jest.fn();
     const { getByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} />
     );
 
     fireEvent.press(getByText('4'));
@@ -48,24 +40,11 @@ describe('CricketScorePanel', () => {
     });
   });
 
-  it('shows the chase line in the second innings', () => {
-    const { getByText } = render(
-      <CricketScorePanel
-        match={live({ ...midInnings, currentInnings: 2, matchStatus: 'innings2', runs: 40, target: 61 })}
-        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()}
-      />
-    );
-
-    expect(getByText('Needs 21 to win')).toBeTruthy();
-  });
-
-  // The engine seeds the innings from the first ball's own ids, so they must be
-  // collected rather than read from a liveState that does not have them yet.
   it('prompts for the opening batsmen and bowler on the first ball', () => {
     const { getByText, queryByText } = render(
       <CricketScorePanel
         match={live({ matchStatus: 'awaiting_start', currentInnings: 1, runs: 0, wickets: 0, completedOvers: 0, ballsInCurrentOver: 0 })}
-        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()}
       />
     );
 
@@ -77,7 +56,7 @@ describe('CricketScorePanel', () => {
     const { getByText } = render(
       <CricketScorePanel
         match={live({ ...midInnings, nextBatsmanNeeded: true })}
-        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()}
       />
     );
 
@@ -88,7 +67,7 @@ describe('CricketScorePanel', () => {
     const { getByText } = render(
       <CricketScorePanel
         match={live({ ...midInnings, nextBowlerNeeded: true })}
-        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()}
       />
     );
 
@@ -98,7 +77,7 @@ describe('CricketScorePanel', () => {
   it('posts extras with their type and the chosen run count', () => {
     const onBall = jest.fn();
     const { getByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} />
     );
 
     fireEvent.press(getByText(/extras/i));
@@ -115,7 +94,7 @@ describe('CricketScorePanel', () => {
   it('posts a wide with 4 runs when the host picks a higher extras total', () => {
     const onBall = jest.fn();
     const { getByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} />
     );
 
     fireEvent.press(getByText(/extras/i));
@@ -130,7 +109,7 @@ describe('CricketScorePanel', () => {
   it('posts a wicket with its type and the dismissed player', () => {
     const onBall = jest.fn();
     const { getByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} />
     );
 
     fireEvent.press(getByText(/wicket/i));
@@ -144,60 +123,38 @@ describe('CricketScorePanel', () => {
   it('offers undo once play has started', () => {
     const onUndo = jest.fn();
     const { getByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={jest.fn()} onUndo={onUndo} onCancel={jest.fn()} />
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={jest.fn()} onUndo={onUndo} />
     );
 
     fireEvent.press(getByText(/undo/i));
     expect(onUndo).toHaveBeenCalled();
   });
 
-  it('shows the outcome and no controls once completed', () => {
-    const { getByText, queryByText } = render(
+  it('renders nothing once completed — the result shows in the live view', () => {
+    const { toJSON } = render(
       <CricketScorePanel
         match={live({ ...midInnings, matchStatus: 'completed' }, { status: 'completed', outcome: 'side1' })}
-        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()}
       />
     );
-
-    expect(getByText('Reds won')).toBeTruthy();
-    expect(queryByText('4')).toBeNull();
+    expect(toJSON()).toBeNull();
   });
 
-  it('gives a non-host the score and no controls', () => {
-    const { getByText, queryByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="someone-else" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()} />
+  it('renders nothing for a non-host', () => {
+    const { toJSON } = render(
+      <CricketScorePanel match={live(midInnings)} playerId="someone-else" busy={false} onBall={jest.fn()} onUndo={jest.fn()} />
     );
-
-    expect(getByText('42/3 (6.2)')).toBeTruthy();
-    expect(queryByText('4')).toBeNull();
+    expect(toJSON()).toBeNull();
   });
 
   it('disables the run buttons while a mutation is in flight', () => {
     const onBall = jest.fn();
     const { getByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy onBall={onBall} onUndo={jest.fn()} />
     );
 
     fireEvent.press(getByText('4'));
     expect(onBall).not.toHaveBeenCalled();
-  });
-
-  it('lets the host cancel the match', () => {
-    const onCancel = jest.fn();
-    const { getByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={onCancel} />
-    );
-
-    fireEvent.press(getByText(/cancel match/i));
-    expect(onCancel).toHaveBeenCalled();
-  });
-
-  it('gives a non-host no cancel control', () => {
-    const { queryByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="someone-else" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()} />
-    );
-
-    expect(queryByText(/cancel match/i)).toBeNull();
   });
 
   it('collects both a new batsman and a new bowler when the engine asks for both, and posts the chosen ids rather than the stale ones', () => {
@@ -211,7 +168,7 @@ describe('CricketScorePanel', () => {
           strikerId: 'stale-striker',
           currentBowlerId: 'stale-bowler',
         })}
-        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()}
       />
     );
 
@@ -236,7 +193,7 @@ describe('CricketScorePanel', () => {
   it('reveals a fielder row from the bowling side after choosing caught, and posts the fielder alongside the dismissal', () => {
     const onBall = jest.fn();
     const { getByText, queryByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} />
     );
 
     fireEvent.press(getByText(/wicket/i));
@@ -269,7 +226,7 @@ describe('CricketScorePanel', () => {
     const { getByText, queryByText, rerender } = render(
       <CricketScorePanel
         match={live(midInnings, { sides: threePlayerSide1 })}
-        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()}
       />
     );
 
@@ -296,7 +253,7 @@ describe('CricketScorePanel', () => {
           { ...midInnings, nextBatsmanNeeded: true, nonStrikerId: undefined },
           { sides: threePlayerSide1 },
         )}
-        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()}
       />
     );
 
@@ -316,7 +273,7 @@ describe('CricketScorePanel', () => {
   it('lets a retired-hurt dismissal target the non-striker directly, with no fielder step', () => {
     const onBall = jest.fn();
     const { getByText } = render(
-      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()} />
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} />
     );
 
     fireEvent.press(getByText(/wicket/i));
@@ -343,7 +300,7 @@ describe('CricketScorePanel', () => {
           { ...midInnings, nextBatsmanNeeded: true, strikerId: undefined, nonStrikerId: 'a1' },
           { sides: threePlayerSide1 },
         )}
-        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()}
       />
     );
 
@@ -356,7 +313,7 @@ describe('CricketScorePanel', () => {
     const { getByText, queryByText, rerender } = render(
       <CricketScorePanel
         match={live(midInnings, { sides: threePlayerSide1 })}
-        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()}
       />
     );
 
@@ -372,7 +329,7 @@ describe('CricketScorePanel', () => {
     rerender(
       <CricketScorePanel
         match={live({ ...midInnings, nextBatsmanNeeded: true }, { sides: threePlayerSide1 })}
-        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()} onCancel={jest.fn()}
+        playerId="host" busy={false} onBall={onBall} onUndo={jest.fn()}
       />
     );
 
@@ -380,14 +337,25 @@ describe('CricketScorePanel', () => {
     expect(queryByText(/who is at the non-striker/i)).toBeNull();
   });
 
-  it('a knockout match offers no cancel and no join code — the knockout manages it', () => {
-    const plain = render(<CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()} />);
-    expect(plain.queryByText('Cancel match')).toBeTruthy();
-    expect(plain.queryByTestId('join-code')).toBeTruthy();
-    plain.unmount();
+  it('names the striker and the bowler above the keys', () => {
+    const { getByText } = render(
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} />
+    );
+    expect(getByText('Kohli on strike · Bumrah bowling')).toBeTruthy();
+  });
 
-    const managed = render(<CricketScorePanel match={live(midInnings, { knockoutId: 'k1' })} playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()} />);
-    expect(managed.queryByText('Cancel match')).toBeNull();
-    expect(managed.queryByTestId('join-code')).toBeNull();
+  it('hides Undo when there is nothing to undo', () => {
+    const { queryByText } = render(
+      <CricketScorePanel match={live({ ...midInnings, matchStatus: undefined })} playerId="host" busy={false} onBall={jest.fn()} onUndo={jest.fn()} />
+    );
+    expect(queryByText('Extras')).toBeTruthy();
+    expect(queryByText('Undo')).toBeNull();
+  });
+
+  it('shows a refused delivery at the top of the pad, where the host is looking', () => {
+    const { getByText } = render(
+      <CricketScorePanel match={live(midInnings)} playerId="host" busy={false} problem="That bowler has no overs left." onBall={jest.fn()} onUndo={jest.fn()} />
+    );
+    expect(getByText('That bowler has no overs left.')).toBeTruthy();
   });
 });

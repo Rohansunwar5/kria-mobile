@@ -27,43 +27,9 @@ const live = (over: Partial<QuickMatch> = {}): QuickMatch => ({
 const panel = (match: QuickMatch, playerId = 'host') => render(
   <CricketScorePanel
     match={match} playerId={playerId} busy={false}
-    onBall={jest.fn()} onUndo={jest.fn()} onCancel={jest.fn()}
+    onBall={jest.fn()} onUndo={jest.fn()}
   />
 );
-
-describe('the cricket panel surfaces the join code, as badminton does', () => {
-  it('shows the code to the host while a slot is open', () => {
-    // A free slot on side 2. Badminton's MatchPanel has always shown this;
-    // a cricket host had to leave the match to find the code.
-    const match = live({
-      sides: [
-        { sideId: 's1', name: 'Reds', slots: [{ slotId: 'a1', displayName: 'Kohli' }, { slotId: 'a2', displayName: 'Rahul' }] },
-        { sideId: 's2', name: 'Blues', slots: [{ slotId: 'b1', displayName: 'Bumrah' }, { slotId: 'b2', displayName: 'open' }] },
-      ],
-    } as Partial<QuickMatch>);
-
-    const { getByText } = panel(match);
-    expect(getByText('ABC123')).toBeTruthy();
-  });
-
-  it('hides it once every slot is taken', () => {
-    // Nothing left to invite anyone to.
-    const full = live({
-      sides: [
-        { sideId: 's1', name: 'Reds', slots: [{ slotId: 'a1', playerId: 'p1', displayName: 'Kohli' }] },
-        { sideId: 's2', name: 'Blues', slots: [{ slotId: 'b1', playerId: 'p2', displayName: 'Bumrah' }] },
-      ],
-    } as unknown as Partial<QuickMatch>);
-
-    const { queryByText } = panel(full);
-    expect(queryByText('ABC123')).toBeNull();
-  });
-
-  it('never shows it to a non-host', () => {
-    const { queryByText } = panel(live(), 'someone-else');
-    expect(queryByText('ABC123')).toBeNull();
-  });
-});
 
 describe('every entry step can be backed out of', () => {
   it('returns from the extras sheet to the main controls', () => {
