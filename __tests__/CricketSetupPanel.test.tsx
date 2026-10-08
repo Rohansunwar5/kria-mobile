@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { CricketSetupPanel } from '@/components/quick/CricketSetupPanel';
 import type { QuickMatch } from '@/api/quickMatch';
 
@@ -13,92 +13,81 @@ const match = (over: Record<string, unknown> = {}): QuickMatch => ({
   ...over,
 }) as QuickMatch;
 
-const tossed = () => match({
-  cricketSetup: {
-    toss: { winnerTeamId: 's1', decision: 'bat', recorded: true },
-    lineupsSet: false, side1Lineup: [], side2Lineup: [],
-  },
+/** A toss recorded by an app older than the server filling the squads. */
+const tossed = (side1Lineup: unknown[] = []) => match({
+  cricketSetup: { toss: { winnerTeamId: 's1', decision: 'bat', recorded: true }, lineupsSet: false, side1Lineup, side2Lineup: [] },
 });
 
-describe('CricketSetupPanel', () => {
-  it('asks for the toss first, offering both sides', () => {
-    const { getByText } = render(
-      <CricketSetupPanel match={match()} playerId="host" busy={false} onToss={jest.fn()} onLineup={jest.fn()} />
-    );
+const panel = (m: QuickMatch, over: Record<string, unknown> = {}) =>
+  render(<CricketSetupPanel match={m} playerId="host" busy={false} onToss={jest.fn()} onLineup={jest.fn()} {...over} />);
 
-    expect(getByText(/toss/i)).toBeTruthy();
-    expect(getByText('Reds')).toBeTruthy();
-    expect(getByText('Blues')).toBeTruthy();
+describe('the toss', () => {
+  it('offers both sides as cards with their player counts', () => {
+    panel(match());
+    expect(screen.getByText('Toss — who won it?')).toBeTruthy();
+    expect(screen.getByText('Reds')).toBeTruthy();
+    expect(screen.getByText('Blues')).toBeTruthy();
+    expect(screen.getAllByText('1 players')).toHaveLength(2);
+    expect(screen.queryByText(/^bat$/i)).toBeNull();
   });
 
-  it('reports the toss winner and decision the host picked', () => {
+  it('reports the picked side and decision', () => {
     const onToss = jest.fn();
-    const { getByText } = render(
-      <CricketSetupPanel match={match()} playerId="host" busy={false} onToss={onToss} onLineup={jest.fn()} />
-    );
-
-    fireEvent.press(getByText('Reds'));
-    fireEvent.press(getByText(/^bat$/i));
-
+    panel(match(), { onToss });
+    fireEvent.press(screen.getByText('Reds'));
+    expect(screen.getByText('Reds chose to…')).toBeTruthy();
+    fireEvent.press(screen.getByText(/^bat$/i));
     expect(onToss).toHaveBeenCalledWith({ winnerSideId: 's1', decision: 'bat' });
   });
 
-  it('moves on to lineups once the toss is recorded', () => {
-    const { getByText, queryByText } = render(
-      <CricketSetupPanel match={tossed()} playerId="host" busy={false} onToss={jest.fn()} onLineup={jest.fn()} />
-    );
-
-    expect(getByText(/batting order/i)).toBeTruthy();
-    expect(queryByText(/who won the toss/i)).toBeNull();
-  });
-
-  // The career-credit rule of spec §2, enforced at the UI boundary.
-  it('submits a lineup derived from slots, carrying playerId through', () => {
-    const onLineup = jest.fn();
-    const { getByText } = render(
-      <CricketSetupPanel match={tossed()} playerId="host" busy={false} onToss={jest.fn()} onLineup={onLineup} />
-    );
-
-    fireEvent.press(getByText(/confirm reds/i));
-
-    expect(onLineup).toHaveBeenCalledWith({
-      sideId: 's1',
-      players: [{ slotId: 'a1', playerId: 'p1', name: 'Kohli' }],
-    });
-  });
-
-  it('keeps a placeholder slot playerless', () => {
-    const onLineup = jest.fn();
-    const { getByText } = render(
-      <CricketSetupPanel match={tossed()} playerId="host" busy={false} onToss={jest.fn()} onLineup={onLineup} />
-    );
-
-    fireEvent.press(getByText(/confirm blues/i));
-
-    expect(onLineup).toHaveBeenCalledWith({
-      sideId: 's2',
-      players: [{ slotId: 'b1', name: 'Guest' }],
-    });
-  });
-
-  it('offers no controls to a non-host', () => {
-    const { queryByText } = render(
-      <CricketSetupPanel match={match()} playerId="someone-else" busy={false} onToss={jest.fn()} onLineup={jest.fn()} />
-    );
-
-    expect(queryByText('Reds')).toBeNull();
-    expect(queryByText(/only the host/i)).toBeTruthy();
-  });
-
-  it('disables the controls while a mutation is in flight', () => {
+  it('switches the pick when the other card is tapped', () => {
     const onToss = jest.fn();
-    const { getByText } = render(
-      <CricketSetupPanel match={match()} playerId="host" busy onToss={onToss} onLineup={jest.fn()} />
-    );
+    panel(match(), { onToss });
+    fireEvent.press(screen.getByText('Reds'));
+    fireEvent.press(screen.getByText('Blues'));
+    fireEvent.press(screen.getByText(/^bowl$/i));
+    expect(onToss).toHaveBeenCalledWith({ winnerSideId: 's2', decision: 'bowl' });
+  });
 
-    fireEvent.press(getByText('Reds'));
-    fireEvent.press(getByText(/^bat$/i));
-
+  it('records nothing while a request is in flight', () => {
+    const onToss = jest.fn();
+    panel(match(), { onToss, busy: true });
+    fireEvent.press(screen.getByText('Reds'));
+    fireEvent.press(screen.getByText(/^bat$/i));
     expect(onToss).not.toHaveBeenCalled();
+  });
+
+  it('gives a non-host nothing — their setup view is the live view', () => {
+    expect(panel(match(), { playerId: 'someone-else' }).toJSON()).toBeNull();
+  });
+});
+
+describe('a toss recorded before the squads were filled for it', () => {
+  it('asks to confirm the teams instead of the toss', () => {
+    panel(tossed());
+    expect(screen.getByText('Confirm teams')).toBeTruthy();
+    expect(screen.queryByText('Toss — who won it?')).toBeNull();
+  });
+
+  it('confirms each empty side from its slots, one after the other', async () => {
+    let release: () => void = () => undefined;
+    const onLineup = jest.fn((input: { sideId: string }) =>
+      input.sideId === 's1' ? new Promise<void>((resolve) => { release = resolve; }) : undefined);
+    panel(tossed(), { onLineup });
+
+    fireEvent.press(screen.getByText('Confirm teams'));
+    expect(onLineup).toHaveBeenCalledTimes(1); // waits for side 1's save
+    await act(async () => { release(); });
+
+    expect(onLineup).toHaveBeenNthCalledWith(1, { sideId: 's1', players: [{ slotId: 'a1', playerId: 'p1', name: 'Kohli' }] });
+    expect(onLineup).toHaveBeenNthCalledWith(2, { sideId: 's2', players: [{ slotId: 'b1', name: 'Guest' }] });
+  });
+
+  it('skips a side that already has its squad', async () => {
+    const onLineup = jest.fn();
+    panel(tossed([{ slotId: 'a1', name: 'Kohli' }]), { onLineup });
+    await act(async () => { fireEvent.press(screen.getByText('Confirm teams')); });
+    expect(onLineup).toHaveBeenCalledTimes(1);
+    expect(onLineup).toHaveBeenCalledWith({ sideId: 's2', players: [{ slotId: 'b1', name: 'Guest' }] });
   });
 });

@@ -69,6 +69,7 @@ export const MIGRATED: string[] = [
   'src/components/knockout/KnockoutRow.tsx',
   'src/app/matches/[playerId].tsx',
   'src/components/quick/CricketScorePanel.tsx',
+  'src/components/quick/CricketSetupPanel.tsx',
 ];
 
 export interface ColourLiteralFinding {
