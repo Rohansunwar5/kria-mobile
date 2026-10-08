@@ -1,11 +1,19 @@
 import { View, Text } from 'react-native';
-import { CricketMatch, InningsScorecard, LiveState, TeamBrand } from '@/api/cricketMatch';
+import { InningsScorecard, LiveState, TeamBrand } from '@/api/cricketMatch';
 import { oversDisplay, currentRunRate, chaseLine } from '@/lib/cricketView';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hairlines } from '@/components/canvas';
 import { Ghost } from '@/components/states';
 
 const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+
+/** The fields read here: a tournament CricketMatch, or one a quick match builds from its sides. */
+type HeroMatch = {
+  matchConfig?: { maxOvers?: number };
+  teams?: { team1Id?: string; team2Id?: string; team1Name?: string; team2Name?: string };
+  winnerId?: string;
+  result?: { marginOfVictory?: string };
+};
 
 // The band used to repeat the fixture and the Live tag that the screen header
 // already carries. It now names the side that is batting, which is the one
@@ -16,12 +24,14 @@ export function HeroScore({
   innings,
   completed,
   brands = {},
+  resultLabel,
 }: {
-  match: CricketMatch;
+  match: HeroMatch;
   live: LiveState | null;
   innings: InningsScorecard | null;
   completed: boolean;
   brands?: Record<string, TeamBrand>;
+  resultLabel?: string;
 }) {
   const maxOvers = match.matchConfig?.maxOvers;
   const team1 = match.teams?.team1Name || 'Team 1';
@@ -125,8 +135,7 @@ export function HeroScore({
       {completed ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 11, backgroundColor: '#16C46A' }}>
           <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, color: '#06240F' }}>
-            {winnerName ? `${winnerName} won` : 'Match complete'}
-            {match.result?.marginOfVictory ? ` · ${match.result.marginOfVictory}` : ''}
+            {resultLabel ?? `${winnerName ? `${winnerName} won` : 'Match complete'}${match.result?.marginOfVictory ? ` · ${match.result.marginOfVictory}` : ''}`}
           </Text>
         </View>
       ) : null}

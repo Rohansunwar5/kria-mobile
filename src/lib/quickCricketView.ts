@@ -149,3 +149,11 @@ export function panelFor(match: QuickMatch): 'waiting' | 'badminton' | 'cricket-
   if (match.sport !== 'cricket') return 'badminton';
   return setupStage(match) === 'ready' ? 'cricket-score' : 'cricket-setup';
 }
+
+/** "Reds won the toss and chose to bat", or null until the toss is recorded. */
+export function tossLine(match: QuickMatch): string | null {
+  const toss = match.cricketSetup?.toss;
+  const winner = match.sides.find((s) => s.sideId === toss?.winnerTeamId);
+  if (!toss?.recorded || !winner || !toss.decision) return null;
+  return `${winner.name} won the toss and chose to ${toss.decision}`;
+}

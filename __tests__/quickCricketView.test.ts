@@ -9,6 +9,7 @@ import {
   oversText,
   scoreLine,
   setupStage,
+  tossLine,
   whoIsNeeded,
 } from '@/lib/quickCricketView';
 import type { QuickMatch } from '@/api/quickMatch';
@@ -271,5 +272,20 @@ describe('cricketOutcomeLabel', () => {
   it('reports a cancelled match', () => {
     const m = { ...ready(), status: 'cancelled' } as QuickMatch;
     expect(cricketOutcomeLabel(m)).toBe('Cancelled');
+  });
+});
+
+describe('tossLine', () => {
+  const m = (toss: Record<string, unknown>) => ({
+    sides: [{ sideId: 's1', name: 'Reds', slots: [] }, { sideId: 's2', name: 'Blues', slots: [] }],
+    cricketSetup: { toss, lineupsSet: false, side1Lineup: [], side2Lineup: [] },
+  }) as unknown as QuickMatch;
+
+  it('says who won the toss and what they chose', () => {
+    expect(tossLine(m({ recorded: true, winnerTeamId: 's2', decision: 'bowl' }))).toBe('Blues won the toss and chose to bowl');
+  });
+
+  it('is null until the toss is recorded', () => {
+    expect(tossLine(m({ recorded: false }))).toBeNull();
   });
 });
