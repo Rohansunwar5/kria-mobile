@@ -1,5 +1,5 @@
 import API from './axios';
-import type { LiveState } from './cricketMatch';
+import type { LiveState, Scorecard } from './cricketMatch';
 import { unwrap } from './unwrap';
 
 export interface QuickMatchSlot {
@@ -204,4 +204,15 @@ export async function recordQuickBall(id: string, ball: BallEntry): Promise<Quic
 
 export async function undoQuickBall(id: string): Promise<QuickMatch> {
   return asMatch(await API.post(`/quick-match/${id}/cricket/undo`));
+}
+
+/** Batting and bowling cards per innings, built by the server from the stored balls. */
+export async function getQuickScorecard(id: string): Promise<Scorecard> {
+  const result = unwrap(await API.get(`/quick-match/${id}/scorecard`)) as any;
+  // unwrap may return { data: null } when the payload is explicitly null,
+  // so check if the result looks like a Scorecard before using it.
+  if (result && 'innings1' in result) {
+    return result as Scorecard;
+  }
+  return { innings1: null, innings2: null };
 }

@@ -2,6 +2,7 @@ import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
 import {
   createQuickMatch,
+  getQuickScorecard,
   listMyQuickMatches,
   recordQuickBall,
   recordQuickLineup,
@@ -134,5 +135,15 @@ describe('quick cricket api', () => {
     await undoQuickBall('m1');
 
     expect(mock.history.post[0].url).toBe('/quick-match/m1/cricket/undo');
+  });
+});
+
+describe('getQuickScorecard', () => {
+  it('reads the cards, and an empty body as no innings', async () => {
+    mock.onGet('/quick-match/m1/scorecard').replyOnce(200, envelope({ innings1: { inningsNumber: 1 }, innings2: null }));
+    expect(await getQuickScorecard('m1')).toEqual({ innings1: { inningsNumber: 1 }, innings2: null });
+
+    mock.onGet('/quick-match/m1/scorecard').replyOnce(200, envelope(null));
+    expect(await getQuickScorecard('m1')).toEqual({ innings1: null, innings2: null });
   });
 });
