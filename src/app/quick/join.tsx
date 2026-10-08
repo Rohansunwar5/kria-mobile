@@ -220,7 +220,7 @@ export default function JoinQuickMatchScreen() {
                   <>
                     <Text style={{ ...LBL, marginTop: 14 }}>Pick your team</Text>
                     {(knockout.teams ?? []).map((team) => {
-                      const count = teamPlayers(knockout, team.teamId).length;
+                      const count = teamPlayers(knockout, team.teamId).filter((p) => !p.drawn).length;
                       const full = count >= (knockout.matchConfig.playersPerTeam ?? 0);
                       const on = teamId === team.teamId;
                       return (

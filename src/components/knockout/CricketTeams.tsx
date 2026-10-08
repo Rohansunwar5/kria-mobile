@@ -27,11 +27,12 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
   onRenameTeam: (teamId: string, name: string) => void;
 }) {
   const t = useTheme();
-  const host = isKnockoutHost(k, playerId) && !busy;
+  const host = isKnockoutHost(k, playerId);
   const teams = k.teams ?? [];
   const cap = k.matchConfig.playersPerTeam ?? 0;
   const [selected, setSelected] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<{ teamId: string; name: string } | null>(null);
+  const dim = { opacity: busy ? 0.5 : 1 };
   const picked = k.players.find((p) => p.playerKey === selected);
 
   const move = (teamId: string | null) => {
@@ -57,7 +58,7 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
             autoFocus
             style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 15, color: t.text, borderWidth: 1.5, borderColor: t.line, borderRadius: 5, backgroundColor: t.fillSoft, paddingHorizontal: 12, minHeight: 44 }}
           />
-          <Pressable accessibilityRole="button" onPress={saveName} style={{ minHeight: 44, paddingHorizontal: 12, justifyContent: 'center' }}>
+          <Pressable accessibilityRole="button" onPress={saveName} disabled={busy} style={{ ...dim, minHeight: 44, paddingHorizontal: 12, justifyContent: 'center' }}>
             <Text style={{ ...label(t), color: t.brandInk }}>Save</Text>
           </Pressable>
         </View>
@@ -65,11 +66,11 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
     }
     return (
       <View style={{ flexDirection: 'row', gap: 16, paddingBottom: 6 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel={`Rename ${team.name}`} onPress={() => setRenaming({ teamId: team.teamId, name: team.name })} hitSlop={8} style={{ minHeight: 32, justifyContent: 'center' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`Rename ${team.name}`} onPress={() => setRenaming({ teamId: team.teamId, name: team.name })} hitSlop={8} disabled={busy} style={{ ...dim, minHeight: 32, justifyContent: 'center' }}>
           <Text style={{ ...label(t), color: t.textMeta }}>Rename</Text>
         </Pressable>
         {teams.length > MIN_TEAMS ? (
-          <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${team.name}`} onPress={() => onRemoveTeam(team.teamId)} hitSlop={8} style={{ minHeight: 32, justifyContent: 'center' }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${team.name}`} onPress={() => onRemoveTeam(team.teamId)} hitSlop={8} disabled={busy} style={{ ...dim, minHeight: 32, justifyContent: 'center' }}>
             <Text style={{ ...label(t), color: t.failInk }}>Remove</Text>
           </Pressable>
         ) : null}
@@ -78,7 +79,7 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
   };
 
   const card = (key: string, title: string, players: KnockoutPlayer[], teamId: string | null, extra?: ReactNode) => {
-    const full = teamId !== null && players.length >= cap;
+    const full = teamId !== null && players.filter((p) => !p.drawn).length >= cap;
     const canMoveHere = host && Boolean(picked) && (picked?.teamId ?? null) !== teamId && !full;
     return (
       <View key={key} style={{ marginTop: 12, borderRadius: 6, borderWidth: 1.5, borderColor: canMoveHere ? t.brand : t.line, paddingHorizontal: 8, paddingBottom: 4 }}>
@@ -86,7 +87,7 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
           <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_700Bold', fontSize: 15, color: t.text }}>{title}</Text>
           <Text style={label(t)}>{teamId === null ? String(players.length) : `${players.length}/${cap}`}</Text>
           {canMoveHere ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={`Move ${picked?.displayName} to ${title}`} onPress={() => move(teamId)} hitSlop={8} style={{ minHeight: 32, justifyContent: 'center' }}>
+            <Pressable accessibilityRole="button" accessibilityLabel={`Move ${picked?.displayName} to ${title}`} onPress={() => move(teamId)} hitSlop={8} disabled={busy} style={{ ...dim, minHeight: 32, justifyContent: 'center' }}>
               <Text style={{ ...label(t), color: t.brandInk }}>Move here</Text>
             </Pressable>
           ) : null}
@@ -99,8 +100,8 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
             viewerId={playerId}
             tone={selected === p.playerKey ? 'selected' : undefined}
             a11y={host ? `Select ${p.displayName}` : undefined}
-            onPress={host ? () => setSelected(selected === p.playerKey ? null : p.playerKey) : undefined}
-            onRemove={host ? () => onRemove(p.playerKey) : undefined}
+            onPress={host ? () => { if (!busy) setSelected(selected === p.playerKey ? null : p.playerKey); } : undefined}
+            onRemove={host ? () => { if (!busy) onRemove(p.playerKey); } : undefined}
           />
         ))}
       </View>
@@ -113,7 +114,7 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
       {teams.map((team) => card(team.teamId, team.name, teamPlayers(k, team.teamId), team.teamId, tools(team)))}
       {card('any', 'Any team', teamPlayers(k), null)}
       {host && teams.length < MAX_TEAMS ? (
-        <Pressable accessibilityRole="button" onPress={onAddTeam} style={{ marginTop: 12, minHeight: 44, borderRadius: 5, borderWidth: 1.5, borderColor: t.line, alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable accessibilityRole="button" onPress={onAddTeam} disabled={busy} style={{ ...dim, marginTop: 12, minHeight: 44, borderRadius: 5, borderWidth: 1.5, borderColor: t.line, alignItems: 'center', justifyContent: 'center' }}>
           <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.textBody }}>+ Add team</Text>
         </Pressable>
       ) : null}

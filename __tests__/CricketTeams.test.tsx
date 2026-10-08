@@ -68,3 +68,23 @@ it('a joined player sees the teams but cannot arrange them', () => {
   expect(screen.queryByLabelText('Rename Strikers')).toBeNull();
   expect(screen.queryByText('+ Add team')).toBeNull();
 });
+
+it('keeps the host controls on screen, inert, while an action is running', () => {
+  const h = handlers();
+  render(<CricketTeams knockout={knockout()} playerId="h1" busy {...h} />);
+  expect(screen.getByLabelText('Rename Strikers')).toBeTruthy();
+  expect(screen.getByText('+ Add team')).toBeTruthy();
+  fireEvent.press(screen.getByText('+ Add team'));
+  fireEvent.press(screen.getByLabelText('Remove Sam'));
+  expect(h.onAddTeam).not.toHaveBeenCalled();
+  expect(h.onRemove).not.toHaveBeenCalled();
+});
+
+it('does not count drawn players toward a full team: the server would re-deal them', () => {
+  const h = handlers();
+  const drawn = knockout().players.map((p) => (p.teamId ? { ...p, drawn: true } : p));
+  render(<CricketTeams knockout={knockout({ players: drawn })} playerId="h1" {...h} />);
+  fireEvent.press(screen.getByLabelText('Select Sam'));
+  fireEvent.press(screen.getByLabelText('Move Sam to Strikers'));
+  expect(h.onMove).toHaveBeenCalledWith('c', 't1');
+});
