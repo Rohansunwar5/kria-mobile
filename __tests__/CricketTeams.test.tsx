@@ -80,11 +80,9 @@ it('keeps the host controls on screen, inert, while an action is running', () =>
   expect(h.onRemove).not.toHaveBeenCalled();
 });
 
-it('does not count drawn players toward a full team: the server would re-deal them', () => {
-  const h = handlers();
+it("counts drawn players toward a full team: the draw's placements stand", () => {
   const drawn = knockout().players.map((p) => (p.teamId ? { ...p, drawn: true } : p));
-  render(<CricketTeams knockout={knockout({ players: drawn })} playerId="h1" {...h} />);
+  render(<CricketTeams knockout={knockout({ players: drawn })} playerId="h1" {...handlers()} />);
   fireEvent.press(screen.getByLabelText('Select Sam'));
-  fireEvent.press(screen.getByLabelText('Move Sam to Strikers'));
-  expect(h.onMove).toHaveBeenCalledWith('c', 't1');
+  expect(screen.queryByLabelText('Move Sam to Strikers')).toBeNull();
 });

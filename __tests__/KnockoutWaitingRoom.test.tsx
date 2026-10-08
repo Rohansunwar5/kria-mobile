@@ -65,6 +65,15 @@ describe('host', () => {
     fireEvent.press(screen.getByLabelText('Remove Sam'));
     expect(h.onRemove).toHaveBeenCalledWith('c');
   });
+
+  it('can add themselves back after removing themselves', () => {
+    const h = handlers();
+    const { rerender } = render(<KnockoutWaitingRoom knockout={knockout()} playerId="h1" {...h} />);
+    expect(screen.queryByText('Add me')).toBeNull();
+    rerender(<KnockoutWaitingRoom knockout={knockout({ players: knockout().players.slice(1) })} playerId="h1" {...h} />);
+    fireEvent.press(screen.getByText('Add me'));
+    expect(h.onAddPlayer).toHaveBeenCalledWith('h1');
+  });
 });
 
 describe('joined player', () => {
@@ -96,6 +105,28 @@ describe('draw bar', () => {
     fireEvent.press(screen.getByText('Start knockout'));
     expect(onDraw).toHaveBeenCalledTimes(1);
     expect(onStart).toHaveBeenCalledTimes(1);
+  });
+
+  it('greys Start when a cricket draw no longer holds, but keeps Reshuffle', () => {
+    const onDraw = jest.fn();
+    const onStart = jest.fn();
+    const drawn = knockout({
+      sport: 'cricket', format: 'teams', matchConfig: { maxOvers: 8, playersPerTeam: 6 },
+      teams: [{ teamId: 't1', name: 'Strikers' }, { teamId: 't2', name: 'Team 2' }, { teamId: 't3', name: 'Team 3' }],
+      entrants: [{ entrantId: 't1', playerKeys: [] }, { entrantId: 't2', playerKeys: [] }, { entrantId: 't3', playerKeys: [] }],
+    });
+    render(<KnockoutDrawBar knockout={drawn} onDraw={onDraw} onStart={onStart} />);
+    expect(screen.getByText('Put everyone in a team, or reshuffle.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Start knockout' }).props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(screen.getByText('Start knockout'));
+    fireEvent.press(screen.getByText('Reshuffle'));
+    expect(onStart).not.toHaveBeenCalled();
+    expect(onDraw).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the server's refusal where the host is looking", () => {
+    render(<KnockoutDrawBar knockout={knockout()} problem="That team is full." onDraw={jest.fn()} onStart={jest.fn()} />);
+    expect(screen.getByText('That team is full.')).toBeTruthy();
   });
 });
 

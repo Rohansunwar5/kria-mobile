@@ -19,6 +19,7 @@ export default function KnockoutScreen() {
   const ko = useQuickKnockout(id);
   const k = ko.knockout;
   const host = k ? isKnockoutHost(k, user?._id) : false;
+  const drawBar = Boolean(k && k.status === 'waiting' && host);
 
   // One tap would end it for everyone, unfinished matches included.
   const confirmCancel = () =>
@@ -80,10 +81,10 @@ export default function KnockoutScreen() {
           </Pressable>
         ) : null}
 
-        {ko.problem ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk, marginTop: 16, paddingHorizontal: 20 }}>{ko.problem}</Text> : null}
+        {ko.problem && !drawBar ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk, marginTop: 16, paddingHorizontal: 20 }}>{ko.problem}</Text> : null}
       </ScrollView>
 
-      {k && k.status === 'waiting' && host ? <KnockoutDrawBar knockout={k} busy={ko.busy} onDraw={ko.draw} onStart={ko.start} /> : null}
+      {k && drawBar ? <KnockoutDrawBar knockout={k} busy={ko.busy} problem={ko.problem} onDraw={ko.draw} onStart={ko.start} /> : null}
     </Screen>
   );
 }

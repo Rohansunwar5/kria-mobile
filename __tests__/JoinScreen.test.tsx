@@ -108,13 +108,12 @@ it('a cricket knockout: no pick joins Any team, and a full team cannot be picked
   await waitFor(() => expect(joinQuickKnockout).toHaveBeenCalledWith('KX4P9M'));
 });
 
-it('a cricket knockout: a team full only through a draw preview is still joinable', async () => {
-  const previewed = { ...cricket, players: cricket.players.map((p) => ({ ...p, drawn: true })) };
-  (resolveQuickCode as jest.Mock).mockResolvedValue({ kind: 'knockout', data: previewed });
+it('a cricket knockout: a team filled by the draw is full too', async () => {
+  const drawn = { ...cricket, players: cricket.players.map((p) => ({ ...p, drawn: true })) };
+  (resolveQuickCode as jest.Mock).mockResolvedValue({ kind: 'knockout', data: drawn });
   await lookUp('KX4P9M');
-  expect(await screen.findByText('Knockout · Cricket · 8 overs')).toBeTruthy();
-  expect(screen.queryByText('Full')).toBeNull();
+  expect(await screen.findByText('Full')).toBeTruthy();
   fireEvent.press(screen.getByText('Strikers'));
   fireEvent.press(screen.getByText('Join as Rahul Singh'));
-  await waitFor(() => expect(joinQuickKnockout).toHaveBeenCalledWith('KX4P9M', 't1'));
+  await waitFor(() => expect(joinQuickKnockout).toHaveBeenCalledWith('KX4P9M'));
 });

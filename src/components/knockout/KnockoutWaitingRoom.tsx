@@ -9,7 +9,7 @@ import { searchPlayers, type PlayerHit } from '@/api/playerSearch';
 import type { QuickKnockout } from '@/api/quickKnockout';
 import { PlayerLine } from './PlayerLine';
 import { CricketTeams } from './CricketTeams';
-import { bracketColumns, drawBlocker, entrantShortName, formatLabel, isKnockoutHost, unpairedPlayers } from '@/lib/quickKnockoutView';
+import { bracketColumns, drawBlocker, entrantShortName, formatLabel, isKnockoutHost, startBlocker, unpairedPlayers } from '@/lib/quickKnockoutView';
 
 const label = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
 const body = (t: Palette) => ({ fontFamily: 'SpaceGrotesk_400Regular' as const, fontSize: 13, lineHeight: 19, color: t.textMeta });
@@ -163,6 +163,12 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
         </>
       )}
 
+      {/* Search never finds yourself, so a host who removed themselves needs this way back. */}
+      {host && playerId && !k.players.some((p) => p.playerId === playerId) ? (
+        <Pressable accessibilityRole="button" onPress={() => onAddPlayer(playerId)} disabled={busy} style={{ marginTop: 12, minHeight: 44, borderRadius: 5, borderWidth: 1.5, borderColor: t.brand, alignItems: 'center', justifyContent: 'center', opacity: busy ? 0.5 : 1 }}>
+          <Text style={{ ...button, color: t.brandInk }}>Add me</Text>
+        </Pressable>
+      ) : null}
       {host ? <AddPlayer onAddGuest={onAddGuest} onAddPlayer={onAddPlayer} excludeIds={k.players.map((p) => p.playerId).filter((x): x is string => Boolean(x))} /> : null}
 
       {k.entrants.length > 0 ? (
@@ -187,17 +193,18 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
   );
 }
 
-/** Host only, pinned under the scroll by the screen. */
-export function KnockoutDrawBar({ knockout: k, busy, onDraw, onStart }: { knockout: QuickKnockout; busy?: boolean; onDraw: () => void; onStart: () => void }) {
+/** Host only, pinned under the scroll by the screen. Also where a refused action says why. */
+export function KnockoutDrawBar({ knockout: k, busy, problem, onDraw, onStart }: { knockout: QuickKnockout; busy?: boolean; problem?: string; onDraw: () => void; onStart: () => void }) {
   const t = useTheme();
   const insets = useSafeAreaInsets();
-  const blocker = drawBlocker(k);
   const drawn = k.entrants.length > 0;
+  const blocker = drawn ? startBlocker(k) : drawBlocker(k);
   // Pressable writes `disabled` over accessibilityState.disabled, so the
   // blocked state goes through `disabled` for a screen reader to hear it.
-  const off = Boolean(busy) || (!drawn && Boolean(blocker));
+  const off = Boolean(busy) || Boolean(blocker);
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12 + insets.bottom, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg, gap: 8 }}>
+      {problem ? <Text style={{ ...body(t), fontSize: 12, lineHeight: 17, color: t.failInk }}>{problem}</Text> : null}
       {blocker ? <Text style={{ ...body(t), fontSize: 12, lineHeight: 17 }}>{blocker}</Text> : null}
       {drawn ? (
         <Pressable accessibilityRole="button" onPress={onDraw} disabled={busy} style={{ minHeight: 44, borderRadius: 5, borderWidth: 1.5, borderColor: t.line, alignItems: 'center', justifyContent: 'center' }}>

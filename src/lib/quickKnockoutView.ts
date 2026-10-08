@@ -53,6 +53,14 @@ export function drawBlocker(k: QuickKnockout): string | null {
   return null;
 }
 
+/** Once drawn: a cricket draw outlives roster changes, so Start re-checks the teams (as the server does). */
+export function startBlocker(k: QuickKnockout): string | null {
+  if (k.sport !== 'cricket') return null;
+  if (teamPlayers(k).length > 0) return 'Put everyone in a team, or reshuffle.';
+  if ((k.teams ?? []).some((t) => teamPlayers(k, t.teamId).length < 2)) return 'Every team needs at least 2 players.';
+  return null;
+}
+
 export function unpairedPlayers(k: QuickKnockout): KnockoutPlayer[] {
   const paired = new Set(k.pairs.filter((p) => p.byHost).flatMap((p) => p.playerKeys));
   return k.players.filter((p) => !paired.has(p.playerKey));

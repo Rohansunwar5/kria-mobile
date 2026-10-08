@@ -79,7 +79,7 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
   };
 
   const card = (key: string, title: string, players: KnockoutPlayer[], teamId: string | null, extra?: ReactNode) => {
-    const full = teamId !== null && players.filter((p) => !p.drawn).length >= cap;
+    const full = teamId !== null && players.length >= cap;
     const canMoveHere = host && Boolean(picked) && (picked?.teamId ?? null) !== teamId && !full;
     return (
       <View key={key} style={{ marginTop: 12, borderRadius: 6, borderWidth: 1.5, borderColor: canMoveHere ? t.brand : t.line, paddingHorizontal: 8, paddingBottom: 4 }}>

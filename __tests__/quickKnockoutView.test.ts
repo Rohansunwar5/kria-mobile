@@ -1,5 +1,6 @@
 import {
   bracketColumns, championName, drawBlocker, entrantName, entrantShortName, isPlayable, unpairedPlayers, awardablePlayers, formatLabel, teamPlayers, awardBadges,
+  startBlocker,
 } from '@/lib/quickKnockoutView';
 import type { QuickKnockout } from '@/api/quickKnockout';
 
@@ -107,6 +108,15 @@ it('blocks a cricket Draw only when the loose players cannot lift every team to 
     ...['c', 'd', 'e'].map((key) => ({ playerKey: key, displayName: key })),
   ];
   expect(drawBlocker(cricket({ players }))).toBeNull();
+});
+
+it('blocks a drawn cricket Start while someone is in Any team or a team is under 2', () => {
+  expect(startBlocker(cricket())).toBe('Put everyone in a team, or reshuffle.');
+  const placed = cricket().players.map((p) => ({ ...p, teamId: p.teamId ?? 't2' }));
+  expect(startBlocker(cricket({ players: placed }))).toBe('Every team needs at least 2 players.');
+  const filled = [...placed, ...[['d', 't2'], ['e', 't3'], ['f', 't3']].map(([key, teamId]) => ({ playerKey: key, displayName: key, teamId }))];
+  expect(startBlocker(cricket({ players: filled }))).toBeNull();
+  expect(startBlocker(k())).toBeNull();
 });
 
 it('offers cricket three award badges, without Ace Serve', () => {
