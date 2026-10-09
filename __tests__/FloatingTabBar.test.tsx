@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { FloatingTabBar, NAV_SLOTS, HOST_LIFT } from '../src/components/navigation/FloatingTabBar';
+import { FloatingTabBar, NAV_SLOTS } from '../src/components/navigation/FloatingTabBar';
 
 // Named `mockPush` (not `push`) because babel-plugin-jest-hoist only allows a
 // jest.mock() factory to reference out-of-scope variables whose name starts
@@ -86,14 +86,22 @@ describe('FloatingTabBar', () => {
     expect(p.navigation.navigate).toHaveBeenCalledWith('explore');
   });
 
-  // Host is an ACTION, not a tab. It pushes rather than switching tabs, which is
-  // why it never takes the selected state.
-  it('pushes the host chooser from Host', () => {
+  // Host is an ACTION, not a tab: it opens the Host sheet over the current
+  // screen and never takes the selected state. Each option starts its flow.
+  it('opens the Host sheet, whose options start each flow', () => {
     const p = props();
     const { getByLabelText } = render(<FloatingTabBar {...p} />);
     fireEvent.press(getByLabelText('Host a match'));
-    expect(mockPush).toHaveBeenCalledWith('/quick/host');
+    expect(getByLabelText('Host a match').props.accessibilityState.expanded).toBe(true);
+
+    fireEvent.press(getByLabelText('Knockout'));
+    expect(mockPush).toHaveBeenCalledWith('/knockout/new');
     expect(p.navigation.navigate).not.toHaveBeenCalled();
+  });
+
+  it('shows your avatar on the You tab when signed in', () => {
+    const { getByText } = render(<FloatingTabBar {...props()} avatar={{ name: 'Rohan Sunwar' }} />);
+    expect(getByText('RS')).toBeTruthy();
   });
 
   it('gives every slot a 44px hit target', () => {
@@ -102,19 +110,5 @@ describe('FloatingTabBar', () => {
       const style = getByLabelText(label).props.style;
       expect(style.minHeight).toBeGreaterThanOrEqual(44);
     }
-  });
-
-  // The Host circle is lifted above the bar by HOST_LIFT px (a negative
-  // marginTop) — that is exactly how far it overflows the bar's bounds. On
-  // Android, touches outside a parent's bounds are not delivered to the
-  // child, so the Pressable's hitSlop must cover at least that overflow or
-  // the top of the visible circle silently stops responding to taps. This
-  // asserts against the component's own HOST_LIFT constant rather than a
-  // hard-coded number, so it stays meaningful if the circle size or lift
-  // distance ever change.
-  it('gives the Host slot a hitSlop covering its lift-induced overflow', () => {
-    const { getByLabelText } = render(<FloatingTabBar {...props()} />);
-    const hitSlop = getByLabelText('Host a match').props.hitSlop;
-    expect(hitSlop?.top).toBeGreaterThanOrEqual(HOST_LIFT);
   });
 });

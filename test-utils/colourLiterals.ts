@@ -60,6 +60,8 @@ export const MIGRATED: string[] = [
   'src/components/tournament/AboutSection.tsx',
   'src/components/tournament/YourTeam.tsx',
   'src/components/tournament/JumpBar.tsx',
+  'src/components/navigation/FloatingTabBar.tsx',
+  'src/components/navigation/HostSheet.tsx',
   'src/app/quick/new.tsx',
   'src/components/quick/HostSteps.tsx',
   'src/components/quick/WaitingRoom.tsx',

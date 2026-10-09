@@ -138,6 +138,11 @@ export interface Palette {
   failLine: string;
   /** The modal backdrop. */
   scrim: string;
+  /** Tint laid over a blur (the nav bar, the Host sheet) so frosted glass
+   *  reads in this palette whatever is behind it. */
+  glass: string;
+  /** The lighter pane of glass that glides under the active nav tab. */
+  glassLens: string;
   /** Drop shadow — black in every palette; see docblock. */
   shadow: string;
 }
@@ -176,6 +181,8 @@ export const dark: Palette = {
   auctionLine: 'rgba(250,76,147,0.45)',
   failLine: 'rgba(255,68,56,0.4)',
   scrim: 'rgba(11,11,11,0.72)',
+  glass: 'rgba(30,30,30,0.46)',
+  glassLens: 'rgba(255,255,255,0.13)',
   shadow: '#000',
 };
 
@@ -278,6 +285,8 @@ export const light: Palette = {
   auctionLine: 'rgba(250,76,147,0.45)',
   failLine: 'rgba(255,68,56,0.4)',
   scrim: 'rgba(11,11,11,0.72)',
+  glass: 'rgba(250,250,248,0.62)',
+  glassLens: 'rgba(11,11,11,0.13)',
   shadow: '#000',
 };
 

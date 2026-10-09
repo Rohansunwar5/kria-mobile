@@ -131,13 +131,17 @@ daylight. Only `live` carries a dot.
 - **Avatars and team badges are squares**, 4px radius — players on brand orange, teams in their
   own colour. Circles are used only for genuinely round things (a cricket ball, a live dot).
 
-**The bottom nav is the one exception, and it is deliberate.** It is a floating pill —
-`border-radius: 32px`, inset 14px from both edges and 20px from the bottom — carrying a single
-lifted **circle** for the Host action, ringed 5px in the page ground so the ring reads as a notch
-cut into the bar. Only that one circle ever lifts, so the lift always means *create* and never
-competes with which tab is selected. Nothing else in the app may take a pill radius or a circular
-control on the strength of this; if a second exception is ever wanted, change this rule rather
-than quietly widening it. Designed in `docs/design-canvas/home-portals/NavBar.dc.html`.
+**The bottom nav is the one exception, and it is deliberate.** It is a floating capsule of
+frosted glass (redesigned 2026-10-09) — `expo-blur` under the `glass` tint, a lit top edge
+(`fill` fading out), a 0.5px `keyline`, inset 14px from both edges. Icons only, Instagram-style:
+the active glyph fills in `brandInk`, and a lighter pane of glass (`glassLens`) glides under it.
+The You tab is the player's own photo or initials, **round**, ringed in orange when selected.
+Host is a plain plus-in-a-square in the middle that opens the Host sheet (Quick match, Knockout,
+Join with a code) on the same glass; it never takes the selected state, so the lens only ever
+marks where you are. Nothing else in the app may take a pill radius, glass or a round avatar on
+the strength of this; if a second exception is ever wanted, change this rule rather than quietly
+widening it. The previous pill + lifted Host circle lives in git history
+(`docs/design-canvas/home-portals/NavBar.dc.html`).
 
 ### Texture — four devices, used sparingly
 
@@ -170,10 +174,12 @@ low-opacity image or nothing. Ghost type has no `-webkit-text-stroke` equivalent
 
 ### The nav set is the second language, and the boundary is fixed
 
-The five bottom-nav glyphs — `home`, `search`, `plus`, `calendar`, `user` — are drawn to **1.8 stroke
+The five bottom-nav glyphs — `home`, `search`, `create`, `calendar`, `user` — are drawn to **1.8 stroke
 with round caps and round joins**, the opposite of the rule above. At 22px in a floating bar the
 industrial set read spiky rather than precise; the nav is chrome you see on every screen, and it
-should recede.
+should recede. Each has an `active` form: closed glyphs fill solid with their detail (the door,
+the calendar's band) cut back out in the ground colour; `search`, which has nothing to fill,
+goes heavier instead.
 
 **The boundary is: nav is soft, everything else is industrial.** That is the whole of it. A round
 terminal anywhere in content — a tag, a scoreboard, a row, an empty state — is a bug, not a style
@@ -228,6 +234,7 @@ seven artboards in [`docs/design-canvas/motion/`](docs/design-canvas/motion/).
 | 150 | focus | Input border and label colour. |
 | 180 | `pressOut` | Release settles slower than the press. |
 | 260 | `sweep` | Hazard bar scaling across a block. |
+| 320 | `glide` | The nav bar's glass lens moving to the active tab. |
 | 350 | fade | Overlay in/out. |
 | 420 | `reveal` | Art wipe, and the type rising behind it. |
 | 650 | brand | Splash only. Never in a list. |

@@ -19,6 +19,8 @@ export const DUR = {
   pressIn: 120,
   pressOut: 180,
   sweep: 260,
+  /** The nav bar's glass lens gliding to the active tab. */
+  glide: 320,
   reveal: 420,
   rise: 380,
   sweepPass: 1400,

@@ -1,193 +1,205 @@
-import { View, Pressable, Text } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View, Pressable, Platform } from 'react-native';
+import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, type Tabs } from 'expo-router';
+import { type Tabs } from 'expo-router';
 import { NavIcon, type NavIconName } from '@/components/icons/nav';
-import { colors, useTheme } from '@/lib/theme';
+import { InitialsAvatar } from '@/components/InitialsAvatar';
+import { HostSheet } from './HostSheet';
+import { DUR, OUT, usePress } from '@/lib/motion';
+import { useTheme } from '@/lib/theme';
 
 // expo-router 57 vendors react-navigation, so the tab-bar prop type comes from
 // the Tabs component itself — the standalone @react-navigation/bottom-tabs types
 // are a different, incompatible copy.
 type BottomTabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>>[0];
 
-// expo-router's typed routes narrow Href to the known-route union, which
-// widens to plain `string` if declared by hand — pull the param type straight
-// off `router.push` instead so this stays in sync with the generated routes.
 type Slot =
   | { kind: 'route'; route: string; icon: NavIconName; label: string }
-  | { kind: 'action'; href: Parameters<typeof router.push>[0]; icon: NavIconName; label: string; a11y: string }
-  | { kind: 'pending'; icon: NavIconName; label: string };
+  | { kind: 'action'; icon: NavIconName; label: string; a11y: string };
 
 /**
- * Five slots: four routes and one action. Every slot the design calls for now
- * has a real destination — `pending` remains a valid `Slot` kind for a future
- * slot that ships its chrome before its route (the way Explore and Live both
- * once did), announced disabled so a control that looks tappable and does
- * nothing is never mistaken for one that works.
- *
- * Host is an ACTION, not a tab: it pushes /quick/host and never takes the
- * selected state. That is deliberate — the lifted circle always means "create",
- * so the lift never competes with which tab you are on.
+ * Five slots: four routes and one action. Host is an ACTION, not a tab: it
+ * opens the Host sheet over the current screen and never takes the selected
+ * state, so the glass lens only ever marks where you are.
  */
 export const NAV_SLOTS: Slot[] = [
   { kind: 'route', route: 'home', icon: 'home', label: 'Home' },
   { kind: 'route', route: 'explore', icon: 'search', label: 'Explore' },
-  { kind: 'action', href: '/quick/host', icon: 'plus', label: 'Host', a11y: 'Host a match' },
+  { kind: 'action', icon: 'create', label: 'Host', a11y: 'Host a match' },
   { kind: 'route', route: 'events', icon: 'calendar', label: 'Events' },
   { kind: 'route', route: 'profile', icon: 'user', label: 'You' },
 ];
 
-// The Host circle is lifted above the bar by HOST_LIFT px (negative marginTop),
-// which is exactly how far it overflows the bar's bounds. On Android, touches
-// outside a parent's bounds never reach the child, so the Pressable's hitSlop
-// must cover at least that much or the top of the visible circle goes dead.
-// Both live here, as the single source of truth, so a future change to either
-// number can't silently desync hitSlop from the actual overflow.
-export const HOST_CIRCLE_SIZE = 64;
-export const HOST_LIFT = 30;
-const HOST_HIT_SLOP = { top: HOST_LIFT };
+const BAR_HEIGHT = 62;
+const INSET = 6;
+const fill = { position: 'absolute' as const, top: 0, left: 0, right: 0, bottom: 0 };
 
-/**
- * The second, non-colour signal for a `pending` slot, if one is ever drawn.
- *
- * No current slot uses it — Explore and Live were the last two to ship
- * dimmed, and both have since graduated to real routes — but a disabled slot
- * would otherwise be dimmer chrome and nothing else to a sighted user, and
- * DESIGN.md §7 is explicit that colour is never the only signal. A three-dot
- * ellipsis under the label reads as "not yet" at a glance, survives a
- * greyscale screenshot and a colour-blind eye, and stays chrome-sized: 2px
- * tall, no extra text, no badge.
- *
- * Drawn as three views rather than a dashed border because React Native renders
- * `borderStyle: 'dashed'` inconsistently when only one edge has a width.
- */
-function PendingMarker() {
+/** The You tab: your photo or initials, round, ringed in orange when selected. */
+function AvatarGlyph({ name, photo, focused }: { name: string; photo?: string; focused: boolean }) {
   const theme = useTheme();
   return (
-    <View testID="pending-marker" style={{ flexDirection: 'row', gap: 3, marginTop: 3 }}>
-      {[0, 1, 2].map((i) => (
-        <View key={i} style={{ width: 2, height: 2, borderRadius: 1, backgroundColor: theme.mutedTint }} />
-      ))}
+    <View style={{ width: 31, height: 31, borderRadius: 16, borderWidth: 1.5, borderColor: focused ? theme.brandInk : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: 24, height: 24, borderRadius: 12, overflow: 'hidden' }}>
+        <InitialsAvatar name={name} logo={photo} size={24} />
+      </View>
     </View>
   );
 }
 
-const label = (color: string) => ({
-  fontFamily: 'SpaceGrotesk_700Bold' as const,
-  fontSize: 9,
-  letterSpacing: 0.03 * 9,
-  color,
-  marginTop: 3,
-});
-
-export function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
+function NavSlot({
+  slot,
+  focused,
+  onPress,
+  avatar,
+  expanded,
+}: {
+  slot: Slot;
+  focused: boolean;
+  onPress: () => void;
+  avatar?: { name: string; photo?: string };
+  expanded?: boolean;
+}) {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
+  const { press, onPressIn, onPressOut } = usePress();
+  const squeeze = useAnimatedStyle(() => ({ transform: [{ scale: 1 - press.value * 0.18 }] }));
+  const isAvatar = slot.kind === 'route' && slot.route === 'profile' && !!avatar;
 
   return (
-    <View
-      style={{
-        position: 'absolute',
-        left: 14,
-        right: 14,
-        bottom: Math.max(insets.bottom, 12) + 8,
-        height: 64,
-        flexDirection: 'row',
-        alignItems: 'stretch',
-        backgroundColor: colors.panel,
-        borderWidth: 1.5,
-        borderColor: colors.line,
-        borderRadius: 32,
-        shadowColor: theme.shadow,
-        shadowOpacity: 0.5,
-        shadowRadius: 22,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 12,
-      }}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={slot.kind === 'action' ? slot.a11y : slot.label}
+      accessibilityState={slot.kind === 'action' ? { expanded: !!expanded, disabled: false } : { selected: focused, disabled: false }}
+      onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
+      style={{ flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
     >
-      {NAV_SLOTS.map((slot) => {
-        const routeIndex =
-          slot.kind === 'route' ? state.routes.findIndex((r) => r.name === slot.route) : -1;
-        const focused = routeIndex >= 0 && state.index === routeIndex;
-        const disabled = slot.kind === 'pending';
-        const a11yLabel = slot.kind === 'action' ? slot.a11y : slot.label;
+      <Animated.View style={squeeze}>
+        {isAvatar ? (
+          <AvatarGlyph name={avatar!.name} photo={avatar!.photo} focused={focused} />
+        ) : (
+          <NavIcon name={slot.icon} size={25} color={focused ? theme.brandInk : theme.text} active={focused} ground={theme.bg} />
+        )}
+      </Animated.View>
+    </Pressable>
+  );
+}
 
-        const onPress = () => {
-          if (slot.kind === 'pending') return;
-          if (slot.kind === 'action') {
-            router.push(slot.href);
-            return;
-          }
-          const route = state.routes[routeIndex];
-          if (!route) return;
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-          if (!focused && !event.defaultPrevented) navigation.navigate(slot.route);
-        };
+/**
+ * The bottom nav: a floating capsule of frosted glass with a lit top edge.
+ * Icons only, Instagram-style — the active one fills in orange, and a lighter
+ * pane of glass glides under it. Transform-only motion on the existing
+ * out-curve; under reduce-motion the lens jumps instead of gliding.
+ */
+export function FloatingTabBar({ state, navigation, avatar }: BottomTabBarProps & { avatar?: { name: string; photo?: string } }) {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const reduced = useReducedMotion();
+  const [hostOpen, setHostOpen] = useState(false);
+  const [width, setWidth] = useState(0);
+  const lensX = useSharedValue(0);
+  const placed = useRef(false);
+  const slotWidth = width > 0 ? (width - INSET * 2) / NAV_SLOTS.length : 0;
+  const activeRoute = state.routes[state.index]?.name;
+  const activeSlot = NAV_SLOTS.findIndex((s) => s.kind === 'route' && s.route === activeRoute);
 
-        // The create action: a lifted circle ringed in the page ground, so the
-        // ring reads as a notch cut into the bar.
-        if (slot.kind === 'action') {
-          return (
-            <Pressable
-              key={slot.label}
-              accessibilityRole="button"
-              accessibilityLabel={a11yLabel}
-              accessibilityState={{ selected: false, disabled: false }}
-              onPress={onPress}
-              hitSlop={HOST_HIT_SLOP}
-              style={{
-                flex: 1,
-                minHeight: 44,
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-              }}
-            >
-              <View
-                style={{
-                  width: HOST_CIRCLE_SIZE,
-                  height: HOST_CIRCLE_SIZE,
-                  borderRadius: HOST_CIRCLE_SIZE / 2,
-                  marginTop: -HOST_LIFT,
-                  backgroundColor: colors.auction,
-                  borderWidth: 5,
-                  borderColor: colors.ink,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <NavIcon name={slot.icon} size={24} color={theme.onAuction} strokeWidth={2.2} />
-              </View>
-              <Text style={label(theme.text)}>{slot.label}</Text>
-            </Pressable>
-          );
-        }
+  useEffect(() => {
+    if (activeSlot < 0 || slotWidth === 0) return;
+    const x = activeSlot * slotWidth;
+    // The first placement lands; only later tab changes glide.
+    lensX.value = reduced || !placed.current ? x : withTiming(x, { duration: DUR.glide, easing: OUT });
+    placed.current = true;
+  }, [activeSlot, slotWidth, reduced, lensX]);
+  const lensStyle = useAnimatedStyle(() => ({ transform: [{ translateX: lensX.value }] }));
 
-        const tint = disabled ? theme.mutedTint : focused ? colors.brand : theme.textFaint;
+  return (
+    <>
+      <View
+        style={{
+          position: 'absolute',
+          left: 14,
+          right: 14,
+          bottom: Math.max(insets.bottom, 12) + 8,
+          height: BAR_HEIGHT,
+          borderRadius: BAR_HEIGHT / 2,
+          shadowColor: theme.shadow,
+          shadowOpacity: 0.45,
+          shadowRadius: 20,
+          shadowOffset: { width: 0, height: 10 },
+        }}
+      >
+        <View
+          onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            paddingHorizontal: INSET,
+            borderRadius: BAR_HEIGHT / 2,
+            overflow: 'hidden',
+            borderWidth: 0.5,
+            borderColor: theme.keyline,
+          }}
+        >
+          <BlurView
+            intensity={50}
+            tint="dark"
+            experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
+            style={fill}
+          />
+          <View style={[fill, { backgroundColor: theme.glass }]} />
+          {/* The lit top edge: light catching the glass, not a second blur. */}
+          <LinearGradient colors={[theme.fill, 'transparent']} locations={[0, 0.55]} style={fill} pointerEvents="none" />
 
-        return (
-          <Pressable
-            key={slot.label}
-            accessibilityRole="button"
-            accessibilityLabel={a11yLabel}
-            accessibilityState={{ selected: focused, disabled }}
-            disabled={disabled}
-            onPress={onPress}
-            style={{
-              flex: 1,
-              minHeight: 44,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <NavIcon name={slot.icon} size={22} color={tint} />
-            <Text style={label(tint)}>{slot.label}</Text>
-            {disabled ? <PendingMarker /> : null}
-          </Pressable>
-        );
-      })}
-    </View>
+          {activeSlot >= 0 && slotWidth > 0 ? (
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                {
+                  position: 'absolute',
+                  top: INSET,
+                  bottom: INSET,
+                  left: INSET,
+                  width: slotWidth,
+                  borderRadius: (BAR_HEIGHT - INSET * 2) / 2,
+                  backgroundColor: theme.glassLens,
+                  borderWidth: 0.5,
+                  borderColor: theme.keyline,
+                },
+                lensStyle,
+              ]}
+            />
+          ) : null}
+
+          {NAV_SLOTS.map((slot, i) => {
+            const routeIndex = slot.kind === 'route' ? state.routes.findIndex((r) => r.name === slot.route) : -1;
+            const focused = i === activeSlot;
+            const onPress = () => {
+              if (slot.kind === 'action') {
+                setHostOpen(true);
+                return;
+              }
+              const route = state.routes[routeIndex];
+              if (!route) return;
+              const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+              if (!focused && !event.defaultPrevented) navigation.navigate(slot.route);
+            };
+            return (
+              <NavSlot
+                key={slot.label}
+                slot={slot}
+                focused={focused}
+                onPress={onPress}
+                avatar={avatar}
+                expanded={slot.kind === 'action' ? hostOpen : undefined}
+              />
+            );
+          })}
+        </View>
+      </View>
+      <HostSheet visible={hostOpen} onClose={() => setHostOpen(false)} />
+    </>
   );
 }

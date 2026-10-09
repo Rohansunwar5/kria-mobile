@@ -4,7 +4,19 @@ import { NavIcon, NAV_ICON_NAMES, NAV_ICON_PATHS } from '../src/components/icons
 
 describe('nav icon set', () => {
   it('ships exactly the five nav glyphs', () => {
-    expect(NAV_ICON_NAMES).toEqual(['home', 'search', 'plus', 'calendar', 'user']);
+    expect(NAV_ICON_NAMES).toEqual(['home', 'search', 'create', 'calendar', 'user']);
+  });
+
+  // The selected tab fills in, Instagram-style; the door is cut back out of
+  // the fill in the ground colour so the glyph still reads as a house.
+  it('fills a glyph in its active form, with its detail cut in the ground colour', () => {
+    const idle = render(<NavIcon name="home" size={22} color="#F97316" />);
+    expect(idle.UNSAFE_root.findAllByType(Path).filter((p) => p.props.fill === '#F97316')).toHaveLength(0);
+
+    const active = render(<NavIcon name="home" size={22} color="#F97316" active ground="#0B0B0B" />);
+    const paths = active.UNSAFE_root.findAllByType(Path);
+    expect(paths.filter((p) => p.props.fill === '#F97316')).toHaveLength(1);
+    expect(paths.filter((p) => p.props.stroke === '#0B0B0B')).toHaveLength(1);
   });
 
   it('every glyph has at least one path', () => {
