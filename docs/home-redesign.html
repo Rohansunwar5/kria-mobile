@@ -1,0 +1,626 @@
+<title>Kria Home Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+/* Layout: a proposal sheet in the app's own dark broadcast language. The phone stays pinned on the
+   left while the reasoning reads down the right; below 900px they stack. Single dark theme on
+   purpose: the app ships dark, and light mode is not user-reachable yet. */
+:root {
+  --ink: #0B0B0B;
+  --panel: #151515;
+  --panel2: #1E1E1E;
+  --bezel: #202020;
+  --line: rgba(255,255,255,0.14);
+  --line-soft: rgba(255,255,255,0.10);
+  --keyline: rgba(255,255,255,0.22);
+  --hair: rgba(255,255,255,0.05);
+  --ghost: rgba(255,255,255,0.045);
+  --text: #FFFFFF;
+  --body: #d4d4d4;
+  --meta: #a3a3a3;
+  --faint: #7d7d7d;
+  --brand: #F97316;
+  --auction: #FA4C93;
+  --open: #16C46A;
+  --fail: #FF4438;
+  --on-brand: #0B0B0B;
+  --on-auction: #240614;
+  --on-open: #06240F;
+  --on-fail: #2A0703;
+  --up: rgba(255,255,255,0.10);
+  --auction-tint: rgba(250,76,147,0.09);
+  --auction-line: rgba(250,76,147,0.45);
+  --display: 'Anton', 'Arial Narrow', Haettenschweiler, Impact, sans-serif;
+  --ui: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --data: 'Space Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--ink); }
+body { color: var(--body); font-family: var(--ui); font-size: 15px; line-height: 1.55; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+
+.wrap { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 96px; }
+.over { font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); }
+.hazard { height: 5px; background: repeating-linear-gradient(115deg, var(--brand) 0 6px, transparent 6px 12px); }
+
+/* ---------- sheet head ---------- */
+.sheet-head { display: grid; gap: 16px; padding-bottom: 36px; border-bottom: 1.5px solid var(--line); }
+.sheet-head .hazard { width: 132px; }
+h1 { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: clamp(40px, 7vw, 64px); line-height: 1.19; letter-spacing: 0.01em; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--brand); }
+.lede { margin: 0; max-width: 64ch; font-size: 17px; line-height: 1.6; color: var(--body); }
+
+h2.sec-h { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 30px; line-height: 1.2; }
+.block { padding-top: 44px; display: grid; gap: 20px; }
+
+/* ---------- problems ---------- */
+.problems { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px 28px; }
+.problem { border-top: 1.5px solid var(--line); padding-top: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.problem h3 { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 19px; line-height: 1.25; }
+.problem p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--meta); }
+
+/* ---------- showcase ---------- */
+.show { display: grid; grid-template-columns: 410px minmax(0, 1fr); gap: 52px; align-items: start; }
+.phone-col { position: sticky; top: 20px; display: grid; gap: 14px; justify-items: center; }
+.states { display: flex; width: 100%; max-width: 390px; border: 1.5px solid var(--line); border-radius: 5px; overflow: hidden; background: var(--panel); }
+.states button { flex: 1; min-height: 44px; padding: 6px 8px; font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+.states button + button { border-left: 1.5px solid var(--line-soft); }
+.states button[aria-pressed="true"] { background: var(--brand); color: var(--on-brand); }
+.state-cap { max-width: 390px; text-align: center; font-size: 13px; color: var(--meta); min-height: 40px; margin: 0; }
+
+.phone { width: 390px; max-width: 100%; height: 800px; border: 10px solid var(--bezel); border-radius: 46px; background: var(--ink); position: relative; overflow: hidden; }
+.scr { height: 100%; overflow-y: auto; overflow-x: hidden; padding-top: 50px; padding-bottom: 116px; scrollbar-width: none; scroll-behavior: smooth; }
+.scr::-webkit-scrollbar { display: none; }
+@media (prefers-reduced-motion: reduce) { .scr { scroll-behavior: auto; } }
+
+/* ---------- in-phone primitives ---------- */
+.tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 3px; font-family: var(--data); font-weight: 700; font-size: 9px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap; }
+.tag.live { background: var(--brand); color: var(--on-brand); }
+.tag.open { background: var(--open); color: var(--on-open); }
+.tag.auc { background: var(--auction); color: var(--on-auction); }
+.tag.up { background: var(--up); color: var(--body); }
+.tag .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.mono-lbl { font-family: var(--data); font-weight: 700; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
+
+.sec { padding: 24px 16px 0; transition: background-color .4s; }
+.sec.flash { animation: flash 1.4s ease-out; }
+@keyframes flash { 0% { box-shadow: inset 0 0 0 2px var(--brand); } 100% { box-shadow: inset 0 0 0 2px transparent; } }
+@media (prefers-reduced-motion: reduce) { .sec.flash { animation: none; box-shadow: inset 0 0 0 2px var(--brand); } }
+.sec-head { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 10px; }
+.sec-title { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 20px; line-height: 24px; display: flex; align-items: center; gap: 8px; }
+.sec-meta { font-family: var(--data); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); padding-bottom: 3px; }
+.sec-head .all { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); padding-bottom: 3px; min-height: 24px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 3px rgba(249,115,22,0.22); }
+.hscroll { display: flex; gap: 10px; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; scrollbar-width: none; }
+.hscroll::-webkit-scrollbar { display: none; }
+.hscroll > * { flex: none; scroll-snap-align: start; }
+
+/* hero shared */
+.hero { margin: 0 16px; position: relative; overflow: hidden; background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; }
+.hero .ghost { position: absolute; font-family: var(--display); color: var(--ghost); line-height: 0.78; pointer-events: none; user-select: none; }
+.hero-in { position: relative; padding: 14px 14px 14px; display: grid; gap: 12px; }
+.hero-top { display: flex; align-items: center; gap: 7px; }
+.hero-top .over { font-size: 9px; }
+.hero-top .right { margin-left: auto; }
+
+/* hero: between matches */
+.hero--you { background-image: repeating-linear-gradient(115deg, var(--hair) 0 1px, transparent 1px 9px); background-color: var(--panel); }
+.hero--you .ghost { font-size: 210px; right: -18px; top: 6px; }
+.hero-name { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 34px; line-height: 41px; }
+.sport-tabs { display: flex; gap: 6px; }
+.sport-tabs span { font-family: var(--data); font-weight: 700; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 8px; border-radius: 3px; border: 1.5px solid var(--line); color: var(--faint); }
+.sport-tabs span.on { border-color: var(--text); color: var(--text); }
+.statline { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 12px; }
+.bignum { font-family: var(--data); font-weight: 700; color: var(--text); font-size: 58px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.bignum small { font-size: 26px; letter-spacing: 0; color: var(--meta); }
+.bignum-lbl { margin-top: 6px; }
+.minis { display: grid; gap: 8px; text-align: right; }
+.mini b { display: block; font-family: var(--data); font-weight: 700; font-size: 20px; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; }
+.form { display: flex; align-items: center; gap: 5px; }
+.form .mono-lbl { margin-right: 6px; }
+.res { width: 22px; height: 22px; border-radius: 3px; display: grid; place-items: center; font-family: var(--data); font-weight: 700; font-size: 11px; line-height: 1; }
+.res.w { background: var(--open); color: var(--on-open); }
+.res.l { background: var(--fail); color: var(--on-fail); }
+.join { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; border: 1.5px solid var(--keyline); border-radius: 5px; background: var(--ink); width: 100%; text-align: left; }
+.join-w { font-family: var(--display); text-transform: uppercase; font-size: 16px; line-height: 20px; color: var(--text); }
+.join .mono-lbl { color: var(--meta); }
+.slots { display: flex; gap: 4px; margin-left: auto; }
+.slots i { width: 14px; height: 20px; border-bottom: 2px solid var(--faint); }
+
+/* hero: on court */
+.hero--live { border-color: rgba(249,115,22,0.5); }
+.hero--live .ghost { font-size: 170px; right: -12px; bottom: -14px; }
+.hero--live .hazard { position: relative; }
+.bug { display: grid; grid-template-columns: 1fr repeat(3, 40px); border: 1.5px solid var(--line); border-radius: 5px; overflow: hidden; background: var(--ink); }
+.bug > div { padding: 9px 0; text-align: center; font-family: var(--data); font-weight: 700; font-size: 18px; line-height: 1; color: var(--faint); font-variant-numeric: tabular-nums; border-top: 1.5px solid var(--line-soft); }
+.bug > .h { font-size: 9px; letter-spacing: 0.14em; padding: 7px 0; border-top: 0; color: var(--faint); }
+.bug > .h.nm { text-align: left; padding-left: 12px; }
+.bug > .nm { text-align: left; padding-left: 12px; font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 19px; line-height: 23px; padding-block: 6px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.bug > .won { color: var(--text); }
+.bug > .now { background: var(--panel2); color: var(--brand); font-size: 22px; }
+.serve { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
+.cta { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; border-radius: 5px; background: var(--brand); color: var(--on-brand); font-family: var(--display); text-transform: uppercase; font-size: 17px; line-height: 21px; width: 100%; }
+.hero-meta { font-family: var(--data); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+
+/* hero: first match */
+.hero--first { border-color: var(--auction-line); }
+.hero--first .ghost { font-size: 120px; right: -6px; top: 8px; }
+.hero-h { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 30px; line-height: 36px; max-width: 12ch; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.steps li { display: grid; grid-template-columns: 24px 1fr; gap: 10px; align-items: start; font-size: 13px; line-height: 1.45; color: var(--body); }
+.steps b { width: 24px; height: 24px; border-radius: 4px; border: 1.5px solid var(--auction); color: var(--auction); display: grid; place-items: center; font-family: var(--data); font-size: 11px; }
+.duo { display: flex; gap: 9px; }
+.btn-auc { flex: 1.25; min-height: 48px; border-radius: 5px; background: var(--auction); color: var(--on-auction); display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--display); text-transform: uppercase; font-size: 16px; line-height: 20px; }
+.btn-line { flex: 1; min-height: 48px; border-radius: 5px; border: 1.5px solid var(--keyline); display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--display); text-transform: uppercase; font-size: 15px; line-height: 19px; color: var(--text); }
+
+/* live ticker chips */
+.chip { width: 260px; background: var(--panel); border: 1.5px solid var(--line); border-left: 3px solid var(--brand); border-radius: 6px; padding: 9px 11px 10px; display: grid; gap: 8px; }
+.chip.q { border-left-color: var(--auction); }
+.chip-top { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.chip-top .mono-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.chip-main { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.chip-name { font-family: var(--display); text-transform: uppercase; font-size: 16px; line-height: 20px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.chip-score { font-family: var(--data); font-weight: 700; font-size: 13px; color: var(--text); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* tournament posters */
+.poster { width: 284px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; overflow: hidden; }
+.art { height: 112px; position: relative; overflow: hidden; }
+.art .ini { position: absolute; left: 12px; bottom: 8px; font-family: var(--display); font-size: 92px; line-height: 0.82; color: rgba(255,255,255,0.13); text-transform: uppercase; }
+.art .glyph { position: absolute; right: 14px; top: 12px; opacity: 0.55; }
+.art::after { content: ""; position: absolute; inset: auto 0 0 0; height: 5px; background: repeating-linear-gradient(115deg, var(--brand) 0 6px, transparent 6px 12px); }
+.art.a1 { background: linear-gradient(140deg, #2f4a6b 0%, #142235 60%, #0e1520 100%); }
+.art.a2 { background: linear-gradient(140deg, #3b5a2a 0%, #1b2c14 60%, #10180c 100%); }
+.art.a3 { background: linear-gradient(140deg, #5a2a4a 0%, #2c1424 60%, #190b15 100%); }
+.p-body { padding: 11px 12px 0; display: grid; gap: 6px; }
+.p-tags { display: flex; gap: 6px; }
+.p-name { font-family: var(--display); text-transform: uppercase; font-size: 21px; line-height: 26px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.p-where { font-size: 12px; color: var(--meta); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-strip { display: grid; grid-template-columns: 1fr 1fr 1.35fr; margin-top: 12px; border-top: 1.5px solid var(--line-soft); }
+.p-strip > div { padding: 9px 12px 11px; display: grid; gap: 3px; min-width: 0; }
+.p-strip > div + div { border-left: 1.5px solid var(--line-soft); }
+.p-strip b { font-family: var(--data); font-weight: 700; font-size: 15px; line-height: 1.1; color: var(--text); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.p-strip .hot b { color: var(--brand); }
+.p-strip .mono-lbl { font-size: 8px; letter-spacing: 0.14em; }
+
+/* ledger (results + ladder) */
+.ledger { background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; overflow: hidden; }
+.lrow { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 12px; min-height: 52px; }
+.lrow + .lrow { border-top: 1.5px solid var(--line-soft); }
+.lrow .res { width: 30px; height: 30px; font-size: 13px; border-radius: 4px; }
+.l-name { font-family: var(--display); text-transform: uppercase; font-size: 15px; line-height: 18px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.l-ctx { margin-top: 3px; }
+.l-right { text-align: right; display: grid; gap: 3px; }
+.l-score { font-family: var(--data); font-weight: 700; font-size: 12px; color: var(--text); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.l-foot { display: flex; align-items: center; justify-content: space-between; padding: 12px; min-height: 44px; border-top: 1.5px solid var(--line-soft); font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); width: 100%; }
+.ladder .lrow { grid-template-columns: 22px 32px minmax(0, 1fr) auto; }
+.rank { font-family: var(--data); font-weight: 700; font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.ava { width: 32px; height: 32px; border-radius: 4px; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; font-family: var(--display); font-size: 13px; line-height: 16px; }
+.p-nm { font-weight: 700; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 7px; }
+.pct { font-family: var(--data); font-weight: 700; font-size: 15px; color: var(--text); font-variant-numeric: tabular-nums; }
+.lrow.me { background: var(--auction-tint); box-shadow: inset 3px 0 0 var(--auction); }
+.lrow.me .rank, .lrow.me .pct { color: var(--auction); }
+.lrow.me .ava { background: var(--auction); color: var(--on-auction); }
+.swap { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1.5px solid var(--line); border-radius: 3px; font-family: var(--data); font-weight: 700; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--body); margin-left: auto; }
+
+/* floating nav */
+.nav { position: absolute; left: 14px; right: 14px; bottom: 18px; height: 64px; display: flex; background: var(--panel); border: 1.5px solid var(--line); border-radius: 32px; box-shadow: 0 8px 22px rgba(0,0,0,0.5); }
+.nav > div { flex: 1; display: grid; place-items: center; align-content: center; gap: 3px; font-family: var(--ui); font-weight: 700; font-size: 9px; letter-spacing: 0.03em; color: var(--faint); }
+.nav > div.on { color: var(--brand); }
+.nav .host { align-content: start; color: var(--text); }
+.nav .host span.c { width: 64px; height: 64px; margin-top: -30px; border-radius: 50%; background: var(--auction); border: 5px solid var(--ink); display: grid; place-items: center; }
+
+/* ---------- notes ---------- */
+.notes { list-style: none; margin: 0; padding: 0; display: grid; }
+.note { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; width: 100%; text-align: left; padding: 22px 0; border-top: 1.5px solid var(--line); }
+.notes li:last-child .note { border-bottom: 1.5px solid var(--line); }
+.note .n { width: 36px; height: 36px; border-radius: 4px; border: 1.5px solid var(--brand); color: var(--brand); display: grid; place-items: center; font-family: var(--data); font-weight: 700; font-size: 13px; transition: background-color .15s, color .15s; }
+.note:hover .n, .note[aria-current="true"] .n { background: var(--brand); color: var(--on-brand); }
+.note h3 { margin: 0 0 6px; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 23px; line-height: 1.22; }
+.note p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--body); max-width: 60ch; }
+.note .rep { margin-top: 10px; font-family: var(--data); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); line-height: 1.6; }
+.note .rep b { color: var(--meta); font-weight: 700; }
+.notes-intro { margin: 0 0 18px; font-size: 14px; color: var(--meta); }
+
+/* ---------- compare table ---------- */
+.table-scroll { overflow-x: auto; border: 1.5px solid var(--line); border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 14px; }
+th { text-align: left; font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); padding: 12px 14px; background: var(--panel); border-bottom: 1.5px solid var(--line); }
+td { padding: 13px 14px; vertical-align: top; border-top: 1.5px solid var(--line-soft); line-height: 1.5; }
+tr:first-child td { border-top: 0; }
+td:first-child { font-family: var(--display); text-transform: uppercase; color: var(--text); font-size: 15px; white-space: nowrap; }
+td:nth-child(2) { color: var(--meta); }
+td:nth-child(3) { color: var(--text); }
+
+/* ---------- build + decide ---------- */
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px 44px; }
+.build { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.build li { display: grid; gap: 3px; padding-left: 14px; border-left: 1.5px solid var(--line); }
+.build b { color: var(--text); font-weight: 700; }
+.build code { font-family: var(--data); font-size: 12px; color: var(--meta); }
+.decide { margin: 0; padding: 0; list-style: none; counter-reset: q; display: grid; gap: 16px; }
+.decide li { counter-increment: q; display: grid; grid-template-columns: 32px 1fr; gap: 12px; }
+.decide li::before { content: counter(q); width: 28px; height: 28px; border-radius: 4px; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; font-family: var(--data); font-weight: 700; font-size: 12px; }
+.decide b { display: block; color: var(--text); margin-bottom: 2px; }
+.decide span { color: var(--meta); font-size: 14px; }
+.foot { margin-top: 56px; padding-top: 18px; border-top: 1.5px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+@media (max-width: 900px) {
+  .show { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .phone-col { position: static; }
+}
+@media (max-width: 440px) {
+  .phone { border-width: 6px; border-radius: 30px; height: 720px; }
+  .states button { font-size: 9px; letter-spacing: 0.06em; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12 H19 M13 6 L19 12 L13 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8 H18 M14 4 L18 8 L14 12 M20 16 H6 M10 12 L6 16 L10 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5 V18.5 M5.5 12 H18.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></symbol>
+    <symbol id="n-home" viewBox="0 0 24 24"><path d="M3.8 10.4 L12 4.2 L20.2 10.4 V18.5 A1.7 1.7 0 0 1 18.5 20.2 H5.5 A1.7 1.7 0 0 1 3.8 18.5 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="n-search" viewBox="0 0 24 24"><path d="M11 4.7 A6.3 6.3 0 1 1 11 17.3 A6.3 6.3 0 1 1 11 4.7 Z M15.6 15.6 L20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="n-plus" viewBox="0 0 24 24"><path d="M12 5.5 V18.5 M5.5 12 H18.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="n-cal" viewBox="0 0 24 24"><path d="M5.5 6 H18.5 A2 2 0 0 1 20.5 8 V18 A2 2 0 0 1 18.5 20 H5.5 A2 2 0 0 1 3.5 18 V8 A2 2 0 0 1 5.5 6 Z M3.5 10.5 H20.5 M8 3.8 V7.6 M16 3.8 V7.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="n-user" viewBox="0 0 24 24"><path d="M12 4.5 A3.9 3.9 0 1 1 12 12.3 A3.9 3.9 0 1 1 12 4.5 Z M4.8 20 A7.2 7.2 0 0 1 19.2 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="g-shuttle" viewBox="0 0 24 24"><path d="M9 21 H15 L16 17 H8 Z M8 17 L4 4 M16 17 L20 4 M12 17 V3 M10 17 L7.5 4.5 M14 17 L16.5 4.5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="square"/></symbol>
+    <symbol id="g-bat" viewBox="0 0 24 24"><path d="M14 3 L21 10 L11 20 L8 20 L4 16 L4 13 Z M4 20 L2 22 M18 20 A2 2 0 1 0 18 16 A2 2 0 1 0 18 20" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="square"/></symbol>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <header class="sheet-head">
+    <div class="hazard" aria-hidden="true"></div>
+    <p class="over">Kria player app · Home screen · Design proposal · 09 Oct 2026</p>
+    <h1>Home, in <em>matchday</em> order</h1>
+    <p class="lede">Today's home stacks six blocks of equal weight and opens on a Host card the nav already covers. This version orders home by what needs you first: your own game, then what is live, then what you can enter, then how you have been playing. Everything stays inside the existing Kria design system: Anton, Space Grotesk and Space Mono, hard 6px edges, solid status fills.</p>
+  </header>
+
+  <section class="block" aria-labelledby="why-h">
+    <h2 class="sec-h" id="why-h">What isn't working today</h2>
+    <div class="problems">
+      <article class="problem">
+        <span class="over">Top of screen</span>
+        <h3>It opens on a duplicate</h3>
+        <p>The large "Start a match" card repeats the pink Host button in the nav, and it takes most of the first screen.</p>
+      </article>
+      <article class="problem">
+        <span class="over">Hierarchy</span>
+        <h3>Nothing leads</h3>
+        <p>Six sections share one heading size and one card style, so the eye has no first place to land.</p>
+      </article>
+      <article class="problem">
+        <span class="over">Your live match</span>
+        <h3>The urgent thing is buried</h3>
+        <p>A match you are playing right now sits inside Recent matches, below your record and the tournament row.</p>
+      </article>
+      <article class="problem">
+        <span class="over">Results</span>
+        <h3>A card per match</h3>
+        <p>Every past match is its own bordered card, so two results fill the space five could use.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="prop-h">
+    <h2 class="sec-h" id="prop-h">The proposal</h2>
+    <div class="show">
+      <div class="phone-col">
+        <div class="states" role="group" aria-label="Preview state">
+          <button type="button" id="st-between" data-state="between" aria-pressed="true">Between matches</button>
+          <button type="button" id="st-live" data-state="live" aria-pressed="false">In a match</button>
+          <button type="button" id="st-first" data-state="first" aria-pressed="false">First match</button>
+        </div>
+        <p class="state-cap" id="state-cap" aria-live="polite">Most visits. Your player card leads, with the join code built in.</p>
+
+        <div class="phone" aria-label="Proposed home screen mock-up">
+          <div class="scr" id="scr">
+
+            <!-- 1 · hero -->
+            <section class="sec" id="s-hero" style="padding-inline:0; padding-top:4px;">
+              <div class="hero hero--you" data-hero="between">
+                <span class="ghost" aria-hidden="true">68</span>
+                <div class="hero-in">
+                  <div class="hero-top"><span class="over" style="color:var(--auction)">Your game</span></div>
+                  <h3 class="hero-name">Rohan Sunwar</h3>
+                  <div class="sport-tabs"><span class="on">Badminton</span><span>Cricket · 54%</span></div>
+                  <div class="statline">
+                    <div>
+                      <div class="bignum">68<small>%</small></div>
+                      <div class="mono-lbl bignum-lbl">Win rate · 31 decided</div>
+                    </div>
+                    <div class="minis">
+                      <div class="mini"><b>31</b><span class="mono-lbl">Played</span></div>
+                      <div class="mini"><b>21–10</b><span class="mono-lbl">Won–lost</span></div>
+                    </div>
+                  </div>
+                  <div class="form" aria-label="Last five results, oldest first: won, won, won, lost, won">
+                    <span class="mono-lbl">Last 5</span>
+                    <span class="res w">W</span><span class="res w">W</span><span class="res w">W</span><span class="res l">L</span><span class="res w">W</span>
+                  </div>
+                  <button type="button" class="join" aria-label="Join a match with a code">
+                    <span class="join-w">Join</span><span class="mono-lbl">with code</span>
+                    <span class="slots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    <svg width="16" height="16" style="color:var(--text)" aria-hidden="true"><use href="#i-arrow"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="hero hero--live" data-hero="live" hidden>
+                <div class="hazard" aria-hidden="true"></div>
+                <span class="ghost" aria-hidden="true">G3</span>
+                <div class="hero-in">
+                  <div class="hero-top"><span class="tag live"><span class="dot"></span>Live</span><span class="tag up">Quick</span><span class="over right">You're hosting</span></div>
+                  <div class="hero-meta">Badminton · Best of 3 · to 21</div>
+                  <div class="bug" role="img" aria-label="Score: Rohan 21, 18, 9. Dev 19, 21, 7.">
+                    <div class="h nm">Side</div><div class="h">G1</div><div class="h">G2</div><div class="h">G3</div>
+                    <div class="nm">Rohan <span class="serve" aria-label="serving"></span></div><div class="won">21</div><div>18</div><div class="now">9</div>
+                    <div class="nm">Dev</div><div>19</div><div class="won">21</div><div class="now">7</div>
+                  </div>
+                  <button type="button" class="cta">Resume scoring <svg width="17" height="17" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+                  <div class="hero-meta">Started 18 min ago · Code AB12CD</div>
+                </div>
+              </div>
+
+              <div class="hero hero--first" data-hero="first" hidden>
+                <span class="ghost" aria-hidden="true">QM</span>
+                <div class="hero-in">
+                  <div class="hero-top"><span class="over" style="color:var(--auction)">No organiser needed</span></div>
+                  <h3 class="hero-h">Your first match starts here</h3>
+                  <ol class="steps">
+                    <li><b>1</b><span>Host a badminton or cricket match from the pink button.</span></li>
+                    <li><b>2</b><span>Share the six-character code so the others can join.</span></li>
+                    <li><b>3</b><span>Score it live. The result starts your record.</span></li>
+                  </ol>
+                  <div class="duo">
+                    <button type="button" class="btn-auc"><svg width="17" height="17" aria-hidden="true"><use href="#i-plus"/></svg>Host</button>
+                    <button type="button" class="btn-line">Join <span class="mono-lbl">Code</span></button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 2 · live ticker -->
+            <section class="sec" id="s-live">
+              <div class="sec-head">
+                <h3 class="sec-title"><span class="live-dot" aria-hidden="true"></span>Live now</h3>
+                <span class="sec-meta">7 matches</span>
+                <button type="button" class="all">All <svg width="11" height="11" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+              </div>
+              <div class="hscroll">
+                <div class="chip"><div class="chip-top"><span class="tag live">Live</span><span class="mono-lbl">JBN Badminton · Semi final</span></div><div class="chip-main"><span class="chip-name">A. Mehta v S. Iyer</span><span class="chip-score">21-18 · 14-11</span></div></div>
+                <div class="chip q"><div class="chip-top"><span class="tag auc">Quick</span><span class="mono-lbl">Badminton singles</span></div><div class="chip-main"><span class="chip-name">A. Kumar v P. Nair</span><span class="chip-score">11-9</span></div></div>
+                <div class="chip"><div class="chip-top"><span class="tag live">Live</span><span class="mono-lbl">City T20 League · Match 7</span></div><div class="chip-main"><span class="chip-name">Strikers v Titans</span><span class="chip-score">142/6 · 17.2</span></div></div>
+                <div class="chip q"><div class="chip-top"><span class="tag auc">Quick</span><span class="mono-lbl">Badminton doubles</span></div><div class="chip-main"><span class="chip-name">Rao/Das v Sen/Roy</span><span class="chip-score">21-19 · 3-5</span></div></div>
+              </div>
+            </section>
+
+            <!-- 3 · tournaments -->
+            <section class="sec" id="s-events">
+              <div class="sec-head">
+                <h3 class="sec-title">Tournaments</h3>
+                <span class="sec-meta">2 open</span>
+                <button type="button" class="all">All <svg width="11" height="11" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+              </div>
+              <div class="hscroll">
+                <article class="poster">
+                  <div class="art a1"><span class="ini" aria-hidden="true">KSC</span><svg class="glyph" width="34" height="34" aria-hidden="true"><use href="#g-shuttle"/></svg></div>
+                  <div class="p-body">
+                    <div class="p-tags"><span class="tag open">Open</span><span class="tag up">Badminton</span></div>
+                    <div class="p-name">Kria Smash Cup</div>
+                    <div class="p-where">18–20 Oct · Koramangala Indoor Stadium, Bangalore</div>
+                  </div>
+                  <div class="p-strip">
+                    <div><span class="mono-lbl">Players</span><b>64</b></div>
+                    <div><span class="mono-lbl">Teams</span><b>5/8</b></div>
+                    <div class="hot"><span class="mono-lbl">Entries close</span><b>5 days</b></div>
+                  </div>
+                </article>
+                <article class="poster">
+                  <div class="art a2"><span class="ini" aria-hidden="true">CTL</span><svg class="glyph" width="34" height="34" aria-hidden="true"><use href="#g-bat"/></svg></div>
+                  <div class="p-body">
+                    <div class="p-tags"><span class="tag open">Open</span><span class="tag up">Cricket</span></div>
+                    <div class="p-name">City T20 League</div>
+                    <div class="p-where">25 Oct–2 Nov · HAL Grounds, Bangalore</div>
+                  </div>
+                  <div class="p-strip">
+                    <div><span class="mono-lbl">Players</span><b>96</b></div>
+                    <div><span class="mono-lbl">Teams</span><b>7/12</b></div>
+                    <div class="hot"><span class="mono-lbl">Entries close</span><b>9 days</b></div>
+                  </div>
+                </article>
+                <article class="poster">
+                  <div class="art a3"><span class="ini" aria-hidden="true">JBN</span><svg class="glyph" width="34" height="34" aria-hidden="true"><use href="#g-shuttle"/></svg></div>
+                  <div class="p-body">
+                    <div class="p-tags"><span class="tag live"><span class="dot"></span>Live</span><span class="tag up">Badminton</span></div>
+                    <div class="p-name">JBN Badminton Tournament</div>
+                    <div class="p-where">22 Sep–12 Oct · Greenfield Sports Arena, Bangalore</div>
+                  </div>
+                  <div class="p-strip">
+                    <div><span class="mono-lbl">Players</span><b>122</b></div>
+                    <div><span class="mono-lbl">Teams</span><b>6/6</b></div>
+                    <div><span class="mono-lbl">Ends</span><b>12 Oct</b></div>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <!-- 4 · results -->
+            <section class="sec" id="s-results">
+              <div class="sec-head">
+                <h3 class="sec-title">Your results</h3>
+                <span class="sec-meta">21W · 10L</span>
+              </div>
+              <div class="ledger">
+                <div class="lrow"><span class="res w">W</span><div style="min-width:0"><div class="l-name">Rohan v Dev</div><div class="mono-lbl l-ctx">Quick · Badminton</div></div><div class="l-right"><span class="l-score">21-18 21-16</span><span class="mono-lbl">07 Oct</span></div></div>
+                <div class="lrow"><span class="res l">L</span><div style="min-width:0"><div class="l-name">Sunday Smash · Final</div><div class="mono-lbl l-ctx">Knockout · Badminton</div></div><div class="l-right"><span class="l-score">19-21 21-23</span><span class="mono-lbl">05 Oct</span></div></div>
+                <div class="lrow"><span class="res w">W</span><div style="min-width:0"><div class="l-name">Rohan &amp; Dev v Arjun &amp; Kiran</div><div class="mono-lbl l-ctx">Quick · Doubles</div></div><div class="l-right"><span class="l-score">21-15 21-12</span><span class="mono-lbl">03 Oct</span></div></div>
+                <div class="lrow"><span class="res w">W</span><div style="min-width:0"><div class="l-name">Kria Smash League · R2</div><div class="mono-lbl l-ctx">Tournament · Badminton</div></div><div class="l-right"><span class="l-score">21-17 19-21 21-14</span><span class="mono-lbl">01 Oct</span></div></div>
+                <button type="button" class="l-foot">All 31 matches <svg width="12" height="12" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+              </div>
+            </section>
+
+            <!-- 5 · ladder -->
+            <section class="sec" id="s-ladder">
+              <div class="sec-head">
+                <h3 class="sec-title">Top players</h3>
+                <span class="swap"><svg width="11" height="11" aria-hidden="true"><use href="#i-swap"/></svg>Badminton</span>
+              </div>
+              <div class="ledger ladder">
+                <div class="lrow"><span class="rank">01</span><span class="ava">AM</span><div style="min-width:0"><div class="p-nm">Arjun Mehta</div><div class="mono-lbl">24 played</div></div><span class="pct">92%</span></div>
+                <div class="lrow"><span class="rank">02</span><span class="ava">KR</span><div style="min-width:0"><div class="p-nm">Kiran Rao</div><div class="mono-lbl">33 played</div></div><span class="pct">88%</span></div>
+                <div class="lrow"><span class="rank">03</span><span class="ava">SI</span><div style="min-width:0"><div class="p-nm">Sana Iyer</div><div class="mono-lbl">19 played</div></div><span class="pct">84%</span></div>
+                <div class="lrow me"><span class="rank">04</span><span class="ava">RS</span><div style="min-width:0"><div class="p-nm">Rohan Sunwar <span class="tag auc">You</span></div><div class="mono-lbl">31 played</div></div><span class="pct">68%</span></div>
+                <div class="lrow"><span class="rank">05</span><span class="ava">DP</span><div style="min-width:0"><div class="p-nm">Dev Patel</div><div class="mono-lbl">28 played</div></div><span class="pct">64%</span></div>
+              </div>
+            </section>
+          </div>
+
+          <nav class="nav" aria-label="Bottom navigation (mock)">
+            <div class="on"><svg width="22" height="22" aria-hidden="true"><use href="#n-home"/></svg>Home</div>
+            <div><svg width="22" height="22" aria-hidden="true"><use href="#n-search"/></svg>Explore</div>
+            <div class="host"><span class="c"><svg width="24" height="24" style="color:var(--on-auction)" aria-hidden="true"><use href="#n-plus"/></svg></span>Host</div>
+            <div><svg width="22" height="22" aria-hidden="true"><use href="#n-cal"/></svg>Events</div>
+            <div><svg width="22" height="22" aria-hidden="true"><use href="#n-user"/></svg>You</div>
+          </nav>
+        </div>
+      </div>
+
+      <div>
+        <p class="notes-intro">Five sections, top to bottom. Select a note to scroll the phone to it.</p>
+        <ol class="notes">
+          <li><button type="button" class="note" data-target="s-hero">
+            <span class="n">01</span>
+            <span>
+              <h3>Your game</h3>
+              <p>The top of home changes with your state. Between matches it is your player card: win rate in large Space Mono, your record, the last five results, and a join-with-code bar with six slots for the code. During a match it becomes a scoreboard with one Resume button. On a new account it explains a first match in three steps. Host stays where it already is, the lifted pink button in the nav.</p>
+              <span class="rep"><b>Replaces</b> the Start a match card, the Your record section, and the in-progress rows inside Recent matches.</span>
+            </span>
+          </button></li>
+          <li><button type="button" class="note" data-target="s-live">
+            <span class="n">02</span>
+            <span>
+              <h3>Live now, as a ticker</h3>
+              <p>Each live match becomes a compact chip, about 70px tall, that leads with the players and the score. The edge keeps the Live screen's code: orange for tournament matches, pink for quick ones. "All" opens the full live list.</p>
+              <span class="rep"><b>Replaces</b> the current 260px live cards.</span>
+            </span>
+          </button></li>
+          <li><button type="button" class="note" data-target="s-events">
+            <span class="n">03</span>
+            <span>
+              <h3>Tournaments as posters</h3>
+              <p>The banner art leads, cut with the same hazard rule the Events list uses. A three-cell data strip gives players, teams and the days left to enter, which is the number that gets someone to sign up. Open tournaments come first, soonest deadline first, then live ones.</p>
+              <span class="rep"><b>Replaces</b> the small tiles added in the last change. Still above your results.</span>
+            </span>
+          </button></li>
+          <li><button type="button" class="note" data-target="s-results">
+            <span class="n">04</span>
+            <span>
+              <h3>Your results, as a ledger</h3>
+              <p>One panel, one row per match. A solid W or L square, the match name, the context, and the scores in a mono column. Four rows fit where two cards did, and "All 31 matches" opens your full match history.</p>
+              <span class="rep"><b>Replaces</b> the Recent matches card list.</span>
+            </span>
+          </button></li>
+          <li><button type="button" class="note" data-target="s-ladder">
+            <span class="n">05</span>
+            <span>
+              <h3>Top players</h3>
+              <p>Same content and sport switch as today, set in the results ledger so the bottom of home reads as one table family. Your row is pink, the colour the design system keeps for "you" in any list.</p>
+              <span class="rep"><b>Restyles</b> the existing board. No change to its data.</span>
+            </span>
+          </button></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="cmp-h">
+    <h2 class="sec-h" id="cmp-h">Before and after</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th scope="col">Section</th><th scope="col">Today</th><th scope="col">Proposed</th></tr></thead>
+        <tbody>
+          <tr><td>Top of screen</td><td>Start a match card with Host and Join</td><td>Your game: player card, live scoreboard, or first-match guide</td></tr>
+          <tr><td>Your record</td><td>Its own section, third on the page</td><td>Folded into the player card</td></tr>
+          <tr><td>Live now</td><td>Tall 260px cards</td><td>Ticker chips, about 70px tall</td></tr>
+          <tr><td>Tournaments</td><td>Small tiles, newest start date first</td><td>Posters with players, teams and days left to enter</td></tr>
+          <tr><td>Recent matches</td><td>One card per match, in-progress mixed in</td><td>Results ledger, 4 rows plus All; in-progress moves to the top</td></tr>
+          <tr><td>Top players</td><td>Its own card style</td><td>Same ledger style as results</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="build-h">
+    <div class="two">
+      <div style="display:grid; gap:18px; align-content:start;">
+        <h2 class="sec-h" id="build-h">What building it takes</h2>
+        <ul class="build">
+          <li><b>Your game hero</b><span>One new component with three states, fed by data home already loads: your career profile and your quick matches. <code>HomeHero.tsx</code></span></li>
+          <li><b>Live ticker chip</b><span>A compact chip for home only. The full Live screen keeps its current rows.</span></li>
+          <li><b>Tournament poster</b><span>Grows the existing tile, adds the data strip and a deadline countdown from <code>registrationDeadline</code>.</span></li>
+          <li><b>Results and top players ledger</b><span>Restyles the existing rows into one panel. "All" goes to the existing <code>/matches/[playerId]</code> screen.</span></li>
+          <li><b>Server</b><span>Nothing planned. I'll confirm the quick-match list and the tournament list already return game scores and the deadline before building those two pieces.</span></li>
+        </ul>
+      </div>
+      <div style="display:grid; gap:18px; align-content:start;">
+        <h2 class="sec-h">Decide before I build</h2>
+        <ol class="decide">
+          <li><span><b>A date line on the player card?</b><span>You removed the header. The card carries a small "Your game · Fri 09 Oct" line. Keep it or drop it?</span></span></li>
+          <li><span><b>Host only in the nav?</b><span>Between matches, home offers Join only. Hosting is the pink nav button. New accounts still get both.</span></span></li>
+          <li><span><b>Top players on home?</b><span>It is the least personal section. It could stay, or move to Explore to keep home shorter.</span></span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span class="over">Proposal only · nothing in the app has changed yet</span>
+    <span class="over">Sample data: Rohan Sunwar's account</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var caps = {
+    between: 'Most visits. Your player card leads, with the join code built in.',
+    live: 'You are in a match. The scoreboard takes the top until it ends.',
+    first: 'A new account with nothing played. The top explains how a first match works.'
+  };
+  var buttons = document.querySelectorAll('.states button');
+  var heroes = document.querySelectorAll('[data-hero]');
+  var results = document.getElementById('s-results');
+  var cap = document.getElementById('state-cap');
+  var scr = document.getElementById('scr');
+
+  function setState(state) {
+    buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.state === state)); });
+    heroes.forEach(function (h) { h.hidden = h.dataset.hero !== state; });
+    results.hidden = state === 'first';
+    cap.textContent = caps[state];
+    scr.scrollTop = 0;
+  }
+  buttons.forEach(function (b) { b.addEventListener('click', function () { setState(b.dataset.state); }); });
+
+  document.querySelectorAll('.note').forEach(function (n) {
+    n.addEventListener('click', function () {
+      var target = document.getElementById(n.dataset.target);
+      if (!target) return;
+      if (target.hidden) setState('between');
+      document.querySelectorAll('.note').forEach(function (m) { m.removeAttribute('aria-current'); });
+      n.setAttribute('aria-current', 'true');
+      scr.scrollTop = Math.max(0, target.offsetTop - 50);
+      target.classList.remove('flash');
+      void target.offsetWidth;
+      target.classList.add('flash');
+      if (window.matchMedia('(max-width: 900px)').matches) {
+        scr.closest('.phone').scrollIntoView({ block: 'center', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      }
+    });
+  });
+})();
+</script>

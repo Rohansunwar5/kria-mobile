@@ -14,6 +14,10 @@ import { Icon, type IconName } from '@/components/icons';
 export function Ghost({ text, size, color, style }: { text: string; size: number; color?: string; style?: ViewStyle }) {
   return (
     <Text
+      // Decoration, never content: a screen reader must not read the ghost
+      // beside the real text it echoes. iOS reads one prop, Android the other.
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
       // The ghost device from DESIGN.md §3 — oversized Anton at 4.5% opacity,
       // absolutely positioned and bleeding off the frame edge on purpose. The
       // tight leading is how it sits where it sits, and iOS trimming the line

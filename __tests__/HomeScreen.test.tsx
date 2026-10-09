@@ -55,6 +55,13 @@ describe('Home', () => {
     expect(queryByText('Kria')).toBeNull();
   });
 
+  // The server leaves knockout matches to their knockout unless asked; home's
+  // top card needs the live ones, or a knockout's scorer is two screens away.
+  it('asks for your live knockout matches along with your quick matches', async () => {
+    await renderHome();
+    expect(listMyQuickMatches).toHaveBeenCalledWith({ liveKnockout: true });
+  });
+
   it('peeks at live matches and links through to the full live list', async () => {
     (fetchLiveFeed as jest.Mock).mockResolvedValue({
       total: 1,
@@ -87,13 +94,17 @@ describe('Home', () => {
   });
 
   it('previews the newest organiser tournaments and links through to Events', async () => {
+    // 5.5 days out, so the poster counts down whole days, rounded down.
+    const registrationDeadline = new Date(Date.now() + 5.5 * 24 * 3_600_000).toISOString();
     (latestTournaments as jest.Mock).mockResolvedValueOnce([
-      { _id: 't1', name: 'JBN Badminton Tournament', sport: 'badminton', status: 'registration_open', startDate: '2026-09-22T00:00:00.000Z', venue: { city: 'Bangalore' } },
+      { _id: 't1', name: 'JBN Badminton Tournament', sport: 'badminton', status: 'registration_open', startDate: '2026-09-22T00:00:00.000Z', registrationDeadline, venue: { city: 'Bangalore' } },
     ]);
     const { getByText, getByLabelText } = await renderHome();
 
     expect(getByText('Tournaments')).toBeTruthy();
     expect(getByText('JBN Badminton Tournament')).toBeTruthy();
+    expect(getByText('Entries close')).toBeTruthy();
+    expect(getByText('5 days')).toBeTruthy();
     fireEvent.press(getByLabelText('View all tournaments'));
     expect(mockNavigate).toHaveBeenCalledWith('/(tabs)/events');
   });

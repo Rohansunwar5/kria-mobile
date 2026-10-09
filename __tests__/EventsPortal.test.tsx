@@ -67,19 +67,21 @@ describe('EventsPortal', () => {
     // legitimately matches twice and proves nothing about rows. Climb from
     // each row's title up to the nearest ancestor that also contains its
     // badge: that ancestor is the row's own Pressable, never the header,
-    // since the header text is never an ancestor of a row's title.
+    // since the header text is never an ancestor of a row's title. The badge is
+    // ghost type, hidden from screen readers, so it is looked up with hidden
+    // elements included.
     const rowFor = (title: RegExp, badge: string) => {
       let node = getByText(title);
       for (;;) {
-        if (within(node).queryByText(badge)) return node;
+        if (within(node).queryByText(badge, { includeHiddenElements: true })) return node;
         const parent = node.parent;
         if (!parent) return node;
         node = parent;
       }
     };
 
-    expect(within(rowFor(/monsoon open/i, '01')).getByText('01')).toBeTruthy();
-    expect(within(rowFor(/harbour slam/i, '02')).getByText('02')).toBeTruthy();
+    expect(within(rowFor(/monsoon open/i, '01')).getByText('01', { includeHiddenElements: true })).toBeTruthy();
+    expect(within(rowFor(/harbour slam/i, '02')).getByText('02', { includeHiddenElements: true })).toBeTruthy();
   });
 
   it('opens the tournament a list row was tapped on, not the featured one', () => {

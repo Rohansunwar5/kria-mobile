@@ -24,7 +24,7 @@ export default function Home() {
     // Side by side, each failing on its own: a failed list leaves the last good
     // one in place and never takes the others down with it.
     const [mine, knockoutsNow, latest] = await Promise.all([
-      listMyQuickMatches().catch(() => null),
+      listMyQuickMatches({ liveKnockout: true }).catch(() => null),
       listMyQuickKnockouts().catch(() => []),
       latestTournaments().catch(() => null),
     ]);
@@ -39,7 +39,9 @@ export default function Home() {
     <Screen>
       <PlayPortal
         profile={career.profile}
+        playerName={[user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'Player'}
         liveFeed={liveFeed.items}
+        liveTotal={liveFeed.total}
         tournaments={tournaments}
         recent={career.recent}
         matches={matches}

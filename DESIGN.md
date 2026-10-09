@@ -170,7 +170,7 @@ low-opacity image or nothing. Ghost type has no `-webkit-text-stroke` equivalent
 
 ### The nav set is the second language, and the boundary is fixed
 
-The five bottom-nav glyphs — `home`, `search`, `plus`, `live`, `user` — are drawn to **1.8 stroke
+The five bottom-nav glyphs — `home`, `search`, `plus`, `calendar`, `user` — are drawn to **1.8 stroke
 with round caps and round joins**, the opposite of the rule above. At 22px in a floating bar the
 industrial set read spiky rather than precise; the nav is chrome you see on every screen, and it
 should recede.

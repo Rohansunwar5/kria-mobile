@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import { PlayPortal } from '../src/components/home/PlayPortal';
 import type { CareerProfile, RecentMatch } from '../src/api/career';
 import type { QuickKnockout } from '../src/api/quickKnockout';
@@ -31,6 +31,8 @@ const profile: CareerProfile = {
   achievements: [],
 };
 
+const cricket = { sport: 'cricket', played: 13, decided: 13, won: 7, lost: 6, tied: 0, noResult: 0, winRate: 7 / 13 };
+
 const recent: RecentMatch[] = [
   {
     _id: 'r1',
@@ -58,6 +60,17 @@ const quickMatch = (over: Partial<QuickMatch> = {}): QuickMatch => ({
   ...over,
 });
 
+// Side names distinct from the `recent` fixture's "Rohan v Dev", so a match at
+// the top can never be confused with a result below.
+const falconsVTitans = (over: Partial<QuickMatch> = {}) =>
+  quickMatch({
+    sides: [
+      { sideId: 's1', name: 'Falcons', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
+      { sideId: 's2', name: 'Titans', slots: [{ slotId: 'b', playerId: 'p2', displayName: 'Dev' }] },
+    ],
+    ...over,
+  });
+
 const knockout = (over: Partial<QuickKnockout> = {}): QuickKnockout => ({
   _id: 'k1', hostId: 'p1', name: 'Sunday Smash', sport: 'badminton', format: 'singles', status: 'live',
   matchConfig: { bestOf: 1, pointsToWin: 21 }, players: [], pairs: [], entrants: [], fixtures: [], roundNames: [], awards: [],
@@ -66,6 +79,7 @@ const knockout = (over: Partial<QuickKnockout> = {}): QuickKnockout => ({
 });
 
 const props = (over = {}) => ({
+  playerName: 'Rohan',
   profile,
   recent,
   matches: [] as QuickMatch[],
@@ -82,153 +96,209 @@ describe('PlayPortal', () => {
     mockUseTopPlayers.mockReturnValue({ players: [rankedPlayer], loading: false, error: false, reload: jest.fn() });
   });
 
-  // Task 3: the Top players board renders below recent matches, reading the
-  // viewer's identity from the same `playerId` prop the live rows already use.
-  it('renders the top players board below recent matches, with the viewer marked', () => {
+  it('renders the top players board, with the viewer marked', () => {
     const { getByText } = render(<PlayPortal {...props({ playerId: 'p1' })} />);
     expect(getByText('Top players')).toBeTruthy();
     expect(getByText(/rohan sunwar/i)).toBeTruthy();
     expect(getByText('You')).toBeTruthy();
   });
 
-  it('always offers Host and Join', () => {
-    const { getByLabelText } = render(<PlayPortal {...props()} />);
+  describe('player card', () => {
+    // Host is the nav's lifted button; between matches the card does not repeat it.
+    it('leads with your win rate, record and the join, but not Host', () => {
+      const { getByText, getByLabelText, queryByLabelText } = render(<PlayPortal {...props()} />);
+      expect(getByText('Rohan')).toBeTruthy();
+      expect(getByText('68%')).toBeTruthy();
+      expect(getByText('21–10')).toBeTruthy();
+      expect(getByLabelText('Join with a code')).toBeTruthy();
+      expect(queryByLabelText('Host a match')).toBeNull();
+    });
+
+    it('switches between your sports', () => {
+      const { getByText, getByLabelText } = render(
+        <PlayPortal {...props({ profile: { ...profile, sports: [...profile.sports, cricket] } })} />,
+      );
+      expect(getByText('68%')).toBeTruthy();
+      fireEvent.press(getByLabelText(/^Cricket, 54% win rate/));
+      expect(getByText('54%')).toBeTruthy();
+    });
+
+    it('opens on your best sport when the server names one', () => {
+      const { getByText } = render(
+        <PlayPortal {...props({ profile: { ...profile, sports: [...profile.sports, cricket], bestSport: cricket } })} />,
+      );
+      expect(getByText('54%')).toBeTruthy();
+    });
+
+    // `played` counts a no-result and `decided` does not, so it is named
+    // beside won–lost rather than leaving the figures to disagree.
+    it('names a no-result beside won–lost', () => {
+      const nr = { ...profile.sports[0], played: 32, noResult: 1 };
+      const { getByText } = render(<PlayPortal {...props({ profile: { ...profile, sports: [nr] } })} />);
+      expect(getByText('Won–lost · 1 NR')).toBeTruthy();
+    });
+
+    // DESIGN.md §5: keep the chrome while loading, never blank it.
+    it('keeps your name and the join while the record loads', () => {
+      const { getByText, getByLabelText, queryByText } = render(
+        <PlayPortal {...props({ profile: null, recent: null, loading: true })} />,
+      );
+      expect(getByText('Rohan')).toBeTruthy();
+      expect(getByLabelText('Join with a code')).toBeTruthy();
+      expect(queryByText(/your first match/i)).toBeNull();
+    });
+
+    it('scopes a failed record to the card and keeps the join', () => {
+      const { getByText, getByLabelText } = render(<PlayPortal {...props({ profile: null, error: true })} />);
+      expect(getByText('Couldn’t load your record')).toBeTruthy();
+      expect(getByLabelText('Join with a code')).toBeTruthy();
+    });
+  });
+
+  // A new account: the guide already says nothing has been played, so there is
+  // no results section repeating it, and this is the one state that offers Host.
+  it('shows the first-match guide, with Host and Join, when nothing has been played', () => {
+    const { getByText, getByLabelText, queryByText } = render(
+      <PlayPortal {...props({ profile: { sports: [], bestSport: null, achievements: [] }, recent: [] })} />,
+    );
+    expect(getByText(/your first match starts here/i)).toBeTruthy();
     expect(getByLabelText('Host a match')).toBeTruthy();
     expect(getByLabelText('Join with a code')).toBeTruthy();
+    expect(queryByText('Your results')).toBeNull();
   });
 
-  it('renders the win rate as a percentage, not the 0-1 fraction', () => {
-    const { getByText } = render(<PlayPortal {...props()} />);
-    expect(getByText('68%')).toBeTruthy();
-  });
-
-  it('lists a recent match with its scoreline', () => {
-    const { getByText } = render(<PlayPortal {...props()} />);
-    expect(getByText(/rohan v dev/i)).toBeTruthy();
-    expect(getByText(/21-18, 21-16/)).toBeTruthy();
-  });
-
-  // The ledger outlives the matches it describes, so `title` can be absent.
-  it('survives a feed row whose match could not be read', () => {
-    const bare: RecentMatch[] = [
-      { _id: 'r2', matchId: 'm2', sport: 'cricket', context: 'tournament', result: 'lost', playedAt: '2026-09-01T00:00:00.000Z' },
-    ];
-    const { getByText } = render(<PlayPortal {...props({ recent: bare })} />);
-    expect(getByText(/match unavailable/i)).toBeTruthy();
-  });
-
-  it('tags a knockout match as knockout rather than quick', () => {
-    const ko: RecentMatch[] = [
-      { _id: 'r3', matchId: 'm3', sport: 'badminton', context: 'quick', result: 'won', playedAt: '2026-09-01T00:00:00.000Z', title: 'A v B', knockout: { name: 'Sunday Cup', round: 'Final' } },
-    ];
-    const { getByText, queryByText } = render(<PlayPortal {...props({ recent: ko })} />);
-    expect(getByText(/^knockout$/i)).toBeTruthy();
-    expect(queryByText(/^quick$/i)).toBeNull();
-  });
-
-  // DESIGN.md §5: an empty state names what would appear and offers the one
-  // action that fills it — which is Host, already at the top. It must not offer
-  // a second competing action.
-  it('names what is missing when nothing has been played', () => {
-    const { getByText, queryByText } = render(
-      <PlayPortal {...props({ profile: { sports: [], bestSport: null }, recent: [] })} />
-    );
-    expect(getByText(/your record/i)).toBeTruthy();
-    expect(getByText(/once you have played/i)).toBeTruthy();
-    expect(queryByText(/^start playing$/i)).toBeNull();
-  });
-
-  it('keeps the chrome while loading rather than blanking', () => {
-    const { getByLabelText } = render(
-      <PlayPortal {...props({ profile: null, recent: null, loading: true })} />
-    );
-    expect(getByLabelText('Host a match')).toBeTruthy();
-  });
-
-  // The flagship cross-portal affordance: a quick match still in progress
-  // surfaces at the top of the recent-matches feed. Side names distinct from
-  // the `recent` fixture's "Rohan v Dev" so the two rows can't be confused.
-  it('shows a live quick match as a live row with both sides named and a live tag', () => {
-    const live = quickMatch({
-      sides: [
-        { sideId: 's1', name: 'Falcons', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
-        { sideId: 's2', name: 'Titans', slots: [{ slotId: 'b', playerId: 'p2', displayName: 'Dev' }] },
-      ],
+  describe('results', () => {
+    it('lists a result with its scoreline', () => {
+      const { getByText } = render(<PlayPortal {...props()} />);
+      expect(getByText(/rohan v dev/i)).toBeTruthy();
+      expect(getByText(/21-18, 21-16/)).toBeTruthy();
     });
-    const { getByText } = render(<PlayPortal {...props({ matches: [live] })} />);
-    expect(getByText(/falcons v titans/i)).toBeTruthy();
-    expect(getByText('live')).toBeTruthy();
-  });
 
-  // A player who backs out of the waiting room must still find their way back,
-  // and a finished-match ledger row will not exist for it yet. It is not
-  // "live", though, so it must not be counted as such.
-  it('shows a waiting quick match with the live ones, without counting it as live', () => {
-    const waiting = quickMatch({
-      status: 'waiting',
-      sides: [
-        { sideId: 's1', name: 'Falcons', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
-        { sideId: 's2', name: 'Titans', slots: [{ slotId: 'b', displayName: 'Dev' }] },
-      ],
+    // The ledger outlives the matches it describes, so `title` can be absent.
+    it('survives a feed row whose match could not be read', () => {
+      const bare: RecentMatch[] = [
+        { _id: 'r2', matchId: 'm2', sport: 'cricket', context: 'tournament', result: 'lost', playedAt: '2026-09-01T00:00:00.000Z' },
+      ];
+      const { getByText } = render(<PlayPortal {...props({ recent: bare })} />);
+      expect(getByText(/match unavailable/i)).toBeTruthy();
     });
-    const { getByText, queryByText } = render(<PlayPortal {...props({ matches: [waiting] })} />);
-    expect(getByText(/falcons v titans/i)).toBeTruthy();
-    expect(getByText('waiting')).toBeTruthy();
-    expect(queryByText(/\d+ live/)).toBeNull();
-  });
 
-  // A quick match that has finished is already represented by a ledger row —
-  // it must not also produce a live row, or the same result would appear twice.
-  it('renders no live row for a completed or cancelled quick match, while ledger rows still show', () => {
-    const done = quickMatch({
-      status: 'completed',
-      outcome: 'side1',
-      sides: [
-        { sideId: 's1', name: 'Falcons', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
-        { sideId: 's2', name: 'Titans', slots: [{ slotId: 'b', playerId: 'p2', displayName: 'Dev' }] },
-      ],
+    it('tags a knockout match as knockout rather than quick', () => {
+      const ko: RecentMatch[] = [
+        { _id: 'r3', matchId: 'm3', sport: 'badminton', context: 'quick', result: 'won', playedAt: '2026-09-01T00:00:00.000Z', title: 'A v B', knockout: { name: 'Sunday Cup', round: 'Final' } },
+      ];
+      const { getByText, queryByText } = render(<PlayPortal {...props({ recent: ko })} />);
+      expect(getByText(/^knockout · /i)).toBeTruthy();
+      expect(queryByText(/^quick · /i)).toBeNull();
     });
-    const cancelled = quickMatch({
-      _id: 'q2',
-      status: 'cancelled',
-      sides: [
-        { sideId: 's1', name: 'Eagles', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
-        { sideId: 's2', name: 'Hawks', slots: [{ slotId: 'b', playerId: 'p2', displayName: 'Dev' }] },
-      ],
+
+    it('shows four results and links the rest to your full history', () => {
+      const many: RecentMatch[] = Array.from({ length: 6 }, (_, i) => ({ ...recent[0], _id: `r${i}`, title: `Match ${i}` }));
+      const { getByText, queryByText, getByLabelText } = render(<PlayPortal {...props({ recent: many })} />);
+      expect(getByText('Match 3')).toBeTruthy();
+      expect(queryByText('Match 4')).toBeNull();
+      expect(getByLabelText('All matches')).toBeTruthy();
     });
-    const { queryByText, getByText } = render(<PlayPortal {...props({ matches: [done, cancelled] })} />);
-    expect(queryByText(/falcons v titans/i)).toBeNull();
-    expect(queryByText(/eagles v hawks/i)).toBeNull();
-    expect(getByText(/rohan v dev/i)).toBeTruthy();
   });
 
-  // `isHost` distinguishes the host's own live match from one they are merely
-  // playing in — both read from the same `hostId` the fixture already sets.
-  it('labels a live row Hosting for the host and Playing for a participant who is not', () => {
-    const live = quickMatch();
+  describe('in progress', () => {
+    it('puts a live badminton match at the top as a scoreboard', () => {
+      const live = falconsVTitans({
+        gameScores: [
+          { gameNumber: 1, side1Score: 21, side2Score: 19, winnerSideId: 's1' },
+          { gameNumber: 2, side1Score: 9, side2Score: 7 },
+        ],
+      });
+      const { getByText, getByLabelText, queryByLabelText } = render(<PlayPortal {...props({ matches: [live] })} />);
+      expect(getByText('Live')).toBeTruthy();
+      expect(getByLabelText('Score: Falcons 21, 9. Titans 19, 7.')).toBeTruthy();
+      // The match takes the top; the player card waits until it ends.
+      expect(queryByLabelText('Join with a code')).toBeNull();
+    });
 
-    const asHost = render(<PlayPortal {...props({ matches: [live], playerId: 'p1', recent: [] })} />);
-    expect(asHost.getByText('Hosting')).toBeTruthy();
-    expect(asHost.queryByText('Playing')).toBeNull();
-    asHost.unmount();
+    // `isHost` separates the host's own match from one they are only playing in.
+    it('offers Resume scoring to the host and Open match to a player', () => {
+      const asHost = render(<PlayPortal {...props({ matches: [falconsVTitans()], playerId: 'p1' })} />);
+      expect(asHost.getByText('Resume scoring')).toBeTruthy();
+      expect(asHost.getByText('Hosting')).toBeTruthy();
+      asHost.unmount();
 
-    const asParticipant = render(<PlayPortal {...props({ matches: [live], playerId: 'p2', recent: [] })} />);
-    expect(asParticipant.getByText('Playing')).toBeTruthy();
-    expect(asParticipant.queryByText('Hosting')).toBeNull();
-  });
+      const asPlayer = render(<PlayPortal {...props({ matches: [falconsVTitans()], playerId: 'p2' })} />);
+      expect(asPlayer.getByText('Open match')).toBeTruthy();
+      expect(asPlayer.getByText('Playing')).toBeTruthy();
+    });
 
-  it('lists an unfinished knockout you are in', () => {
-    const { getByText } = render(<PlayPortal {...props({ knockouts: [knockout()] })} />);
-    expect(getByText('Sunday Smash')).toBeTruthy();
-    expect(getByText('Knockout')).toBeTruthy();
-  });
+    it('shows a live cricket match by its score line', () => {
+      const live = falconsVTitans({
+        sport: 'cricket',
+        liveState: { runs: 42, wickets: 3, completedOvers: 6, ballsInCurrentOver: 2, currentInnings: 1 },
+      });
+      const { getByText } = render(<PlayPortal {...props({ matches: [live] })} />);
+      expect(getByText(/falcons v titans/i)).toBeTruthy();
+      expect(getByText('42/3 (6.2)')).toBeTruthy();
+    });
 
-  it('counts a live knockout in "N live" but not a waiting one', () => {
-    const live = render(<PlayPortal {...props({ knockouts: [knockout()] })} />);
-    expect(live.getByText('1 live')).toBeTruthy();
-    live.unmount();
-    const waiting = render(<PlayPortal {...props({ knockouts: [knockout({ status: 'waiting' })] })} />);
-    expect(waiting.getByText('Sunday Smash')).toBeTruthy();
-    expect(waiting.queryByText(/^\d+ live$/)).toBeNull();
+    // A player who backs out of the waiting room must find their way back, and
+    // the host needs the code to share.
+    it('shows a waiting room with its code and how many have joined', () => {
+      const waiting = falconsVTitans({
+        status: 'waiting',
+        sides: [
+          { sideId: 's1', name: 'Falcons', slots: [{ slotId: 'a', playerId: 'p1', displayName: 'Rohan' }] },
+          { sideId: 's2', name: 'Titans', slots: [{ slotId: 'b', displayName: 'Dev' }] },
+        ],
+      });
+      const { getByText } = render(<PlayPortal {...props({ matches: [waiting] })} />);
+      expect(getByText('Waiting')).toBeTruthy();
+      expect(getByText('AB12CD')).toBeTruthy();
+      expect(getByText('1/2 joined')).toBeTruthy();
+      expect(getByText('Open waiting room')).toBeTruthy();
+    });
+
+    // A finished quick match is already a result below; it must not also take
+    // the top, or the same match would appear twice.
+    it('never puts a finished or cancelled quick match at the top', () => {
+      const done = falconsVTitans({ status: 'completed', outcome: 'side1' });
+      const cancelled = falconsVTitans({ _id: 'q2', status: 'cancelled' });
+      const { queryByText, getByText, getByLabelText } = render(<PlayPortal {...props({ matches: [done, cancelled] })} />);
+      expect(queryByText('Falcons')).toBeNull();
+      expect(getByLabelText('Join with a code')).toBeTruthy();
+      expect(getByText(/rohan v dev/i)).toBeTruthy();
+    });
+
+    // What the host and players of a knockout see once its match is underway:
+    // the score and Resume, not the knockout card.
+    it('puts a begun knockout match at the top, named by its knockout and round', () => {
+      const ko = knockout({ name: 'Re testing', roundNames: ['Final'], fixtures: [{ fixtureId: 'f1', round: 1, position: 0, bye: false }] });
+      const match = falconsVTitans({
+        sport: 'cricket',
+        knockoutId: 'k1',
+        fixtureId: 'f1',
+        matchConfig: { maxOvers: 5 },
+        cricketSetup: { toss: { recorded: true, winnerTeamId: 's2', decision: 'bat' }, lineupsSet: true, side1Lineup: [], side2Lineup: [] },
+        liveState: { runs: 20, wickets: 0, completedOvers: 1, ballsInCurrentOver: 0, currentInnings: 1 },
+      });
+      const { getByText, queryByText } = render(<PlayPortal {...props({ matches: [match], knockouts: [ko] })} />);
+      expect(getByText('Knockout')).toBeTruthy();
+      expect(getByText('Re testing · Final · Cricket · 5 overs')).toBeTruthy();
+      expect(getByText('20/0 (1.0)')).toBeTruthy();
+      expect(getByText('Resume scoring')).toBeTruthy();
+      expect(queryByText('Open knockout')).toBeNull();
+    });
+
+    it('puts an unfinished knockout at the top when no match is running', () => {
+      const { getByText } = render(<PlayPortal {...props({ knockouts: [knockout()] })} />);
+      expect(getByText('Sunday Smash')).toBeTruthy();
+      expect(getByText('Knockout')).toBeTruthy();
+      expect(getByText('Open knockout')).toBeTruthy();
+    });
+
+    it('lists anything else in progress under the top card', () => {
+      const { getByText, getByLabelText } = render(
+        <PlayPortal {...props({ matches: [falconsVTitans()], knockouts: [knockout({ status: 'waiting' })] })} />,
+      );
+      expect(getByLabelText(/^Score: Falcons/)).toBeTruthy();
+      expect(getByText('Sunday Smash')).toBeTruthy();
+    });
   });
 });

@@ -133,8 +133,15 @@ export async function createQuickMatch(input: CreateQuickMatchBody): Promise<Qui
   return asMatch(await API.post('/quick-match', input));
 }
 
-export async function listMyQuickMatches(): Promise<QuickMatch[]> {
-  const payload = unwrap(await API.get('/quick-match/mine')) as QuickMatch[] | null;
+/**
+ * `liveKnockout` adds your live knockout matches, which the server otherwise
+ * leaves to their knockout. Home asks for them so its top card can put the
+ * match being scored one tap away; the quick-matches list does not.
+ */
+export async function listMyQuickMatches(opts?: { liveKnockout?: boolean }): Promise<QuickMatch[]> {
+  const payload = unwrap(
+    await API.get('/quick-match/mine', opts?.liveKnockout ? { params: { knockout: 'live' } } : undefined),
+  ) as QuickMatch[] | null;
   // A player with no matches is a success with nothing in it, not an error —
   // callers render an empty state, they do not branch on null.
   //

@@ -26,7 +26,7 @@ const MONO = (theme: Palette) => ({
   color: theme.textFaint,
 });
 
-const FORM_TOKEN = (theme: Palette): Record<RecentMatch['result'], { token: string; bg: string; fg: string }> => ({
+export const FORM_TOKEN = (theme: Palette): Record<RecentMatch['result'], { token: string; bg: string; fg: string }> => ({
   won: { token: 'W', bg: colors.open, fg: theme.onOpen },
   lost: { token: 'L', bg: colors.fail, fg: theme.onFail },
   tied: { token: 'T', bg: theme.lineFaint, fg: theme.textBody },
