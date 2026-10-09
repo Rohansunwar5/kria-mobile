@@ -1,14 +1,11 @@
 import { useState, type ReactNode } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { Icon } from '@/components/icons';
 import { StatusPill, Tag } from '@/components/StatusPill';
 import { TournamentArt } from '@/components/TournamentArt';
 import type { Tournament } from '@/store/slices/tournamentSlice';
-import { Skeleton, ErrorBlock } from '@/components/states';
 import { colors, useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
-import { SPORT_LABELS } from '@/lib/sports';
 import { formatShortDate } from '@/lib/format';
 import { inProgress, openForEntryCount, posterCell, posterOrder } from '@/lib/homePortal';
 import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMatchView';
@@ -17,7 +14,7 @@ import type { CareerProfile, RecentMatch } from '@/api/career';
 import type { QuickMatch } from '@/api/quickMatch';
 import type { QuickKnockout } from '@/api/quickKnockout';
 import { formatLabel as knockoutFormatLabel } from '@/lib/quickKnockoutView';
-import { FORM_TOKEN } from '@/components/profile/FormStrip';
+import { RecentMatches } from '@/components/profile/RecentMatches';
 import { LiveChip } from '@/components/live/LiveRow';
 import type { LiveItem } from '@/api/live';
 import { HomeHero } from './HomeHero';
@@ -56,17 +53,6 @@ const CARD = {
   borderRadius: 6,
   backgroundColor: colors.panel,
 };
-
-const RESULT_WORD: Record<RecentMatch['result'], string> = {
-  won: 'Won',
-  lost: 'Lost',
-  tied: 'Tied',
-  no_result: 'No result',
-};
-
-function sportLabel(sport: string): string {
-  return SPORT_LABELS[sport] ?? sport;
-}
 
 /** A quick match still in progress that did not make the hero, rendered through
  *  the same helpers the quick-match list uses, so the two cannot disagree. */
@@ -128,54 +114,6 @@ function KnockoutRow({ knockout }: { knockout: QuickKnockout }) {
       <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: colors.white, marginTop: 8 }}>{knockout.name}</Text>
       <Text style={MONO(theme)}>{`${knockoutFormatLabel(knockout)} · ${knockout.players.length} players`}</Text>
     </Pressable>
-  );
-}
-
-/**
- * One result in the ledger. `title` and `scoreline` are both optional — the
- * participation ledger outlives the matches it describes — so a missing title
- * is NAMED rather than left blank, and a missing scoreline renders nothing.
- * The score column is capped so a long cricket line wraps onto a second line
- * instead of squeezing the match name out.
- */
-function ResultRow({ match, first }: { match: RecentMatch; first: boolean }) {
-  const theme = useTheme();
-  const token = FORM_TOKEN(theme)[match.result];
-  const title = match.title ?? 'Match unavailable';
-  const date = formatShortDate(match.playedAt);
-  return (
-    <View
-      accessible
-      accessibilityLabel={[RESULT_WORD[match.result], title, match.scoreline, date].filter(Boolean).join('. ')}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        paddingHorizontal: 13,
-        paddingVertical: 11,
-        ...(first ? null : { borderTopWidth: 1.5, borderTopColor: theme.lineFaint }),
-      }}
-    >
-      <View style={{ width: 30, height: 30, borderRadius: 4, backgroundColor: token.bg, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: token.token.length > 1 ? 10 : 13, color: token.fg }}>{token.token}</Text>
-      </View>
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: theme.text }}>
-          {title}
-        </Text>
-        <Text numberOfLines={1} style={{ ...LBL(theme), letterSpacing: 0.12 * 9, marginTop: 4 }}>
-          {`${match.knockout ? 'Knockout' : match.context} · ${sportLabel(match.sport)}`}
-        </Text>
-      </View>
-      <View style={{ alignItems: 'flex-end', maxWidth: 150 }}>
-        {match.scoreline ? (
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: theme.text, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
-            {match.scoreline}
-          </Text>
-        ) : null}
-        <Text style={{ ...LBL(theme), letterSpacing: 0.12 * 9, marginTop: 3 }}>{date}</Text>
-      </View>
-    </View>
   );
 }
 
@@ -382,65 +320,9 @@ export function PlayPortal({
   recentError,
   onRetry,
 }: PlayPortalProps) {
-  const theme = useTheme();
   const [topPlayersSport, setTopPlayersSport] = useState(RANKED_SPORTS[0]);
   const [current, ...alsoInProgress] = inProgress(matches, knockouts);
   const ledger = recent ?? [];
-
-  const resultsBody = () => {
-    // Nothing cached yet: keep the section and show the row geometry. Never an
-    // ActivityIndicator that blanks it (DESIGN.md §5).
-    if (loading && !recent) {
-      return (
-        <View style={{ paddingHorizontal: 16 }}>
-          <Skeleton h={58} />
-          <Skeleton h={58} style={{ marginTop: 9 }} />
-        </View>
-      );
-    }
-
-    if (recentError) {
-      return (
-        <View style={{ paddingHorizontal: 16 }}>
-          <ErrorBlock
-            label="Your results"
-            title="Couldn’t load your results"
-            message="Pull to refresh, or try again in a moment."
-            onRetry={onRetry}
-          />
-        </View>
-      );
-    }
-
-    return (
-      <View style={{ paddingHorizontal: 16 }}>
-        <View style={{ borderWidth: 1.5, borderColor: theme.line, borderRadius: 6, backgroundColor: theme.surface, overflow: 'hidden' }}>
-          {ledger.slice(0, 4).map((m, i) => (
-            <ResultRow key={m._id} match={m} first={i === 0} />
-          ))}
-          {ledger.length > 4 && playerId ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="All matches"
-              onPress={() => router.push({ pathname: '/matches/[playerId]', params: { playerId } })}
-              style={{
-                minHeight: 44,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingHorizontal: 13,
-                borderTopWidth: 1.5,
-                borderTopColor: theme.lineFaint,
-              }}
-            >
-              <Text style={{ ...MONO(theme), color: theme.brandInk }}>All matches</Text>
-              <Icon name="arrow-right" size={12} color={theme.brandInk} strokeWidth={2.4} />
-            </Pressable>
-          ) : null}
-        </View>
-      </View>
-    );
-  };
 
   // A player with no history has no results; the first-match guide at the top
   // already says so, so the section is left out rather than given a second
@@ -483,7 +365,18 @@ export function PlayPortal({
       {showResults ? (
         <View>
           <SectionHeading title="Your results" />
-          {resultsBody()}
+          {/* The same results list as both profiles and All matches. */}
+          <View style={{ paddingHorizontal: 16 }}>
+            <RecentMatches
+              matches={recent}
+              loading={loading}
+              error={recentError}
+              onRetry={onRetry}
+              limit={4}
+              heading={null}
+              onSeeAll={playerId ? () => router.push({ pathname: '/matches/[playerId]', params: { playerId } }) : undefined}
+            />
+          </View>
         </View>
       ) : null}
 

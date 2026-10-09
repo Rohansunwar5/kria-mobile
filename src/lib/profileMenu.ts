@@ -24,6 +24,7 @@ export function groupMenu(): MenuGroup[] {
       title: 'Playing',
       items: [
         { label: 'My entries', icon: 'document', href: '/profile/registrations' },
+        { label: 'Quick matches', icon: 'live', href: '/quick' },
         { label: 'Tournament history', icon: 'clock', href: '/profile/history' },
         { label: 'Payments', icon: 'receipt', href: '/profile/invoices' },
       ],

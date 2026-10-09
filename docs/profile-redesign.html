@@ -1,0 +1,657 @@
+<title>Kria Profile Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+/* Layout: the same proposal sheet as the home redesign, in the app's dark broadcast language. Phone pinned
+   left, reasoning down the right; stacked below 900px. Single dark theme on purpose: the app ships dark. */
+:root {
+  --ink: #0B0B0B;
+  --panel: #151515;
+  --panel2: #1E1E1E;
+  --bezel: #202020;
+  --line: rgba(255,255,255,0.14);
+  --line-soft: rgba(255,255,255,0.10);
+  --keyline: rgba(255,255,255,0.22);
+  --hair: rgba(255,255,255,0.05);
+  --ghost: rgba(255,255,255,0.045);
+  --fill-soft: rgba(255,255,255,0.06);
+  --text: #FFFFFF;
+  --body: #d4d4d4;
+  --meta: #a3a3a3;
+  --faint: #7d7d7d;
+  --brand: #F97316;
+  --auction: #FA4C93;
+  --open: #16C46A;
+  --fail: #FF4438;
+  --on-brand: #0B0B0B;
+  --on-auction: #240614;
+  --on-open: #06240F;
+  --on-fail: #2A0703;
+  --up: rgba(255,255,255,0.10);
+  --fail-line: rgba(255,68,56,0.4);
+  --display: 'Anton', 'Arial Narrow', Haettenschweiler, Impact, sans-serif;
+  --ui: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --data: 'Space Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--ink); }
+body { color: var(--body); font-family: var(--ui); font-size: 15px; line-height: 1.55; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+
+.wrap { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 96px; }
+.over { font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); }
+.hazard { height: 5px; background: repeating-linear-gradient(115deg, var(--brand) 0 6px, transparent 6px 12px); }
+
+/* ---------- sheet head ---------- */
+.sheet-head { display: grid; gap: 16px; padding-bottom: 36px; border-bottom: 1.5px solid var(--line); }
+.sheet-head .hazard { width: 132px; }
+h1 { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: clamp(40px, 7vw, 64px); line-height: 1.19; letter-spacing: 0.01em; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--brand); }
+.lede { margin: 0; max-width: 64ch; font-size: 17px; line-height: 1.6; }
+h2.sec-h { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 30px; line-height: 1.2; }
+.block { padding-top: 44px; display: grid; gap: 20px; }
+
+/* ---------- problems ---------- */
+.problems { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px 28px; }
+.problem { border-top: 1.5px solid var(--line); padding-top: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.problem h3 { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 19px; line-height: 1.25; }
+.problem p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--meta); }
+
+/* ---------- showcase ---------- */
+.show { display: grid; grid-template-columns: 410px minmax(0, 1fr); gap: 52px; align-items: start; }
+.phone-col { position: sticky; top: 20px; display: grid; gap: 14px; justify-items: center; }
+.states { display: flex; width: 100%; max-width: 390px; border: 1.5px solid var(--line); border-radius: 5px; overflow: hidden; background: var(--panel); }
+.states button { flex: 1; min-height: 44px; padding: 6px 8px; font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+.states button + button { border-left: 1.5px solid var(--line-soft); }
+.states button[aria-pressed="true"] { background: var(--brand); color: var(--on-brand); }
+.state-cap { max-width: 390px; text-align: center; font-size: 13px; color: var(--meta); min-height: 40px; margin: 0; }
+
+.phone { width: 390px; max-width: 100%; height: 800px; border: 10px solid var(--bezel); border-radius: 46px; background: var(--ink); position: relative; overflow: hidden; }
+.scr { height: 100%; overflow-y: auto; overflow-x: hidden; padding-top: 50px; padding-bottom: 116px; scrollbar-width: none; scroll-behavior: smooth; }
+.scr::-webkit-scrollbar { display: none; }
+@media (prefers-reduced-motion: reduce) { .scr { scroll-behavior: auto; } }
+
+/* ---------- in-phone primitives ---------- */
+.tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 3px; font-family: var(--data); font-weight: 700; font-size: 9px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap; }
+.tag.end { background: rgba(255,255,255,0.06); color: #8a8a8a; }
+.tag.outline { border: 1.5px solid var(--brand); color: var(--brand); padding: 3px 6px; }
+.tag.example { background: var(--up); color: var(--body); }
+.mono-lbl { font-family: var(--data); font-weight: 700; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
+.sec { padding: 24px 16px 0; }
+.sec.flash { animation: flash 1.4s ease-out; }
+@keyframes flash { 0% { box-shadow: inset 0 0 0 2px var(--brand); } 100% { box-shadow: inset 0 0 0 2px transparent; } }
+@media (prefers-reduced-motion: reduce) { .sec.flash { animation: none; box-shadow: inset 0 0 0 2px var(--brand); } }
+.sec-head { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 10px; }
+.sec-title { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 20px; line-height: 24px; }
+.sec-meta { font-family: var(--data); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); padding-bottom: 3px; }
+.res { width: 22px; height: 22px; border-radius: 3px; display: grid; place-items: center; font-family: var(--data); font-weight: 700; font-size: 11px; line-height: 1; }
+.res.w { background: var(--open); color: var(--on-open); }
+.res.l { background: var(--fail); color: var(--on-fail); }
+.hscroll { display: flex; gap: 10px; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; scrollbar-width: none; }
+.hscroll::-webkit-scrollbar { display: none; }
+.hscroll > * { flex: none; scroll-snap-align: start; }
+
+/* public header (seen by others) */
+.pub-head { display: flex; align-items: center; gap: 12px; padding: 0 16px 12px; margin-bottom: 4px; border-bottom: 1.5px solid var(--line-soft); }
+.back { width: 38px; height: 38px; border-radius: 4px; background: rgba(255,255,255,0.07); border: 1.5px solid var(--line-soft); display: grid; place-items: center; color: var(--text); }
+.pub-title { font-family: var(--display); text-transform: uppercase; font-size: 17px; line-height: 21px; color: var(--text); }
+
+/* 1 · player card */
+.card-sec { padding: 0; }
+.pcard { position: relative; overflow: hidden; padding: 6px 16px 0; background-image: repeating-linear-gradient(115deg, var(--hair) 0 1px, transparent 1px 9px); }
+.pcard .ghost { position: absolute; right: -22px; top: -14px; font-family: var(--display); font-size: 168px; line-height: 0.78; color: var(--ghost); pointer-events: none; user-select: none; }
+.pcard-top { position: relative; display: flex; align-items: flex-end; gap: 14px; }
+.ava { position: relative; flex: none; width: 84px; height: 84px; border-radius: 4px; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; font-family: var(--display); font-size: 32px; line-height: 38px; }
+.ava-edit { position: absolute; right: -6px; bottom: -6px; width: 26px; height: 26px; border-radius: 4px; background: var(--ink); border: 1.5px solid var(--keyline); display: grid; place-items: center; color: var(--text); }
+.who { flex: 1; min-width: 0; padding-bottom: 2px; display: grid; gap: 6px; }
+.pname { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 32px; line-height: 38px; }
+.sports-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-family: var(--data); font-weight: 700; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--meta); }
+.sports-line svg { color: var(--brand); }
+.gear { position: absolute; right: 0; top: 0; width: 38px; height: 38px; border-radius: 4px; background: rgba(255,255,255,0.07); border: 1.5px solid var(--line-soft); display: grid; place-items: center; color: var(--text); }
+.board { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); margin: 16px -16px 0; border-top: 1.5px solid var(--line-soft); border-bottom: 1.5px solid var(--line-soft); background: rgba(11,11,11,0.55); }
+.board > div { padding: 10px 0 11px 14px; display: grid; gap: 3px; min-width: 0; }
+.board > div + div { border-left: 1.5px solid var(--line-soft); }
+.board b { font-family: var(--data); font-weight: 700; font-size: 22px; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; }
+.board b.hot { color: var(--brand); }
+.board .mono-lbl { font-size: 8px; letter-spacing: 0.12em; }
+.formrow { position: relative; display: flex; align-items: center; gap: 5px; padding: 12px 0 14px; }
+.formrow .mono-lbl { margin-right: 6px; }
+.formrow .newest { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; }
+.formrow .none { font-size: 12px; color: var(--meta); }
+
+/* 2 · by sport */
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.scard { background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 8px; min-width: 0; }
+.scard-top { display: flex; align-items: center; gap: 7px; color: var(--brand); }
+.scard-top .mono-lbl { color: var(--body); }
+.spct { font-family: var(--data); font-weight: 700; font-size: 36px; line-height: 1; color: var(--text); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.spct small { font-size: 16px; color: var(--meta); letter-spacing: 0; }
+.bar { height: 5px; border-radius: 3px; background: var(--fill-soft); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--brand); }
+.hint { margin: 9px 0 0; font-size: 12px; color: var(--faint); }
+.empty { border: 1.5px dashed var(--keyline); border-radius: 6px; padding: 15px 14px; display: grid; gap: 10px; }
+.empty p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--meta); }
+.btn-auc { justify-self: start; min-height: 44px; padding: 0 18px; border-radius: 5px; background: var(--auction); color: var(--on-auction); display: inline-flex; align-items: center; gap: 8px; font-family: var(--display); text-transform: uppercase; font-size: 15px; line-height: 19px; }
+
+/* 3 · trophy cabinet */
+.tro { width: 124px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 14px 10px 12px; display: grid; justify-items: center; gap: 5px; text-align: center; }
+.hex { width: 54px; height: 60px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: var(--tier); display: grid; place-items: center; margin-bottom: 4px; }
+.hex-in { width: 47px; height: 53px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: var(--panel2); display: grid; place-items: center; color: var(--tier); }
+.tier-rare { --tier: var(--open); }
+.tier-milestone { --tier: var(--brand); }
+.tier-word { font-family: var(--data); font-weight: 700; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tier); }
+.tro-name { font-family: var(--display); text-transform: uppercase; font-size: 15px; line-height: 18px; color: var(--text); }
+.next { margin-top: 12px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 11px; }
+.nrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; }
+.nrow .label { font-size: 13px; color: var(--body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nrow .count { font-family: var(--data); font-weight: 700; font-size: 11px; color: var(--text); font-variant-numeric: tabular-nums; }
+.nrow .bar { grid-column: 1 / -1; }
+.nrow.lead .label { color: var(--text); font-weight: 700; }
+
+/* 4 · history */
+.seg { display: flex; border: 1.5px solid var(--line); border-radius: 5px; overflow: hidden; background: var(--panel); margin-bottom: 10px; }
+.seg button { flex: 1; min-height: 40px; font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+.seg button + button { border-left: 1.5px solid var(--line-soft); }
+.seg button[aria-pressed="true"] { background: var(--brand); color: var(--on-brand); }
+.ledger { background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; overflow: hidden; }
+.lrow { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 12px; }
+.lrow + .lrow { border-top: 1.5px solid var(--line-soft); }
+.lrow .res { width: 30px; height: 30px; font-size: 13px; border-radius: 4px; }
+.l-name { font-family: var(--display); text-transform: uppercase; font-size: 15px; line-height: 18px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.l-ctx { margin-top: 4px; letter-spacing: 0.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.l-right { text-align: right; display: grid; gap: 3px; max-width: 132px; }
+.l-score { font-family: var(--data); font-weight: 700; font-size: 11px; color: var(--text); font-variant-numeric: tabular-nums; }
+.l-foot { display: flex; align-items: center; justify-content: space-between; padding: 12px; min-height: 44px; border-top: 1.5px solid var(--line-soft); font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); width: 100%; }
+.ko { padding: 12px; display: grid; gap: 7px; }
+.ko-top { display: flex; align-items: center; gap: 7px; }
+.ko-name { font-family: var(--display); text-transform: uppercase; font-size: 17px; line-height: 21px; color: var(--text); }
+.ko-top .ko-name { flex: 1; min-width: 0; }
+.ko-note { padding: 0 12px 12px; font-size: 12px; color: var(--faint); }
+.team { background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 10px; }
+.team-top { display: flex; align-items: center; gap: 11px; }
+.team-badge { flex: none; width: 40px; height: 40px; border-radius: 4px; background: #2F6FED; color: #fff; display: grid; place-items: center; font-family: var(--display); font-size: 15px; line-height: 18px; }
+.team-name { font-family: var(--display); text-transform: uppercase; font-size: 17px; line-height: 21px; color: var(--text); }
+.team-cells { display: grid; grid-template-columns: 1fr 1fr 1.3fr; border-top: 1.5px solid var(--line-soft); margin: 0 -12px -12px; }
+.team-cells > div { padding: 9px 12px 11px; display: grid; gap: 3px; }
+.team-cells > div + div { border-left: 1.5px solid var(--line-soft); }
+.team-cells b { font-family: var(--data); font-weight: 700; font-size: 15px; color: var(--text); }
+.team-cells .sold b { color: var(--open); }
+.panel-empty { padding: 16px 14px; font-size: 13px; color: var(--meta); border: 1.5px dashed var(--keyline); border-radius: 6px; }
+
+/* 5 · account */
+.grp { margin: 0 0 8px; }
+.grp + .menu, .menu + .grp { margin-top: 0; }
+.menu { background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
+.mrow { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 14px; font-size: 14px; color: var(--text); }
+.mrow + .mrow { border-top: 1.5px solid var(--line-soft); }
+.mrow svg:first-child { color: var(--meta); }
+.mrow .chev { margin-left: auto; color: var(--faint); }
+.mrow .new-row { margin-left: 6px; }
+.menu.danger { border-color: var(--fail-line); }
+.menu.danger .mrow, .menu.danger .mrow svg:first-child, .menu.danger .chev { color: var(--fail); }
+
+/* floating nav */
+.nav { position: absolute; left: 14px; right: 14px; bottom: 18px; height: 64px; display: flex; background: var(--panel); border: 1.5px solid var(--line); border-radius: 32px; box-shadow: 0 8px 22px rgba(0,0,0,0.5); }
+.nav > div { flex: 1; display: grid; place-items: center; align-content: center; gap: 3px; font-family: var(--ui); font-weight: 700; font-size: 9px; letter-spacing: 0.03em; color: var(--faint); }
+.nav > div.on { color: var(--brand); }
+.nav .host { align-content: start; color: var(--text); }
+.nav .host span.c { width: 64px; height: 64px; margin-top: -30px; border-radius: 50%; background: var(--auction); border: 5px solid var(--ink); display: grid; place-items: center; }
+
+/* ---------- notes ---------- */
+.notes { list-style: none; margin: 0; padding: 0; display: grid; }
+.note { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; width: 100%; text-align: left; padding: 22px 0; border-top: 1.5px solid var(--line); }
+.notes li:last-child .note { border-bottom: 1.5px solid var(--line); }
+.note .n { width: 36px; height: 36px; border-radius: 4px; border: 1.5px solid var(--brand); color: var(--brand); display: grid; place-items: center; font-family: var(--data); font-weight: 700; font-size: 13px; transition: background-color .15s, color .15s; }
+.note:hover .n, .note[aria-current="true"] .n { background: var(--brand); color: var(--on-brand); }
+.note h3 { margin: 0 0 6px; font-family: var(--display); font-weight: 400; text-transform: uppercase; color: var(--text); font-size: 23px; line-height: 1.22; }
+.note p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--body); max-width: 60ch; }
+.note .rep { display: block; margin-top: 10px; font-family: var(--data); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); line-height: 1.6; }
+.note .rep b { color: var(--meta); font-weight: 700; }
+.notes-intro { margin: 0 0 18px; font-size: 14px; color: var(--meta); }
+
+/* ---------- compare table ---------- */
+.table-scroll { overflow-x: auto; border: 1.5px solid var(--line); border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 14px; }
+th { text-align: left; font-family: var(--data); font-weight: 700; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); padding: 12px 14px; background: var(--panel); border-bottom: 1.5px solid var(--line); }
+td { padding: 13px 14px; vertical-align: top; border-top: 1.5px solid var(--line-soft); line-height: 1.5; }
+tr:first-child td { border-top: 0; }
+td:first-child { font-family: var(--display); text-transform: uppercase; color: var(--text); font-size: 15px; white-space: nowrap; }
+td:nth-child(2) { color: var(--meta); }
+td:nth-child(3) { color: var(--text); }
+
+/* ---------- build + decide ---------- */
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px 44px; }
+.build { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.build li { display: grid; gap: 3px; padding-left: 14px; border-left: 1.5px solid var(--line); }
+.build b { color: var(--text); font-weight: 700; }
+.build code { font-family: var(--data); font-size: 12px; color: var(--meta); }
+.decide { margin: 0; padding: 0; list-style: none; counter-reset: q; display: grid; gap: 16px; }
+.decide li { counter-increment: q; display: grid; grid-template-columns: 32px 1fr; gap: 12px; }
+.decide li::before { content: counter(q); width: 28px; height: 28px; border-radius: 4px; background: var(--brand); color: var(--on-brand); display: grid; place-items: center; font-family: var(--data); font-weight: 700; font-size: 12px; }
+.decide b { display: block; color: var(--text); margin-bottom: 2px; }
+.decide span { color: var(--meta); font-size: 14px; }
+.foot { margin-top: 56px; padding-top: 18px; border-top: 1.5px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+@media (max-width: 900px) {
+  .show { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .phone-col { position: static; }
+}
+@media (max-width: 440px) {
+  .phone { border-width: 6px; border-radius: 30px; height: 720px; }
+  .states button { font-size: 9px; letter-spacing: 0.06em; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12 H19 M13 6 L19 12 L13 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6 L15 12 L9 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6 L9 12 L15 18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="square"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5 V18.5 M5.5 12 H18.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20 V16 L15 5 L19 9 L8 20 Z M13 7 L17 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7 H10 M14 7 H20 M10 5 H14 V9 H10 Z M4 17 H6 M10 17 H20 M6 15 H10 V19 H6 Z M4 12 H15 M19 12 H20 M15 10 H19 V14 H15 Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3 H14 L18 7 V21 H6 Z M14 3 V7 H18 M9 12 H15 M9 16 H15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3 L5 14 H12 L11 21 L19 10 H12 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 4 A8 8 0 1 1 12 20 A8 8 0 1 1 12 4 Z M12 8 V12 L15 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3 H18 V21 L15 19 L12 21 L9 19 L6 21 Z M9 8 H15 M9 12 H15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-person" viewBox="0 0 24 24"><path d="M12 4 A4 4 0 1 1 12 12 A4 4 0 1 1 12 4 Z M5 21 V19 A5 5 0 0 1 10 14 H14 A5 5 0 0 1 19 19 V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M10 4 H4 V20 H10 M15 8 L19 12 L15 16 M19 12 H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20 H20 M6 20 V13 M11 20 V7 M16 20 V10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></symbol>
+    <symbol id="g-shuttle" viewBox="0 0 24 24"><path d="M9 21 H15 L16 17 H8 Z M8 17 L4 4 M16 17 L20 4 M12 17 V3 M10 17 L7.5 4.5 M14 17 L16.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></symbol>
+    <symbol id="g-bat" viewBox="0 0 24 24"><path d="M14 3 L21 10 L11 20 L8 20 L4 16 L4 13 Z M4 20 L2 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></symbol>
+    <symbol id="n-home" viewBox="0 0 24 24"><path d="M3.8 10.4 L12 4.2 L20.2 10.4 V18.5 A1.7 1.7 0 0 1 18.5 20.2 H5.5 A1.7 1.7 0 0 1 3.8 18.5 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="n-search" viewBox="0 0 24 24"><path d="M11 4.7 A6.3 6.3 0 1 1 11 17.3 A6.3 6.3 0 1 1 11 4.7 Z M15.6 15.6 L20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="n-plus" viewBox="0 0 24 24"><path d="M12 5.5 V18.5 M5.5 12 H18.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="n-cal" viewBox="0 0 24 24"><path d="M5.5 6 H18.5 A2 2 0 0 1 20.5 8 V18 A2 2 0 0 1 18.5 20 H5.5 A2 2 0 0 1 3.5 18 V8 A2 2 0 0 1 5.5 6 Z M3.5 10.5 H20.5 M8 3.8 V7.6 M16 3.8 V7.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="n-user" viewBox="0 0 24 24"><path d="M12 4.5 A3.9 3.9 0 1 1 12 12.3 A3.9 3.9 0 1 1 12 4.5 Z M4.8 20 A7.2 7.2 0 0 1 19.2 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<main class="wrap">
+  <header class="sheet-head">
+    <div class="hazard" aria-hidden="true"></div>
+    <p class="over">Kria player app · You tab · Design proposal · 09 Oct 2026</p>
+    <h1>Your profile as a <em>player card</em></h1>
+    <p class="lede">Today's profile is one long column: your email under your name, a lone Events count, a table, then knockouts, an orange quick-matches card, honours and two menus. This version reads like a broadcast player card. Who you are and your numbers come first, then how you play each sport, what you have won, and your history. Account settings go to the bottom. It stays inside the Kria design system, the same one the new home uses.</p>
+  </header>
+
+  <section class="block" aria-labelledby="why-h">
+    <h2 class="sec-h" id="why-h">What isn't working today</h2>
+    <div class="problems">
+      <article class="problem">
+        <span class="over">Header</span>
+        <h3>Your email is the headline</h3>
+        <p>The line under your name is your email address, in capitals. It is private, and it says nothing about you as a player.</p>
+      </article>
+      <article class="problem">
+        <span class="over">Stats</span>
+        <h3>A lone zero</h3>
+        <p>"Events 0" fills a full-width strip of its own and is the largest number on the first screen.</p>
+      </article>
+      <article class="problem">
+        <span class="over">Career</span>
+        <h3>Nothing leads</h3>
+        <p>The best-sport card waits for 10 decided matches. Until then the first thing you read is a table.</p>
+      </article>
+      <article class="problem">
+        <span class="over">Structure</span>
+        <h3>One long stack</h3>
+        <p>Eleven blocks in one column. Cancelled knockouts sit beside finished ones, and the orange Quick matches card is narrower than everything around it.</p>
+      </article>
+      <article class="problem">
+        <span class="over">Consistency</span>
+        <h3>Two styles for one result</h3>
+        <p>Results here use outlined W/L boxes; home uses solid ones. The design system says status is a solid fill.</p>
+      </article>
+      <article class="problem">
+        <span class="over">Achievements</span>
+        <h3>Hidden from you</h3>
+        <p>Other players see your milestone achievements on your public profile. Your own profile never shows them.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="prop-h">
+    <h2 class="sec-h" id="prop-h">The proposal</h2>
+    <div class="show">
+      <div class="phone-col">
+        <div class="states" role="group" aria-label="Preview state">
+          <button type="button" id="st-you" data-state="you" aria-pressed="true">Your profile</button>
+          <button type="button" id="st-new" data-state="new" aria-pressed="false">New player</button>
+          <button type="button" id="st-others" data-state="others" aria-pressed="false">Seen by others</button>
+        </div>
+        <p class="state-cap" id="state-cap" aria-live="polite">Your own profile, with your real numbers from the screenshots.</p>
+
+        <div class="phone" aria-label="Proposed profile screen mock-up">
+          <div class="scr" id="scr">
+
+            <div class="pub-head" data-only="others">
+              <span class="back"><svg width="19" height="19" aria-hidden="true"><use href="#i-back"/></svg></span>
+              <span class="pub-title">Player</span>
+            </div>
+
+            <!-- 1 · player card -->
+            <section class="sec card-sec" id="s-card">
+              <div class="pcard">
+                <span class="ghost" aria-hidden="true">HD</span>
+                <div class="pcard-top">
+                  <div class="ava">HD<span class="ava-edit" data-only="you new" aria-label="Change photo"><svg width="13" height="13" aria-hidden="true"><use href="#i-pencil"/></svg></span></div>
+                  <div class="who">
+                    <h3 class="pname">Helo Delo</h3>
+                    <div class="sports-line" data-only="you others">
+                      <svg width="13" height="13" aria-hidden="true"><use href="#g-shuttle"/></svg>Badminton
+                      <span aria-hidden="true">·</span>
+                      <svg width="13" height="13" aria-hidden="true"><use href="#g-bat"/></svg>Cricket
+                    </div>
+                    <div class="sports-line" data-only="new" hidden>No matches yet</div>
+                  </div>
+                  <button type="button" class="gear" data-only="you new" aria-label="Settings"><svg width="17" height="17" aria-hidden="true"><use href="#i-sliders"/></svg></button>
+                </div>
+                <div class="board" data-only="you others">
+                  <div><span class="mono-lbl">Played</span><b>7</b></div>
+                  <div><span class="mono-lbl">Win rate</span><b class="hot">43%</b></div>
+                  <div><span class="mono-lbl">Honours</span><b>1</b></div>
+                  <div><span class="mono-lbl">Events</span><b>0</b></div>
+                </div>
+                <div class="board" data-only="new" hidden>
+                  <div><span class="mono-lbl">Played</span><b>0</b></div>
+                  <div><span class="mono-lbl">Win rate</span><b>–</b></div>
+                  <div><span class="mono-lbl">Honours</span><b>0</b></div>
+                  <div><span class="mono-lbl">Events</span><b>0</b></div>
+                </div>
+                <div class="formrow" data-only="you others" aria-label="Form, oldest first: won, lost, won, won, lost">
+                  <span class="mono-lbl">Form</span>
+                  <span class="res w">W</span><span class="res l">L</span><span class="res w">W</span><span class="res w">W</span><span class="res l">L</span>
+                  <span class="mono-lbl newest">Newest <svg width="9" height="9" aria-hidden="true"><use href="#i-chev"/></svg></span>
+                </div>
+                <div class="formrow" data-only="new" hidden>
+                  <span class="mono-lbl">Form</span><span class="none">Your last results will line up here.</span>
+                </div>
+              </div>
+              <div class="hazard" aria-hidden="true"></div>
+            </section>
+
+            <!-- 2 · by sport -->
+            <section class="sec" id="s-sports">
+              <div class="sec-head"><h3 class="sec-title">By sport</h3><span class="sec-meta" data-only="you others">2 sports</span></div>
+              <div class="sgrid" data-only="you others">
+                <article class="scard">
+                  <div class="scard-top"><svg width="15" height="15" aria-hidden="true"><use href="#g-shuttle"/></svg><span class="mono-lbl">Badminton</span></div>
+                  <div class="spct">25<small>%</small></div>
+                  <div class="bar" aria-hidden="true"><i style="width:25%"></i></div>
+                  <span class="mono-lbl">1W · 3L · 4 played</span>
+                </article>
+                <article class="scard">
+                  <div class="scard-top"><svg width="15" height="15" aria-hidden="true"><use href="#g-bat"/></svg><span class="mono-lbl">Cricket</span></div>
+                  <div class="spct">67<small>%</small></div>
+                  <div class="bar" aria-hidden="true"><i style="width:67%"></i></div>
+                  <span class="mono-lbl">2W · 1L · 3 played</span>
+                </article>
+              </div>
+              <p class="hint" data-only="you">Your best sport gets a marker once it has 10 decided matches.</p>
+              <div class="empty" data-only="new" hidden>
+                <p>Your record starts with your first match. Win rate, form and a card per sport appear here once you have played.</p>
+                <span class="btn-auc"><svg width="16" height="16" aria-hidden="true"><use href="#i-plus"/></svg>Host a match</span>
+              </div>
+            </section>
+
+            <!-- 3 · trophy cabinet -->
+            <section class="sec" id="s-trophies">
+              <div class="sec-head"><h3 class="sec-title">Trophy cabinet</h3><span class="sec-meta" data-only="you others">1 honour · 1 milestone</span></div>
+              <div class="hscroll" data-only="you others">
+                <article class="tro tier-rare">
+                  <span class="hex"><span class="hex-in"><svg width="24" height="24" aria-hidden="true"><use href="#g-shuttle"/></svg></span></span>
+                  <span class="tier-word">Rare</span>
+                  <span class="tro-name">Ace Serve</span>
+                  <span class="mono-lbl">Test Knockout</span>
+                </article>
+                <article class="tro tier-milestone">
+                  <span class="hex"><span class="hex-in"><svg width="24" height="24" aria-hidden="true"><use href="#i-chart"/></svg></span></span>
+                  <span class="tier-word">Milestone</span>
+                  <span class="tro-name">Two sports</span>
+                  <span class="mono-lbl">Played both</span>
+                </article>
+              </div>
+              <div class="panel-empty" data-only="new" hidden>Honours from organisers, knockout titles and the milestones you earn are kept here.</div>
+              <div class="next">
+                <span class="mono-lbl">Next milestones</span>
+                <div class="nrow lead" data-only="you others"><span class="label">Play 50 matches</span><span class="count">7/50</span><div class="bar"><i style="width:14%"></i></div></div>
+                <div class="nrow" data-only="you others"><span class="label">Win 25 matches</span><span class="count">3/25</span><div class="bar"><i style="width:12%"></i></div></div>
+                <div class="nrow" data-only="you others"><span class="label">Play 100 matches</span><span class="count">7/100</span><div class="bar"><i style="width:7%"></i></div></div>
+                <div class="nrow lead" data-only="new" hidden><span class="label">Play 2 different sports</span><span class="count">0/2</span><div class="bar"><i style="width:0%"></i></div></div>
+                <div class="nrow" data-only="new" hidden><span class="label">Win 25 matches</span><span class="count">0/25</span><div class="bar"><i style="width:0%"></i></div></div>
+                <div class="nrow" data-only="new" hidden><span class="label">Play 50 matches</span><span class="count">0/50</span><div class="bar"><i style="width:0%"></i></div></div>
+              </div>
+            </section>
+
+            <!-- 4 · history -->
+            <section class="sec" id="s-history">
+              <div class="sec-head"><h3 class="sec-title">History</h3></div>
+              <div class="seg" role="group" aria-label="History">
+                <button type="button" id="seg-matches" data-seg="matches" aria-pressed="true">Matches</button>
+                <button type="button" id="seg-knockouts" data-seg="knockouts" aria-pressed="false" data-only="you new">Knockouts</button>
+                <button type="button" id="seg-teams" data-seg="teams" aria-pressed="false">Teams</button>
+              </div>
+
+              <div data-panel="matches">
+                <div class="ledger" data-only="you others">
+                  <div class="lrow"><span class="res l">L</span><div style="min-width:0"><div class="l-name">DMAP vs Arohance</div><div class="mono-lbl l-ctx">Knockout · Re testing · Final</div></div><div class="l-right"><span class="l-score">105/1 (5.0) vs 55/1 (5.0)</span><span class="mono-lbl">9 Oct</span></div></div>
+                  <div class="lrow"><span class="res w">W</span><div style="min-width:0"><div class="l-name">Paryatech vs DMAP</div><div class="mono-lbl l-ctx">Knockout · Re testing · Semi-final</div></div><div class="l-right"><span class="l-score">30/3 (4.1) vs 35/0 (1.5)</span><span class="mono-lbl">8 Oct</span></div></div>
+                  <div class="lrow"><span class="res w">W</span><div style="min-width:0"><div class="l-name">DMAP vs Arohance</div><div class="mono-lbl l-ctx">Knockout · Cricket test · Semi-final</div></div><div class="l-right"><span class="l-score">73/1 (5.0) vs 42/1 (5.0)</span><span class="mono-lbl">8 Oct</span></div></div>
+                  <button type="button" class="l-foot">All matches <svg width="12" height="12" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+                </div>
+                <div class="panel-empty" data-only="new" hidden>Every match you play is listed here, newest first.</div>
+              </div>
+
+              <div data-panel="knockouts" hidden>
+                <div class="ledger" data-only="you">
+                  <div class="ko">
+                    <div class="ko-top"><span class="ko-name">Re testing</span><span class="tag outline">Host</span><span class="tag end">Ended</span></div>
+                    <span class="mono-lbl">Cricket · 5 overs · Champion Arohance</span>
+                  </div>
+                  <p class="ko-note">2 cancelled knockouts are left out here. They stay in All knockouts.</p>
+                  <button type="button" class="l-foot">All knockouts <svg width="12" height="12" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+                </div>
+                <div class="panel-empty" data-only="new" hidden>Knockouts you host or play in are listed here.</div>
+              </div>
+
+              <div data-panel="teams" hidden>
+                <article class="team" data-only="you others">
+                  <div class="team-top">
+                    <span class="team-badge" aria-hidden="true">SM</span>
+                    <div style="min-width:0; flex:1"><div class="team-name">Smashers</div><span class="mono-lbl">JBN Badminton · 2026</span></div>
+                    <span class="tag example">Example</span>
+                  </div>
+                  <div class="team-cells">
+                    <div><span class="mono-lbl">Played</span><b>6</b></div>
+                    <div><span class="mono-lbl">Won</span><b>4</b></div>
+                    <div class="sold"><span class="mono-lbl">Sold for</span><b>₹2,400</b></div>
+                  </div>
+                </article>
+                <div class="panel-empty" data-only="new" hidden>Teams you play for in organiser tournaments land here, with what the auction paid for you.</div>
+              </div>
+            </section>
+
+            <!-- 5 · account -->
+            <section class="sec" id="s-account" data-only="you new">
+              <div class="mono-lbl grp">Playing</div>
+              <div class="menu">
+                <div class="mrow"><svg width="18" height="18" aria-hidden="true"><use href="#i-doc"/></svg>My entries<svg class="chev" width="14" height="14" aria-hidden="true"><use href="#i-chev"/></svg></div>
+                <div class="mrow"><svg width="18" height="18" aria-hidden="true"><use href="#i-bolt"/></svg>Quick matches<svg class="chev" width="14" height="14" aria-hidden="true"><use href="#i-chev"/></svg></div>
+                <div class="mrow"><svg width="18" height="18" aria-hidden="true"><use href="#i-clock"/></svg>Tournament history<svg class="chev" width="14" height="14" aria-hidden="true"><use href="#i-chev"/></svg></div>
+                <div class="mrow"><svg width="18" height="18" aria-hidden="true"><use href="#i-receipt"/></svg>Payments<svg class="chev" width="14" height="14" aria-hidden="true"><use href="#i-chev"/></svg></div>
+              </div>
+              <div class="mono-lbl grp">Account</div>
+              <div class="menu">
+                <div class="mrow"><svg width="18" height="18" aria-hidden="true"><use href="#i-person"/></svg>Edit profile<svg class="chev" width="14" height="14" aria-hidden="true"><use href="#i-chev"/></svg></div>
+                <div class="mrow"><svg width="18" height="18" aria-hidden="true"><use href="#i-sliders"/></svg>Settings<svg class="chev" width="14" height="14" aria-hidden="true"><use href="#i-chev"/></svg></div>
+              </div>
+              <div class="menu danger">
+                <div class="mrow"><svg width="18" height="18" aria-hidden="true"><use href="#i-logout"/></svg>Log out<svg class="chev" width="14" height="14" aria-hidden="true"><use href="#i-chev"/></svg></div>
+              </div>
+            </section>
+          </div>
+
+          <nav class="nav" aria-label="Bottom navigation (mock)">
+            <div><svg width="22" height="22" aria-hidden="true"><use href="#n-home"/></svg>Home</div>
+            <div><svg width="22" height="22" aria-hidden="true"><use href="#n-search"/></svg>Explore</div>
+            <div class="host"><span class="c"><svg width="24" height="24" style="color:var(--on-auction)" aria-hidden="true"><use href="#n-plus"/></svg></span>Host</div>
+            <div><svg width="22" height="22" aria-hidden="true"><use href="#n-cal"/></svg>Events</div>
+            <div class="on" id="nav-you"><svg width="22" height="22" aria-hidden="true"><use href="#n-user"/></svg>You</div>
+          </nav>
+        </div>
+      </div>
+
+      <div>
+        <p class="notes-intro">Five bands, top to bottom. Select a note to scroll the phone to it.</p>
+        <ol class="notes">
+          <li><button type="button" class="note" data-target="s-card">
+            <span class="n">01</span>
+            <span>
+              <h3>Player card</h3>
+              <p>Your photo, your name and the sports you play, then a four-number scoreboard: played, win rate, honours and events. Your form sits right under it. The pencil on the photo changes it, and the gear opens Settings. Your email moves to Edit profile, where it belongs.</p>
+              <span class="rep"><b>Replaces</b> the header with your email, the lone Events strip, and the career table's Total row.</span>
+            </span>
+          </button></li>
+          <li><button type="button" class="note" data-target="s-sports">
+            <span class="n">02</span>
+            <span>
+              <h3>By sport</h3>
+              <p>One card per sport, each with a win-rate bar drawn to scale, so 25% and 67% look as different as they are. Your best sport gets a marker when the server names one, which happens at 10 decided matches.</p>
+              <span class="rep"><b>Replaces</b> the career table and the separate best-sport card.</span>
+            </span>
+          </button></li>
+          <li><button type="button" class="note" data-target="s-trophies">
+            <span class="n">03</span>
+            <span>
+              <h3>Trophy cabinet</h3>
+              <p>Organiser honours, knockout titles and earned milestones on one shelf, each in its tier colour. Under it, your next milestones and how far along you are, closest first.</p>
+              <span class="rep"><b>Replaces</b> the Honours list, and adds the milestones your own profile never showed.</span>
+            </span>
+          </button></li>
+          <li><button type="button" class="note" data-target="s-history">
+            <span class="n">04</span>
+            <span>
+              <h3>History behind one switch</h3>
+              <p>Matches, Knockouts and Teams share one place, three rows at most each. Results use the same solid W/L squares as home. Cancelled knockouts stay in All knockouts. Teams shows where you played in organiser tournaments, with what the auction paid for you.</p>
+              <span class="rep"><b>Replaces</b> Recent matches, the Knockouts list and Played for.</span>
+            </span>
+          </button></li>
+          <li><button type="button" class="note" data-target="s-account">
+            <span class="n">05</span>
+            <span>
+              <h3>Account, at the bottom</h3>
+              <p>The Playing and Account rows stay as they are, with Quick matches added to Playing. Log out stays set apart in red.</p>
+              <span class="rep"><b>Replaces</b> the orange "Between tournaments" card.</span>
+            </span>
+          </button></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="cmp-h">
+    <h2 class="sec-h" id="cmp-h">Before and after</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th scope="col">Part</th><th scope="col">Today</th><th scope="col">Proposed</th></tr></thead>
+        <tbody>
+          <tr><td>Header</td><td>Name, email in capitals, an edit button</td><td>Name and your sports; pencil on the photo, gear for Settings</td></tr>
+          <tr><td>Numbers</td><td>Events, on its own</td><td>Played, win rate, honours and events, plus your form</td></tr>
+          <tr><td>Career</td><td>A table with a Total row; best-sport card after 10 decided</td><td>A card per sport with a to-scale bar; best-sport marker</td></tr>
+          <tr><td>Achievements</td><td>Not shown on your own profile</td><td>Trophy cabinet with your next milestones</td></tr>
+          <tr><td>Recent matches</td><td>Five rows, outlined W/L boxes</td><td>History · Matches: three rows, solid squares like home</td></tr>
+          <tr><td>Knockouts</td><td>Up to three rows, cancelled ones included</td><td>History · Knockouts, cancelled ones left to All knockouts</td></tr>
+          <tr><td>Played for</td><td>Full-width cards in their own section</td><td>History · Teams</td></tr>
+          <tr><td>Quick matches</td><td>An orange card mid-page</td><td>A row in Playing</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="build-h">
+    <div class="two">
+      <div style="display:grid; gap:18px; align-content:start;">
+        <h2 class="sec-h" id="build-h">What building it takes</h2>
+        <ul class="build">
+          <li><b>Player card</b><span>A rewrite of the top of <code>profile.tsx</code>. The figures come from data the screen already loads: your career profile, honours and event count.</span></li>
+          <li><b>Sport cards</b><span>A new component in place of the career table on this screen.</span></li>
+          <li><b>Trophy cabinet</b><span>Brings together the honour badges and the milestone data that already exist (<code>HonorsList</code>, <code>Achievements</code>).</span></li>
+          <li><b>History switch</b><span>Matches shares one result row with home, so the two screens can never drift apart. Knockouts reuses <code>KnockoutRow</code>; Teams reuses <code>PlayedForCard</code>.</span></li>
+          <li><b>Menu</b><span>Quick matches added to Playing in <code>profileMenu.ts</code>.</span></li>
+          <li><b>Server</b><span>Nothing. Everything shown is already loaded today.</span></li>
+        </ul>
+      </div>
+      <div style="display:grid; gap:18px; align-content:start;">
+        <h2 class="sec-h">Decide before I build</h2>
+        <ol class="decide">
+          <li><span><b>Other players' profiles too?</b><span>"Seen by others" shows the same layout without your account section. Building both at once keeps them consistent.</span></span></li>
+          <li><span><b>Email off the profile?</b><span>It moves to Edit profile, and nothing else on the page shows it.</span></span></li>
+          <li><span><b>History as one switch?</b><span>A switch keeps the page short. The alternative is three short lists stacked, with everything visible at once.</span></span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span class="over">Proposal only · nothing in the app has changed yet</span>
+    <span class="over">Sample data: Helo Delo's account · the team card is an example</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var caps = {
+    you: 'Your own profile, with your real numbers from the screenshots.',
+    new: 'A new account with nothing played. Every band says what will appear there.',
+    others: 'How another player sees you: the same card and history, no account rows.'
+  };
+  var state = 'you';
+  var scr = document.getElementById('scr');
+  var cap = document.getElementById('state-cap');
+  var stateButtons = document.querySelectorAll('.states button');
+  var segButtons = document.querySelectorAll('.seg button');
+
+  function setSeg(seg) {
+    segButtons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.seg === seg)); });
+    document.querySelectorAll('[data-panel]').forEach(function (p) { p.hidden = p.dataset.panel !== seg; });
+  }
+
+  function setState(next) {
+    state = next;
+    stateButtons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.state === next)); });
+    document.querySelectorAll('[data-only]').forEach(function (el) {
+      el.hidden = el.dataset.only.split(' ').indexOf(next) === -1;
+    });
+    cap.textContent = caps[next];
+    var current = document.querySelector('.seg button[aria-pressed="true"]');
+    if (!current || current.hidden) setSeg('matches');
+    scr.scrollTop = 0;
+  }
+
+  stateButtons.forEach(function (b) { b.addEventListener('click', function () { setState(b.dataset.state); }); });
+  segButtons.forEach(function (b) { b.addEventListener('click', function () { setSeg(b.dataset.seg); }); });
+
+  document.querySelectorAll('.note').forEach(function (n) {
+    n.addEventListener('click', function () {
+      var target = document.getElementById(n.dataset.target);
+      if (!target) return;
+      if (target.hidden) setState('you');
+      document.querySelectorAll('.note').forEach(function (m) { m.removeAttribute('aria-current'); });
+      n.setAttribute('aria-current', 'true');
+      scr.scrollTop = Math.max(0, target.offsetTop - 50);
+      target.classList.remove('flash');
+      void target.offsetWidth;
+      target.classList.add('flash');
+      if (window.matchMedia('(max-width: 900px)').matches) {
+        scr.closest('.phone').scrollIntoView({ block: 'center', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      }
+    });
+  });
+
+  setState('you');
+})();
+</script>

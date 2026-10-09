@@ -37,9 +37,6 @@
 export const MIGRATED: string[] = [
   'src/components/home/EventsPortal.tsx',
   'src/components/icons/nav.tsx',
-  'src/components/profile/Achievements.tsx',
-  'src/components/profile/CareerCard.tsx',
-  'src/components/profile/BestSportHero.tsx',
   'src/components/profile/PlayedForCard.tsx',
   'src/app/player/[playerId].tsx',
   'src/app/(tabs)/profile.tsx',
@@ -51,7 +48,6 @@ export const MIGRATED: string[] = [
   'src/app/(tabs)/explore.tsx',
   'src/components/explore/PlayerHitRow.tsx',
   'src/components/explore/EventHitRow.tsx',
-  'src/components/profile/HonorsList.tsx',
   'src/app/quick/new.tsx',
   'src/components/quick/HostSteps.tsx',
   'src/components/quick/WaitingRoom.tsx',
@@ -70,6 +66,11 @@ export const MIGRATED: string[] = [
   'src/app/matches/[playerId].tsx',
   'src/components/quick/CricketScorePanel.tsx',
   'src/components/quick/CricketSetupPanel.tsx',
+  'src/components/profile/PlayerCard.tsx',
+  'src/components/profile/SportCards.tsx',
+  'src/components/profile/TrophyCabinet.tsx',
+  'src/components/profile/ProfileHistory.tsx',
+  'src/components/profile/RecentMatches.tsx',
 ];
 
 export interface ColourLiteralFinding {

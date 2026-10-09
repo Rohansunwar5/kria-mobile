@@ -174,13 +174,15 @@ describe('PlayPortal', () => {
       expect(getByText(/21-18, 21-16/)).toBeTruthy();
     });
 
-    // The ledger outlives the matches it describes, so `title` can be absent.
+    // The ledger outlives the matches it describes, so `title` can be absent;
+    // the row is then called by its sport, the same as on both profiles.
     it('survives a feed row whose match could not be read', () => {
       const bare: RecentMatch[] = [
         { _id: 'r2', matchId: 'm2', sport: 'cricket', context: 'tournament', result: 'lost', playedAt: '2026-09-01T00:00:00.000Z' },
       ];
       const { getByText } = render(<PlayPortal {...props({ recent: bare })} />);
-      expect(getByText(/match unavailable/i)).toBeTruthy();
+      expect(getByText(/^cricket$/i)).toBeTruthy();
+      expect(getByText(/^tournament · cricket$/i)).toBeTruthy();
     });
 
     it('tags a knockout match as knockout rather than quick', () => {

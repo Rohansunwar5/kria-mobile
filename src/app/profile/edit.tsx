@@ -111,6 +111,10 @@ export default function EditProfile() {
             </View>
 
             <AuthInput label="Phone" icon="phone" keyboardType="phone-pad" value={form.phone} onChangeText={set('phone')} />
+
+            {/* Read-only: you sign in with it. Kept here rather than on your
+                profile, where other players would see it. */}
+            <AuthInput label="Email" icon="mail" value={user?.email ?? ''} editable={false} />
           </View>
 
           <View style={{ paddingHorizontal: 16, paddingTop: 6 }}>

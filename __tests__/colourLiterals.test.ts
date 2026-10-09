@@ -48,7 +48,7 @@ describe('colour literal fence', () => {
 
   it('lists the files migrated so far', () => {
     expect(MIGRATED).toContain('src/app/profile/settings.tsx');
-    expect(MIGRATED).toContain('src/components/profile/CareerCard.tsx');
+    expect(MIGRATED).toContain('src/components/profile/SportCards.tsx');
     expect(MIGRATED.length).toBeGreaterThanOrEqual(8);
   });
 

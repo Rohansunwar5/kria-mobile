@@ -5,28 +5,19 @@ import { goBack } from '@/lib/nav';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
-import { Hairlines, Hazard } from '@/components/canvas';
-import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
-import { hue } from '@/components/TournamentArt';
-import { CareerCard } from '@/components/profile/CareerCard';
-import { BestSportHero } from '@/components/profile/BestSportHero';
-import { Achievements } from '@/components/profile/Achievements';
-import { RecentMatches } from '@/components/profile/RecentMatches';
-import { PlayedForCard } from '@/components/profile/PlayedForCard';
-import { HonorsList } from '@/components/profile/HonorsList';
+import { Skeleton, ErrorBlock } from '@/components/states';
+import { PlayerCard } from '@/components/profile/PlayerCard';
+import { SportCards } from '@/components/profile/SportCards';
+import { TrophyCabinet } from '@/components/profile/TrophyCabinet';
+import { ProfileHistory } from '@/components/profile/ProfileHistory';
 import { getPublicPlayer, type PublicPlayer, type PublicHistoryEntry } from '@/api/profileApi';
 import { useCareer } from '@/lib/useCareer';
 import { useTheme } from '@/lib/theme';
-import type { Palette } from '@/lib/theme/palette';
 
-const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
-  fontSize: 9,
-  letterSpacing: 0.1 * 9,
-  textTransform: 'uppercase' as const,
-  color: theme.textFaint,
-});
-
+/**
+ * Another player's profile: the same player card, sports, trophy cabinet and
+ * history as your own, without your account rows or your knockouts.
+ */
 export default function PlayerProfile() {
   const { playerId } = useLocalSearchParams<{ playerId: string }>();
   const router = useRouter();
@@ -101,77 +92,39 @@ export default function PlayerProfile() {
     <Screen>
       {Header}
       <ScrollView refreshControl={refresh} contentContainerStyle={{ paddingBottom: 24 }}>
-        <View style={{ overflow: 'hidden', backgroundColor: `hsl(${hue(player._id)}, 44%, 13%)` }}>
-          <Hairlines />
-          <Ghost text={name.split(/\s+/).slice(0, 2).map((w) => w[0]).join('')} size={150} style={{ right: -26, top: -8 }} />
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14, paddingHorizontal: 16, paddingTop: 12 }}>
-            <InitialsAvatar name={name} logo={player.profileImage} size={76} />
-            <View style={{ flex: 1, paddingBottom: 3 }}>
-              <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 30, lineHeight: 36, color: theme.text }}>
-                {name}
-              </Text>
-            </View>
-          </View>
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textMeta, paddingHorizontal: 16, paddingTop: 12 }}>
-            {[player.sport, player.location].filter(Boolean).join(' · ') || 'Kria player'}
-          </Text>
-          <View style={{ marginTop: 13 }}>
-            <Hazard />
-          </View>
-        </View>
+        <PlayerCard
+          name={name}
+          avatar={<InitialsAvatar name={name} logo={player.profileImage} size={84} />}
+          location={player.location}
+          profile={career.profile}
+          loading={career.loading}
+          recent={career.recent}
+          honours={(player.honors?.length ?? 0) + (player.titles?.length ?? 0)}
+          // Each history entry is one tournament entered.
+          events={history.length}
+        />
 
-        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
-          <BestSportHero bestSport={career.profile?.bestSport ?? null} recent={career.recent ?? []} />
+        <SportCards profile={career.profile} loading={career.loading} error={career.error} onRetry={career.reload} />
 
-          <CareerCard
-            profile={career.profile}
-            loading={career.loading}
-            error={career.error}
-            onRetry={career.reload}
-            // BestSportHero directly above already carries this fact — the
-            // badge would be a third restatement of the same "best sport" in
-            // 200px of screen.
-            showBestSportBadge={false}
-          />
+        <TrophyCabinet
+          honors={player.honors}
+          titles={player.titles}
+          achievements={career.profile?.achievements ?? []}
+          loading={career.loading}
+          error={career.error}
+          onRetry={career.reload}
+        />
 
-          <Achievements
-            achievements={career.profile?.achievements ?? []}
-            loading={career.loading}
-            error={career.error}
-            onRetry={career.reload}
-          />
-
-          <RecentMatches
-            matches={career.recent}
-            loading={career.loading}
-            error={career.recentError}
-            onRetry={career.reload}
-            onSeeAll={() => router.push({ pathname: '/matches/[playerId]', params: { playerId: playerId } })}
-          />
-
-          <HonorsList label="Titles" honors={player.honors} titles={player.titles} style={{ marginTop: 22 }} />
-
-          <View style={{ marginTop: 22 }}>
-            <Text style={{ ...LBL(theme), letterSpacing: 0.18 * 9, marginBottom: 8 }}>Played for</Text>
-            {history.length === 0 ? (
-              <EmptyState
-                icon="trophy"
-                title="No events yet"
-                message="Tournaments this player has entered will appear here."
-              />
-            ) : (
-              <View style={{ gap: 9 }}>
-                {history.map((h) => (
-                  <PlayedForCard
-                    key={h._id}
-                    entry={h}
-                    onPress={() => router.push({ pathname: '/tournament/[id]', params: { id: h.tournament!._id } })}
-                  />
-                ))}
-              </View>
-            )}
-          </View>
-        </View>
+        <ProfileHistory
+          recent={career.recent}
+          loading={career.loading}
+          error={career.recentError}
+          onRetry={career.reload}
+          onAllMatches={() => router.push({ pathname: '/matches/[playerId]', params: { playerId } })}
+          teams={history}
+          onOpenTournament={(id) => router.push({ pathname: '/tournament/[id]', params: { id } })}
+          teamsEmpty="No events yet. Tournament teams this player joins appear here."
+        />
       </ScrollView>
     </Screen>
   );

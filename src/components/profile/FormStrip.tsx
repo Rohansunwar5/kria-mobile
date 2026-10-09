@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, type ViewStyle } from 'react-native';
 import { Icon } from '@/components/icons';
 import { colors, useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
@@ -44,7 +44,7 @@ export const FORM_TOKEN = (theme: Palette): Record<RecentMatch['result'], { toke
  * (`PlayPortal`) are unaffected; callers that do not (the profile screen)
  * get the same behaviour for free.
  */
-export function FormStrip({ recent, limit = 6 }: { recent: RecentMatch[]; limit?: number }) {
+export function FormStrip({ recent, limit = 6, style }: { recent: RecentMatch[]; limit?: number; style?: ViewStyle }) {
   const theme = useTheme();
   const formToken = FORM_TOKEN(theme);
   const form = recent.slice(0, limit).reverse();
@@ -61,6 +61,7 @@ export function FormStrip({ recent, limit = 6 }: { recent: RecentMatch[]; limit?
         paddingVertical: 11,
         borderTopWidth: 1.5,
         borderTopColor: theme.lineFaint,
+        ...style,
       }}
     >
       <Text style={{ ...LBL(theme), letterSpacing: 0.12 * 9 }}>Form</Text>

@@ -45,8 +45,8 @@ describe('RecentMatches', () => {
     const { getByText } = render(
       <RecentMatches matches={[row({ context: 'quick' }), row({ _id: 'r2', context: 'tournament' })]} />
     );
-    expect(getByText(/^quick$/i)).toBeTruthy();
-    expect(getByText(/^tournament$/i)).toBeTruthy();
+    expect(getByText(/^quick · badminton$/i)).toBeTruthy();
+    expect(getByText(/^tournament · badminton$/i)).toBeTruthy();
   });
 
   it('formats the date without a year for a match played this year', () => {
@@ -88,27 +88,35 @@ describe('RecentMatches', () => {
   });
 });
 
-describe('RecentMatches see all', () => {
+describe('RecentMatches all matches', () => {
   const ten = Array.from({ length: 10 }, (_, i) => row({ _id: `r${i}`, title: `Match ${i}` }));
 
-  it('shows five rows and a See all button when more were loaded', () => {
+  it('shows five rows and an All matches row when more were loaded', () => {
     const onSeeAll = jest.fn();
     const { getAllByText, queryByText, getByText } = render(<RecentMatches matches={ten} onSeeAll={onSeeAll} />);
     expect(getAllByText(/^match \d$/i)).toHaveLength(5);
     expect(queryByText(/^match 5$/i)).toBeNull();
-    fireEvent.press(getByText(/see all/i));
+    fireEvent.press(getByText(/all matches/i));
     expect(onSeeAll).toHaveBeenCalledTimes(1);
   });
 
-  it('has no See all at five or fewer', () => {
+  it('has no All matches row at five or fewer', () => {
     const { getAllByText, queryByText } = render(<RecentMatches matches={ten.slice(0, 5)} onSeeAll={jest.fn()} />);
     expect(getAllByText(/^match \d$/i)).toHaveLength(5);
-    expect(queryByText(/see all/i)).toBeNull();
+    expect(queryByText(/all matches/i)).toBeNull();
   });
 
-  it('shows every row and no See all with the cap off', () => {
+  // Home shows four and the profiles three, under a heading the screen owns.
+  it('shows `limit` rows, with no heading of its own when the screen titles the section', () => {
+    const { getAllByText, queryByText, getByText } = render(<RecentMatches matches={ten} onSeeAll={jest.fn()} limit={3} heading={null} />);
+    expect(getAllByText(/^match \d$/i)).toHaveLength(3);
+    expect(queryByText(/recent matches/i)).toBeNull();
+    expect(getByText(/all matches/i)).toBeTruthy();
+  });
+
+  it('shows every row and no All matches row with the cap off', () => {
     const { getAllByText, queryByText } = render(<RecentMatches matches={ten} onSeeAll={jest.fn()} all />);
     expect(getAllByText(/^match \d$/i)).toHaveLength(10);
-    expect(queryByText(/see all/i)).toBeNull();
+    expect(queryByText(/all matches/i)).toBeNull();
   });
 });

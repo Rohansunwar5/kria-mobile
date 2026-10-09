@@ -101,9 +101,9 @@ describe('groupMenu', () => {
     expect(groups.map((g) => g.title)).toEqual(['Playing', 'Account']);
   });
 
-  it('keeps registrations, history and invoices under Playing', () => {
+  it('keeps registrations, quick matches, history and invoices under Playing', () => {
     const playing = groupMenu().find((g) => g.title === 'Playing')!;
-    expect(playing.items.map((i) => i.label)).toEqual(['My entries', 'Tournament history', 'Payments']);
+    expect(playing.items.map((i) => i.label)).toEqual(['My entries', 'Quick matches', 'Tournament history', 'Payments']);
   });
 
   it('drops the redundant Find Tournaments row — the Events tab is one tap away', () => {

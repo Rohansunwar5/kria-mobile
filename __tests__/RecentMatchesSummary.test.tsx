@@ -49,7 +49,7 @@ describe('RecentMatches shows who played and the score', () => {
       <RecentMatches matches={[row({ title: 'Alpha vs Bravo', scoreline: '21-9', result: 'lost', context: 'tournament' })]} />
     );
     expect(getByText('L')).toBeTruthy();
-    expect(getByText(/^tournament$/i)).toBeTruthy();
+    expect(getByText(/^tournament · badminton$/i)).toBeTruthy();
     expect(getByText('Alpha vs Bravo')).toBeTruthy();
   });
 
