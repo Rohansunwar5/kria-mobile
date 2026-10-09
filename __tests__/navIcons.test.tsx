@@ -4,7 +4,7 @@ import { NavIcon, NAV_ICON_NAMES, NAV_ICON_PATHS } from '../src/components/icons
 
 describe('nav icon set', () => {
   it('ships exactly the five nav glyphs', () => {
-    expect(NAV_ICON_NAMES).toEqual(['home', 'search', 'plus', 'live', 'user']);
+    expect(NAV_ICON_NAMES).toEqual(['home', 'search', 'plus', 'calendar', 'user']);
   });
 
   it('every glyph has at least one path', () => {

@@ -96,6 +96,7 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="profile" />
         <Stack.Screen name="auction/[tournamentId]/[categoryId]" />
         <Stack.Screen name="bracket/[tournamentId]/[categoryId]" />
+        <Stack.Screen name="live/index" />
         <Stack.Screen name="live/[matchId]" />
         <Stack.Screen name="quick/index" />
         <Stack.Screen name="quick/new" />

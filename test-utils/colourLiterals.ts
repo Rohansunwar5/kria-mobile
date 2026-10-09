@@ -46,7 +46,7 @@ export const MIGRATED: string[] = [
   'src/app/profile/settings.tsx',
   'src/components/settings/AppearanceSection.tsx',
   'src/components/settings/Section.tsx',
-  'src/app/(tabs)/live.tsx',
+  'src/app/live/index.tsx',
   'src/components/live/LiveRow.tsx',
   'src/app/(tabs)/explore.tsx',
   'src/components/explore/PlayerHitRow.tsx',

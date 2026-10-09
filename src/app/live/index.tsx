@@ -1,32 +1,31 @@
-import { View, Text, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, RefreshControl, ActivityIndicator, Pressable } from 'react-native';
+import { router } from 'expo-router';
 import { Screen } from '@/components/Screen';
+import { Icon } from '@/components/icons';
+import { goBack } from '@/lib/nav';
 import { useTheme } from '@/lib/theme';
 import { useLiveFeed } from '@/lib/useLiveFeed';
 import LiveRow from '@/components/live/LiveRow';
 
+/** Every live match. Reached from home's "Live now" row, so it is a pushed
+ *  screen with a way back, not a tab. */
 export default function LiveScreen() {
   const theme = useTheme();
   const { items, total, loading, error, refresh } = useLiveFeed();
 
   return (
     <Screen>
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1.5,
-        borderBottomColor: theme.lineSoft,
-      }}>
-        <Text style={{
-          fontFamily: 'Anton_400Regular',
-          textTransform: 'uppercase',
-          fontSize: 23,
-          lineHeight: 28,
-          color: theme.text,
-        }}>
-          Kria
-        </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: theme.lineSoft }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          onPress={() => goBack(router)}
+          hitSlop={8}
+          style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: theme.fill, borderWidth: 1.5, borderColor: theme.lineSoft, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Icon name="chevron-left" size={19} color={theme.text} strokeWidth={2.3} />
+        </Pressable>
+        <Text style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: theme.text }}>Live now</Text>
       </View>
 
       <Text style={{
@@ -46,7 +45,7 @@ export default function LiveScreen() {
         data={items}
         keyExtractor={(item) => `${item.kind}-${item.matchId}`}
         renderItem={({ item }) => <LiveRow item={item} />}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 11, paddingBottom: 110 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 11, paddingBottom: 24 }}
         refreshControl={<RefreshControl refreshing={loading && items.length > 0} onRefresh={refresh} tintColor={theme.textFaint} />}
         ListEmptyComponent={
           loading ? (

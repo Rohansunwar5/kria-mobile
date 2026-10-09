@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { Icon, type IconName } from '@/components/icons';
-import { Tag, type TagVariant } from '@/components/StatusPill';
+import { StatusPill, Tag, type TagVariant } from '@/components/StatusPill';
+import { TournamentArt } from '@/components/TournamentArt';
+import type { Tournament } from '@/store/slices/tournamentSlice';
 import { Skeleton, ErrorBlock, Ghost } from '@/components/states';
 import { colors, useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
@@ -15,10 +17,12 @@ import type { QuickMatch } from '@/api/quickMatch';
 import type { QuickKnockout } from '@/api/quickKnockout';
 import { formatLabel as knockoutFormatLabel } from '@/lib/quickKnockoutView';
 import { FormStrip } from '@/components/profile/FormStrip';
+import LiveFeedCard from '@/components/live/LiveRow';
+import type { LiveItem } from '@/api/live';
 import { RANKED_SPORTS, TopPlayers } from './TopPlayers';
 
-// PlayFull.dc.html / PlayEmpty.dc.html. The masthead, the portal switch and the
-// strip above this belong to the screen; the portal starts at host/join.
+// PlayFull.dc.html / PlayEmpty.dc.html. This is the whole of home now; it
+// starts at host/join.
 
 const LBL = (theme: Palette) => ({
   fontFamily: 'SpaceMono_700Bold' as const,
@@ -364,8 +368,99 @@ function SectionHeading({ title, meta, metaAccent }: { title: string; meta?: str
   );
 }
 
+/** A horizontal peek row: heading, a "View all" into the full list, and the
+ *  cards. Each row hides itself when empty — the full list owns the empty state. */
+function PeekRow({ title, moreLabel, onMore, children }: { title: string; moreLabel: string; onMore: () => void; children: ReactNode }) {
+  const theme = useTheme();
+  return (
+    <View>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 18, paddingBottom: 9 }}>
+        <Text style={HEADING}>{title}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={moreLabel} onPress={onMore} hitSlop={10}>
+          <Text style={{ ...MONO(theme), letterSpacing: 0.1 * 10, color: colors.brand }}>View all</Text>
+        </Pressable>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}>
+        {children}
+      </ScrollView>
+    </View>
+  );
+}
+
+/** Everything live right now, everyone's. */
+function LiveNow({ items }: { items: LiveItem[] }) {
+  if (items.length === 0) return null;
+  return (
+    <PeekRow title="Live now" moreLabel="View all live matches" onMore={() => router.push('/live')}>
+      {items.map((item) => (
+        <View key={`${item.kind}-${item.matchId}`} style={{ width: 260 }}>
+          <LiveFeedCard item={item} />
+        </View>
+      ))}
+    </PeekRow>
+  );
+}
+
+/** One organiser tournament, sized for the peek row: the same art strip, pill
+ *  and sport tag as the Events list, cut to one line of name and one of meta so
+ *  every tile in the row is the same height. */
+function TournamentTile({ tournament }: { tournament: Tournament }) {
+  const theme = useTheme();
+  const meta = [tournament.venue?.city, formatShortDate(tournament.startDate)].filter(Boolean).join(' · ');
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={tournament.name}
+      onPress={() => router.push({ pathname: '/tournament/[id]', params: { id: tournament._id } })}
+      style={{
+        width: 260,
+        backgroundColor: theme.surface,
+        borderWidth: 1.5,
+        borderColor: theme.line,
+        borderLeftWidth: 4,
+        borderLeftColor: theme.brand,
+        borderRadius: 6,
+        overflow: 'hidden',
+      }}
+    >
+      <TournamentArt uri={tournament.bannerImage} seed={tournament._id} height={84} fadeTo={theme.surface} />
+      <View style={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+          <StatusPill status={tournament.status} />
+          {tournament.sport ? <Tag label={tournament.sport.replace('_', ' ')} /> : null}
+        </View>
+        <Text
+          numberOfLines={1}
+          style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: theme.text, marginTop: 8 }}
+        >
+          {tournament.name}
+        </Text>
+        <Text numberOfLines={1} style={{ ...MONO(theme), letterSpacing: 0.06 * 10, color: theme.textMeta, marginTop: 5 }}>
+          {meta}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
+/** The newest organiser-hosted tournaments, a peek at the Events tab. */
+function LatestTournaments({ tournaments }: { tournaments: Tournament[] }) {
+  if (tournaments.length === 0) return null;
+  return (
+    <PeekRow title="Tournaments" moreLabel="View all tournaments" onMore={() => router.navigate('/(tabs)/events')}>
+      {tournaments.map((t) => (
+        <TournamentTile key={t._id} tournament={t} />
+      ))}
+    </PeekRow>
+  );
+}
+
 export interface PlayPortalProps {
   profile: CareerProfile | null;
+  /** The public live feed — every live match, not just yours. */
+  liveFeed?: LiveItem[];
+  /** The newest organiser-hosted tournaments. */
+  tournaments?: Tournament[];
   recent: RecentMatch[] | null;
   /**
    * Your quick matches. Only the live ones surface here: a finished quick match
@@ -394,11 +489,13 @@ export interface PlayPortalProps {
  * The player half of home: host or join a casual match, your record, and the
  * blended recent feed.
  *
- * Props-driven for the same reason `EventsPortal` is — the home screen owns the
- * loading, the portal owns only how it looks.
+ * Props-driven: the home screen owns the loading, the portal owns only how it
+ * looks.
  */
 export function PlayPortal({
   profile,
+  liveFeed = [],
+  tournaments = [],
   recent,
   matches,
   playerId,
@@ -513,6 +610,8 @@ export function PlayPortal({
     <ScrollView contentContainerStyle={{ paddingBottom: 110 }} showsVerticalScrollIndicator={false}>
       <HostJoin />
 
+      <LiveNow items={liveFeed} />
+
       {/* Nothing yet is the first-run state, not a failure: only `loading` and a
           real `error` keep the record section up in place of EmptyRecord. */}
       {hasRecord || loading || error ? (
@@ -523,6 +622,8 @@ export function PlayPortal({
       ) : (
         <EmptyRecord />
       )}
+
+      <LatestTournaments tournaments={tournaments} />
 
       {showRecent ? (
         <View>

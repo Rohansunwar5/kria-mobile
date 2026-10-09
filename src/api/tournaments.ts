@@ -1,6 +1,8 @@
 import API from './axios';
 import { unwrap } from './unwrap';
 import { toQuery, type Filters } from '@/lib/tournamentFilters';
+import { visibleTournaments } from '@/lib/homePortal';
+import type { Tournament } from '@/store/slices/tournamentSlice';
 
 export interface TournamentHit {
   _id: string;
@@ -17,9 +19,9 @@ interface TournamentListPayload {
 
 /**
  * Deliberately NOT the Redux `fetchPublicTournaments` thunk. That writes into
- * a single shared `publicTournaments` slot the Home screen reads, so a search
- * typed here would silently re-filter Home's tournament strip and the user
- * would find Home changed with no explanation.
+ * a single shared `publicTournaments` slot the Events tab reads, so a search
+ * typed here would silently re-filter the Events list and the user
+ * would find it changed with no explanation.
  *
  * A search 422s below three characters the same way player search does, and
  * resolves to an empty list rather than surfacing an error the user cannot act
@@ -35,4 +37,14 @@ export async function searchTournaments(q: string, filters?: Filters): Promise<T
     if (status === 422) return [];
     throw err;
   }
+}
+
+/**
+ * The newest organiser tournaments for home's preview row — the server sorts by
+ * start date, newest first. Also not the Redux thunk, for the same reason as
+ * above: the Events tab's filters must not reach home.
+ */
+export async function latestTournaments(limit = 10): Promise<Tournament[]> {
+  const payload = unwrap<{ tournaments: Tournament[] } | null>(await API.get('/tournament', { params: { limit } }));
+  return visibleTournaments(payload?.tournaments ?? []);
 }

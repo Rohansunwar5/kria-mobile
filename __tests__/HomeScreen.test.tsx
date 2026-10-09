@@ -1,256 +1,77 @@
-import { act, render, fireEvent, waitFor } from '@testing-library/react-native';
+import { act, render, fireEvent } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/store/slices/authSlice';
-import tournamentReducer, { type Tournament } from '@/store/slices/tournamentSlice';
 import Home from '../src/app/(tabs)/home';
+import { fetchLiveFeed } from '../src/api/live';
+import { latestTournaments } from '../src/api/tournaments';
 import { listMyQuickKnockouts } from '../src/api/quickKnockout';
 import { listMyQuickMatches } from '../src/api/quickMatch';
 
-// This test is about the portal switch, not about loading. Stub the thunk so
-// nothing reaches axios, and give the screen a real store — the repo builds
-// stores with preloadedState rather than a mock-store library (see
-// __tests__/uploadProfileImage.test.ts). Do NOT add redux-mock-store.
-//
-// The stub is wrapped in a jest.fn() (mockFetchPublicTournaments) rather than
-// being a bare no-op, so tests can assert what the screen actually dispatched
-// — which query a filter maps to, and whether a no-op Apply skipped the
-// refetch entirely — not just that the UI's local state changed. Jest only
-// allows the factory below to close over an out-of-scope variable when its
-// name is prefixed `mock`.
-type FetchPublicTournamentsParams = { limit?: number; sport?: string; city?: string; status?: string };
-
-const mockFetchPublicTournaments = jest.fn((_params?: FetchPublicTournamentsParams) => ({ type: 'tournament/noop' }));
-
-jest.mock('@/store/slices/tournamentSlice', () => {
-  const actual = jest.requireActual('@/store/slices/tournamentSlice');
-  return {
-    ...actual,
-    __esModule: true,
-    default: actual.default,
-    fetchPublicTournaments: Object.assign(
-      (params?: FetchPublicTournamentsParams) => mockFetchPublicTournaments(params),
-      { pending: { type: 'p' }, fulfilled: { type: 'f' }, rejected: { type: 'r' } }
-    ),
-  };
-});
-
-// Same shape as useQuickCricket.test.tsx / EventsPortal.test.tsx: there is no
-// navigation container around a bare screen render, so focus degrades to an
-// effect and every push is a no-op.
+// There is no navigation container around a bare screen render, so focus
+// degrades to an effect.
+const mockPush = jest.fn();
+const mockNavigate = jest.fn();
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
-  router: { push: jest.fn() },
+  router: { push: (...a: unknown[]) => mockPush(...a), navigate: (...a: unknown[]) => mockNavigate(...a) },
   useIsFocused: () => true,
   useFocusEffect: (callback: () => void) => require('react').useEffect(callback, [callback]),
 }));
 
+jest.mock('../src/api/live', () => ({ fetchLiveFeed: jest.fn(async () => ({ total: 0, items: [] })) }));
+jest.mock('../src/api/tournaments', () => ({ latestTournaments: jest.fn(async () => []) }));
 jest.mock('../src/api/quickKnockout', () => ({ listMyQuickKnockouts: jest.fn(async () => []) }));
 jest.mock('../src/api/quickMatch', () => ({ listMyQuickMatches: jest.fn(async () => []) }));
 jest.mock('../src/lib/useCareer', () => ({
   useCareer: () => ({ profile: { sports: [], bestSport: null }, recent: [], loading: false, error: false, recentError: false, reload: jest.fn() }),
 }));
 
-// Each slice's own initial state, with only the fields this screen reads
-// overridden — a hand-written partial does not typecheck against the full
-// slice state, and `as any` is not available here.
 const INIT = { type: '@@preload' };
 
-const tournament = (over: Partial<Tournament>): Tournament => ({
-  _id: 't1',
-  name: 'Kria Smash Cup',
-  sport: 'badminton',
-  status: 'registration_open',
-  startDate: '2026-09-02T00:00:00.000Z',
-  endDate: '2026-09-07T00:00:00.000Z',
-  ...over,
-}) as Tournament;
-
-const makeStore = (publicTournaments: Tournament[] = [], publicTotal = publicTournaments.length) =>
+const makeStore = () =>
   configureStore({
-    reducer: { auth: authReducer, tournament: tournamentReducer },
+    reducer: { auth: authReducer },
     preloadedState: {
       auth: {
         ...authReducer(undefined, INIT),
         user: { _id: 'p1', firstName: 'Rohan', lastName: 'Sunwar', email: 'rohan@kria.club', phone: '9000000000', status: 'active' },
       },
-      tournament: { ...tournamentReducer(undefined, INIT), publicTournaments, publicTotal },
     },
   });
 
-// The quick-match list resolves on the next microtask, so flush it before
-// asserting — otherwise every test logs an out-of-act update it did not cause.
-// `publicTotal` defaults to the fixture list's own length; pass it explicitly
-// to simulate the server's true countDocuments total diverging from what got
-// fetched (see the "never promises more events" test below).
-const renderHome = async (tournaments: Tournament[] = [], publicTotal?: number) => {
-  const utils = render(<Provider store={makeStore(tournaments, publicTotal)}><Home /></Provider>);
+// The lists resolve on the next microtask, so flush them before asserting.
+const renderHome = async () => {
+  const utils = render(<Provider store={makeStore()}><Home /></Provider>);
   await act(async () => {});
   return utils;
 };
 
-// PortalSwitch relabels the PLAY tab to 'Play, a match is live' the moment a
-// fixture has a live quick match, so an exact-string query would break the
-// first time one does. Match the prefix instead.
-const PLAY_TAB = /^Play/;
-
 describe('Home', () => {
-  it('opens on the events portal', async () => {
-    const { getByLabelText, getByTestId } = await renderHome();
-    expect(getByLabelText('Events').props.accessibilityState.selected).toBe(true);
-    expect(getByTestId('events-list')).toBeTruthy();
+  it('opens straight on play, with no masthead or portal switch', async () => {
+    const { getByLabelText, queryByLabelText, queryByText } = await renderHome();
+    expect(getByLabelText('Host a match')).toBeTruthy();
+    expect(queryByLabelText('Events')).toBeNull();
+    expect(queryByLabelText('Profile')).toBeNull();
+    expect(queryByText('Kria')).toBeNull();
   });
 
-  it('crosses to the play portal and back', async () => {
-    const { getByLabelText, getByTestId, queryByLabelText, queryByTestId } = await renderHome();
+  it('peeks at live matches and links through to the full live list', async () => {
+    (fetchLiveFeed as jest.Mock).mockResolvedValue({
+      total: 1,
+      items: [{ kind: 'quick', matchId: 'm1', sport: 'badminton', title: 'Rohan v Dev', startedAt: '2026-10-09T00:00:00.000Z' }],
+    });
+    const { getByText, getByLabelText } = await renderHome();
 
-    fireEvent.press(getByLabelText(PLAY_TAB));
-    await waitFor(() => expect(getByLabelText('Host a match')).toBeTruthy());
-    expect(queryByTestId('events-list')).toBeNull();
-
-    // Crossing back has to restore the events BODY, not just repaint the tab —
-    // the two portals are swapped siblings, so a half-applied switch would
-    // still flip the selected state while showing the wrong content.
-    fireEvent.press(getByLabelText('Events'));
-    await waitFor(() => expect(getByTestId('events-list')).toBeTruthy());
-    expect(queryByLabelText('Host a match')).toBeNull();
-    expect(getByLabelText(PLAY_TAB).props.accessibilityState.selected).toBe(false);
+    expect(getByText('Live now')).toBeTruthy();
+    expect(getByText('Rohan v Dev')).toBeTruthy();
+    fireEvent.press(getByLabelText('View all live matches'));
+    expect(mockPush).toHaveBeenCalledWith('/live');
   });
 
-  // The strip used to be unit-tested through portalStrip and nothing asserted
-  // what the SCREEN puts in it, so a wrong count reached it unseen: it counted
-  // every visible tournament, which includes the ongoing and completed ones,
-  // under the word OPEN. This renders the real screen over a realistic mixed
-  // list — portalStrip deliberately unmocked — so any future desync of the
-  // strip from what is open fails here.
-  it('counts only the tournaments open for entry in the strip', async () => {
-    const { getByText } = await renderHome([
-      tournament({ _id: 'a', status: 'registration_open' }),
-      tournament({ _id: 'b', status: 'ongoing', name: 'City League' }),
-      tournament({ _id: 'c', status: 'registration_open', name: 'Monsoon Open' }),
-      tournament({ _id: 'd', status: 'completed', name: 'Winter Cup' }),
-      tournament({ _id: 'e', status: 'draft', name: 'Unannounced' }),
-      tournament({ _id: 'f', status: 'registration_open', name: 'Pulled Event', isActive: false }),
-    ]);
-
-    expect(getByText('ORGANISER-HOSTED · 2 OPEN')).toBeTruthy();
-  });
-
-  it('reports nothing open when every visible event has started or finished', async () => {
-    const { getByText } = await renderHome([
-      tournament({ _id: 'a', status: 'ongoing' }),
-      tournament({ _id: 'b', status: 'completed', name: 'Winter Cup' }),
-    ]);
-
-    expect(getByText('ORGANISER-HOSTED · 0 OPEN')).toBeTruthy();
-  });
-
-  // Both portals stay mounted so neither loses its scroll position, which makes
-  // "hidden" a real obligation rather than a side effect of unmounting: the
-  // pane behind must be unreachable by touch AND by a screen reader, not merely
-  // invisible. The default queries already exclude accessibility-hidden
-  // subtrees, so the pair of assertions below is the proof — present in the
-  // tree, absent to anyone using it.
-  it('keeps the inactive portal mounted but out of reach of a screen reader', async () => {
-    const { getByLabelText, queryByLabelText } = await renderHome();
-
-    expect(queryByLabelText('Host a match')).toBeNull();
-    expect(getByLabelText('Host a match', { includeHiddenElements: true })).toBeTruthy();
-
-    fireEvent.press(getByLabelText(PLAY_TAB));
-
-    await waitFor(() => expect(getByLabelText('Host a match')).toBeTruthy());
-    // 'City' was the old city chip's label, retired along with the rest of the
-    // hard-coded chip row; the filter bar's button is the same kind of
-    // always-present, stably-labelled probe for "this hidden subtree still
-    // rendered its header."
-    expect(queryByLabelText('Filter tournaments')).toBeNull();
-    expect(getByLabelText('Filter tournaments', { includeHiddenElements: true })).toBeTruthy();
-  });
-
-  // The masthead renders from cached auth state, which is the whole point of
-  // the Patterns sheet — it must survive every load and every error.
-  it('keeps the masthead across a portal change', async () => {
-    const { getByLabelText, getByText } = await renderHome();
-    expect(getByText('Kria')).toBeTruthy();
-    fireEvent.press(getByLabelText(PLAY_TAB));
-    expect(getByText('Kria')).toBeTruthy();
-  });
-
-  it('opens the filter sheet from the bar and applies a choice', async () => {
-    const { getByLabelText, getByText } = await renderHome();
-    fireEvent.press(getByLabelText('Filter tournaments'));
-    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
-
-    fireEvent.press(getByLabelText('Cricket'));
-    fireEvent.press(getByText(/show \d+ events?/i));
-
-    // The chip proves the choice reached the screen's state, not just the sheet's.
-    await waitFor(() => expect(getByText('Cricket')).toBeTruthy());
-  });
-
-  // publicTotal is the server's true count via countDocuments, but the fetch
-  // itself is capped (TOURNAMENT_FETCH_LIMIT, 100 — the max
-  // getAllTournamentsValidator accepts). Above that cap the two used to
-  // drift: the button quoted the server's true total while the list could
-  // only ever render 20. The button must never promise more than the fetch
-  // will actually return.
-  it('never promises more events on the filter button than the fetch will return', async () => {
-    const { getByLabelText, getByText, queryByText } = await renderHome([], 147);
-    fireEvent.press(getByLabelText('Filter tournaments'));
-    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
-
-    expect(getByText('Show 100 events')).toBeTruthy();
-    expect(queryByText(/show 147 events?/i)).toBeNull();
-  });
-
-  it('still shows the true count on the filter button when it is under the fetch limit', async () => {
-    const { getByLabelText, getByText } = await renderHome([], 3);
-    fireEvent.press(getByLabelText('Filter tournaments'));
-    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
-
-    expect(getByText('Show 3 events')).toBeTruthy();
-  });
-
-  // The chip assertion above proves the choice reached local state, but it
-  // would pass even if the load effect's dependency on `filters` were
-  // broken and nothing ever refetched. Assert the actual dispatch: applying
-  // a filter must reach the fetch with the query it maps to, and unset
-  // ('All') values must never leak into that query.
-  it('sends the filter to the fetch as a query, without All values', async () => {
-    const { getByLabelText, getByText } = await renderHome();
-    mockFetchPublicTournaments.mockClear();
-
-    fireEvent.press(getByLabelText('Filter tournaments'));
-    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
-    fireEvent.press(getByLabelText('Cricket'));
-    fireEvent.press(getByText(/show \d+ events?/i));
-
-    await waitFor(() =>
-      expect(mockFetchPublicTournaments).toHaveBeenCalledWith(expect.objectContaining({ sport: 'cricket' }))
-    );
-    const calls = mockFetchPublicTournaments.mock.calls;
-    const [args] = calls[calls.length - 1];
-    expect(args).not.toHaveProperty('city');
-    expect(args).not.toHaveProperty('status');
-  });
-
-  // FilterSheet's toggle() always spreads a new object, so selecting a value
-  // and then unselecting it before Apply produces a value-identical but
-  // reference-different Filters. The load effect keys off `filters` identity,
-  // so this used to refetch — and flash the stale-dim — for a filter set
-  // that never actually changed.
-  it('does not refetch when Apply carries back the same filters that were already applied', async () => {
-    const { getByLabelText, getByText } = await renderHome();
-    mockFetchPublicTournaments.mockClear();
-
-    fireEvent.press(getByLabelText('Filter tournaments'));
-    await waitFor(() => expect(getByText(/^reset$/i)).toBeTruthy());
-    fireEvent.press(getByLabelText('Cricket'));
-    fireEvent.press(getByLabelText('Cricket'));
-    fireEvent.press(getByText(/show \d+ events?/i));
-
-    expect(mockFetchPublicTournaments).not.toHaveBeenCalled();
+  it('leaves the live section out when nothing is live', async () => {
+    (fetchLiveFeed as jest.Mock).mockResolvedValue({ total: 0, items: [] });
+    const { queryByText } = await renderHome();
+    expect(queryByText('Live now')).toBeNull();
   });
 
   // The two lists load side by side; a failed match list must not take the
@@ -260,10 +81,26 @@ describe('Home', () => {
     (listMyQuickKnockouts as jest.Mock).mockResolvedValueOnce([
       { _id: 'k1', name: 'Sunday Smash', status: 'live', format: 'singles', players: [] },
     ]);
-    const { getByLabelText, findByText } = await renderHome();
-
-    fireEvent.press(getByLabelText(PLAY_TAB));
+    const { findByText } = await renderHome();
 
     expect(await findByText('Sunday Smash')).toBeTruthy();
+  });
+
+  it('previews the newest organiser tournaments and links through to Events', async () => {
+    (latestTournaments as jest.Mock).mockResolvedValueOnce([
+      { _id: 't1', name: 'JBN Badminton Tournament', sport: 'badminton', status: 'registration_open', startDate: '2026-09-22T00:00:00.000Z', venue: { city: 'Bangalore' } },
+    ]);
+    const { getByText, getByLabelText } = await renderHome();
+
+    expect(getByText('Tournaments')).toBeTruthy();
+    expect(getByText('JBN Badminton Tournament')).toBeTruthy();
+    fireEvent.press(getByLabelText('View all tournaments'));
+    expect(mockNavigate).toHaveBeenCalledWith('/(tabs)/events');
+  });
+
+  it('leaves the tournaments section out when there are none', async () => {
+    const { queryByText } = await renderHome();
+    expect(queryByText('View all tournaments')).toBeNull();
+    expect(queryByText('Tournaments')).toBeNull();
   });
 });

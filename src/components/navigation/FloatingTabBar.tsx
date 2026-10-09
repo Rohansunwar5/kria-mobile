@@ -32,7 +32,7 @@ export const NAV_SLOTS: Slot[] = [
   { kind: 'route', route: 'home', icon: 'home', label: 'Home' },
   { kind: 'route', route: 'explore', icon: 'search', label: 'Explore' },
   { kind: 'action', href: '/quick/host', icon: 'plus', label: 'Host', a11y: 'Host a match' },
-  { kind: 'route', route: 'live', icon: 'live', label: 'Live' },
+  { kind: 'route', route: 'events', icon: 'calendar', label: 'Events' },
   { kind: 'route', route: 'profile', icon: 'user', label: 'You' },
 ];
 

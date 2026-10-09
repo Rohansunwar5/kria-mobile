@@ -51,20 +51,20 @@ describe('FloatingTabBar', () => {
   it('does not mark a real route disabled', () => {
     const { getByLabelText } = render(<FloatingTabBar {...props()} />);
     expect(getByLabelText('Explore').props.accessibilityState.disabled).toBe(false);
-    expect(getByLabelText('Live').props.accessibilityState.disabled).toBe(false);
+    expect(getByLabelText('Events').props.accessibilityState.disabled).toBe(false);
     expect(getByLabelText('Home').props.accessibilityState.disabled).toBe(false);
   });
 
   // Explore is now in `routes` (below) so its own press genuinely
   // navigates — asserted separately as 'navigates to Explore when pressed'.
-  // Live is the one route this fixture still omits, so pressing it still
+  // Events is the one route this fixture still omits, so pressing it still
   // exercises the same "route not present in state yet" guard (`if (!route)
   // return`) this test always meant to cover — no slot is actually `pending`
   // any more, per NAV_SLOTS' own docblock.
   it('does not navigate when a disabled slot is pressed', () => {
     const p = props();
     const { getByLabelText } = render(<FloatingTabBar {...p} />);
-    fireEvent.press(getByLabelText('Live'));
+    fireEvent.press(getByLabelText('Events'));
     expect(p.navigation.navigate).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
   });

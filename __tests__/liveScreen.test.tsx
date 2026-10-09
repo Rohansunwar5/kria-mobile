@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react-native';
 import MockAdapter from 'axios-mock-adapter';
 import API from '../src/api/axios';
-import LiveScreen from '../src/app/(tabs)/live';
+import LiveScreen from '../src/app/live';
 
 let mock: MockAdapter;
 
