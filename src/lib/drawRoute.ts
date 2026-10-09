@@ -78,10 +78,3 @@ export function drawSecondary(
   const row = drawRow(category, tournamentId);
   return [{ label: row.kind === 'teamLeague' ? 'League table' : 'Bracket', href: row.href }];
 }
-
-export const DRAW_LABEL: Record<DrawKind, string> = {
-  auction: 'Auction live',
-  teamLeague: 'League table',
-  bracket: 'Bracket',
-  none: 'Not drawn yet',
-};

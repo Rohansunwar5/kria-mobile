@@ -1,61 +1,44 @@
-import { render, screen, waitFor } from '@testing-library/react-native';
-import MockAdapter from 'axios-mock-adapter';
-import API from '@/api/axios';
-import { ChampionsBlock } from '@/components/tournament/ChampionsBlock';
+import { render, screen } from '@testing-library/react-native';
+import { ChampionsBlock, type Champion } from '@/components/tournament/ChampionsBlock';
+import type { Competitor } from '@/lib/bracketView';
 
-const envelope = (payload: unknown) => ({ data: { data: payload } });
-const cat = (id: string, name: string) => ({ _id: id, name, status: 'completed' } as never);
+const side = (id: string, name: string, isWinner: boolean): Competitor =>
+  ({ id, name, teamName: '', isTBD: false, isBye: false, isWinner });
 
-const bracket = (over: Record<string, unknown> = {}) =>
-  envelope({
+const champion = (over: Partial<Champion['result']> = {}, categoryName = 'Gold Cup'): Champion => ({
+  categoryId: categoryName,
+  categoryName,
+  result: {
     competitorType: 'team',
-    rounds: {},
-    matches: [
-      {
-        _id: 'f1', bracketRound: 'Final', roundNumber: 3, positionInRound: 0, matchNumber: 7,
-        status: 'completed', winnerId: 't1',
-        teams: { team1Id: 't1', team1Name: 'Konkan Titans', team2Id: 't2', team2Name: 'Deccan Dynamos' },
-        ...over,
-      },
-    ],
-  });
+    winner: side('t2', 'Deccan Dynamos', true),
+    loser: side('t1', 'Coastal Chargers', false),
+    score: '142/6 – 138/9',
+    ...over,
+  },
+});
 
 describe('ChampionsBlock', () => {
-  let mock: MockAdapter;
-  beforeEach(() => { mock = new MockAdapter(API); });
-  afterEach(() => { mock.restore(); });
-
-  it('names the champion alongside the category it was won in', async () => {
-    mock.onGet('/matches/categories/c1').reply(200, bracket());
-
-    render(<ChampionsBlock categories={[cat('c1', 'Gold Cup')]} />);
-
-    await waitFor(() => expect(screen.getByText('Konkan Titans')).toBeTruthy());
-    expect(screen.getByText(/gold cup/i)).toBeTruthy();
-  });
-
-  it('renders nothing at all while no category has been won', async () => {
-    // An unfinished tournament must not leave an empty "Champions" heading
-    // sitting on the Overview tab.
-    mock.onGet('/matches/categories/c1').reply(200, bracket({ status: 'in_progress', winnerId: undefined }));
-
-    const { toJSON } = render(<ChampionsBlock categories={[cat('c1', 'Gold Cup')]} />);
-    await waitFor(() => expect(toJSON()).toBeNull());
-  });
-
-  it('lists one row per decided category', async () => {
-    mock.onGet('/matches/categories/c1').reply(200, bracket());
-    mock.onGet('/matches/categories/c2').reply(200, bracket({ winnerId: 't2' }));
-
-    render(<ChampionsBlock categories={[cat('c1', 'Gold Cup'), cat('c2', 'Silver Plate')]} />);
-
-    await waitFor(() => expect(screen.getByText('Konkan Titans')).toBeTruthy());
+  it('names the champion, the category, who they beat and the score', () => {
+    render(<ChampionsBlock champions={[champion()]} />);
     expect(screen.getByText('Deccan Dynamos')).toBeTruthy();
+    expect(screen.getByText('Gold Cup champions')).toBeTruthy();
+    expect(screen.getByText('Coastal Chargers')).toBeTruthy();
+    expect(screen.getByText('142/6 – 138/9')).toBeTruthy();
   });
 
-  it('stays quiet when a category has no bracket at all', async () => {
-    mock.onGet('/matches/categories/c1').reply(404);
-    const { toJSON } = render(<ChampionsBlock categories={[cat('c1', 'Gold Cup')]} />);
-    await waitFor(() => expect(toJSON()).toBeNull());
+  it('falls back to the margin when the final has no score line', () => {
+    render(<ChampionsBlock champions={[champion({ score: null, margin: 'Walkover' })]} />);
+    expect(screen.getByText('Walkover')).toBeTruthy();
+  });
+
+  it('renders nothing at all while no category has been won', () => {
+    const { toJSON } = render(<ChampionsBlock champions={[]} />);
+    expect(toJSON()).toBeNull();
+  });
+
+  it('lists one card per decided category', () => {
+    render(<ChampionsBlock champions={[champion({}, 'Gold Cup'), champion({}, 'Silver Cup')]} />);
+    expect(screen.getByText('Gold Cup champions')).toBeTruthy();
+    expect(screen.getByText('Silver Cup champions')).toBeTruthy();
   });
 });

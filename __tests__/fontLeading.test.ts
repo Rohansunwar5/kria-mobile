@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { analyseSource, describeFinding, ANTON_MIN_LEADING } from '../test-utils/fontLeading';
 
@@ -16,10 +16,12 @@ import { analyseSource, describeFinding, ANTON_MIN_LEADING } from '../test-utils
 // the tree undetected.
 
 test('every Anton style clears the iOS clipping floor, or says why it cannot', () => {
-  const files: string[] = execSync('git ls-files "src/**/*.tsx" "src/**/*.ts"', { encoding: 'utf8' })
+  // Tracked plus untracked-but-not-ignored, so a new screen is fenced before
+  // its first commit; a file deleted but not yet staged is skipped.
+  const files: string[] = execSync('git ls-files --cached --others --exclude-standard "src/**/*.tsx" "src/**/*.ts"', { encoding: 'utf8' })
     .trim()
     .split('\n')
-    .filter(Boolean);
+    .filter((f) => f && existsSync(f));
 
   const findings = files.flatMap((file) => analyseSource(file, readFileSync(file, 'utf8')));
 

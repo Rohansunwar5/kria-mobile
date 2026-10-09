@@ -1,4 +1,4 @@
-import { getCompetitors, visibleRounds, sortedRoundNames, leagueStandings, championOf } from '@/lib/bracketView';
+import { getCompetitors, visibleRounds, sortedRoundNames, leagueStandings, championOf, finalResult } from '@/lib/bracketView';
 import { Match } from '@/api/match';
 
 const baseMatch = (over: Partial<Match>): Match => ({
@@ -131,6 +131,25 @@ describe('championOf', () => {
 
   it('ignores a final that still feeds another match', () => {
     expect(championOf([final({ nextMatchId: 'later' })], 'team')).toBeNull();
+  });
+
+  // The champion card says who they beat and by what, from the winner's side,
+  // whichever slot the winner played from.
+  it("gives the runner-up and the score from the winner's side", () => {
+    const games = finalResult([final({ winnerId: 't2', gameScores: [
+      { gameNumber: 1, team1Score: 18, team2Score: 21 },
+      { gameNumber: 2, team1Score: 21, team2Score: 19 },
+      { gameNumber: 3, team1Score: 15, team2Score: 21 },
+    ] })], 'team');
+    expect(games?.winner.name).toBe('Deccan Dynamos');
+    expect(games?.loser.name).toBe('Konkan Titans');
+    expect(games?.score).toBe('21–18, 19–21, 21–15');
+
+    const innings = finalResult([final({ result: { team1Summary: '142/6', team2Summary: '138/9', marginOfVictory: 'by 4 runs' } })], 'team');
+    expect(innings?.score).toBe('142/6 – 138/9');
+    expect(innings?.margin).toBe('by 4 runs');
+
+    expect(finalResult([final({ winnerId: undefined })], 'team')).toBeNull();
   });
 
   it('picks the final out of a full bracket', () => {

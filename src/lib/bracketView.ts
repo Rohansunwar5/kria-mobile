@@ -148,6 +148,25 @@ export function championOf(
   competitorType: 'player' | 'team',
   logoById?: Record<string, string | undefined>,
 ): Competitor | null {
+  return finalResult(matches, competitorType, logoById)?.winner ?? null;
+}
+
+export interface FinalResult {
+  competitorType: 'player' | 'team';
+  winner: Competitor;
+  loser: Competitor;
+  /** Winner first: "142/6 – 138/9" for innings, "21–18, 21–16" for games. */
+  score: string | null;
+  margin?: string;
+}
+
+/** The decided final: who won, who they beat, and the score from the
+ *  winner's side. Nobody until the final is played and resolved. */
+export function finalResult(
+  matches: Match[],
+  competitorType: 'player' | 'team',
+  logoById?: Record<string, string | undefined>,
+): FinalResult | null {
   const final = matches.find(
     (m) =>
       m.bracketRound === 'Final' &&
@@ -158,5 +177,24 @@ export function championOf(
   if (!final) return null;
 
   const { c1, c2 } = getCompetitors(final, competitorType, logoById);
-  return c1.isWinner ? c1 : c2.isWinner ? c2 : null;
+  if (!c1.isWinner && !c2.isWinner) return null;
+  const firstWon = c1.isWinner;
+  const r = final.result;
+
+  let score: string | null = null;
+  if (r?.team1Summary && r?.team2Summary) {
+    score = firstWon ? `${r.team1Summary} – ${r.team2Summary}` : `${r.team2Summary} – ${r.team1Summary}`;
+  } else if (final.gameScores?.length) {
+    score = final.gameScores
+      .map((g) => (firstWon ? `${g.team1Score}–${g.team2Score}` : `${g.team2Score}–${g.team1Score}`))
+      .join(', ');
+  }
+
+  return {
+    competitorType,
+    winner: firstWon ? c1 : c2,
+    loser: firstWon ? c2 : c1,
+    score,
+    margin: r?.marginOfVictory,
+  };
 }
