@@ -185,8 +185,8 @@ function LiveNow({ items, total }: { items: LiveItem[]; total: number }) {
 
 /** One organiser tournament as a poster: the art, the name, and a three-cell
  *  data strip whose last cell says what happens next — while entries are open,
- *  the time left to enter. */
-function TournamentPoster({ tournament }: { tournament: Tournament }) {
+ *  the time left to enter. Explore's open-for-entry row reuses it. */
+export function TournamentPoster({ tournament }: { tournament: Tournament }) {
   const theme = useTheme();
   const where = [tournament.venue?.name, tournament.venue?.city].filter(Boolean).join(', ');
   const meta = [`${formatShortDate(tournament.startDate)}–${formatShortDate(tournament.endDate)}`, where].filter(Boolean).join(' · ');

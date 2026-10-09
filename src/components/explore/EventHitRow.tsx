@@ -15,7 +15,7 @@ const META = (theme: Palette) => ({
 
 /** One tournament hit in the Explore search. Matches LiveRow's idiom: a
  *  bordered, brand-edged card rather than a plain list row. */
-export default function EventHitRow({ hit }: { hit: TournamentHit }) {
+export default function EventHitRow({ hit, onOpen }: { hit: TournamentHit; onOpen?: () => void }) {
   const theme = useTheme();
   const meta = [hit.sport, hit.venue?.name, hit.venue?.city].filter(Boolean).join(' · ');
 
@@ -23,7 +23,10 @@ export default function EventHitRow({ hit }: { hit: TournamentHit }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={hit.name}
-      onPress={() => router.push({ pathname: '/tournament/[id]', params: { id: hit._id } })}
+      onPress={() => {
+        onOpen?.();
+        router.push({ pathname: '/tournament/[id]', params: { id: hit._id } });
+      }}
       style={{
         backgroundColor: theme.surface,
         borderWidth: 1.5,

@@ -1,7 +1,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import MockAdapter from 'axios-mock-adapter';
 import API from '../src/api/axios';
-import { useExploreSearch } from '../src/lib/useExploreSearch';
+import { pushRecent, useExploreSearch } from '../src/lib/useExploreSearch';
 import { EMPTY_FILTERS } from '../src/lib/tournamentFilters';
 
 let mock: MockAdapter;
@@ -229,5 +229,13 @@ describe('useExploreSearch', () => {
 
     await act(async () => { jest.advanceTimersByTime(350); });
     await waitFor(() => expect(mock.history.get.filter((r) => r.url === '/tournament').length).toBe(callsAfterInitialSearch + 2));
+  });
+});
+
+describe('pushRecent', () => {
+  it('puts the newest first, drops a same-text repeat whatever its case, and caps at six', () => {
+    expect(pushRecent(['Arjun', 'Smash'], ' smash ')).toEqual(['smash', 'Arjun']);
+    expect(pushRecent(['a1', 'a2', 'a3', 'a4', 'a5', 'a6'], 'new')).toEqual(['new', 'a1', 'a2', 'a3', 'a4', 'a5']);
+    expect(pushRecent(['Arjun'], '   ')).toEqual(['Arjun']);
   });
 });

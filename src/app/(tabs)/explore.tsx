@@ -1,22 +1,32 @@
-import { useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { Icon } from '@/components/icons';
 import PlayerHitRow from '@/components/explore/PlayerHitRow';
 import EventHitRow from '@/components/explore/EventHitRow';
+import {
+  CityChips,
+  GroupHeading,
+  KeepTyping,
+  LiveNow,
+  NoMatch,
+  OpenForEntry,
+  RecentSearches,
+  SportTiles,
+  TopPlayersRail,
+} from '@/components/explore/Browse';
 import { FilterSheet } from '@/components/home/FilterSheet';
+import { RANKED_SPORTS } from '@/components/home/TopPlayers';
+import { latestTournaments } from '@/api/tournaments';
 import { appliedCount, type Filters } from '@/lib/tournamentFilters';
-import { useExploreSearch } from '@/lib/useExploreSearch';
+import { MIN_QUERY_LENGTH, pushRecent, useExploreSearch } from '@/lib/useExploreSearch';
+import { useLiveFeed } from '@/lib/useLiveFeed';
+import { getItem, setItem } from '@/lib/secureStore';
+import { RECENT_SEARCHES_KEY } from '@/lib/storage';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme';
-
-const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
-  fontSize: 9,
-  letterSpacing: 0.18 * 9,
-  textTransform: 'uppercase' as const,
-  color: theme.textFaint,
-});
+import type { Tournament } from '@/store/slices/tournamentSlice';
 
 const PROMPT = (theme: Palette) => ({
   fontFamily: 'SpaceGrotesk_400Regular' as const,
@@ -25,17 +35,6 @@ const PROMPT = (theme: Palette) => ({
   color: theme.textFaint,
   textAlign: 'center' as const,
 });
-
-function GroupHeading({ theme, label, count, right }: { theme: Palette; label: string; count: number; right?: ReactNode }) {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, paddingTop: 17, paddingBottom: 9 }}>
-      <Text style={LBL(theme)}>{label}</Text>
-      <View style={{ flex: 1, height: 1.5, backgroundColor: theme.lineFaint }} />
-      <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: theme.textFaint }}>{count}</Text>
-      {right}
-    </View>
-  );
-}
 
 /** The filter control lives on the Events heading and nowhere else — it
  *  filters events only, and putting it in the masthead would imply it
@@ -92,8 +91,45 @@ export default function ExploreScreen() {
   const theme = useTheme();
   const { query, setQuery, filters, setFilters, players, tournaments, loading, error } = useExploreSearch();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [recent, setRecent] = useState<string[]>([]);
+  const [rankSport, setRankSport] = useState(RANKED_SPORTS[0]);
+  const [open, setOpen] = useState<Tournament[] | null>(null);
+  const live = useLiveFeed();
+  const refreshLive = live.refresh;
+
+  // Recents live on the device (logout clears them, see storage.ts). A
+  // missing or unreadable entry just starts the list empty.
+  useEffect(() => {
+    getItem(RECENT_SEARCHES_KEY)
+      .then((raw) => {
+        const saved: unknown = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(saved)) setRecent(saved.filter((q): q is string => typeof q === 'string'));
+      })
+      .catch(() => {});
+  }, []);
+
+  function saveRecent(next: string[]) {
+    setRecent(next);
+    setItem(RECENT_SEARCHES_KEY, JSON.stringify(next)).catch(() => {});
+  }
+
+  // Reloaded on every focus, like Home: live scores and open entries both go
+  // stale while you are on another tab. A failed load keeps the last good list.
+  // ponytail: one page at the server's cap of 100 stands in for "every open
+  // event", and the sport tile counts read it too. Paginate past 100.
+  useFocusEffect(useCallback(() => {
+    latestTournaments(100, { status: 'registration_open' }).then(setOpen, () => {});
+    refreshLive();
+  }, [refreshLive]));
 
   const events = tournaments;
+  const typed = query.trim();
+  // Below the server's floor the hook never searches, so this is browse, not
+  // "no results".
+  const short = typed.length < MIN_QUERY_LENGTH;
+  const matchingRecent = recent.filter((r) => r.toLowerCase().startsWith(typed.toLowerCase()));
+  // The typed query, not the hit's name: it is what reproduces these results.
+  const remember = () => saveRecent(pushRecent(recent, query));
 
   function applyFilters(next: Filters) {
     // FilterSheet's own docblock: the sheet's draft re-seeds from `filters`
@@ -107,7 +143,6 @@ export default function ExploreScreen() {
     setSheetOpen(false);
   }
 
-  const hasQuery = query.trim().length > 0;
   const appliedFilterCount = appliedCount(filters);
   // A filter that matches nothing must not take its own escape hatch down
   // with it — the Events group, and the Filter control it carries, stays
@@ -184,24 +219,39 @@ export default function ExploreScreen() {
         <View style={{ paddingTop: 48, alignItems: 'center' }}>
           <ActivityIndicator color={theme.brand} />
         </View>
-      ) : !hasQuery ? (
-        <View style={{ paddingHorizontal: 26, paddingTop: 48, alignItems: 'center' }}>
-          <Text style={PROMPT(theme)}>Search for players or events.</Text>
-        </View>
+      ) : short ? (
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 110 }} keyboardShouldPersistTaps="handled">
+          {typed ? <KeepTyping typed={typed.length} /> : null}
+          <RecentSearches
+            items={matchingRecent}
+            label={typed ? 'From your recent' : 'Recent'}
+            onPick={setQuery}
+            onClear={() => saveRecent([])}
+          />
+          <GroupHeading label="Browse by sport" />
+          <SportTiles open={open} live={live.items} />
+          <LiveNow items={live.items} total={live.total} />
+          <OpenForEntry tournaments={open ?? []} />
+          <TopPlayersRail sport={rankSport} onSportChange={setRankSport} />
+          <CityChips />
+        </ScrollView>
       ) : !hasResults ? (
-        <View style={{ paddingHorizontal: 26, paddingTop: 48, alignItems: 'center' }}>
-          <Text style={PROMPT(theme)}>Nothing matched that.</Text>
-        </View>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 110 }} keyboardShouldPersistTaps="handled">
+          <NoMatch query={typed} onClear={() => setQuery('')} />
+          <GroupHeading label="Browse instead" />
+          <SportTiles open={open} live={live.items} />
+          <CityChips />
+        </ScrollView>
       ) : (
         <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 110 }} keyboardShouldPersistTaps="handled">
           {players.length > 0 ? (
             <View>
-              <GroupHeading theme={theme} label="Players" count={players.length} />
+              <GroupHeading label="Players" count={players.length} />
               <View style={{ borderRadius: 6, borderWidth: 1.5, borderColor: theme.line, overflow: 'hidden' }}>
                 {players.map((hit, i) => (
                   <View key={hit._id}>
                     {i > 0 ? <View style={{ height: 1.5, backgroundColor: theme.lineFaint }} /> : null}
-                    <PlayerHitRow hit={hit} />
+                    <PlayerHitRow hit={hit} onOpen={remember} />
                   </View>
                 ))}
               </View>
@@ -211,13 +261,12 @@ export default function ExploreScreen() {
           {showEvents ? (
             <View>
               <GroupHeading
-                theme={theme}
                 label="Events"
                 count={events.length}
                 right={<EventsFilterControl theme={theme} count={appliedFilterCount} onPress={() => setSheetOpen(true)} />}
               />
               {events.map((hit) => (
-                <EventHitRow key={hit._id} hit={hit} />
+                <EventHitRow key={hit._id} hit={hit} onOpen={remember} />
               ))}
             </View>
           ) : null}

@@ -42,9 +42,15 @@ export async function searchTournaments(q: string, filters?: Filters): Promise<T
 /**
  * The newest organiser tournaments for home's preview row — the server sorts by
  * start date, newest first. Also not the Redux thunk, for the same reason as
- * above: the Events tab's filters must not reach home.
+ * above: the Events tab's filters must not reach home. Explore passes a
+ * `status` for its open-for-entry row; Events passes its own filters for the
+ * "elsewhere" row.
  */
-export async function latestTournaments(limit = 10): Promise<Tournament[]> {
-  const payload = unwrap<{ tournaments: Tournament[] } | null>(await API.get('/tournament', { params: { limit } }));
+export async function latestTournaments(
+  limit = 10,
+  filters: { sport?: string; city?: string; status?: string } = {},
+): Promise<Tournament[]> {
+  const params = { limit, ...filters };
+  const payload = unwrap<{ tournaments: Tournament[] } | null>(await API.get('/tournament', { params }));
   return visibleTournaments(payload?.tournaments ?? []);
 }

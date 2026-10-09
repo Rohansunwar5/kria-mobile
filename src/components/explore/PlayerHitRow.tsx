@@ -20,7 +20,7 @@ const META = (theme: Palette) => ({
  * them is present, so a sparse record still shows a clean row rather than a
  * blank second line.
  */
-export default function PlayerHitRow({ hit }: { hit: PlayerHit }) {
+export default function PlayerHitRow({ hit, onOpen }: { hit: PlayerHit; onOpen?: () => void }) {
   const theme = useTheme();
   const name = `${hit.firstName} ${hit.lastName}`;
   const meta = [hit.sport, hit.location].filter(Boolean).join(' · ');
@@ -29,7 +29,10 @@ export default function PlayerHitRow({ hit }: { hit: PlayerHit }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={name}
-      onPress={() => router.push({ pathname: '/player/[playerId]', params: { playerId: hit._id } })}
+      onPress={() => {
+        onOpen?.();
+        router.push({ pathname: '/player/[playerId]', params: { playerId: hit._id } });
+      }}
       style={{
         flexDirection: 'row',
         alignItems: 'center',

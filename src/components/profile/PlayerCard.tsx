@@ -86,7 +86,7 @@ export function PlayerCard({
         <View style={{ flex: 1, gap: 6, paddingBottom: 2 }}>
           <Text
             numberOfLines={2}
-            style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 32, lineHeight: 38, color: theme.text }}
+            style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 32, lineHeight: 39, color: theme.text }}
           >
             {name}
           </Text>

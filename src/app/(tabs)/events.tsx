@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { EventsPortal } from '@/components/home/EventsPortal';
 import { FilterSheet } from '@/components/home/FilterSheet';
-import { eventsStrip, openForEntryCount } from '@/lib/homePortal';
+import { latestTournaments } from '@/api/tournaments';
+import { visibleTournaments } from '@/lib/homePortal';
 import { useTheme } from '@/lib/theme';
-import { EMPTY_FILTERS, clearOne, toQuery, type Filters } from '@/lib/tournamentFilters';
+import { EMPTY_FILTERS, toQuery, type Filters } from '@/lib/tournamentFilters';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchPublicTournaments } from '@/store/slices/tournamentSlice';
-
+import { fetchPublicTournaments, type Tournament } from '@/store/slices/tournamentSlice';
 // The server's getAllTournamentsValidator caps `limit` at 100
 // (server/src/middlewares/validators/tournament.validator.ts) — asking for
 // more gets the whole request rejected. Real pagination is the correct
@@ -29,14 +29,42 @@ function sameFilters(a: Filters, b: Filters): boolean {
   return a.sport === b.sport && a.city === b.city && a.status === b.status;
 }
 
+type FilterParams = { sport?: string; city?: string; status?: string; at?: string };
+
+// Explore's sport tiles, city chips and "Open for entry" link open this tab
+// pre-filtered. A param left out means that filter is off.
+function fromParams(p: FilterParams): Filters {
+  return {
+    sport: p.sport ?? EMPTY_FILTERS.sport,
+    city: p.city ?? EMPTY_FILTERS.city,
+    status: p.status ?? EMPTY_FILTERS.status,
+  };
+}
+
 /** Organiser-hosted tournaments. */
 export default function EventsScreen() {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { publicTournaments, publicTotal, isLoading, error } = useAppSelector((s) => s.tournament);
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const params = useLocalSearchParams<FilterParams>();
+  const [filters, setFilters] = useState<Filters>(() => fromParams(params));
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Keyed on `at`, the timestamp Explore stamps on every tap: the tab stays
+  // mounted, so a second tap must re-apply its filter even when the params
+  // are otherwise identical to the last ones.
+  const [seenAt, setSeenAt] = useState(params.at);
+  if (params.at !== seenAt) {
+    setSeenAt(params.at);
+    const next = fromParams(params);
+    setFilters((prev) => (sameFilters(prev, next) ? prev : next));
+  }
+
+  // Every filter change funnels through here. Skipping a value-identical
+  // update keeps the load effect's `filters` dependency on the same reference
+  // so a no-op edit never refetches (see sameFilters above).
+  const applyFilters = (next: Filters) => setFilters((prev) => (sameFilters(prev, next) ? prev : next));
 
   const load = () => dispatch(fetchPublicTournaments({ limit: TOURNAMENT_FETCH_LIMIT, ...toQuery(filters) }));
 
@@ -44,6 +72,19 @@ export default function EventsScreen() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, filters]);
+
+  // A city that empties the list gets the same search without the city, so
+  // the empty state still has something to tap. Stored with the filters it
+  // answers, so a reply for an older filter set can never show under a newer one.
+  const [elsewhere, setElsewhere] = useState<{ for: Filters; list: Tournament[] } | null>(null);
+  const emptyInCity = !isLoading && filters.city !== EMPTY_FILTERS.city && visibleTournaments(publicTournaments).length === 0;
+  useEffect(() => {
+    if (!emptyInCity) return;
+    latestTournaments(3, toQuery({ ...filters, city: EMPTY_FILTERS.city })).then(
+      (list) => setElsewhere({ for: filters, list }),
+      () => {},
+    );
+  }, [emptyInCity, filters]);
 
   return (
     <Screen>
@@ -54,29 +95,14 @@ export default function EventsScreen() {
         </Text>
       </View>
 
-      {/* The strip says OPEN, so it counts what is actually open for entry —
-          not every visible tournament. */}
-      <Text
-        style={{
-          fontFamily: 'SpaceMono_700Bold',
-          fontSize: 9,
-          letterSpacing: 0.14 * 9,
-          textTransform: 'uppercase',
-          color: theme.textFaint,
-          paddingHorizontal: 17,
-          paddingTop: 9,
-        }}
-      >
-        {eventsStrip(openForEntryCount(publicTournaments), filters.city)}
-      </Text>
-
       <View style={{ flex: 1 }}>
         <EventsPortal
           tournaments={publicTournaments}
           isLoading={isLoading}
           error={error}
           filters={filters}
-          onClearFilter={(key) => setFilters((f) => clearOne(f, key))}
+          elsewhere={elsewhere?.for === filters ? elsewhere.list : []}
+          onFilters={applyFilters}
           onOpenFilters={() => setSheetOpen(true)}
           onOpen={(id) => router.push({ pathname: '/tournament/[id]', params: { id } })}
           onRetry={load}
@@ -93,10 +119,7 @@ export default function EventsScreen() {
         // never promise more events than the list can show.
         resultCount={Math.min(publicTotal, TOURNAMENT_FETCH_LIMIT)}
         onApply={(f) => {
-          // Skip the update when nothing changed, so the load effect's
-          // `filters` dependency keeps its reference and never refetches for
-          // a no-op edit (see sameFilters above).
-          setFilters((prev) => (sameFilters(prev, f) ? prev : f));
+          applyFilters(f);
           setSheetOpen(false);
         }}
         onClose={() => setSheetOpen(false)}

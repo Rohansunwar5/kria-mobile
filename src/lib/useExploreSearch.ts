@@ -4,8 +4,16 @@ import { searchTournaments, type TournamentHit } from '@/api/tournaments';
 import { EMPTY_FILTERS, type Filters } from '@/lib/tournamentFilters';
 
 // The server 422s below this, so firing at all would only ever fail.
-const MIN_QUERY_LENGTH = 3;
+export const MIN_QUERY_LENGTH = 3;
 const DEBOUNCE_MS = 300;
+const MAX_RECENT = 6;
+
+/** Explore's recent searches: newest first, one entry per query whatever its case. */
+export function pushRecent(list: string[], query: string): string[] {
+  const q = query.trim();
+  if (!q) return list;
+  return [q, ...list.filter((r) => r.toLowerCase() !== q.toLowerCase())].slice(0, MAX_RECENT);
+}
 
 /**
  * Filters are an INPUT to this hook, not a second fetch layered on top of it
@@ -98,16 +106,14 @@ export function useExploreSearch() {
     };
   }, []);
 
-  // Clearing the search box reads as "start over". The screen's own
-  // `!hasQuery` branch already hides the whole results block — badge
-  // included — at exactly this boundary, so a filter that survived past it
-  // would be invisible and would silently reapply to whatever is typed
-  // next. Reset at the fully-empty query rather than the 3-character search
-  // floor: below the floor but above empty, the Events group (and the
-  // filter control on it) stays visible per the I3 fix, so nothing is
-  // hidden there and nothing needs resetting.
+  // Dropping below the search floor reads as "start over". The screen swaps
+  // the whole results block — badge included — for its browse view at
+  // exactly this boundary, so a filter that survived past it would be
+  // invisible and would silently reapply to whatever is typed next. This
+  // used to reset only at the fully-empty query, back when the Events group
+  // (and its filter control) still showed for a 1–2 letter query.
   useEffect(() => {
-    if (query.trim().length === 0) {
+    if (query.trim().length < MIN_QUERY_LENGTH) {
       filtersRef.current = EMPTY_FILTERS;
       setFiltersState(EMPTY_FILTERS);
     }

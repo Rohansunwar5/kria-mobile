@@ -1,24 +1,32 @@
-import { fireEvent, render, within } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import { EventsPortal } from '../src/components/home/EventsPortal';
 import type { Tournament } from '../src/store/slices/tournamentSlice';
 import { EMPTY_FILTERS } from '../src/lib/tournamentFilters';
 
 // The featured card's art strip calls expo-router's `useIsFocused`, which needs
-// a real NavigationContainer — absent when rendering a bare component. Same
-// shape as the mock in useQuickCricket.test.tsx: focus degrades to true, and
-// the quick-matches push is a no-op here.
+// a real NavigationContainer — absent when rendering a bare component.
 jest.mock('expo-router', () => ({
   useIsFocused: () => true,
   useRouter: () => ({ push: jest.fn() }),
+  router: { push: jest.fn(), navigate: jest.fn() },
 }));
+
+// Dates relative to today, so the date strip (which starts today) holds them.
+const inDays = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  d.setHours(12, 0, 0, 0);
+  return d;
+};
 
 const tournament = (over: Partial<Tournament> = {}): Tournament => ({
   _id: 't1',
   name: 'Kria Smash Cup',
   sport: 'badminton',
   status: 'registration_open',
-  startDate: '2026-09-02T00:00:00.000Z',
-  endDate: '2026-09-07T00:00:00.000Z',
+  startDate: inDays(2).toISOString(),
+  endDate: inDays(3).toISOString(),
+  registrationDeadline: inDays(1).toISOString(),
   ...over,
 }) as Tournament;
 
@@ -27,110 +35,157 @@ const props = (over = {}) => ({
   isLoading: false,
   error: null,
   filters: EMPTY_FILTERS,
-  onClearFilter: jest.fn(),
+  elsewhere: [],
+  onFilters: jest.fn(),
   onOpenFilters: jest.fn(),
   onOpen: jest.fn(),
   onRetry: jest.fn(),
   ...over,
 });
 
+// Headings and row names in the order they render, so a test can check which
+// heading each tournament sits under.
+type Node = string | { children?: Node[] | null } | Node[] | null;
+const textsOf = (node: Node): string[] =>
+  !node ? [] : typeof node === 'string' ? [node] : Array.isArray(node) ? node.flatMap(textsOf) : textsOf(node.children ?? null);
+const renderOrder = (tree: unknown, ...texts: string[]) => {
+  const flat = textsOf(tree as Node);
+  return texts.map((t) => flat.indexOf(t));
+};
+const ascending = (xs: number[]) => xs.every((x, i) => x >= 0 && (i === 0 || x > xs[i - 1]));
+
 describe('EventsPortal', () => {
-  it('shows the tournament list', () => {
+  it('features the open event closing soonest, with entry as its action', () => {
     const { getByText } = render(<EventsPortal {...props()} />);
     expect(getByText(/kria smash cup/i)).toBeTruthy();
+    expect(getByText(/enter now/i)).toBeTruthy();
   });
 
-  // Every other test here passes a single tournament, which becomes the
-  // FEATURED card — so the `rest` mapping, i.e. the entire list body, was never
-  // rendered by any test and could have broken silently. This is the list.
-  it('renders every non-featured tournament as a numbered list row', () => {
-    const { getByText } = render(
+  // The old list sat under one "Open for entry" heading whatever each
+  // tournament's status — finished ones included. Each section must hold
+  // only the statuses its title describes.
+  it('sections the rest by real status, never a finished event under open for entry', () => {
+    const { toJSON, queryByText } = render(
       <EventsPortal
         {...props({
           tournaments: [
-            tournament({ _id: 'a', name: 'City League', status: 'ongoing' }),
-            tournament({ _id: 'b', name: 'Monsoon Open' }),
-            tournament({ _id: 'c', name: 'Harbour Slam' }),
+            tournament({ _id: 'soon', name: 'Soon Open', registrationDeadline: inDays(1).toISOString() }),
+            tournament({ _id: 'late', name: 'Late Open', registrationDeadline: inDays(5).toISOString() }),
+            tournament({ _id: 'live', name: 'Live Cup', status: 'ongoing' }),
+            tournament({ _id: 'done', name: 'Done Cup', status: 'completed' }),
           ],
         })}
-      />
+      />,
     );
 
-    // The ongoing one is the hero, so the other two are rows — and rows carry
-    // the ghost index the featured card has no place for.
-    expect(getByText(/city league/i)).toBeTruthy();
-    expect(getByText(/monsoon open/i)).toBeTruthy();
-    expect(getByText(/harbour slam/i)).toBeTruthy();
+    expect(ascending(renderOrder(toJSON(), 'Soon Open', 'Live now', 'Live Cup', 'Open for entry', 'Late Open', 'Finished', 'Done Cup'))).toBe(true);
+    expect(queryByText('Coming up')).toBeNull();
+  });
 
-    // The "Open for entry" header prints its own count, which for two
-    // non-featured tournaments is also "02" — so a bare getByText('02')
-    // legitimately matches twice and proves nothing about rows. Climb from
-    // each row's title up to the nearest ancestor that also contains its
-    // badge: that ancestor is the row's own Pressable, never the header,
-    // since the header text is never an ancestor of a row's title. The badge is
-    // ghost type, hidden from screen readers, so it is looked up with hidden
-    // elements included.
-    const rowFor = (title: RegExp, badge: string) => {
-      let node = getByText(title);
-      for (;;) {
-        if (within(node).queryByText(badge, { includeHiddenElements: true })) return node;
-        const parent = node.parent;
-        if (!parent) return node;
-        node = parent;
-      }
-    };
+  it('promotes nothing when no event is open for entry, listing every one as a row', () => {
+    const { queryByText, toJSON } = render(
+      <EventsPortal
+        {...props({
+          tournaments: [
+            tournament({ _id: 'a', name: 'Harbour Slam', status: 'completed' }),
+            tournament({ _id: 'b', name: 'Monsoon Open', status: 'auction_in_progress' }),
+          ],
+        })}
+      />,
+    );
 
-    expect(within(rowFor(/monsoon open/i, '01')).getByText('01', { includeHiddenElements: true })).toBeTruthy();
-    expect(within(rowFor(/harbour slam/i, '02')).getByText('02', { includeHiddenElements: true })).toBeTruthy();
+    expect(queryByText(/enter now/i)).toBeNull();
+    expect(ascending(renderOrder(toJSON(), 'Coming up', 'Monsoon Open', 'Finished', 'Harbour Slam'))).toBe(true);
   });
 
   it('opens the tournament a list row was tapped on, not the featured one', () => {
     const onOpen = jest.fn();
-    const { getByText } = render(
-      <EventsPortal
-        {...props({
-          onOpen,
-          tournaments: [
-            tournament({ _id: 'a', name: 'City League', status: 'ongoing' }),
-            tournament({ _id: 'b', name: 'Monsoon Open' }),
-          ],
-        })}
-      />
+    const { getByLabelText } = render(
+      <EventsPortal {...props({ onOpen, tournaments: [tournament({ _id: 'a' }), tournament({ _id: 'b', name: 'Monsoon Open', status: 'ongoing' })] })} />,
     );
 
-    fireEvent.press(getByText(/monsoon open/i));
+    fireEvent.press(getByLabelText('Monsoon Open'));
     expect(onOpen).toHaveBeenCalledWith('b');
   });
 
-  // DESIGN.md §5: an error scopes to the section that failed. The rest of home
-  // — masthead, portal switch — is the home screen's, not this component's, and
-  // must survive.
+  it('switches sport from the segment', () => {
+    const onFilters = jest.fn();
+    const { getByLabelText } = render(<EventsPortal {...props({ onFilters })} />);
+
+    fireEvent.press(getByLabelText('Show cricket'));
+    expect(onFilters).toHaveBeenCalledWith({ ...EMPTY_FILTERS, sport: 'cricket' });
+  });
+
+  it('narrows the list to a day picked on the strip', () => {
+    const later = inDays(10);
+    const { getByLabelText, queryByLabelText } = render(
+      <EventsPortal
+        {...props({
+          tournaments: [
+            tournament({ _id: 'a', name: 'Early Open' }),
+            tournament({ _id: 'b', name: 'Later Open', startDate: later.toISOString(), endDate: later.toISOString() }),
+          ],
+        })}
+      />,
+    );
+    const dayName = later.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    fireEvent.press(getByLabelText(`${dayName}, has events`));
+    expect(queryByLabelText(/^Early Open/)).toBeNull();
+    expect(getByLabelText(/^Later Open/)).toBeTruthy();
+  });
+
+  // DESIGN.md §5: an error scopes to the section that failed.
   it('scopes a failed load to itself when nothing is cached', () => {
     const { getByText } = render(<EventsPortal {...props({ tournaments: [], error: 'boom' })} />);
     expect(getByText(/events unavailable/i)).toBeTruthy();
   });
 
-  it('shows the filter bar instead of the old sport chips', () => {
-    const { getByLabelText, queryByText } = render(<EventsPortal {...props()} />);
+  it('keeps the filter sheet one tap away', () => {
+    const { getByLabelText } = render(<EventsPortal {...props()} />);
     expect(getByLabelText('Filter tournaments')).toBeTruthy();
-    // The hard-coded chip row is gone for good.
-    expect(queryByText('BLR')).toBeNull();
   });
 
-  it('offers a filter reset in the empty state only when a filter is applied', () => {
+  it('offers to widen only the filters that are applied', () => {
     const { queryByText } = render(<EventsPortal {...props({ tournaments: [] })} />);
-    expect(queryByText(/clear filters/i)).toBeNull();
+    expect(queryByText(/no events yet/i)).toBeTruthy();
+    expect(queryByText(/all sports|all cities|any stage/i)).toBeNull();
 
+    const onFilters = jest.fn();
     const { getByText } = render(
-      <EventsPortal {...props({ tournaments: [], filters: { sport: 'badminton', city: 'All', status: 'All' } })} />
+      <EventsPortal {...props({ tournaments: [], onFilters, filters: { sport: 'cricket', city: 'Pune', status: 'All' } })} />,
     );
-    expect(getByText(/clear filters/i)).toBeTruthy();
+    expect(getByText('No cricket in Pune')).toBeTruthy();
+    fireEvent.press(getByText('All cities'));
+    expect(onFilters).toHaveBeenCalledWith({ sport: 'cricket', city: 'All', status: 'All' });
   });
 
-  // The PLAY portal and the nav's Host button are the ways to a quick match
-  // now. This CTA was a third route to the same place and the approved design
-  // has none on the events side — it must not creep back.
-  it('no longer carries the quick-matches CTA', () => {
+  // A stage filter alone must not blame a sport or city the user never touched.
+  it('names only the filters actually set in the empty state', () => {
+    const { getByText, queryByText } = render(
+      <EventsPortal {...props({ tournaments: [], filters: { sport: 'All', city: 'All', status: 'ongoing' } })} />,
+    );
+    expect(getByText('No live events')).toBeTruthy();
+    expect(getByText('Any stage')).toBeTruthy();
+    expect(queryByText(/all cities|all sports/i)).toBeNull();
+  });
+
+  it('shows the same search elsewhere when a city emptied the list', () => {
+    const { getByText } = render(
+      <EventsPortal
+        {...props({
+          tournaments: [],
+          filters: { sport: 'cricket', city: 'Pune', status: 'All' },
+          elsewhere: [tournament({ _id: 'x', name: 'JBN Cricket Cup', sport: 'cricket' })],
+        })}
+      />,
+    );
+    expect(getByText(/cricket elsewhere/i)).toBeTruthy();
+    expect(getByText('JBN Cricket Cup')).toBeTruthy();
+  });
+
+  // The PLAY portal and the nav's Host button are the ways to a quick match.
+  it('does not carry the quick-matches CTA', () => {
     const { queryByText } = render(<EventsPortal {...props()} />);
     expect(queryByText(/between tournaments/i)).toBeNull();
     expect(queryByText(/quick matches/i)).toBeNull();
@@ -139,62 +194,5 @@ describe('EventsPortal', () => {
   it('dims rather than blanks while refreshing over cached data', () => {
     const { getByTestId } = render(<EventsPortal {...props({ isLoading: true })} />);
     expect(getByTestId('events-list').props.style.opacity).toBe(0.5);
-  });
-
-  // The old copy named "this sport and city" regardless of which filter was
-  // actually set — but filtersActive also fires on stage alone, so filtering
-  // to a stage with no results blamed a sport and city the user never touched.
-  it('does not name a specific filter in the empty-state message', () => {
-    const { getByText, queryByText } = render(
-      <EventsPortal {...props({ tournaments: [], filters: { sport: 'All', city: 'All', status: 'ongoing' } })} />
-    );
-    expect(getByText(/clear filters/i)).toBeTruthy();
-    expect(queryByText(/sport and city/i)).toBeNull();
-  });
-
-  // Only `ongoing` and `registration_open` are hero-worthy. This is the
-  // has-hero half of that rule: a registration_open tournament is promoted
-  // even when a finished one would otherwise have been visible[0].
-  it('features the registration_open tournament as the hero over a finished one', () => {
-    const { getByText, getByTestId } = render(
-      <EventsPortal
-        {...props({
-          tournaments: [
-            tournament({ _id: 'a', name: 'Harbour Slam', status: 'completed' }),
-            tournament({ _id: 'b', name: 'Monsoon Open', status: 'registration_open' }),
-          ],
-        })}
-      />
-    );
-
-    expect(getByText(/view tournament/i)).toBeTruthy();
-    // The finished tournament is the only one left as a row.
-    expect(getByTestId('events-list').props.data).toHaveLength(1);
-  });
-
-  // The no-hero half: filtering to a stage where nothing qualifies as a hero
-  // (e.g. Ended, Auction) used to fall back to visible[0] regardless of its
-  // status, promoting a finished tournament to the headline card. Now there
-  // must be no hero at all, and every visible tournament renders as a row.
-  it('features no hero when nothing is ongoing or open for entry, listing every tournament as a row', () => {
-    const { getByText, queryByText, getByTestId } = render(
-      <EventsPortal
-        {...props({
-          tournaments: [
-            tournament({ _id: 'a', name: 'Harbour Slam', status: 'completed' }),
-            tournament({ _id: 'b', name: 'Monsoon Open', status: 'auction_in_progress' }),
-          ],
-        })}
-      />
-    );
-
-    expect(queryByText(/view tournament/i)).toBeNull();
-    expect(queryByText(/watch the broadcast/i)).toBeNull();
-    expect(getByText(/harbour slam/i)).toBeTruthy();
-    expect(getByText(/monsoon open/i)).toBeTruthy();
-    // Neither tournament was consumed as a hero, so both are rows — the
-    // section count (driven by this same array) is right without a phantom
-    // featured card silently eating one of them.
-    expect(getByTestId('events-list').props.data).toHaveLength(2);
   });
 });

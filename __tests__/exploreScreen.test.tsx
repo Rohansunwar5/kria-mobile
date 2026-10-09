@@ -2,6 +2,14 @@ import { render, screen, waitFor, act, fireEvent } from '@testing-library/react-
 import MockAdapter from 'axios-mock-adapter';
 import API from '../src/api/axios';
 import ExploreScreen from '../src/app/(tabs)/explore';
+import { clearAuth } from '../src/lib/storage';
+
+const mockNavigate = jest.fn();
+jest.mock('expo-router', () => ({
+  router: { push: jest.fn(), navigate: (...a: unknown[]) => mockNavigate(...a) },
+  useIsFocused: () => true,
+  useFocusEffect: (callback: () => void) => require('react').useEffect(callback, [callback]),
+}));
 
 let mock: MockAdapter;
 
@@ -63,12 +71,49 @@ describe('Explore screen', () => {
     await waitFor(() => expect(screen.getByText(/could not search/i)).toBeTruthy());
   });
 
-  // Before anything is typed the screen must invite a search rather than
-  // claiming nothing matched.
-  it('opens with a prompt, not an empty state', () => {
+  // Before anything is typed the screen offers browsing rather than an empty
+  // page or a claim that nothing matched.
+  it('opens on browse, not an empty state', () => {
     render(<ExploreScreen />);
-    expect(screen.getByText(/search for players or events/i)).toBeTruthy();
+    expect(screen.getByText(/browse by sport/i)).toBeTruthy();
+    expect(screen.getByLabelText('Badminton events')).toBeTruthy();
     expect(screen.queryByText(/nothing matched/i)).toBeNull();
+  });
+
+  // The server never searches below three letters, so a two-letter query
+  // must say how far it has to go rather than reading as no results.
+  it('counts down to the search floor instead of saying nothing matched', async () => {
+    render(<ExploreScreen />);
+    await typeSearch('ro');
+
+    expect(screen.getByText(/1 more letter to search/i)).toBeTruthy();
+    expect(screen.queryByText(/nothing matched/i)).toBeNull();
+  });
+
+  it('remembers a search that was opened, across a restart', async () => {
+    mock.onGet('/player/search').reply(200, players([PLAYER]));
+    mock.onGet('/tournament').reply(200, tournaments([]));
+
+    const first = render(<ExploreScreen />);
+    await typeSearch('sunw');
+    await waitFor(() => expect(screen.getByText('Rohan Sunwar')).toBeTruthy());
+    fireEvent.press(screen.getByLabelText('Rohan Sunwar'));
+    first.unmount();
+
+    render(<ExploreScreen />);
+    await waitFor(() => expect(screen.getByLabelText('Search sunw again')).toBeTruthy());
+
+    // The secure-store mock is shared across this file; leave it empty.
+    await act(async () => { await clearAuth(); });
+  });
+
+  it('opens Events filtered to the sport tile that was tapped', () => {
+    render(<ExploreScreen />);
+    fireEvent.press(screen.getByLabelText('Cricket events'));
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/(tabs)/events', params: expect.objectContaining({ sport: 'cricket' }) }),
+    );
   });
 });
 
@@ -253,7 +298,7 @@ describe('Explore screen — filters (I2/I3/I4 root cause)', () => {
     // Clear the query entirely — this reads as "start over".
     fireEvent.press(screen.getByLabelText('Clear search'));
     await act(async () => { jest.advanceTimersByTime(350); });
-    await waitFor(() => expect(screen.getByText(/search for players or events/i)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/browse by sport/i)).toBeTruthy());
 
     await typeSearch('cup');
 

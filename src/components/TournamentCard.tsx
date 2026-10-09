@@ -1,125 +1,196 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { Tournament } from '@/store/slices/tournamentSlice';
+import { Icon } from '@/components/icons';
 import { StatusPill, Tag } from './StatusPill';
-import { Ghost } from './states';
-import { TournamentArt } from './TournamentArt';
-import { useLandReveal, useRise, usePress } from '@/lib/motion';
-import { formatShortDate } from '@/lib/format';
+import { hue } from './TournamentArt';
+import { usePress } from '@/lib/motion';
+import { useTheme } from '@/lib/theme';
+import type { Palette } from '@/lib/theme';
+import { posterCell } from '@/lib/homePortal';
+import { SPORT_ICON } from '@/lib/sports';
+import { dateRange, dayOfEvent, sectionOf } from '@/lib/eventsView';
 
-// The "Open for entry" block from Main.dc.html: flat panel, 4px brand edge,
-// ghost index — led by the tournament's own art strip, which wipes in behind a
-// hazard sweep when the row lands (A), drifts while you read it (B), sweeps
-// when it has no banner (E), and answers the press (C).
-export function TournamentCard({
-  tournament,
-  onPress,
-  index,
-  entryFee,
-}: {
-  tournament: Tournament;
-  onPress: () => void;
-  index?: number;
-  entryFee?: number;
-}) {
-  const { sweep, wipe, rise, riseLate } = useLandReveal(tournament._id, (index ?? 1) - 1);
-  const riseStyle = useRise(rise);
-  const riseLateStyle = useRise(riseLate);
-  const { press, onPressIn, onPressOut } = usePress();
-  const cardStyle = useAnimatedStyle(() => ({ transform: [{ scale: 1 - press.value * 0.015 }] }));
-  const edgeStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: press.value * 0.75 }] }));
+const FOOT = (theme: Palette) => ({
+  fontFamily: 'SpaceMono_400Regular' as const,
+  fontSize: 9,
+  letterSpacing: 0.08 * 9,
+  textTransform: 'uppercase' as const,
+  color: theme.textFaint,
+});
 
-  const meta = [
-    tournament.venue?.city,
-    `${tournament.registeredPlayersCount ?? 0} players`,
-    `${tournament.teamsCount ?? 0}/${tournament.settings?.maxTeams || '∞'} teams`,
-    `${formatShortDate(tournament.startDate)}–${formatShortDate(tournament.endDate)}`,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+const BOLD = (theme: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, color: theme.text });
+
+function initials(name: string) {
+  return name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+}
+
+/** The banner when there is one, else the tournament's seeded ground — the
+ *  same hue as its art strip everywhere else, so it reads as the same event. */
+function Thumb({ tournament }: { tournament: Tournament }) {
+  const theme = useTheme();
+  const icon = SPORT_ICON[tournament.sport] ?? 'trophy';
+  return (
+    <View style={{ width: 74, overflow: 'hidden', backgroundColor: `hsl(${hue(tournament._id)}, 44%, 18%)` }}>
+      {tournament.bannerImage ? (
+        <Image source={{ uri: tournament.bannerImage }} resizeMode="cover" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+      ) : (
+        <>
+          <View style={{ position: 'absolute', left: 9, top: 9 }}>
+            <Icon name={icon} size={16} color={theme.onDark} />
+          </View>
+          <Text
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            style={{ position: 'absolute', left: 6, bottom: -6, fontFamily: 'Anton_400Regular', fontSize: 40, lineHeight: 48, color: theme.mutedTint }}
+          >
+            {initials(tournament.name)}
+          </Text>
+        </>
+      )}
+    </View>
+  );
+}
+
+/** Filled slots out of the cap, one block per team. Grey once full, so a
+ *  full event reads as full before anyone taps it. */
+function TeamMeter({ teams, max }: { teams: number; max: number }) {
+  const theme = useTheme();
+  const full = teams >= max;
+  // ponytail: one block per slot reads up to a dozen; past that it would wrap.
+  if (max > 12) return null;
+  return (
+    <View style={{ flexDirection: 'row', gap: 2 }}>
+      {Array.from({ length: max }, (_, i) => (
+        <View key={i} style={{ width: 7, height: 9, backgroundColor: i < teams ? (full ? theme.textMeta : theme.open) : theme.surfaceAlt }} />
+      ))}
+    </View>
+  );
+}
+
+/** The bottom line says what matters for the row's section: the deadline
+ *  while entry is open, the day count while live, the start date before. */
+function Footer({ tournament }: { tournament: Tournament }) {
+  const theme = useTheme();
+  const section = sectionOf(tournament.status);
+  const teams = tournament.teamsCount ?? 0;
+  const max = tournament.settings?.maxTeams ?? 0;
+  const cell = posterCell(tournament);
+  const view = (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+      <Text style={{ ...FOOT(theme), ...BOLD(theme), color: theme.textBody }}>View</Text>
+      <Icon name="chevron-right" size={10} color={theme.textBody} strokeWidth={2.4} />
+    </View>
+  );
+
+  let left;
+  let right = view;
+  if (section === 'open') {
+    left = (
+      <>
+        {max > 0 ? <TeamMeter teams={teams} max={max} /> : null}
+        <Text style={FOOT(theme)}>
+          <Text style={BOLD(theme)}>{teams}</Text>
+          {max > 0 ? `/${max}${teams >= max ? ' · Full' : ' teams'}` : ' teams'}
+        </Text>
+      </>
+    );
+    right = (
+      <Text style={{ ...FOOT(theme), fontFamily: 'SpaceMono_700Bold', color: cell.urgent ? theme.brandInk : theme.textFaint }}>
+        {cell.urgent ? `Closes in ${cell.value}` : `${cell.label} ${cell.value}`}
+      </Text>
+    );
+  } else if (section === 'live') {
+    const { day, total } = dayOfEvent(tournament);
+    left = (
+      <Text style={FOOT(theme)}>
+        Day <Text style={BOLD(theme)}>{day}</Text> of {total}
+      </Text>
+    );
+  } else if (section === 'done') {
+    left = (
+      <Text style={FOOT(theme)}>
+        <Text style={BOLD(theme)}>{tournament.registeredPlayersCount ?? 0}</Text> players
+      </Text>
+    );
+  } else {
+    left = (
+      <Text style={FOOT(theme)}>
+        {cell.label} <Text style={BOLD(theme)}>{cell.value}</Text>
+      </Text>
+    );
+  }
 
   return (
-    <Animated.View style={[{ marginBottom: 12 }, cardStyle]}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 9,
+        marginHorizontal: -12,
+        paddingHorizontal: 12,
+        paddingVertical: 9,
+        borderTopWidth: 1.5,
+        borderTopColor: theme.lineFaint,
+      }}
+    >
+      {left}
+      <View style={{ flex: 1 }} />
+      {right}
+    </View>
+  );
+}
+
+/** One tournament as a compact ticket on the Events tab. A live one carries
+ *  the brand edge; a finished one dims, since there is nothing left to enter. */
+export function TournamentCard({ tournament, onPress }: { tournament: Tournament; onPress: () => void }) {
+  const theme = useTheme();
+  const { press, onPressIn, onPressOut } = usePress();
+  const cardStyle = useAnimatedStyle(() => ({ transform: [{ scale: 1 - press.value * 0.015 }] }));
+  const section = sectionOf(tournament.status);
+  const meta = [tournament.venue?.city, dateRange(tournament.startDate, tournament.endDate)].filter(Boolean).join(' · ');
+
+  return (
+    <Animated.View style={[{ marginBottom: 9 }, cardStyle]}>
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={tournament.name}
         onPress={onPress}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         style={{
-          backgroundColor: '#151515',
+          flexDirection: 'row',
+          backgroundColor: theme.surface,
           borderWidth: 1.5,
-          borderColor: 'rgba(255,255,255,0.14)',
-          borderLeftWidth: 4,
-          borderLeftColor: '#F97316',
+          borderColor: theme.line,
+          borderLeftWidth: section === 'live' ? 4 : 1.5,
+          borderLeftColor: section === 'live' ? theme.brand : theme.line,
           borderRadius: 6,
           overflow: 'hidden',
+          opacity: section === 'done' ? 0.62 : 1,
         }}
       >
-        <TournamentArt
-          uri={tournament.bannerImage}
-          seed={tournament._id}
-          height={76}
-          wipe={wipe}
-          sweep={sweep}
-          press={press}
-          drift
-          shimmer
-          index={(index ?? 1) - 1}
-        />
-        {index != null ? <Ghost text={String(index).padStart(2, '0')} size={72} style={{ right: 4, top: -6 }} /> : null}
-
-        <Animated.View style={[{ paddingHorizontal: 14, paddingTop: 10 }, riseStyle]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 8 }}>
+        <Thumb tournament={tournament} />
+        <View style={{ flex: 1, minWidth: 0, paddingHorizontal: 12, paddingTop: 10 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <StatusPill status={tournament.status} />
             {tournament.sport ? <Tag label={tournament.sport.replace('_', ' ')} /> : null}
           </View>
           <Text
             numberOfLines={2}
-            style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 23, lineHeight: 28, color: '#fff' }}
+            style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: theme.text, marginTop: 7 }}
           >
             {tournament.name}
           </Text>
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 8 }}>
+          <Text
+            numberOfLines={1}
+            style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.05 * 10, textTransform: 'uppercase', color: theme.textMeta, marginTop: 4 }}
+          >
             {meta}
           </Text>
-        </Animated.View>
-
-        <Animated.View
-          style={[
-            {
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingHorizontal: 14,
-              paddingVertical: 11,
-              marginTop: 12,
-              borderTopWidth: 1.5,
-              borderTopColor: 'rgba(255,255,255,0.10)',
-            },
-            riseLateStyle,
-          ]}
-        >
-          {entryFee != null ? (
-            <View>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
-                Entry
-              </Text>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 16, color: '#16C46A', marginTop: 2 }}>
-                ₹{entryFee.toLocaleString('en-IN')}
-              </Text>
-            </View>
-          ) : (
-            <View />
-          )}
-          <Tag label={tournament.status === 'registration_open' ? 'Enter now' : 'View'} variant="auction" />
-        </Animated.View>
-
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: '#F97316', transformOrigin: 'left' },
-            edgeStyle,
-          ]}
-        />
+          <Footer tournament={tournament} />
+        </View>
       </Pressable>
     </Animated.View>
   );

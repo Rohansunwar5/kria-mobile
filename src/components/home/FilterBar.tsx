@@ -1,24 +1,15 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { Lbl } from '@/components/canvas';
 import { Icon } from '@/components/icons';
-import { colors, useTheme } from '@/lib/theme';
-import { appliedChips, appliedCount, type Filters } from '@/lib/tournamentFilters';
+import { useTheme } from '@/lib/theme';
+import type { Palette } from '@/lib/theme';
 
-const BAR = {
-  flexDirection: 'row' as const,
-  alignItems: 'center' as const,
-  gap: 7,
-  paddingHorizontal: 16,
-  paddingTop: 14,
-};
-
-const CHIP_TEXT = {
+const CHIP_TEXT = (theme: Palette) => ({
   fontFamily: 'SpaceMono_700Bold' as const,
   fontSize: 10,
   letterSpacing: 0.1 * 10,
   textTransform: 'uppercase' as const,
-  color: colors.white,
-};
+  color: theme.text,
+});
 
 // The artboard draws the dismiss glyph at 9px, but a hit target that small
 // fails DESIGN.md's 44px floor — a chip whose x cannot be hit is worse than
@@ -29,24 +20,6 @@ const CHIP_DISMISS = {
   height: 20,
   alignItems: 'center' as const,
   justifyContent: 'center' as const,
-};
-
-const FILTER_BTN = {
-  minHeight: 44,
-  flexDirection: 'row' as const,
-  alignItems: 'center' as const,
-  justifyContent: 'center' as const,
-  gap: 7,
-  paddingHorizontal: 12,
-  borderRadius: 5,
-  backgroundColor: colors.brand,
-};
-
-const COUNT_TEXT = {
-  fontFamily: 'SpaceMono_700Bold' as const,
-  fontSize: 11,
-  letterSpacing: 0.1 * 11,
-  color: colors.ink,
 };
 
 function FilterChip({ label, onDismiss }: { label: string; onDismiss: () => void }) {
@@ -69,7 +42,7 @@ function FilterChip({ label, onDismiss }: { label: string; onDismiss: () => void
   };
   return (
     <View style={chip}>
-      <Text style={CHIP_TEXT}>{label}</Text>
+      <Text style={CHIP_TEXT(theme)}>{label}</Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Clear ${label} filter`}
@@ -93,61 +66,54 @@ function FilterChip({ label, onDismiss }: { label: string; onDismiss: () => void
 }
 
 /**
- * The home screen's applied-filter strip: a chip per set filter plus the
- * button that opens `FilterSheet` for everything else — the sheet edits a
- * draft, so every actual change flows back through `onOpen` + the sheet's
- * `onApply`, except a single dismiss, which this bar can do on its own via
- * `onClear`.
- *
- * Chips are display + dismiss only, never a second way to edit a value —
- * that keeps this bar and the sheet from disagreeing about how a filter
- * gets set. With nothing applied there is nothing to scroll, so the left
- * side reads "All tournaments" (the same 9px overline `Lbl` uses everywhere
- * else) rather than sitting empty.
+ * The Events tab's applied-filter chips. Display + dismiss only, never a
+ * second way to edit a value — that keeps the chips and `FilterSheet` from
+ * disagreeing about how a filter gets set. Renders nothing when no chip is set.
  */
-export function FilterBar({
-  filters,
-  onClear,
-  onOpen,
-}: {
-  filters: Filters;
-  onClear: (key: keyof Filters) => void;
-  onOpen: () => void;
-}) {
-  const chips = appliedChips(filters);
-  const count = appliedCount(filters);
-  const buttonLabel = count === 0 ? 'Filter tournaments' : `Filter tournaments, ${count} applied`;
-
+export function FilterChips({ chips, onClear }: { chips: { key: string; label: string }[]; onClear: (key: string) => void }) {
+  if (chips.length === 0) return null;
   return (
-    <View style={BAR}>
-      <View style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-        {chips.length === 0 ? (
-          <Lbl>All tournaments</Lbl>
-        ) : (
-          // This gap is one leg of the hitSlop/paddingRight/gap equality
-          // explained on FilterChip's dismiss hitSlop above — load-bearing
-          // together with those two, not just a spacing choice.
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-          >
-            {chips.map((chip) => (
-              <FilterChip key={chip.key} label={chip.label} onDismiss={() => onClear(chip.key)} />
-            ))}
-          </ScrollView>
-        )}
-      </View>
+    // This gap is one leg of the hitSlop/paddingRight/gap equality explained
+    // on FilterChip's dismiss hitSlop above — load-bearing together with
+    // those two, not just a spacing choice.
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+    >
+      {chips.map((chip) => (
+        <FilterChip key={chip.key} label={chip.label} onDismiss={() => onClear(chip.key)} />
+      ))}
+    </ScrollView>
+  );
+}
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={buttonLabel}
-        onPress={onOpen}
-        style={FILTER_BTN}
-      >
-        <Icon name="filter" size={14} color={colors.ink} strokeWidth={2.2} />
-        {count > 0 ? <Text style={COUNT_TEXT}>{count}</Text> : null}
-      </Pressable>
-    </View>
+/** Opens `FilterSheet`. Carries the applied count, and keeps a 44px target. */
+export function FilterButton({ count, onPress }: { count: number; onPress: () => void }) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={count === 0 ? 'Filter tournaments' : `Filter tournaments, ${count} applied`}
+      onPress={onPress}
+      style={{
+        minHeight: 44,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 11,
+        borderRadius: 5,
+        borderWidth: 1.5,
+        borderColor: theme.keyline,
+      }}
+    >
+      <Icon name="filter" size={12} color={theme.textBody} strokeWidth={2.2} />
+      <Text style={{ ...CHIP_TEXT(theme), color: theme.textBody }}>Filter</Text>
+      {count > 0 ? (
+        <View style={{ backgroundColor: theme.brand, borderRadius: 2, paddingHorizontal: 5, paddingVertical: 1 }}>
+          <Text style={{ ...CHIP_TEXT(theme), color: theme.onBrand }}>{count}</Text>
+        </View>
+      ) : null}
+    </Pressable>
   );
 }

@@ -25,7 +25,9 @@ jest.mock('@/store/slices/tournamentSlice', () => {
   };
 });
 
+let mockParams: Record<string, string> = {};
 jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => mockParams,
   useRouter: () => ({ push: jest.fn() }),
   router: { push: jest.fn() },
   useIsFocused: () => true,
@@ -67,6 +69,19 @@ const openSheet = async (utils: Awaited<ReturnType<typeof renderEvents>>) => {
 };
 
 describe('Events', () => {
+  afterEach(() => { mockParams = {}; });
+
+  // Explore's sport tiles and city chips open this tab with the filter as params.
+  it('opens pre-filtered from Explore', async () => {
+    mockParams = { sport: 'cricket', city: 'Pune', at: '1' };
+    mockFetchPublicTournaments.mockClear();
+    await renderEvents();
+
+    // Once, and already filtered — no unfiltered fetch before the filter lands.
+    expect(mockFetchPublicTournaments).toHaveBeenCalledTimes(1);
+    expect(mockFetchPublicTournaments).toHaveBeenCalledWith(expect.objectContaining({ sport: 'cricket', city: 'Pune' }));
+  });
+
   it('lists the events', async () => {
     const { getByTestId } = await renderEvents();
     expect(getByTestId('events-list')).toBeTruthy();
@@ -84,7 +99,7 @@ describe('Events', () => {
       tournament({ _id: 'f', status: 'registration_open', name: 'Pulled Event', isActive: false }),
     ]);
 
-    expect(getByText('ORGANISER-HOSTED · 2 OPEN')).toBeTruthy();
+    expect(getByText('2 open for entry')).toBeTruthy();
   });
 
   it('opens the filter sheet from the bar and applies a choice', async () => {
@@ -94,8 +109,8 @@ describe('Events', () => {
     fireEvent.press(utils.getByLabelText('Cricket'));
     fireEvent.press(utils.getByText(/show \d+ events?/i));
 
-    // The chip proves the choice reached the screen's state, not just the sheet's.
-    await waitFor(() => expect(utils.getByText('Cricket')).toBeTruthy());
+    // The segment proves the choice reached the screen's state, not just the sheet's.
+    await waitFor(() => expect(utils.getByLabelText('Show cricket').props.accessibilityState.selected).toBe(true));
   });
 
   // The fetch is capped at 100 (the max getAllTournamentsValidator accepts),

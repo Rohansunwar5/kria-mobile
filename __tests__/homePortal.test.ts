@@ -1,4 +1,4 @@
-import { eventsStrip, hasBegun, inProgress, openForEntryCount, posterCell, posterOrder, visibleTournaments } from '../src/lib/homePortal';
+import { hasBegun, inProgress, openForEntryCount, posterCell, posterOrder, visibleTournaments } from '../src/lib/homePortal';
 import { formatShortDate } from '../src/lib/format';
 import type { QuickKnockout } from '../src/api/quickKnockout';
 import type { QuickMatch } from '../src/api/quickMatch';
@@ -68,16 +68,6 @@ describe('openForEntryCount', () => {
 
   it('is zero for an empty list', () => {
     expect(openForEntryCount([])).toBe(0);
-  });
-});
-
-describe('eventsStrip', () => {
-  it('names the city when one is filtered', () => {
-    expect(eventsStrip(3, 'Bangalore')).toBe('ORGANISER-HOSTED · 3 OPEN IN BANGALORE');
-  });
-
-  it('drops the city clause when the filter is All', () => {
-    expect(eventsStrip(3, 'All')).toBe('ORGANISER-HOSTED · 3 OPEN');
   });
 });
 

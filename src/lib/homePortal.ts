@@ -20,12 +20,6 @@ export function openForEntryCount(tournaments: Tournament[]): number {
   return visibleTournaments(tournaments).filter((t) => t.status === 'registration_open').length;
 }
 
-/** The one-line strip above the events list. */
-export function eventsStrip(openCount: number, city: string): string {
-  const where = city === 'All' ? '' : ` IN ${city.toUpperCase()}`;
-  return `ORGANISER-HOSTED · ${openCount} OPEN${where}`;
-}
-
 /** A match in progress carries its knockout when it belongs to one, so the top
  *  card can say which knockout and round it is. */
 export type InProgress =
