@@ -9,6 +9,7 @@ import { Anton_400Regular } from '@expo-google-fonts/anton';
 import {
   Barlow_400Regular,
   Barlow_500Medium,
+  Barlow_600SemiBold,
   Barlow_700Bold,
 } from '@expo-google-fonts/barlow';
 import { JetBrainsMono_400Regular, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
@@ -130,6 +131,7 @@ export default function RootLayout() {
     Anton_400Regular,
     Barlow_400Regular,
     Barlow_500Medium,
+  Barlow_600SemiBold,
     Barlow_700Bold,
     JetBrainsMono_400Regular,
     JetBrainsMono_700Bold,

@@ -87,8 +87,7 @@ export default function LiveRow({ item }: { item: LiveItem }) {
         <Text
           style={{
             flex: 1,
-            fontFamily: 'Anton_400Regular',
-            textTransform: 'uppercase',
+            fontFamily: 'Barlow_600SemiBold',
             fontSize: 18,
             lineHeight: 22,
             color: theme.text,
@@ -155,8 +154,7 @@ export function LiveChip({ item }: { item: LiveItem }) {
           numberOfLines={1}
           style={{
             flex: 1,
-            fontFamily: 'Anton_400Regular',
-            textTransform: 'uppercase',
+            fontFamily: 'Barlow_600SemiBold',
             fontSize: 16,
             lineHeight: 20,
             color: theme.text,

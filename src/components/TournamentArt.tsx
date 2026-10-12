@@ -41,6 +41,7 @@ export function TournamentArt({
   press,
   drift,
   shimmer,
+  hazard = true,
   index = 0,
 }: {
   uri?: string;
@@ -52,6 +53,9 @@ export function TournamentArt({
   press?: SharedValue<number>;
   drift?: boolean;
   shimmer?: boolean;
+  /** The hazard rule along the bottom edge. A poster that carries its status
+   *  on the art leaves it off. */
+  hazard?: boolean;
   index?: number;
 }) {
   const { width } = useWindowDimensions();
@@ -133,15 +137,17 @@ export function TournamentArt({
         style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: Math.round(height * 0.6) }}
       />
 
-      <Animated.View
-        style={[
-          { position: 'absolute', left: 0, right: 0, bottom: 0, transformOrigin: 'left' },
-          sweepStyle,
-        ]}
-        pointerEvents="none"
-      >
-        <Hazard />
-      </Animated.View>
+      {hazard ? (
+        <Animated.View
+          style={[
+            { position: 'absolute', left: 0, right: 0, bottom: 0, transformOrigin: 'left' },
+            sweepStyle,
+          ]}
+          pointerEvents="none"
+        >
+          <Hazard />
+        </Animated.View>
+      ) : null}
 
       <Animated.View style={[fill, { backgroundColor: fadeTo }, coverStyle]} pointerEvents="none" />
     </View>

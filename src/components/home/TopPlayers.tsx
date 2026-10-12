@@ -40,8 +40,8 @@ function rowLabel(rank: number, player: RankedPlayer, isViewer: boolean): string
 
 const HEADING = {
   fontFamily: 'Anton_400Regular' as const,
-  fontSize: 20,
-  lineHeight: 24,
+  fontSize: 24,
+  lineHeight: 29,
   textTransform: 'uppercase' as const,
   color: colors.white,
 };
@@ -138,8 +138,7 @@ function PlayerRow({
           <Text
             numberOfLines={1}
             style={{
-              fontFamily: 'Anton_400Regular',
-              textTransform: 'uppercase',
+              fontFamily: 'Barlow_600SemiBold',
               fontSize: 16,
               lineHeight: 20,
               color: colors.white,

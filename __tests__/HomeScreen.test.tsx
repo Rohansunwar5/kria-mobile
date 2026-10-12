@@ -103,8 +103,7 @@ describe('Home', () => {
 
     expect(getByText('Tournaments')).toBeTruthy();
     expect(getByText('JBN Badminton Tournament')).toBeTruthy();
-    expect(getByText('Entries close')).toBeTruthy();
-    expect(getByText('5 days')).toBeTruthy();
+    expect(getByText('Open · 5 days left')).toBeTruthy();
     fireEvent.press(getByLabelText('View all tournaments'));
     expect(mockNavigate).toHaveBeenCalledWith('/(tabs)/events');
   });

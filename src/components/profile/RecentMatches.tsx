@@ -77,7 +77,7 @@ function Row({ match, first }: { match: RecentMatch; first: boolean }) {
         <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: token.token.length > 1 ? 10 : 13, color: token.fg }}>{token.token}</Text>
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: theme.text }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'Barlow_600SemiBold', fontSize: 15, lineHeight: 19, color: theme.text }}>
           {title}
         </Text>
         <Text numberOfLines={1} style={{ ...LBL(theme), letterSpacing: 0.12 * 9, marginTop: 4 }}>

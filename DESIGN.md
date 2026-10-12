@@ -23,8 +23,8 @@ Separating display, interface and data is what makes the app feel designed rathe
 
 | Face | Job | Weights |
 |---|---|---|
-| **Anton** | Display. Screen titles, player and team names, buttons, section heads. Always uppercase. **Leading never below 1.188 × size** — see the floor below. | 400 |
-| **Barlow** | Interface. Body copy, row titles, descriptions, form labels. | 400, 500, 700 |
+| **Anton** | Display. Screen titles, section heads, buttons, the hero name. Always uppercase. **Leading never below 1.188 × size** — see the floor below. | 400 |
+| **Barlow** | Interface. Card and row titles (600, as typed — never uppercased), body copy, descriptions, form labels. | 400, 500, 600, 700 |
 | **JetBrains Mono** | Data. Every score, price, over, timestamp, and all overline labels. Tabular figures. | 400, 700 |
 
 All three are grotesques, so the skeletons agree. Anton is ultra-condensed; Barlow is slightly
@@ -45,13 +45,19 @@ Barlow         → 'Segoe UI', system-ui, sans-serif
 JetBrains Mono → ui-monospace, 'Cascadia Mono', Menlo, monospace
 ```
 
+**One face per level.** Anton names a section; Barlow names a thing inside it. When a card title
+was Anton too, every level read as one wall of condensed caps and the tournament title (21)
+outranked its own heading (20). Home and the shared cards it uses (live chips and the live list,
+tournament posters, results rows, top players) moved on 2026-10-12. Other screens still set row
+titles in Anton — move them to Barlow 600 when you next touch them.
+
 ### Scale
 
 | Role | Size / leading | Face |
 |---|---|---|
 | Screen title | 30–40 / 36–48 | Anton |
-| Section head | 18–22 / 22–27 | Anton |
-| Row title | 14–16 / 17–19 | Anton |
+| Section head | 24 / 29 | Anton |
+| Card and row title | 15–18 / 19–23 | Barlow 600 |
 | Body | 13 / 19 | Barlow 400 |
 | Row label, emphasis | 12–13 | Barlow 700 |
 | Meta | 11–12 | Barlow 400 |

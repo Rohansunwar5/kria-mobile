@@ -1,13 +1,14 @@
 import { useState, type ReactNode } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { StatusPill, Tag } from '@/components/StatusPill';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Tag } from '@/components/StatusPill';
 import { TournamentArt } from '@/components/TournamentArt';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 import { colors, useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 import { formatShortDate } from '@/lib/format';
-import { inProgress, openForEntryCount, posterCell, posterOrder } from '@/lib/homePortal';
+import { inProgress, openForEntryCount, posterBadge, posterOrder } from '@/lib/homePortal';
 import { formatLabel, isHost, outcomeLabel, statusVariant } from '@/lib/quickMatchView';
 import { scoreLine } from '@/lib/quickCricketView';
 import type { CareerProfile, RecentMatch } from '@/api/career';
@@ -23,14 +24,6 @@ import { RANKED_SPORTS, TopPlayers } from './TopPlayers';
 // The whole of home, in matchday order: your game, what is live, what you can
 // enter, how you have played, the ladder. Designed in docs/home-redesign.html.
 
-const LBL = (theme: Palette) => ({
-  fontFamily: 'JetBrainsMono_700Bold' as const,
-  fontSize: 9,
-  letterSpacing: 0.18 * 9,
-  textTransform: 'uppercase' as const,
-  color: theme.textFaint,
-});
-
 const MONO = (theme: Palette) => ({
   fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 10,
@@ -41,8 +34,8 @@ const MONO = (theme: Palette) => ({
 
 const HEADING = {
   fontFamily: 'Anton_400Regular' as const,
-  fontSize: 20,
-  lineHeight: 24,
+  fontSize: 24,
+  lineHeight: 29,
   textTransform: 'uppercase' as const,
   color: colors.white,
 };
@@ -82,8 +75,7 @@ function LiveRow({ match, playerId }: { match: QuickMatch; playerId?: string }) 
       </View>
       <Text
         style={{
-          fontFamily: 'Anton_400Regular',
-          textTransform: 'uppercase',
+          fontFamily: 'Barlow_600SemiBold',
           fontSize: 18,
           lineHeight: 22,
           color: colors.white,
@@ -111,7 +103,7 @@ function KnockoutRow({ knockout }: { knockout: QuickKnockout }) {
         <Tag label={knockout.status} variant={knockout.status === 'live' ? 'live' : 'open'} dot={knockout.status === 'live'} />
         <Tag label="Knockout" variant="up" />
       </View>
-      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: colors.white, marginTop: 8 }}>{knockout.name}</Text>
+      <Text style={{ fontFamily: 'Barlow_600SemiBold', fontSize: 18, lineHeight: 22, color: colors.white, marginTop: 8 }}>{knockout.name}</Text>
       <Text style={MONO(theme)}>{`${knockoutFormatLabel(knockout)} · ${knockout.players.length} players`}</Text>
     </Pressable>
   );
@@ -183,18 +175,21 @@ function LiveNow({ items, total }: { items: LiveItem[]; total: number }) {
   );
 }
 
-/** One organiser tournament as a poster: the art, the name, and a three-cell
- *  data strip whose last cell says what happens next — while entries are open,
- *  the time left to enter. Explore's open-for-entry row reuses it. */
+const POSTER_HEIGHT = 180;
+
+/** One organiser tournament as a poster: the art with its status on it, the
+ *  name, and one line. The status tag carries the clock — while entries are
+ *  open, the time left to enter. Explore's open-for-entry row reuses it. */
 export function TournamentPoster({ tournament }: { tournament: Tournament }) {
   const theme = useTheme();
-  const where = [tournament.venue?.name, tournament.venue?.city].filter(Boolean).join(', ');
-  const meta = [`${formatShortDate(tournament.startDate)}–${formatShortDate(tournament.endDate)}`, where].filter(Boolean).join(' · ');
-  const cells = [
-    { label: 'Players', value: String(tournament.registeredPlayersCount ?? 0), urgent: false },
-    { label: 'Teams', value: `${tournament.teamsCount ?? 0}/${tournament.settings?.maxTeams || '∞'}`, urgent: false },
-    posterCell(tournament),
-  ];
+  const badge = posterBadge(tournament);
+  const players = tournament.registeredPlayersCount ?? 0;
+  const meta = [
+    `${formatShortDate(tournament.startDate)}–${formatShortDate(tournament.endDate)}`,
+    tournament.venue?.city || tournament.venue?.name,
+    // A new tournament reads better with no count than with "0 players".
+    players > 0 ? `${players} ${players === 1 ? 'player' : 'players'}` : null,
+  ].filter(Boolean).join(' · ');
   return (
     <Pressable
       accessibilityRole="button"
@@ -202,48 +197,36 @@ export function TournamentPoster({ tournament }: { tournament: Tournament }) {
       onPress={() => router.push({ pathname: '/tournament/[id]', params: { id: tournament._id } })}
       style={{
         width: 284,
-        backgroundColor: theme.surface,
+        height: POSTER_HEIGHT,
+        backgroundColor: colors.ink,
         borderWidth: 1.5,
         borderColor: theme.line,
         borderRadius: 6,
         overflow: 'hidden',
       }}
     >
-      <TournamentArt uri={tournament.bannerImage} seed={tournament._id} height={112} fadeTo={theme.surface} />
-      <View style={{ paddingHorizontal: 12, paddingTop: 11, gap: 6 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <StatusPill status={tournament.status} />
-          {tournament.sport ? <Tag label={tournament.sport.replace('_', ' ')} /> : null}
-        </View>
-        <Text
-          numberOfLines={1}
-          style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 21, lineHeight: 26, color: theme.text, marginTop: 2 }}
-        >
+      {/* The banner fills the card and the text sits on it, so it never fades
+          into the card colour; the scrim below does the legibility work. */}
+      <TournamentArt uri={tournament.bannerImage} seed={tournament._id} height={POSTER_HEIGHT} fadeTo="transparent" hazard={false} />
+      <LinearGradient
+        colors={['rgba(11,11,11,0)', 'rgba(11,11,11,0.6)', 'rgba(11,11,11,0.92)']}
+        locations={[0, 0.45, 1]}
+        pointerEvents="none"
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '65%' }}
+      />
+      {/* A dark backing so the translucent tags (Ended, Upcoming) still read
+          over an organiser's banner. */}
+      <View style={{ position: 'absolute', left: 10, top: 10, borderRadius: 3, backgroundColor: 'rgba(11,11,11,0.78)' }}>
+        <Tag label={badge.label} variant={badge.variant} dot={badge.dot} />
+      </View>
+      {/* Always white: it sits on the image in both themes. */}
+      <View style={{ position: 'absolute', left: 12, right: 12, bottom: 12, gap: 4 }}>
+        <Text numberOfLines={2} style={{ fontFamily: 'Barlow_600SemiBold', fontSize: 18, lineHeight: 23, color: colors.white }}>
           {tournament.name}
         </Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: theme.textMeta }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 16, color: 'rgba(255,255,255,0.78)' }}>
           {meta}
         </Text>
-      </View>
-      <View style={{ flexDirection: 'row', marginTop: 12, borderTopWidth: 1.5, borderTopColor: theme.lineFaint }}>
-        {cells.map((c, i) => (
-          <View
-            key={c.label}
-            style={{
-              flex: i === 2 ? 1.35 : 1,
-              paddingHorizontal: 12,
-              paddingTop: 9,
-              paddingBottom: 11,
-              gap: 3,
-              ...(i > 0 ? { borderLeftWidth: 1.5, borderLeftColor: theme.lineFaint } : null),
-            }}
-          >
-            <Text numberOfLines={1} style={{ ...LBL(theme), fontSize: 8, letterSpacing: 0.14 * 8 }}>{c.label}</Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 15, color: c.urgent ? theme.brandInk : theme.text }}>
-              {c.value}
-            </Text>
-          </View>
-        ))}
       </View>
     </Pressable>
   );

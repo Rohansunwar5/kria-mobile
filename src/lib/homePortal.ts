@@ -1,6 +1,8 @@
 import type { QuickKnockout } from '@/api/quickKnockout';
 import type { QuickMatch } from '@/api/quickMatch';
 import { formatShortDate } from '@/lib/format';
+import { STATUS_TAG } from '@/lib/tournamentConstants';
+import type { TagVariant } from '@/components/StatusPill';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 
 /**
@@ -89,6 +91,24 @@ export function posterCell(
   if (t.status === 'ongoing') return { label: 'Ends', value: formatShortDate(t.endDate), urgent: false };
   if (t.status === 'completed') return { label: 'Ended', value: formatShortDate(t.endDate), urgent: false };
   return { label: 'Starts', value: formatShortDate(t.startDate), urgent: false };
+}
+
+/**
+ * The one tag on a poster's art. The poster has no data strip, so the tag
+ * carries the clock: the time left to enter, or when a live one ends.
+ */
+export function posterBadge(
+  t: Pick<Tournament, 'status' | 'registrationDeadline' | 'startDate' | 'endDate'>,
+  now = Date.now(),
+): { label: string; variant: TagVariant; dot?: boolean } {
+  const base = STATUS_TAG[t.status] ?? STATUS_TAG.draft;
+  const cell = posterCell(t, now);
+  const label = cell.urgent
+    ? `${base.label} · ${cell.value} left`
+    : t.status === 'ongoing'
+      ? `${base.label} · ends ${cell.value}`
+      : base.label;
+  return { label, variant: base.variant, dot: base.dot };
 }
 
 /** Home's poster order: open tournaments first, closing soonest first, then

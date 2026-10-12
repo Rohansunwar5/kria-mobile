@@ -1,4 +1,4 @@
-import { hasBegun, inProgress, openForEntryCount, posterCell, posterOrder, visibleTournaments } from '../src/lib/homePortal';
+import { hasBegun, inProgress, openForEntryCount, posterBadge, posterCell, posterOrder, visibleTournaments } from '../src/lib/homePortal';
 import { formatShortDate } from '../src/lib/format';
 import type { QuickKnockout } from '../src/api/quickKnockout';
 import type { QuickMatch } from '../src/api/quickMatch';
@@ -160,5 +160,32 @@ describe('posterOrder', () => {
     ]).map((x) => x._id);
 
     expect(order).toEqual(['open-soon', 'open-late', 'live', 'done']);
+  });
+});
+
+describe('posterBadge', () => {
+  const NOW = Date.parse('2026-10-09T10:00:00.000Z');
+  const DAY = 24 * 3_600_000;
+  const t = (over: Partial<Tournament>) =>
+    ({ status: 'registration_open', startDate: '2026-10-18T00:00:00.000Z', endDate: '2026-10-20T00:00:00.000Z', registrationDeadline: new Date(NOW + 5.5 * DAY).toISOString(), ...over }) as Tournament;
+
+  // The poster has no data strip, so the one tag on the art carries the clock.
+  it('puts the time left to enter on an open tournament', () => {
+    expect(posterBadge(t({}), NOW)).toEqual({ label: 'Open · 5 days left', variant: 'open', dot: undefined });
+  });
+
+  it('puts the end date on a live tournament', () => {
+    expect(posterBadge(t({ status: 'ongoing' }), NOW)).toEqual({
+      label: `Live · ends ${formatShortDate('2026-10-20T00:00:00.000Z')}`,
+      variant: 'live',
+      dot: true,
+    });
+  });
+
+  it('is the plain status otherwise, including an open one whose deadline passed', () => {
+    expect(posterBadge(t({ status: 'completed' }), NOW).label).toBe('Ended');
+    expect(posterBadge(t({ status: 'upcoming' }), NOW).label).toBe('Upcoming');
+    expect(posterBadge(t({ registrationDeadline: new Date(NOW - DAY).toISOString() }), NOW).label).toBe('Open');
+    expect(posterBadge(t({ status: 'mystery' }), NOW)).toMatchObject({ label: 'Draft', variant: 'end' });
   });
 });
