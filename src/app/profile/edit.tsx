@@ -26,7 +26,7 @@ function SectionTitle({ title, required }: { title: string; required?: boolean }
       <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: '#fff' }}>{title}</Text>
       <View style={{ flex: 1, height: 1.5, backgroundColor: 'rgba(255,255,255,0.12)' }} />
       {required ? (
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.12 * 8, color: '#FA4C93' }}>REQUIRED</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.12 * 8, color: '#FA4C93' }}>REQUIRED</Text>
       ) : null}
     </View>
   );
@@ -77,7 +77,7 @@ export default function EditProfile() {
       <ScreenHeader
         title="Edit profile"
         onBack={() => goBack(router)}
-        right={<Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>PATCH</Text>}
+        right={<Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>PATCH</Text>}
       />
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -88,7 +88,7 @@ export default function EditProfile() {
             <AvatarPicker name={`${form.firstName} ${form.lastName}`} imageUrl={user?.profileImage} size={72} />
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Player photo</Text>
-              <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 11, lineHeight: 15, color: '#737373', marginTop: 5 }}>
+              <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 11, lineHeight: 15, color: '#737373', marginTop: 5 }}>
                 Shown on your ID card and every roster you appear in.
               </Text>
             </View>
@@ -156,14 +156,14 @@ export default function EditProfile() {
         {formError || error ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.6} />
-            <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+            <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
               {formError || error}
             </Text>
           </View>
         ) : (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <Icon name={complete ? 'check' : 'info'} size={13} color={complete ? '#16C46A' : '#7d7d7d'} strokeWidth={2.6} />
-            <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, color: complete ? '#16C46A' : '#7d7d7d' }}>
+            <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, color: complete ? '#16C46A' : '#7d7d7d' }}>
               {complete ? 'PROFILE COMPLETE — ID CARD ISSUED' : 'FILL EVERY FIELD TO COMPLETE YOUR ID CARD'}
             </Text>
           </View>

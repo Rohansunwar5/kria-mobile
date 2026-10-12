@@ -1,4 +1,4 @@
-import { ANTON_MIN_LEADING, SPACEMONO_MIN_LEADING, analyseSource } from '../test-utils/fontLeading';
+import { ANTON_MIN_LEADING, JETBRAINSMONO_MIN_LEADING, analyseSource } from '../test-utils/fontLeading';
 
 // Unit tests for the fence's analyser. The fence itself
 // (__tests__/fontLeading.test.ts) walks the real source tree and can only ever
@@ -101,23 +101,23 @@ describe('font leading analyser', () => {
   });
 
   it('ignores a face the fence does not cover', () => {
-    // SpaceGrotesk has no entry in FENCED_FONTS, so it is not measured. This
-    // used to use SpaceMono as the example, which stopped being true the day
-    // SpaceMono joined the fence — a cricket score was shipping clipped.
+    // Barlow has no entry in FENCED_FONTS, so it is not measured. This
+    // used to use the mono face as the example, which stopped being true the
+    // day it joined the fence — a cricket score was shipping clipped.
     expect(
-      analyseSource('a.tsx', `<Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 18, lineHeight: 9 }}>x</Text>`)
+      analyseSource('a.tsx', `<Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 18, lineHeight: 9 }}>x</Text>`)
     ).toEqual([]);
   });
 
-  it('measures SpaceMono against its own floor rather than the Anton one', () => {
-    // 18/19 = 1.056em: under SpaceMono's 1.061 and well under Anton's 1.188.
+  it('measures JetBrains Mono against its own floor rather than the Anton one', () => {
+    // 20/20 = 1.000em: under JetBrains Mono's 1.030 and well under Anton's 1.188.
     // The floor reported has to be the one the face actually needs.
-    const [finding] = analyseSource('a.tsx', `<Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 18, lineHeight: 19 }}>x</Text>`);
-    expect(finding).toMatchObject({ kind: 'violation', family: 'SpaceMono_700Bold', minLeading: SPACEMONO_MIN_LEADING });
+    const [finding] = analyseSource('a.tsx', `<Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 20, lineHeight: 20 }}>x</Text>`);
+    expect(finding).toMatchObject({ kind: 'violation', family: 'JetBrainsMono_700Bold', minLeading: JETBRAINSMONO_MIN_LEADING });
 
-    // 18/20 = 1.111em clears SpaceMono but would still fail Anton.
+    // 18/20 = 1.111em clears JetBrains Mono but would still fail Anton.
     expect(
-      analyseSource('a.tsx', `<Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 18, lineHeight: 20 }}>x</Text>`)
+      analyseSource('a.tsx', `<Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 18, lineHeight: 20 }}>x</Text>`)
     ).toEqual([]);
   });
 

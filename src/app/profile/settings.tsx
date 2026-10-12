@@ -36,7 +36,7 @@ function Row({
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 17, color: theme.text }}>{title}</Text>
         {detail ? (
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: theme.textFaint, marginTop: 4 }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: theme.textFaint, marginTop: 4 }}>
             {detail}
           </Text>
         ) : null}
@@ -74,7 +74,7 @@ function Button({ label, onPress, busy, disabled }: { label: string; onPress: ()
 function Note({ text, tone }: { text: string; tone: 'ok' | 'bad' }) {
   const theme = useTheme();
   return (
-    <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: tone === 'ok' ? theme.openInk : theme.failInk, marginTop: 8 }}>
+    <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: tone === 'ok' ? theme.openInk : theme.failInk, marginTop: 8 }}>
       {text}
     </Text>
   );
@@ -155,8 +155,8 @@ export default function Settings() {
           <Section title="Notifications">
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 13, paddingVertical: 12, minHeight: 52 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 14, color: theme.text }}>Match and auction alerts</Text>
-                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: theme.textFaint, marginTop: 4 }}>
+                <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 14, color: theme.text }}>Match and auction alerts</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: theme.textFaint, marginTop: 4 }}>
                   Draw published · auction starting · your match
                 </Text>
               </View>
@@ -169,7 +169,7 @@ export default function Settings() {
             </View>
             {pushNote ? (
               <View style={{ paddingHorizontal: 13, paddingBottom: 12 }}>
-                <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: theme.failInk }}>{pushNote}</Text>
+                <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: theme.failInk }}>{pushNote}</Text>
               </View>
             ) : null}
           </Section>

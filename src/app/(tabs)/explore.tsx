@@ -29,7 +29,7 @@ import type { Palette } from '@/lib/theme';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 
 const PROMPT = (theme: Palette) => ({
-  fontFamily: 'SpaceGrotesk_400Regular' as const,
+  fontFamily: 'Barlow_400Regular' as const,
   fontSize: 13,
   lineHeight: 19,
   color: theme.textFaint,
@@ -59,12 +59,12 @@ function EventsFilterControl({ theme, count, onPress }: { theme: Palette; count:
       }}
     >
       <Icon name="filter" size={11} color={theme.textBody} strokeWidth={2.2} />
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textBody }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textBody }}>
         Filter
       </Text>
       {count > 0 ? (
         <View style={{ backgroundColor: theme.brand, borderRadius: 2, paddingHorizontal: 4, paddingVertical: 1 }}>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, color: theme.onBrand }}>{count}</Text>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, color: theme.onBrand }}>{count}</Text>
         </View>
       ) : null}
     </Pressable>

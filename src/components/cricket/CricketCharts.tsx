@@ -38,7 +38,7 @@ export function ManhattanChart({ innings, maxOvers }: { innings: InningsScorecar
             {bars.map((b) => (
               <View key={b.overNumber} style={{ width: BAR, alignItems: 'center', justifyContent: 'flex-end', height: H }}>
                 {!b.empty && b.runs > 0 ? (
-                  <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, color: '#a3a3a3', marginBottom: 2 }}>{b.runs}</Text>
+                  <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, color: '#a3a3a3', marginBottom: 2 }}>{b.runs}</Text>
                 ) : null}
                 <View
                   style={{
@@ -54,7 +54,7 @@ export function ManhattanChart({ innings, maxOvers }: { innings: InningsScorecar
             {bars.map((b) => (
               <Text
                 key={b.overNumber}
-                style={{ width: BAR, textAlign: 'center', fontFamily: 'SpaceMono_400Regular', fontSize: 8, color: '#5c5c5c' }}
+                style={{ width: BAR, textAlign: 'center', fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, color: '#5c5c5c' }}
               >
                 {b.overNumber}
               </Text>
@@ -104,10 +104,10 @@ export function WormChart({
         {series.map((s) => (
           <View key={s.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <View style={{ width: 10, height: 10, backgroundColor: s.color }} />
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 11, color: '#d4d4d4' }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'Barlow_500Medium', fontSize: 11, color: '#d4d4d4' }}>
               {s.teamName}
             </Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: '#fff' }}>{s.finalRuns}</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, color: '#fff' }}>{s.finalRuns}</Text>
           </View>
         ))}
       </View>
@@ -133,7 +133,7 @@ export function WormChart({
           {yTicks.map((v) => (
             <Text
               key={v}
-              style={{ position: 'absolute', right: 4, top: py(v) - 5, fontFamily: 'SpaceMono_400Regular', fontSize: 8, color: '#7d7d7d' }}
+              style={{ position: 'absolute', right: 4, top: py(v) - 5, fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, color: '#7d7d7d' }}
             >
               {v}
             </Text>
@@ -141,7 +141,7 @@ export function WormChart({
         </View>
         <View style={{ flexDirection: 'row', marginLeft: PAD.l, marginRight: PAD.r, justifyContent: 'space-between' }}>
           {xTicks.map((v) => (
-            <Text key={v} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, color: '#7d7d7d' }}>
+            <Text key={v} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, color: '#7d7d7d' }}>
               {v}
             </Text>
           ))}
@@ -168,8 +168,8 @@ export function RunDistribution({ innings }: { innings: InningsScorecard | null 
             <View style={{ flex: 1, height: 10, backgroundColor: 'rgba(255,255,255,0.05)' }}>
               <View style={{ width: `${(r.count / peak) * 100}%`, height: 10, backgroundColor: r.tone }} />
             </View>
-            <Text style={{ width: 26, textAlign: 'right', fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#fff' }}>{r.count}</Text>
-            <Text style={{ width: 30, textAlign: 'right', fontFamily: 'SpaceMono_400Regular', fontSize: 9, color: '#7d7d7d' }}>
+            <Text style={{ width: 26, textAlign: 'right', fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: '#fff' }}>{r.count}</Text>
+            <Text style={{ width: 30, textAlign: 'right', fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, color: '#7d7d7d' }}>
               {Math.round(r.share * 100)}%
             </Text>
           </View>
@@ -191,13 +191,13 @@ export function PartnershipsList({ innings }: { innings: InningsScorecard | null
         {list.map((p) => (
           <View key={`${p.wicketNumber}-${p.batter1Id}-${p.batter2Id}`} style={{ gap: 5 }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: '#7d7d7d' }}>{p.wicketNumber}</Text>
-              <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#d4d4d4' }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, color: '#7d7d7d' }}>{p.wicketNumber}</Text>
+              <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 12, color: '#d4d4d4' }}>
                 {p.batter1Name} / {p.batter2Name}
               </Text>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: '#fff' }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, color: '#fff' }}>
                 {p.runs}
-                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: '#a3a3a3' }}> ({p.balls})</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, color: '#a3a3a3' }}> ({p.balls})</Text>
               </Text>
             </View>
             <View style={{ height: 8, backgroundColor: 'rgba(255,255,255,0.05)' }}>

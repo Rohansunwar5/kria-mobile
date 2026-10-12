@@ -12,14 +12,14 @@ import { SPORT_ICON } from '@/lib/sports';
 import { dateRange, dayOfEvent, sectionOf } from '@/lib/eventsView';
 
 const FOOT = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_400Regular' as const,
+  fontFamily: 'JetBrainsMono_400Regular' as const,
   fontSize: 9,
   letterSpacing: 0.08 * 9,
   textTransform: 'uppercase' as const,
   color: theme.textFaint,
 });
 
-const BOLD = (theme: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, color: theme.text });
+const BOLD = (theme: Palette) => ({ fontFamily: 'JetBrainsMono_700Bold' as const, color: theme.text });
 
 function initials(name: string) {
   return name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -96,7 +96,7 @@ function Footer({ tournament }: { tournament: Tournament }) {
       </>
     );
     right = (
-      <Text style={{ ...FOOT(theme), fontFamily: 'SpaceMono_700Bold', color: cell.urgent ? theme.brandInk : theme.textFaint }}>
+      <Text style={{ ...FOOT(theme), fontFamily: 'JetBrainsMono_700Bold', color: cell.urgent ? theme.brandInk : theme.textFaint }}>
         {cell.urgent ? `Closes in ${cell.value}` : `${cell.label} ${cell.value}`}
       </Text>
     );
@@ -185,7 +185,7 @@ export function TournamentCard({ tournament, onPress }: { tournament: Tournament
           </Text>
           <Text
             numberOfLines={1}
-            style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.05 * 10, textTransform: 'uppercase', color: theme.textMeta, marginTop: 4 }}
+            style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.05 * 10, textTransform: 'uppercase', color: theme.textMeta, marginTop: 4 }}
           >
             {meta}
           </Text>

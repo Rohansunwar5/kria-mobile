@@ -66,7 +66,7 @@ export default function Announcements() {
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Announcements</Text>
         {currentTournament?.name ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
             {currentTournament.name}
           </Text>
         ) : null}
@@ -133,7 +133,7 @@ export default function Announcements() {
                   <Tag label={s.label} variant={s.variant} dot={a.severity === 'schedule_change'} />
                   {a.pinned ? <Tag label="Pinned" variant="auction" /> : null}
                   <View style={{ flex: 1 }} />
-                  <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#7d7d7d' }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#7d7d7d' }}>
                     {when(a.createdAt)}
                   </Text>
                 </View>
@@ -144,12 +144,12 @@ export default function Announcements() {
                   </Text>
                 ) : null}
 
-                <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', paddingHorizontal: 13, paddingTop: a.title ? 6 : 9, paddingBottom: 11 }}>
+                <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', paddingHorizontal: 13, paddingTop: a.title ? 6 : 9, paddingBottom: 11 }}>
                   {a.message}
                 </Text>
 
                 <View style={{ paddingHorizontal: 13, paddingBottom: 11 }}>
-                  <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
                     {a.authorName} · {a.authorRole}
                   </Text>
                 </View>

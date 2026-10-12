@@ -7,11 +7,11 @@ import { Provider } from 'react-redux';
 import { useFonts } from 'expo-font';
 import { Anton_400Regular } from '@expo-google-fonts/anton';
 import {
-  SpaceGrotesk_400Regular,
-  SpaceGrotesk_500Medium,
-  SpaceGrotesk_700Bold,
-} from '@expo-google-fonts/space-grotesk';
-import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
+  Barlow_400Regular,
+  Barlow_500Medium,
+  Barlow_700Bold,
+} from '@expo-google-fonts/barlow';
+import { JetBrainsMono_400Regular, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
 import { store } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { bootstrapAuth, logout } from '@/store/slices/authSlice';
@@ -128,11 +128,11 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Anton_400Regular,
-    SpaceGrotesk_400Regular,
-    SpaceGrotesk_500Medium,
-    SpaceGrotesk_700Bold,
-    SpaceMono_400Regular,
-    SpaceMono_700Bold,
+    Barlow_400Regular,
+    Barlow_500Medium,
+    Barlow_700Bold,
+    JetBrainsMono_400Regular,
+    JetBrainsMono_700Bold,
   });
   return (
     <Provider store={store}>

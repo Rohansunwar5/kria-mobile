@@ -11,7 +11,7 @@ import { paymentVerdict, type VerdictKind } from '@/lib/paymentVerdict';
 import { formatINR } from '@/lib/checkoutView';
 
 const POLL_MS = 4000;
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 const SKIN: Record<VerdictKind, { color: string; ink: string; icon: 'check' | 'close' | 'refresh' | 'clock'; ghost: string; tag: 'open' | 'fail' | 'up' | 'end' }> = {
   success: { color: '#16C46A', ink: '#06240F', icon: 'check', ghost: 'YES', tag: 'open' },
@@ -23,8 +23,8 @@ const SKIN: Record<VerdictKind, { color: string; ink: string; icon: 'check' | 'c
 function Row({ label, value, color = '#fff' }: { label: string; value: string; color?: string }) {
   return (
     <View style={{ flexDirection: 'row', paddingHorizontal: 14, paddingVertical: 10 }}>
-      <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#7d7d7d' }}>{label}</Text>
-      <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 11, color }} numberOfLines={1}>
+      <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 12, color: '#7d7d7d' }}>{label}</Text>
+      <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 11, color }} numberOfLines={1}>
         {value}
       </Text>
     </View>
@@ -126,7 +126,7 @@ export default function PaymentStatus() {
           <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 36, lineHeight: 44, color: '#fff', marginTop: 16 }}>
             {verdict.title}
           </Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
             {verdict.message}
           </Text>
         </View>
@@ -147,7 +147,7 @@ export default function PaymentStatus() {
                 .toUpperCase()}
             />
           </View>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 11, lineHeight: 16, color: '#737373', marginTop: 11 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 11, lineHeight: 16, color: '#737373', marginTop: 11 }}>
             Status is polled from the gateway, so a slow success resolves itself here without a second charge.
           </Text>
         </View>

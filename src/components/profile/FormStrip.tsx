@@ -11,7 +11,7 @@ import type { RecentMatch } from '@/api/career';
 // owns.
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.18 * 9,
   textTransform: 'uppercase' as const,
@@ -19,7 +19,7 @@ const LBL = (theme: Palette) => ({
 });
 
 const MONO = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 10,
   letterSpacing: 0.12 * 10,
   textTransform: 'uppercase' as const,
@@ -81,7 +81,7 @@ export function FormStrip({ recent, limit = 6, style }: { recent: RecentMatch[];
                 justifyContent: 'center',
               }}
             >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: t.fg }}>{t.token}</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, color: t.fg }}>{t.token}</Text>
             </View>
           );
         })}

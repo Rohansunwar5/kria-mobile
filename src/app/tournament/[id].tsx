@@ -330,7 +330,7 @@ export default function TournamentDetail() {
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: theme.onBrand }}>Enter</Text>
             <Text
               numberOfLines={1}
-              style={{ flex: 1, textAlign: 'right', fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: theme.onBrand }}
+              style={{ flex: 1, textAlign: 'right', fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: theme.onBrand }}
             >
               {`${nextEntry.name} · ${feeLabel(nextEntry)}`}
             </Text>

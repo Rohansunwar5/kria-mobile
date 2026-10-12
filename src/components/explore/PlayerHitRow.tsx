@@ -7,7 +7,7 @@ import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Icon } from '@/components/icons';
 
 const META = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.12 * 9,
   textTransform: 'uppercase' as const,

@@ -65,7 +65,7 @@ export default function OnboardingAuth() {
         />
         <View style={{ flex: 1 }} />
         <Pressable accessibilityRole="button" onPress={() => router.replace('/(auth)/login')} hitSlop={10}>
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, color: '#7d7d7d' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, color: '#7d7d7d' }}>
             HAVE AN ACCOUNT? <Text style={{ color: '#F97316' }}>SIGN IN</Text>
           </Text>
         </Pressable>
@@ -79,7 +79,7 @@ export default function OnboardingAuth() {
             {/* Step counter moved off the header row — the sign-in escape hatch lives there now. */}
             <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
               <Kick style={{ letterSpacing: 0.26 * 9 }}>Almost there</Kick>
-              <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>STEP 4 OF 4</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>STEP 4 OF 4</Text>
             </View>
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 48, color: '#fff', marginTop: 12 }}>
               Who&apos;s on{'\n'}the card?
@@ -110,7 +110,7 @@ export default function OnboardingAuth() {
             </Pressable>
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Add a photo</Text>
-              <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 11, lineHeight: 15, color: '#737373', marginTop: 5 }}>
+              <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 11, lineHeight: 15, color: '#737373', marginTop: 5 }}>
                 Optional now — you can add it later from your profile.
               </Text>
               <View style={{ alignSelf: 'flex-start', marginTop: 9 }}>
@@ -145,7 +145,7 @@ export default function OnboardingAuth() {
               <View style={{ marginTop: 2 }}>
                 <Icon name="info" size={13} color="#7d7d7d" strokeWidth={2} />
               </View>
-              <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 11, lineHeight: 16, color: '#737373' }}>
+              <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 11, lineHeight: 16, color: '#737373' }}>
                 Only badminton and cricket run the full auction, live scoring and standings today. More are coming.
               </Text>
             </View>

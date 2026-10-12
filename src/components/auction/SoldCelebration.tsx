@@ -55,7 +55,7 @@ export function SoldCelebration({ playerName, teamName, teamColor, soldPrice }: 
         </Text>
 
         <View style={{ marginTop: 20, backgroundColor: '#F97316', borderRadius: 6, paddingHorizontal: 22, paddingVertical: 12 }}>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 32, color: '#0B0B0B' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 32, color: '#0B0B0B' }}>
             ₹{soldPrice.toLocaleString('en-IN')}
           </Text>
         </View>

@@ -16,13 +16,13 @@ export function BracketTree({ knockout: k, onOpenMatch }: { knockout: QuickKnock
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 12, paddingVertical: 12 }}>
       {bracketColumns(k).map((col) => (
         <View key={col.name} style={{ width: BOX_WIDTH, gap: 10, justifyContent: 'space-around' }}>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: t.textFaint }}>{col.name}</Text>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: t.textFaint }}>{col.name}</Text>
           {col.fixtures.map((f) => {
             const a = entrantShortName(k, f.entrantA) || '—';
             const b = f.bye ? 'Bye' : entrantShortName(k, f.entrantB) || '—';
             const line = (name: string, entrantId?: string) => (
               <Text numberOfLines={1} style={{
-                fontFamily: f.winnerEntrantId && f.winnerEntrantId === entrantId ? 'SpaceGrotesk_700Bold' : 'SpaceGrotesk_500Medium',
+                fontFamily: f.winnerEntrantId && f.winnerEntrantId === entrantId ? 'Barlow_700Bold' : 'Barlow_500Medium',
                 fontSize: 12,
                 color: !entrantId ? t.textFaint : f.winnerEntrantId && f.winnerEntrantId !== entrantId ? t.textFaint : t.text,
               }}>{name}</Text>

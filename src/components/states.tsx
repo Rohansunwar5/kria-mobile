@@ -106,7 +106,7 @@ export function EmptyState({
       <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 32, color: '#fff', marginTop: 14 }}>
         {title}
       </Text>
-      <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4', marginTop: 9 }}>
+      <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4', marginTop: 9 }}>
         {message}
       </Text>
       {cta && onCta ? (
@@ -140,14 +140,14 @@ export function ErrorBlock({
   return (
     <View style={{ borderWidth: 1.5, borderColor: '#FF4438', borderRadius: 6, backgroundColor: '#151515', overflow: 'hidden' }}>
       <View style={{ paddingHorizontal: 12, paddingVertical: 7, backgroundColor: '#FF4438' }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, textTransform: 'uppercase', color: '#2A0703' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, textTransform: 'uppercase', color: '#2A0703' }}>
           {label}
         </Text>
       </View>
       <View style={{ padding: 12 }}>
-        <Text style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 13, color: '#fff' }}>{title}</Text>
+        <Text style={{ fontFamily: 'Barlow_700Bold', fontSize: 13, color: '#fff' }}>{title}</Text>
         {message ? (
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4', marginTop: 5 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4', marginTop: 5 }}>
             {message}
           </Text>
         ) : null}
@@ -170,7 +170,7 @@ export function ErrorBlock({
             }}
           >
             <Icon name="refresh" size={12} color="#FF4438" strokeWidth={2.4} />
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#FF4438' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#FF4438' }}>
               Retry
             </Text>
           </Pressable>
@@ -199,7 +199,7 @@ export function StaleBanner({ secondsAgo, text }: { secondsAgo?: number; text?: 
       }}
     >
       <View style={{ width: 7, height: 7, borderRadius: 999, backgroundColor: '#a3a3a3' }} />
-      <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: '#d4d4d4' }}>
+      <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: '#d4d4d4' }}>
         {copy}
       </Text>
     </View>

@@ -24,21 +24,25 @@ Separating display, interface and data is what makes the app feel designed rathe
 | Face | Job | Weights |
 |---|---|---|
 | **Anton** | Display. Screen titles, player and team names, buttons, section heads. Always uppercase. **Leading never below 1.188 × size** — see the floor below. | 400 |
-| **Space Grotesk** | Interface. Body copy, row titles, descriptions, form labels. | 400, 500, 700 |
-| **Space Mono** | Data. Every score, price, over, timestamp, and all overline labels. Tabular figures. | 400, 700 |
+| **Barlow** | Interface. Body copy, row titles, descriptions, form labels. | 400, 500, 700 |
+| **JetBrains Mono** | Data. Every score, price, over, timestamp, and all overline labels. Tabular figures. | 400, 700 |
 
-They are complementary by construction: all three are grotesques, so the skeletons agree, but
-Anton is ultra-condensed against Grotesk's width. Space Grotesk and Space Mono are companion
-designs, so the data layer sits *inside* the interface layer rather than beside it.
+All three are grotesques, so the skeletons agree. Anton is ultra-condensed; Barlow is slightly
+narrow, with the plain highway-sign lettering of sport, so it sits closer to Anton than a wide
+grotesque would. JetBrains Mono is *not* Barlow's companion — it is there for clean, unambiguous
+digits, so keep it to data and labels and never set running text in it.
 
-**Use Space Mono for anything numeric.** Live scores tick; tabular figures stop columns jittering.
+These replaced Space Grotesk and Space Mono on 2026-10-12: their quirky, retro letterforms dated
+the app.
+
+**Use JetBrains Mono for anything numeric.** Live scores tick; tabular figures stop columns jittering.
 
 Fallbacks matter — PNG/PDF export and first paint show them:
 
 ```
-Anton         → 'Arial Narrow', Haettenschweiler, Impact, sans-serif
-Space Grotesk → 'Segoe UI', system-ui, sans-serif
-Space Mono    → ui-monospace, 'Cascadia Mono', Menlo, monospace
+Anton          → 'Arial Narrow', Haettenschweiler, Impact, sans-serif
+Barlow         → 'Segoe UI', system-ui, sans-serif
+JetBrains Mono → ui-monospace, 'Cascadia Mono', Menlo, monospace
 ```
 
 ### Scale
@@ -48,11 +52,11 @@ Space Mono    → ui-monospace, 'Cascadia Mono', Menlo, monospace
 | Screen title | 30–40 / 36–48 | Anton |
 | Section head | 18–22 / 22–27 | Anton |
 | Row title | 14–16 / 17–19 | Anton |
-| Body | 13 / 19 | Space Grotesk 400 |
-| Row label, emphasis | 12–13 | Space Grotesk 700 |
-| Meta | 11–12 | Space Grotesk 400 |
-| Overline label | 9 / 0.18em tracking | Space Mono 700 |
-| Big data | 26–52 | Space Mono 700 |
+| Body | 13 / 19 | Barlow 400 |
+| Row label, emphasis | 12–13 | Barlow 700 |
+| Meta | 11–12 | Barlow 400 |
+| Overline label | 9 / 0.18em tracking | JetBrains Mono 700 |
+| Big data | 26–52 | JetBrains Mono 700 |
 
 ### The Anton leading floor — 1.188 × size, enforced
 
@@ -63,13 +67,17 @@ need `capHeight + descent = 1.188em` of line box. iOS compresses the line box to
 **clips** whatever sticks out; Android overlaps instead, which is exactly why the tight leading
 looked fine in review and shaved the caps on a real iPhone.
 
-[`__tests__/antonLeading.test.ts`](__tests__/antonLeading.test.ts) enforces the floor across every
+[`__tests__/fontLeading.test.ts`](__tests__/fontLeading.test.ts) enforces the floor across every
 `.tsx` under `src/`. **Never weaken it to make a screen pass** — raise the `lineHeight`, never
 shrink the `fontSize`, because the sizes are the design and the leading is not.
 
+JetBrains Mono is fenced the same way at its own floor, **1.030 × size** (capHeight 730 + descent
+300, over 1000) — a clipped cricket score is how the data face got fenced. Barlow's floor is
+0.900 and nothing sets it anywhere near that, so it is not fenced.
+
 **The fence no longer skips anything in silence.** Its analyser lives in
-[`test-utils/antonLeading.ts`](test-utils/antonLeading.ts) and is itself unit-tested in
-[`__tests__/antonLeadingFence.test.ts`](__tests__/antonLeadingFence.test.ts) — a fence cannot
+[`test-utils/fontLeading.ts`](test-utils/fontLeading.ts) and is itself unit-tested in
+[`__tests__/fontLeadingFence.test.ts`](__tests__/fontLeadingFence.test.ts) — a fence cannot
 prove it would catch a shape it never meets, so those tests feed it synthetic source.
 
 It now reads multi-line styles, ternaries and computed values, and scans `.ts` as well as `.tsx`.

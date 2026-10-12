@@ -49,7 +49,7 @@ export default function Welcome() {
             Play.{'\n'}Compete.{'\n'}
             <Text style={{ color: '#F97316' }}>Get picked.</Text>
           </Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 14, lineHeight: 21, color: '#d4d4d4', marginTop: 16, maxWidth: 310 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 14, lineHeight: 21, color: '#d4d4d4', marginTop: 16, maxWidth: 310 }}>
             Enter real tournaments, go into a live auction, and build a record that follows your name.
           </Text>
         </View>
@@ -65,7 +65,7 @@ export default function Welcome() {
                 ...(i < PROOF.length - 1 ? { borderRightWidth: 1.5, borderRightColor: 'rgba(255,255,255,0.12)' } : null),
               }}
             >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 19, color: '#fff' }}>{p.value}</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 19, color: '#fff' }}>{p.value}</Text>
               <Lbl style={{ letterSpacing: 0.1 * 9, marginTop: 2 }}>{p.label}</Lbl>
             </View>
           ))}

@@ -22,7 +22,7 @@ function Cell({ label, value, tone, last }: { label: string; value: string; tone
       }}
     >
       <Lbl style={{ letterSpacing: 0.1 * 9 }}>{label}</Lbl>
-      <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: tone || '#fff', marginTop: 3 }}>
+      <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, color: tone || '#fff', marginTop: 3 }}>
         {value}
       </Text>
     </View>
@@ -48,7 +48,7 @@ export function CompletedSummary({ tournamentName, categoryName, teams }: Props)
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 14 }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 24, color: '#F97316' }}>{formatMoney(spent)}</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 24, color: '#F97316' }}>{formatMoney(spent)}</Text>
         <Lbl style={{ letterSpacing: 0.14 * 9 }}>Total spent across {teams.length} teams</Lbl>
       </View>
 

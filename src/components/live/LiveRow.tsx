@@ -5,7 +5,7 @@ import type { Palette } from '@/lib/theme';
 import type { LiveItem } from '@/api/live';
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.12 * 9,
   textTransform: 'uppercase' as const,
@@ -27,7 +27,7 @@ function KindTag({ isQuick }: { isQuick: boolean }) {
       paddingVertical: 4,
     }}>
       <Text style={{
-        fontFamily: 'SpaceMono_700Bold',
+        fontFamily: 'JetBrainsMono_700Bold',
         fontSize: 9,
         letterSpacing: 0.16 * 9,
         textTransform: 'uppercase',
@@ -99,7 +99,7 @@ export default function LiveRow({ item }: { item: LiveItem }) {
         </Text>
         {item.scoreline ? (
           <Text style={{
-            fontFamily: 'SpaceMono_700Bold',
+            fontFamily: 'JetBrainsMono_700Bold',
             fontSize: 14,
             color: theme.text,
             fontVariant: ['tabular-nums'],
@@ -165,7 +165,7 @@ export function LiveChip({ item }: { item: LiveItem }) {
           {name}
         </Text>
         {item.scoreline ? (
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: theme.text, fontVariant: ['tabular-nums'] }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, color: theme.text, fontVariant: ['tabular-nums'] }}>
             {item.scoreline}
           </Text>
         ) : null}

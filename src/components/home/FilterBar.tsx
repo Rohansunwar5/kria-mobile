@@ -4,7 +4,7 @@ import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme';
 
 const CHIP_TEXT = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 10,
   letterSpacing: 0.1 * 10,
   textTransform: 'uppercase' as const,

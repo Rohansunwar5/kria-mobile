@@ -38,7 +38,7 @@ export function AuthInput({ label, error, secureToggle, icon, labelRight, right,
       <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 6 }}>
         <Text
           style={{
-            fontFamily: 'SpaceMono_700Bold',
+            fontFamily: 'JetBrainsMono_700Bold',
             fontSize: 9,
             letterSpacing: 0.18 * 9,
             textTransform: 'uppercase',
@@ -72,7 +72,7 @@ export function AuthInput({ label, error, secureToggle, icon, labelRight, right,
           className="flex-1 text-white"
           style={{
             height: 52,
-            fontFamily: 'SpaceGrotesk_400Regular',
+            fontFamily: 'Barlow_400Regular',
             fontSize: 15,
             lineHeight: 20,
             paddingVertical: 0,
@@ -89,7 +89,7 @@ export function AuthInput({ label, error, secureToggle, icon, labelRight, right,
           >
             <Text
               style={{
-                fontFamily: 'SpaceMono_700Bold',
+                fontFamily: 'JetBrainsMono_700Bold',
                 fontSize: 10,
                 letterSpacing: 0.1 * 10,
                 textTransform: 'uppercase',
@@ -103,7 +103,7 @@ export function AuthInput({ label, error, secureToggle, icon, labelRight, right,
         {right}
       </Animated.View>
       {error ? (
-        <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#FF4438', marginTop: 5 }}>
+        <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: '#FF4438', marginTop: 5 }}>
           {error}
         </Text>
       ) : null}

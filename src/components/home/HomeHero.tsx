@@ -23,7 +23,7 @@ import type { QuickKnockout } from '@/api/quickKnockout';
 // Designed in docs/home-redesign.html.
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.16 * 9,
   textTransform: 'uppercase' as const,
@@ -106,7 +106,7 @@ function Mini({ value, label }: { value: string; label: string }) {
   const theme = useTheme();
   return (
     <View style={{ alignItems: 'flex-end' }}>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 20, color: theme.text }}>{value}</Text>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 20, color: theme.text }}>{value}</Text>
       <Text style={LBL(theme)}>{label}</Text>
     </View>
   );
@@ -201,9 +201,9 @@ function PlayerCard({
 
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12 }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 58, lineHeight: 62, letterSpacing: -1, color: theme.text }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 58, lineHeight: 62, letterSpacing: -1, color: theme.text }}>
               {pct.slice(0, -1)}
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, color: theme.textMeta }}>%</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 26, color: theme.textMeta }}>%</Text>
             </Text>
             <Text style={LBL(theme)}>{`Win rate · ${summary.decided} decided`}</Text>
           </View>
@@ -269,9 +269,9 @@ function FirstMatch() {
                   justifyContent: 'center',
                 }}
               >
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: theme.auctionInk }}>{i + 1}</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, color: theme.auctionInk }}>{i + 1}</Text>
               </View>
-              <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: theme.textBody, paddingTop: 2 }}>
+              <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: theme.textBody, paddingTop: 2 }}>
                 {step}
               </Text>
             </View>
@@ -372,7 +372,7 @@ function Scoreboard({ match }: { match: QuickMatch }) {
               <View key={g.gameNumber} style={{ ...cell, backgroundColor: now ? theme.surfaceAlt : 'transparent' }}>
                 <Text
                   style={{
-                    fontFamily: 'SpaceMono_700Bold',
+                    fontFamily: 'JetBrainsMono_700Bold',
                     fontSize: now ? 22 : 18,
                     color: now ? theme.brandInk : won ? theme.text : theme.textFaint,
                   }}
@@ -426,7 +426,7 @@ function MatchHero({ match, knockout, playerId }: { match: QuickMatch; knockout?
             <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
               <View>
                 <Text style={LBL(theme)}>Code</Text>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, letterSpacing: 4, color: theme.text }}>{match.joinCode}</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 26, letterSpacing: 4, color: theme.text }}>{match.joinCode}</Text>
               </View>
               <Text style={{ ...LBL(theme), color: theme.textMeta }}>{`${joined}/${slots} joined`}</Text>
             </View>
@@ -436,7 +436,7 @@ function MatchHero({ match, knockout, playerId }: { match: QuickMatch; knockout?
             <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: theme.text }}>
               {title}
             </Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 34, color: theme.text }}>{scoreLine(match) ?? 'Not started'}</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 34, color: theme.text }}>{scoreLine(match) ?? 'Not started'}</Text>
             {chase ? <Text style={{ ...LBL(theme), color: theme.brandInk }}>{chase}</Text> : null}
           </View>
         ) : (

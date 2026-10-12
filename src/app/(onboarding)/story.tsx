@@ -99,7 +99,7 @@ export default function Story() {
             ))}
           </View>
           <Pressable accessibilityRole="button" accessibilityLabel="Skip the intro" onPress={finish} hitSlop={12}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, color: '#a3a3a3' }}>SKIP</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, color: '#a3a3a3' }}>SKIP</Text>
           </Pressable>
         </View>
 
@@ -111,7 +111,7 @@ export default function Story() {
             {beat.headline}
             <Text style={{ color: '#F97316' }}>{beat.accent}</Text>
           </Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 14, lineHeight: 21, color: '#d4d4d4', marginTop: 14, maxWidth: 315 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 14, lineHeight: 21, color: '#d4d4d4', marginTop: 14, maxWidth: 315 }}>
             {beat.body}
           </Text>
         </View>
@@ -120,7 +120,7 @@ export default function Story() {
           {beat.bullets.map((b, i, all) => (
             <View key={b.text} style={{ flexDirection: 'row', alignItems: 'center', gap: 11, marginBottom: i === all.length - 1 ? 0 : 10 }}>
               <Icon name={b.icon} size={17} color="#F97316" strokeWidth={2} />
-              <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, color: '#d4d4d4' }}>{b.text}</Text>
+              <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 13, color: '#d4d4d4' }}>{b.text}</Text>
             </View>
           ))}
         </View>
@@ -129,7 +129,7 @@ export default function Story() {
           <Btn label="Continue" arrow onPress={() => (isLast ? finish() : setActive((a) => a + 1))} />
           {active > 0 ? (
             <Pressable accessibilityRole="button" onPress={() => setActive((a) => a - 1)} hitSlop={10} style={{ alignItems: 'center', marginTop: 14 }}>
-              <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, color: '#7d7d7d' }}>BACK</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, color: '#7d7d7d' }}>BACK</Text>
             </Pressable>
           ) : null}
         </View>

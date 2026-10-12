@@ -40,7 +40,7 @@ export default function Registrations() {
       </Pressable>
       <Text style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: '#fff' }}>My entries</Text>
       {unpaid > 0 ? (
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
           {unpaid} unpaid
         </Text>
       ) : null}

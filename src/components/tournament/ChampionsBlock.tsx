@@ -41,18 +41,18 @@ export function ChampionsBlock({ champions }: { champions: Champion[] }) {
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
                 <Icon name="trophy" size={11} color={GOLD} strokeWidth={2.2} />
-                <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: GOLD }}>
+                <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: GOLD }}>
                   {categoryName} champions
                 </Text>
               </View>
             </View>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderTopWidth: 1.5, borderTopColor: theme.lineFaint }}>
-            <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: theme.textMeta }}>
-              Final · beat <Text style={{ fontFamily: 'SpaceMono_700Bold', color: theme.text }}>{result.loser.name}</Text>
+            <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: theme.textMeta }}>
+              Final · beat <Text style={{ fontFamily: 'JetBrainsMono_700Bold', color: theme.text }}>{result.loser.name}</Text>
             </Text>
             {result.score || result.margin ? (
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: theme.text }}>{result.score ?? result.margin}</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: theme.text }}>{result.score ?? result.margin}</Text>
             ) : null}
           </View>
         </View>

@@ -133,7 +133,7 @@ export function TournamentHero({
         </Text>
         <Text
           numberOfLines={2}
-          style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: theme.textMeta, marginTop: 6 }}
+          style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: theme.textMeta, marginTop: 6 }}
         >
           {meta}
         </Text>
@@ -162,10 +162,10 @@ export function FactStrip({ cells }: { cells: { label: string; value: string; ac
           key={c.label}
           style={{ flex: 1, paddingHorizontal: 10, paddingTop: 9, paddingBottom: 10, gap: 3, ...(i > 0 ? { borderLeftWidth: 1.5, borderLeftColor: theme.lineFaint } : null) }}
         >
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, textTransform: 'uppercase', color: theme.textFaint }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, textTransform: 'uppercase', color: theme.textFaint }}>
             {c.label}
           </Text>
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 16, color: c.accent ? theme.brandInk : theme.text }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 16, color: c.accent ? theme.brandInk : theme.text }}>
             {c.value}
           </Text>
         </View>
@@ -187,14 +187,14 @@ export function EntryClock({ tournament }: { tournament: Tournament }) {
       style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 16, marginTop: 12, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 6, backgroundColor: theme.brand }}
     >
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: theme.onBrand }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: theme.onBrand }}>
           Entries close in
         </Text>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 24, lineHeight: 29, color: theme.onBrand }}>
           {cell.value}
         </Text>
       </View>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, lineHeight: 15, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: theme.onBrand, textAlign: 'right' }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, lineHeight: 15, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: theme.onBrand, textAlign: 'right' }}>
         {deadline.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
         {'\n'}
         {deadline.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' })}

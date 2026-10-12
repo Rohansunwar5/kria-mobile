@@ -30,9 +30,9 @@ export default function KnockoutAwardsScreen() {
   const canGive = Boolean(k) && host && k!.status === 'completed' && k!.awardsEligible && k!.awards.length < MAX_AWARDS;
   const ready = Boolean(playerId && badge) && !ko.busy;
 
-  const label = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint };
-  const body = { fontFamily: 'SpaceGrotesk_400Regular' as const, fontSize: 13, lineHeight: 19, color: t.textMeta };
-  const button = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
+  const label = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint };
+  const body = { fontFamily: 'Barlow_400Regular' as const, fontSize: 13, lineHeight: 19, color: t.textMeta };
+  const button = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
   const choice = (on: boolean) => ({ borderRadius: 6, borderWidth: 1.5, borderColor: on ? t.brand : t.line, backgroundColor: on ? t.brandTint : t.fillSoft });
 
   return (
@@ -54,11 +54,11 @@ export default function KnockoutAwardsScreen() {
             <Text style={label}>Awards</Text>
             <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 28, lineHeight: 34, textTransform: 'uppercase', color: t.text, marginTop: 6 }}>{k.name}</Text>
             {k.championEntrantId ? (
-              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.textBody, marginTop: 4 }}>{`${championName(k)} won ${k.name}`}</Text>
+              <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: t.textBody, marginTop: 4 }}>{`${championName(k)} won ${k.name}`}</Text>
             ) : null}
 
             {k.awards.map((a, i) => (
-              <Text key={`${a.playerId}-${a.badge}-${i}`} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.text, marginTop: 8 }}>
+              <Text key={`${a.playerId}-${a.badge}-${i}`} style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: t.text, marginTop: 8 }}>
                 {[k.players.find((p) => p.playerId === a.playerId)?.displayName, a.title].filter(Boolean).join(' · ')}
               </Text>
             ))}
@@ -75,7 +75,7 @@ export default function KnockoutAwardsScreen() {
                 <View style={{ gap: 8, marginTop: 10 }}>
                   {awardablePlayers(k, user!._id).map((p) => (
                     <Pressable key={p.playerKey} accessibilityRole="button" accessibilityState={{ selected: playerId === p.playerId }} onPress={() => setPlayerId(p.playerId!)} style={{ ...choice(playerId === p.playerId), minHeight: 48, paddingHorizontal: 14, justifyContent: 'center' }}>
-                      <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: playerId === p.playerId ? t.text : t.textBody }}>{p.displayName}</Text>
+                      <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: playerId === p.playerId ? t.text : t.textBody }}>{p.displayName}</Text>
                     </Pressable>
                   ))}
                 </View>
@@ -85,7 +85,7 @@ export default function KnockoutAwardsScreen() {
                   {awardBadges(k).map(([key, name]) => (
                     <Pressable key={key} accessibilityRole="button" accessibilityState={{ selected: badge === key }} onPress={() => setBadge(key)} style={{ ...choice(badge === key), width: '48%', padding: 12, alignItems: 'center', gap: 8 }}>
                       <Badge badge={key} size={56} />
-                      <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: badge === key ? t.text : t.textBody }}>{name}</Text>
+                      <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: badge === key ? t.text : t.textBody }}>{name}</Text>
                     </Pressable>
                   ))}
                 </View>
@@ -98,7 +98,7 @@ export default function KnockoutAwardsScreen() {
 
       {k && host ? (
         <View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12 + insets.bottom, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg, gap: 8 }}>
-          {ko.problem ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk }}>{ko.problem}</Text> : null}
+          {ko.problem ? <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: t.failInk }}>{ko.problem}</Text> : null}
           {canGive ? (
             <Pressable
               accessibilityRole="button"

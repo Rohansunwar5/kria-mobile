@@ -32,7 +32,7 @@ function Header({ onBack, sub }: { onBack: () => void; sub?: string }) {
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Team league</Text>
         {sub ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
             {sub}
           </Text>
         ) : null}

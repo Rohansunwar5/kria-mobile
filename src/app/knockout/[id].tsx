@@ -51,7 +51,7 @@ export default function KnockoutScreen() {
         {k && k.status !== 'waiting' ? (
           <>
             <View style={{ paddingHorizontal: 20 }}>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: t.brandInk }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: t.brandInk }}>
                 {`Knockout · ${formatLabel(k)} · ${k.status}`}
               </Text>
               <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 28, lineHeight: 34, textTransform: 'uppercase', color: t.text, marginTop: 6 }}>{k.name}</Text>
@@ -66,7 +66,7 @@ export default function KnockoutScreen() {
 
             {host && k.status === 'completed' && k.awardsEligible && k.awards.length < 3 ? (
               <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/knockout/awards/[id]', params: { id: k._id } })} style={{ marginHorizontal: 20, marginTop: 12, minHeight: 48, borderRadius: 5, backgroundColor: t.brand, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.onBrand }}>Give awards</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.onBrand }}>Give awards</Text>
               </Pressable>
             ) : null}
 
@@ -77,11 +77,11 @@ export default function KnockoutScreen() {
 
         {host && k && (k.status === 'waiting' || k.status === 'live') ? (
           <Pressable accessibilityRole="button" onPress={confirmCancel} disabled={ko.busy} style={{ marginHorizontal: 20, marginTop: 24, minHeight: 48, borderRadius: 5, borderWidth: 1.5, borderColor: t.fail, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.failInk }}>Cancel knockout</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.failInk }}>Cancel knockout</Text>
           </Pressable>
         ) : null}
 
-        {ko.problem && !drawBar ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk, marginTop: 16, paddingHorizontal: 20 }}>{ko.problem}</Text> : null}
+        {ko.problem && !drawBar ? <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: t.failInk, marginTop: 16, paddingHorizontal: 20 }}>{ko.problem}</Text> : null}
       </ScrollView>
 
       {k && drawBar ? <KnockoutDrawBar knockout={k} busy={ko.busy} problem={ko.problem} onDraw={ko.draw} onStart={ko.start} /> : null}

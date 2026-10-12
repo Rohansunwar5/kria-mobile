@@ -5,8 +5,8 @@ import { lineupFromSlots, setupStage } from '@/lib/quickCricketView';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 
-const label = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
-const button = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 14, letterSpacing: 0.14 * 14, textTransform: 'uppercase' as const };
+const label = (t: Palette) => ({ fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
+const button = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 14, letterSpacing: 0.14 * 14, textTransform: 'uppercase' as const };
 
 /**
  * The host's setup: the toss. Recording it fills both squads on the server,

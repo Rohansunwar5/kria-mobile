@@ -30,10 +30,10 @@ export function RallyLog({ match, log, now }: { match: BadmintonMatch; log: Logg
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
           Point by point
         </Text>
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
           Since you joined
         </Text>
       </View>
@@ -55,14 +55,14 @@ export function RallyLog({ match, log, now }: { match: BadmintonMatch; log: Logg
                   backgroundColor: newest ? 'rgba(249,115,22,0.08)' : 'transparent',
                 }}
               >
-                <Text style={{ width: 42, fontFamily: newest ? 'SpaceMono_700Bold' : 'SpaceMono_400Regular', fontSize: 11, color: newest ? '#F97316' : '#a3a3a3' }}>
+                <Text style={{ width: 42, fontFamily: newest ? 'JetBrainsMono_700Bold' : 'JetBrainsMono_400Regular', fontSize: 11, color: newest ? '#F97316' : '#a3a3a3' }}>
                   {r.team1Score}-{r.team2Score}
                 </Text>
                 <InitialsAvatar name={name} size={22} neutral={r.side === 2} />
-                <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: newest ? '#fff' : '#d4d4d4' }}>
+                <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 12, color: newest ? '#fff' : '#d4d4d4' }}>
                   Point to {name}
                 </Text>
-                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, color: '#7d7d7d' }}>{ago(r.at, now)}</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, color: '#7d7d7d' }}>{ago(r.at, now)}</Text>
               </View>
             </View>
           );

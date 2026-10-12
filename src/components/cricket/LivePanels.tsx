@@ -52,7 +52,7 @@ export function TossLine({ match }: { match: CricketMatch | null }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: 'rgba(249,115,22,0.10)', borderWidth: 1.5, borderColor: 'rgba(249,115,22,0.30)', borderRadius: 6 }}>
       <Icon name="flame" size={13} color="#F97316" strokeWidth={2.2} />
-      <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: '#d4d4d4' }}>
+      <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: '#d4d4d4' }}>
         {line}
       </Text>
     </View>
@@ -66,11 +66,11 @@ export function MatchStateBanner({ live }: { live: LiveState | null }) {
   return (
     <Block>
       <View style={{ paddingHorizontal: 12, paddingVertical: 7, backgroundColor: '#F97316' }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, textTransform: 'uppercase', color: '#0B0B0B' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, textTransform: 'uppercase', color: '#0B0B0B' }}>
           {note.title}
         </Text>
       </View>
-      <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4', padding: 12 }}>
+      <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4', padding: 12 }}>
         {note.message}
       </Text>
     </Block>
@@ -88,10 +88,10 @@ export function PartnershipCard({ partnership }: { partnership: PartnershipInfo 
       <Band title="Current partnership" aside={`SR ${strikeRate(partnership.runs, partnership.balls).toFixed(1)}`} />
       <View style={{ padding: 13, gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
-          <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, lineHeight: 18, color: '#fff' }}>
+          <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Barlow_500Medium', fontSize: 13, lineHeight: 18, color: '#fff' }}>
             {partnership.strikerName} <Text style={{ color: '#7d7d7d' }}>/</Text> {partnership.nonStrikerName}
           </Text>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, lineHeight: 28, color: '#fff' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 26, lineHeight: 28, color: '#fff' }}>
             {partnership.runs}
             <Text style={{ fontSize: 14, color: '#a3a3a3' }}> ({partnership.balls})</Text>
           </Text>
@@ -139,7 +139,7 @@ export function RunRatePanel({ live, maxOvers }: { live: LiveState | null; maxOv
           }}
         >
           <Lbl style={{ letterSpacing: 0.12 * 9 }}>{c.label}</Lbl>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 22, color: c.tone, marginTop: 4 }}>{c.value}</Text>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 22, color: c.tone, marginTop: 4 }}>{c.value}</Text>
           {c.bar != null ? (
             <View style={{ height: 3, backgroundColor: 'rgba(255,255,255,0.06)', marginTop: 8 }}>
               <View style={{ width: `${c.bar * 100}%`, height: 3, backgroundColor: c.tone === '#FF4438' ? '#FF4438' : '#F97316' }} />
@@ -172,15 +172,15 @@ export function Innings1Panel({
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 13, paddingVertical: 11 }}>
         <View style={{ flex: 1 }}>
           <Lbl style={{ letterSpacing: 0.14 * 9 }}>1st innings</Lbl>
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#d4d4d4', marginTop: 3 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: '#d4d4d4', marginTop: 3 }}>
             {innings1?.battingTeamName || 'Batted first'}
           </Text>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 22, lineHeight: 24, color: '#fff' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 22, lineHeight: 24, color: '#fff' }}>
             {runs}/{wickets}
           </Text>
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: '#a3a3a3', marginTop: 3 }}>{overs} ov</Text>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, color: '#a3a3a3', marginTop: 3 }}>{overs} ov</Text>
         </View>
       </View>
     </Block>
@@ -199,7 +199,7 @@ export function OversTimeline({ innings }: { innings: InningsScorecard | null })
       <View style={{ padding: 12, gap: 11 }}>
         {overs.map((over) => (
           <View key={over.overNumber} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Text style={{ width: 20, fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#7d7d7d' }}>{over.overNumber}</Text>
+            <Text style={{ width: 20, fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: '#7d7d7d' }}>{over.overNumber}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 5 }} style={{ flex: 1 }}>
               {over.balls.map((b, i) => {
                 const skin = BALL[ballChipKind(b)];
@@ -217,14 +217,14 @@ export function OversTimeline({ innings }: { innings: InningsScorecard | null })
                       ...(skin.border ? { borderWidth: 1.5, borderColor: skin.border } : null),
                     }}
                   >
-                    <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: b.label.length > 1 ? 9 : 11, color: skin.fg }}>
+                    <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: b.label.length > 1 ? 9 : 11, color: skin.fg }}>
                       {b.label}
                     </Text>
                   </View>
                 );
               })}
             </ScrollView>
-            <Text style={{ width: 42, textAlign: 'right', fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#fff' }}>
+            <Text style={{ width: 42, textAlign: 'right', fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: '#fff' }}>
               {over.runs}
               {over.wickets > 0 ? <Text style={{ color: '#FF4438' }}>{`·${over.wickets}w`}</Text> : null}
             </Text>
@@ -255,19 +255,19 @@ export function FallOfWickets({ innings }: { innings: InningsScorecard | null })
           key={f.wicketNumber}
           style={{ flexDirection: 'row', alignItems: 'baseline', paddingHorizontal: 13, paddingVertical: 9, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.06)' }}
         >
-          <Text style={{ width: 18, fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: '#7d7d7d' }}>{f.wicketNumber}</Text>
+          <Text style={{ width: 18, fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, color: '#7d7d7d' }}>{f.wicketNumber}</Text>
           <View style={{ flex: 1, paddingRight: 6 }}>
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#d4d4d4' }}>{f.batterName}</Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.06 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: '#d4d4d4' }}>{f.batterName}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, letterSpacing: 0.06 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
               {f.dismissalLine}
             </Text>
           </View>
-          <Text style={{ width: 52, textAlign: 'right', fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#fff' }}>
+          <Text style={{ width: 52, textAlign: 'right', fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: '#fff' }}>
             {f.score}
             <Text style={{ color: '#7d7d7d' }}>/{f.wicketNumber}</Text>
           </Text>
-          <Text style={{ width: 40, textAlign: 'right', fontFamily: 'SpaceMono_400Regular', fontSize: 11, color: '#a3a3a3' }}>{f.overs}</Text>
-          <Text style={{ width: 52, textAlign: 'right', fontFamily: 'SpaceMono_400Regular', fontSize: 11, color: '#a3a3a3' }}>
+          <Text style={{ width: 40, textAlign: 'right', fontFamily: 'JetBrainsMono_400Regular', fontSize: 11, color: '#a3a3a3' }}>{f.overs}</Text>
+          <Text style={{ width: 52, textAlign: 'right', fontFamily: 'JetBrainsMono_400Regular', fontSize: 11, color: '#a3a3a3' }}>
             {f.partnershipRuns}
             <Text style={{ fontSize: 8, color: '#7d7d7d' }}> ({f.partnershipBalls})</Text>
           </Text>
@@ -290,8 +290,8 @@ function XI({ lineup, teamName, innings }: { lineup?: TeamLineup; teamName: stri
           key={p.registrationId}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 8, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.06)' }}
         >
-          <Text style={{ width: 16, textAlign: 'right', fontFamily: 'SpaceMono_700Bold', fontSize: 10, color: '#5c5c5c' }}>{i + 1}</Text>
-          <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, color: '#d4d4d4' }}>
+          <Text style={{ width: 16, textAlign: 'right', fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, color: '#5c5c5c' }}>{i + 1}</Text>
+          <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 13, color: '#d4d4d4' }}>
             {p.name || 'Unnamed'}
           </Text>
           {p.name && pendingSet.has(p.name) ? <Lbl style={{ fontSize: 8, letterSpacing: 0.12 * 8 }}>Yet to bat</Lbl> : null}
@@ -302,7 +302,7 @@ function XI({ lineup, teamName, innings }: { lineup?: TeamLineup; teamName: stri
           <View style={{ paddingHorizontal: 13, paddingVertical: 7, backgroundColor: 'rgba(255,255,255,0.03)', borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)' }}>
             <Lbl style={{ fontSize: 8, letterSpacing: 0.12 * 8 }}>Reserves</Lbl>
           </View>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: '#7d7d7d', paddingHorizontal: 13, paddingVertical: 9 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: '#7d7d7d', paddingHorizontal: 13, paddingVertical: 9 }}>
             {(lineup.reserves ?? []).map((r) => r.name || 'Unnamed').join(' · ')}
           </Text>
         </>

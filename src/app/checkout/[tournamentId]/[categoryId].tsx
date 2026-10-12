@@ -13,14 +13,14 @@ import { RazorpayWebView } from '@/components/checkout/RazorpayWebView';
 
 type CheckoutState = 'loading' | 'confirming' | 'error' | 'webview';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 const CELL_LBL = { ...LBL, letterSpacing: 0.12 * 9 };
 
 function LedgerRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingHorizontal: 14, paddingVertical: 11 }}>
-      <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, color: '#d4d4d4' }}>{label}</Text>
-      <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 14, color: '#fff' }}>{value}</Text>
+      <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, color: '#d4d4d4' }}>{label}</Text>
+      <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 14, color: '#fff' }}>{value}</Text>
     </View>
   );
 }
@@ -150,13 +150,13 @@ export default function CheckoutScreen() {
         {/* What you're buying */}
         <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden', marginBottom: 14 }}>
           <View style={{ paddingHorizontal: 14, paddingVertical: 13 }}>
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }}>
               {tournament?.name || 'Tournament'}
             </Text>
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 24, lineHeight: 29, color: '#fff', marginTop: 6 }}>
               {category?.name || 'Registration'}
             </Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 7 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 7 }}>
               {[category?.bracketType?.replace('_', ' '), tournament?.venue?.city].filter(Boolean).join(' · ') || ' '}
             </Text>
           </View>
@@ -164,13 +164,13 @@ export default function CheckoutScreen() {
           <View style={{ flexDirection: 'row' }}>
             <View style={{ flex: 1, paddingHorizontal: 14, paddingVertical: 10, borderRightWidth: 1.5, borderRightColor: 'rgba(255,255,255,0.10)' }}>
               <Text style={CELL_LBL}>Playing as</Text>
-              <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#fff', marginTop: 3 }}>
+              <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: '#fff', marginTop: 3 }}>
                 {playerName.toUpperCase() || '—'}
               </Text>
             </View>
             <View style={{ flex: 1, paddingHorizontal: 14, paddingVertical: 10 }}>
               <Text style={CELL_LBL}>Entry fee</Text>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#FA4C93', marginTop: 3 }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: '#FA4C93', marginTop: 3 }}>
                 {formatINR(orderDetails.baseAmount)}
               </Text>
             </View>
@@ -187,7 +187,7 @@ export default function CheckoutScreen() {
           <LedgerRow label="GST 18%" value={formatINR(fees.gst)} />
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F97316', paddingHorizontal: 14, paddingVertical: 12 }}>
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: '#0B0B0B' }}>Total</Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 24, color: '#0B0B0B' }}>{formatINR(orderDetails.amount)}</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 24, color: '#0B0B0B' }}>{formatINR(orderDetails.amount)}</Text>
           </View>
         </View>
 
@@ -214,7 +214,7 @@ export default function CheckoutScreen() {
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: '#fff' }}>
               UPI · Card · Netbanking
             </Text>
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 4 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 4 }}>
               Razorpay checkout
             </Text>
           </View>
@@ -225,7 +225,7 @@ export default function CheckoutScreen() {
 
         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
           <Icon name="info" size={13} color="#7d7d7d" strokeWidth={2} />
-          <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 11, lineHeight: 16, color: '#737373' }}>
+          <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 11, lineHeight: 16, color: '#737373' }}>
             Your slot is held the moment payment clears, then the organiser approves it.
           </Text>
         </View>

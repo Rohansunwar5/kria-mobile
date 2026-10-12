@@ -33,7 +33,7 @@ function Ribbon({ played, matches, record, earned }: { played: number; matches: 
           }}
         >
           <Lbl style={{ letterSpacing: 0.1 * 9 }}>{c.label}</Lbl>
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: c.size, color: c.tone, marginTop: c.size === 22 ? 2 : 6 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: c.size, color: c.tone, marginTop: c.size === 22 ? 2 : 6 }}>
             {c.value}
           </Text>
         </View>
@@ -91,7 +91,7 @@ export default function History() {
         title="History"
         onBack={() => goBack(router)}
         right={
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
             {String(tournamentHistory.length).padStart(2, '0')}
           </Text>
         }
@@ -134,7 +134,7 @@ export default function History() {
           years.map(([year, entries]) => (
             <View key={year}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 9, marginTop: 5 }}>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.16 * 11, color: year === years[0][0] ? '#F97316' : '#7d7d7d' }}>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, letterSpacing: 0.16 * 11, color: year === years[0][0] ? '#F97316' : '#7d7d7d' }}>
                   {year}
                 </Text>
                 <View style={{ flex: 1, height: 1.5, backgroundColor: 'rgba(255,255,255,0.12)' }} />

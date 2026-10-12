@@ -60,7 +60,7 @@ export default function WelcomeDone() {
         <View style={{ flex: 1, alignItems: 'center', paddingHorizontal: 20 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 14 }}>
             <Icon name="check" size={15} color="#16C46A" strokeWidth={2.8} />
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, color: '#16C46A' }}>CARD ISSUED</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, color: '#16C46A' }}>CARD ISSUED</Text>
           </View>
 
           <View style={{ marginTop: 18 }}>
@@ -79,7 +79,7 @@ export default function WelcomeDone() {
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 32, lineHeight: 39, color: '#fff', textAlign: 'center' }}>
               You&apos;re in,{'\n'}{firstName}.
             </Text>
-            <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 11, maxWidth: 280, textAlign: 'center' }}>
+            <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 11, maxWidth: 280, textAlign: 'center' }}>
               Your card is live. Find a tournament that is open for entry and put it to work.
             </Text>
           </View>

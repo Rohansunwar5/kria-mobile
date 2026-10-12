@@ -6,7 +6,7 @@ import type { TournamentHit } from '@/api/tournaments';
 import { StatusPill } from '@/components/StatusPill';
 
 const META = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_400Regular' as const,
+  fontFamily: 'JetBrainsMono_400Regular' as const,
   fontSize: 11,
   letterSpacing: 0.05 * 11,
   textTransform: 'uppercase' as const,

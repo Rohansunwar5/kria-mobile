@@ -23,7 +23,7 @@ import type { Tournament } from '@/store/slices/tournamentSlice';
 // typing. Every section reads data the app already fetches for Home.
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.18 * 9,
   textTransform: 'uppercase' as const,
@@ -44,7 +44,7 @@ const CHIP = (theme: Palette) => ({
 
 const CHIP_TEXT = (theme: Palette) => ({
   flexShrink: 1,
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 10,
   letterSpacing: 0.08 * 10,
   textTransform: 'uppercase' as const,
@@ -65,7 +65,7 @@ export function GroupHeading({ label, count, right, live }: { label: string; cou
       <Text style={{ ...LBL(theme), ...(live ? { color: theme.brandInk } : null) }}>{label}</Text>
       <View style={{ flex: 1, height: 1.5, backgroundColor: theme.lineFaint }} />
       {count !== undefined ? (
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: theme.textFaint }}>{count}</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, color: theme.textFaint }}>{count}</Text>
       ) : null}
       {right}
     </View>
@@ -170,8 +170,8 @@ export function SportTiles({ open, live }: { open: Tournament[] | null; live: Li
                 {label}
               </Text>
               {openCount !== undefined ? (
-                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: theme.textMeta, marginTop: 4 }}>
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', color: theme.text }}>{openCount}</Text> open
+                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: theme.textMeta, marginTop: 4 }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', color: theme.text }}>{openCount}</Text> open
                   {liveCount > 0 ? <Text style={{ color: theme.brandInk }}>{`  ${liveCount} live`}</Text> : null}
                 </Text>
               ) : null}
@@ -258,12 +258,12 @@ export function TopPlayersRail({ sport, onSportChange }: { sport: string; onSpor
                 <View>
                   <InitialsAvatar name={name} size={92} logo={p.profileImage} />
                   <View style={{ position: 'absolute', left: 0, top: 0, backgroundColor: theme.bg, borderBottomRightRadius: 4, paddingHorizontal: 6, paddingVertical: 2 }}>
-                    <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: i === 0 ? theme.brandInk : theme.text }}>#{i + 1}</Text>
+                    <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, color: i === 0 ? theme.brandInk : theme.text }}>#{i + 1}</Text>
                   </View>
                 </View>
-                <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 12, color: theme.text }}>{name}</Text>
-                <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: theme.textMeta }}>
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', color: theme.openInk }}>{rate}</Text> · {p.played} played
+                <Text numberOfLines={1} style={{ fontFamily: 'Barlow_700Bold', fontSize: 12, color: theme.text }}>{name}</Text>
+                <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, color: theme.textMeta }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', color: theme.openInk }}>{rate}</Text> · {p.played} played
                 </Text>
               </Pressable>
             );
@@ -274,7 +274,7 @@ export function TopPlayersRail({ sport, onSportChange }: { sport: string; onSpor
           {[0, 1, 2].map((i) => <Skeleton key={i} h={92} w={92} />)}
         </View>
       ) : (
-        <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: theme.textFaint }}>
+        <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: theme.textFaint }}>
           {error ? 'Could not load rankings.' : `No ranked ${label.toLowerCase()} players yet.`}
         </Text>
       )}
@@ -319,7 +319,7 @@ export function NoMatch({ query, onClear }: { query: string; onClear: () => void
       <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 31, color: theme.text, marginTop: 10 }}>
         Nothing matched “{query}”
       </Text>
-      <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta, marginTop: 10, maxWidth: 290 }}>
+      <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta, marginTop: 10, maxWidth: 290 }}>
         Player names match from the first letter, so try just a first name or a surname.
       </Text>
       <Pressable

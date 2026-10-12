@@ -47,7 +47,7 @@ const HEADING = {
 };
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.14 * 9,
   textTransform: 'uppercase' as const,
@@ -74,7 +74,7 @@ function SportChip({ sport, onPress }: { sport: string; onPress: () => void }) {
     >
       <Text
         style={{
-          fontFamily: 'SpaceMono_700Bold',
+          fontFamily: 'JetBrainsMono_700Bold',
           fontSize: 11,
           letterSpacing: 0.08 * 11,
           textTransform: 'uppercase',
@@ -124,7 +124,7 @@ function PlayerRow({
     >
       <Text
         style={{
-          fontFamily: 'SpaceMono_700Bold',
+          fontFamily: 'JetBrainsMono_700Bold',
           fontSize: 12,
           width: 22,
           color: isViewer ? colors.auction : theme.textFaint,
@@ -152,7 +152,7 @@ function PlayerRow({
         </View>
         <Text
           style={{
-            fontFamily: 'SpaceMono_700Bold',
+            fontFamily: 'JetBrainsMono_700Bold',
             fontSize: 10,
             letterSpacing: 0.1 * 10,
             textTransform: 'uppercase',
@@ -163,7 +163,7 @@ function PlayerRow({
           {`${player.decided} decided`}
         </Text>
       </View>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 16, color: colors.white }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 16, color: colors.white }}>
         {winPercent(player.winRate, player.decided)}
       </Text>
     </View>
@@ -227,7 +227,7 @@ export function TopPlayers({ sport, onSportChange, viewerId }: TopPlayersProps) 
           }}
         >
           <Text style={LBL(theme)}>Top players</Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: theme.textMeta, marginTop: 9 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: theme.textMeta, marginTop: 9 }}>
             {`The ${sportLabel(sport)} leaderboard appears here once ten players have decided matches.`}
           </Text>
         </View>
@@ -251,7 +251,7 @@ export function TopPlayers({ sport, onSportChange, viewerId }: TopPlayersProps) 
 
   return (
     <View>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 18, paddingBottom: 9 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 32, paddingBottom: 12 }}>
         <Text style={HEADING}>Top players</Text>
         <SportChip sport={sport} onPress={() => onSportChange(nextSport(sport))} />
       </View>

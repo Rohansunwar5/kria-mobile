@@ -14,8 +14,8 @@ export function TiePick({ match, isHost, busy, onPick }: {
   onPick: (sideId: string) => void;
 }) {
   const t = useTheme();
-  const label = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.brandInk };
-  const body = { fontFamily: 'SpaceGrotesk_400Regular' as const, fontSize: 13, lineHeight: 19, color: t.textMeta };
+  const label = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.brandInk };
+  const body = { fontFamily: 'Barlow_400Regular' as const, fontSize: 13, lineHeight: 19, color: t.textMeta };
 
   if (!isHost) {
     return (
@@ -45,7 +45,7 @@ export function TiePick({ match, isHost, busy, onPick }: {
             onPress={() => confirm(side)}
             style={{ flex: 1, minHeight: 48, borderRadius: 5, borderWidth: 1.5, borderColor: t.brand, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8, opacity: busy ? 0.5 : 1 }}
           >
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.text }}>{side.name}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.text }}>{side.name}</Text>
           </Pressable>
         ))}
       </View>

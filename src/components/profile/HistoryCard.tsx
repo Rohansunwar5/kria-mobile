@@ -28,7 +28,7 @@ function Cell({ label, value, tone, last }: { label: string; value: string; tone
       }}
     >
       <Lbl style={{ letterSpacing: 0.1 * 9 }}>{label}</Lbl>
-      <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: tone || '#fff', marginTop: 3 }}>
+      <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, color: tone || '#fff', marginTop: 3 }}>
         {value}
       </Text>
     </View>
@@ -67,7 +67,7 @@ export function HistoryCard({ entry }: { entry: TournamentHistoryEntry }) {
             {t?.name || 'Tournament'}
           </Text>
           {sub ? (
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#a3a3a3', marginTop: 5 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#a3a3a3', marginTop: 5 }}>
               {sub}
             </Text>
           ) : null}

@@ -8,7 +8,7 @@ import type { QuickMatch } from '@/api/quickMatch';
 import { formatLabel, isHost, statusVariant } from '@/lib/quickMatchView';
 
 const label = (t: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.18 * 9,
   textTransform: 'uppercase' as const,
@@ -16,13 +16,13 @@ const label = (t: Palette) => ({
 });
 
 const body = (t: Palette) => ({
-  fontFamily: 'SpaceGrotesk_400Regular' as const,
+  fontFamily: 'Barlow_400Regular' as const,
   fontSize: 13,
   lineHeight: 19,
   color: t.textMeta,
 });
 
-const button = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
+const button = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
 
 /**
  * The host's Start button, pinned under the scroll by the screen so a long
@@ -101,7 +101,7 @@ export function WaitingRoom({
         <>
           <View style={{ marginTop: 18, padding: 18, borderRadius: 6, borderWidth: 1.5, borderColor: t.line, backgroundColor: t.surface }}>
             <Text style={label(t)}>Match code</Text>
-            <Text selectable style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 40, letterSpacing: 0.2 * 40, color: t.brandInk, marginTop: 6 }}>
+            <Text selectable style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 40, letterSpacing: 0.2 * 40, color: t.brandInk, marginTop: 6 }}>
               {match.joinCode}
             </Text>
             <Text style={{ ...body(t), marginTop: 6 }}>
@@ -147,7 +147,7 @@ export function WaitingRoom({
                     : ['Not joined', 'end'];
             return (
               <View key={slot.slotId} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48, borderBottomWidth: 1.5, borderBottomColor: t.lineSoft }}>
-                <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: claimed ? t.text : t.textMeta }}>
+                <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_500Medium', fontSize: 14, color: claimed ? t.text : t.textMeta }}>
                   {slot.displayName}
                 </Text>
                 <Tag label={tag} variant={variant} />

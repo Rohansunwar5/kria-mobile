@@ -50,11 +50,11 @@ export function InvoiceCard({ inv }: { inv: Invoice }) {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 13, paddingVertical: 7, backgroundColor: look.band }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: look.fg }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: look.fg }}>
           {look.label} · {shortDate(inv.createdAt)}
         </Text>
         {inv.razorpayOrderId ? (
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: look.fg }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: look.fg }}>
             {inv.razorpayOrderId.slice(-8).toUpperCase()}
           </Text>
         ) : null}
@@ -71,7 +71,7 @@ export function InvoiceCard({ inv }: { inv: Invoice }) {
         <View style={{ flex: 1 }}>
           <Text
             style={{
-              fontFamily: 'SpaceMono_700Bold',
+              fontFamily: 'JetBrainsMono_700Bold',
               fontSize: 15,
               color: dim ? '#a3a3a3' : '#fff',
               ...(dim ? { textDecorationLine: 'line-through' as const } : null),
@@ -80,7 +80,7 @@ export function InvoiceCard({ inv }: { inv: Invoice }) {
             {rupees(inv.amount)}
           </Text>
           {breakdown && !dim ? (
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.08 * 8, color: '#7d7d7d', marginTop: 3 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, letterSpacing: 0.08 * 8, color: '#7d7d7d', marginTop: 3 }}>
               {breakdown}
             </Text>
           ) : null}

@@ -8,7 +8,7 @@ import { PlayerLine } from './PlayerLine';
 
 const MIN_TEAMS = 3;
 const MAX_TEAMS = 8;
-const label = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
+const label = (t: Palette) => ({ fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
 
 /**
  * The cricket waiting room's roster: one card per team, then Any team. The
@@ -56,7 +56,7 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
             accessibilityLabel={`New name for ${team.name}`}
             maxLength={20}
             autoFocus
-            style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 15, color: t.text, borderWidth: 1.5, borderColor: t.line, borderRadius: 5, backgroundColor: t.fillSoft, paddingHorizontal: 12, minHeight: 44 }}
+            style={{ flex: 1, fontFamily: 'Barlow_500Medium', fontSize: 15, color: t.text, borderWidth: 1.5, borderColor: t.line, borderRadius: 5, backgroundColor: t.fillSoft, paddingHorizontal: 12, minHeight: 44 }}
           />
           <Pressable accessibilityRole="button" onPress={saveName} disabled={busy} style={{ ...dim, minHeight: 44, paddingHorizontal: 12, justifyContent: 'center' }}>
             <Text style={{ ...label(t), color: t.brandInk }}>Save</Text>
@@ -84,7 +84,7 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
     return (
       <View key={key} style={{ marginTop: 12, borderRadius: 6, borderWidth: 1.5, borderColor: canMoveHere ? t.brand : t.line, paddingHorizontal: 8, paddingBottom: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 40 }}>
-          <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_700Bold', fontSize: 15, color: t.text }}>{title}</Text>
+          <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_700Bold', fontSize: 15, color: t.text }}>{title}</Text>
           <Text style={label(t)}>{teamId === null ? String(players.length) : `${players.length}/${cap}`}</Text>
           {canMoveHere ? (
             <Pressable accessibilityRole="button" accessibilityLabel={`Move ${picked?.displayName} to ${title}`} onPress={() => move(teamId)} hitSlop={8} disabled={busy} style={{ ...dim, minHeight: 32, justifyContent: 'center' }}>
@@ -115,7 +115,7 @@ export function CricketTeams({ knockout: k, playerId, busy, onRemove, onMove, on
       {card('any', 'Any team', teamPlayers(k), null)}
       {host && teams.length < MAX_TEAMS ? (
         <Pressable accessibilityRole="button" onPress={onAddTeam} disabled={busy} style={{ ...dim, marginTop: 12, minHeight: 44, borderRadius: 5, borderWidth: 1.5, borderColor: t.line, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.textBody }}>+ Add team</Text>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.textBody }}>+ Add team</Text>
         </Pressable>
       ) : null}
     </View>

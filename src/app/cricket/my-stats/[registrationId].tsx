@@ -8,7 +8,7 @@ import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
 import { useAppSelector } from '@/store/hooks';
 import { getCricketPlayerStats, type CricketPlayerStats } from '@/api/cricketStats';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 function Cell({ label, value, last }: { label: string; value: string; last?: boolean }) {
   return (
@@ -21,7 +21,7 @@ function Cell({ label, value, last }: { label: string; value: string; last?: boo
       }}
     >
       <Text style={LBL}>{label}</Text>
-      <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 21, color: '#fff', marginTop: 3 }}>
+      <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 21, color: '#fff', marginTop: 3 }}>
         {value}
       </Text>
     </View>
@@ -95,7 +95,7 @@ export default function CricketMyStats() {
       </Pressable>
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>My tournament</Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
           {currentTournament?.name || ' '}
         </Text>
       </View>
@@ -171,14 +171,14 @@ export default function CricketMyStats() {
                 {name}
               </Text>
               {stats.teamName ? (
-                <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: 'rgba(11,11,11,0.72)', marginTop: 4 }}>
+                <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: 'rgba(11,11,11,0.72)', marginTop: 4 }}>
                   {stats.teamName}
                 </Text>
               ) : null}
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 20, lineHeight: 22, color: '#0B0B0B' }}>{stats.matches ?? '—'}</Text>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, color: 'rgba(11,11,11,0.7)' }}>MATCHES</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 20, lineHeight: 22, color: '#0B0B0B' }}>{stats.matches ?? '—'}</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, color: 'rgba(11,11,11,0.7)' }}>MATCHES</Text>
             </View>
           </View>
         </View>

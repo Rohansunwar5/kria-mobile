@@ -50,16 +50,16 @@ function CompetitorRow({
           {c.name}
         </Text>
         {c.teamName && !dim ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 3 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 3 }}>
             {c.teamName}
           </Text>
         ) : null}
       </View>
       {games ? (
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 11, color: '#7d7d7d' }}>{games}</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 11, color: '#7d7d7d' }}>{games}</Text>
       ) : null}
       {score !== null ? (
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 20, color: live || c.isWinner ? '#fff' : '#7d7d7d', width: 30, textAlign: 'right' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 20, color: live || c.isWinner ? '#fff' : '#7d7d7d', width: 30, textAlign: 'right' }}>
           {score}
         </Text>
       ) : null}
@@ -113,12 +113,12 @@ export function MatchCard({
           backgroundColor: live ? '#F97316' : isMine ? 'rgba(250,76,147,0.14)' : 'rgba(255,255,255,0.04)',
         }}
       >
-        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: live ? '#0B0B0B' : isMine ? '#FA4C93' : '#7d7d7d' }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: live ? '#0B0B0B' : isMine ? '#FA4C93' : '#7d7d7d' }}>
           {strip}
         </Text>
         {isMine && !live ? <Tag label="You" variant="auction" /> : null}
         {live && games.length ? (
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#0B0B0B' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#0B0B0B' }}>
             G{games[games.length - 1].gameNumber}
           </Text>
         ) : null}
@@ -143,7 +143,7 @@ export function MatchCard({
             backgroundColor: link === 'live' ? 'rgba(249,115,22,0.10)' : 'transparent',
           }}
         >
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: link === 'live' ? '#F97316' : '#7d7d7d' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: link === 'live' ? '#F97316' : '#7d7d7d' }}>
             {link === 'live' ? 'Watch point by point' : 'View result sheet'}
           </Text>
           <Icon name="chevron-right" size={15} color={link === 'live' ? '#F97316' : '#7d7d7d'} strokeWidth={2.8} />

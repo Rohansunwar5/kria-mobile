@@ -26,7 +26,7 @@ export function MenuRow({
         style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52, paddingHorizontal: 13, paddingVertical: 13 }}
       >
         <Icon name={icon} size={17} color={danger ? '#FF4438' : '#7d7d7d'} />
-        <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 14, color: tint }}>{label}</Text>
+        <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 14, color: tint }}>{label}</Text>
         <Icon name="chevron-right" size={15} color={danger ? '#FF4438' : '#7d7d7d'} />
       </Pressable>
     </View>

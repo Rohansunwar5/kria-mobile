@@ -11,7 +11,7 @@ import { SPORT_ICON, SPORT_LABELS } from '@/lib/sports';
 import type { CareerProfile, RecentMatch } from '@/api/career';
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.14 * 9,
   textTransform: 'uppercase' as const,
@@ -119,7 +119,7 @@ export function PlayerCard({
             }}
           >
             <Text numberOfLines={1} style={{ ...LBL(theme), fontSize: 8, letterSpacing: 0.12 * 8, color: theme.textFaint }}>{c.label}</Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 22, color: c.accent ? theme.brandInk : theme.text, marginTop: 3 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 22, color: c.accent ? theme.brandInk : theme.text, marginTop: 3 }}>
               {c.value}
             </Text>
           </View>

@@ -66,7 +66,7 @@ function SportSegment({ value, onChange }: { value: string; onChange: (sport: st
             }}
           >
             {icon ? <Icon name={icon} size={13} color={on ? theme.onBrand : theme.textMeta} /> : null}
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: on ? theme.onBrand : theme.textMeta }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: on ? theme.onBrand : theme.textMeta }}>
               {label}
             </Text>
           </Pressable>
@@ -109,10 +109,10 @@ function DateStrip({ days, selected, onSelect }: { days: StripDay[]; selected: s
                 ...(on ? { backgroundColor: theme.brand } : null),
               }}
             >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: on ? theme.onBrand : i === 0 ? theme.brandInk : theme.textFaint }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: on ? theme.onBrand : i === 0 ? theme.brandInk : theme.textFaint }}>
                 {top}
               </Text>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: on ? theme.onBrand : d.has ? theme.text : theme.textMeta }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 17, color: on ? theme.onBrand : d.has ? theme.text : theme.textMeta }}>
                 {d.date.getDate()}
               </Text>
               <View
@@ -137,7 +137,7 @@ function EndOfList({ city, onCity }: { city: string | null; onCity: (city: strin
   return (
     <View style={{ marginTop: 14 }}>
       <GroupHeading label={city ? `That's everything in ${city}` : "That's everything, all cities"} />
-      <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta, marginBottom: 10 }}>
+      <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta, marginBottom: 10 }}>
         New tournaments appear here as soon as organisers open entry. Or look in {city ? 'another' : 'one'} city:
       </Text>
       <CityChips label={null} exclude={city ?? undefined} onPick={onCity} />
@@ -182,7 +182,7 @@ function NothingHere({
       <View style={{ marginHorizontal: -16, paddingHorizontal: 16, paddingTop: 28, overflow: 'hidden' }}>
         <Ghost text="0" size={210} style={{ right: -14, top: 0 }} />
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 31, color: theme.text }}>{title}</Text>
-        <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta, marginTop: 10, maxWidth: 290 }}>
+        <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta, marginTop: 10, maxWidth: 290 }}>
           {widen.length ? 'Widen one filter to see what is on.' : 'New tournaments land here as organisers open entry. Check back soon.'}
         </Text>
         {widen.length ? (
@@ -260,10 +260,10 @@ export function EventsPortal({
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12, paddingTop: 16 }}>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 32, lineHeight: 39, color: theme.text }}>Events</Text>
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: theme.textMeta }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: theme.textMeta }}>
             {`${shown.length} ${shown.length === 1 ? 'tournament' : 'tournaments'}${city ? ` in ${city}` : ''}`}
             {openCount > 0 ? ' · ' : null}
-            {openCount > 0 ? <Text style={{ fontFamily: 'SpaceMono_700Bold', color: theme.openInk }}>{`${openCount} open for entry`}</Text> : null}
+            {openCount > 0 ? <Text style={{ fontFamily: 'JetBrainsMono_700Bold', color: theme.openInk }}>{`${openCount} open for entry`}</Text> : null}
           </Text>
         </View>
         <FilterButton count={appliedCount(filters)} onPress={onOpenFilters} />

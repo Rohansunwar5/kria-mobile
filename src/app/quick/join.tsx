@@ -15,7 +15,7 @@ const CODE_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 const CODE_LENGTH = 6;
 
 const LBL = {
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.1 * 9,
   textTransform: 'uppercase' as const,
@@ -120,7 +120,7 @@ export default function JoinQuickMatchScreen() {
           autoCapitalize="characters"
           autoCorrect={false}
           style={{
-            fontFamily: 'SpaceMono_700Bold',
+            fontFamily: 'JetBrainsMono_700Bold',
             fontSize: 26,
             letterSpacing: 0.2 * 26,
             color: '#fff',
@@ -145,13 +145,13 @@ export default function JoinQuickMatchScreen() {
             alignItems: 'center',
           }}
         >
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
             Find
           </Text>
         </Pressable>
 
         {problem ? (
-          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#FF4438', marginTop: 16 }}>
+          <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: '#FF4438', marginTop: 16 }}>
             {problem}
           </Text>
         ) : null}
@@ -187,7 +187,7 @@ export default function JoinQuickMatchScreen() {
                             opacity: taken ? 0.45 : 1,
                           }}
                         >
-                          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: '#fff' }}>
+                          <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: '#fff' }}>
                             {taken ? `${slot.displayName} · taken` : slot.displayName}
                           </Text>
                         </Pressable>
@@ -210,10 +210,10 @@ export default function JoinQuickMatchScreen() {
             {/* Someone already in can always open it; only a newcomer cares whether it has begun. */}
             {user?._id && knockout.players.some((p) => p.playerId === user._id) ? (
               <Pressable onPress={() => router.replace({ pathname: '/knockout/[id]', params: { id: knockout._id } })} style={{ marginTop: 14, backgroundColor: '#F97316', borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>You are in · Open</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>You are in · Open</Text>
               </Pressable>
             ) : knockout.status !== 'waiting' ? (
-              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#d4d4d4', marginTop: 12 }}>{KNOCKOUT_CLOSED[knockout.status]}</Text>
+              <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: '#d4d4d4', marginTop: 12 }}>{KNOCKOUT_CLOSED[knockout.status]}</Text>
             ) : (
               <>
                 {knockout.sport === 'cricket' ? (
@@ -232,7 +232,7 @@ export default function JoinQuickMatchScreen() {
                           onPress={() => setTeamId(team.teamId)}
                           style={{ marginTop: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1.5, borderColor: on ? '#F97316' : 'rgba(255,255,255,0.14)', borderRadius: 4, paddingVertical: 12, paddingHorizontal: 12, opacity: full ? 0.45 : 1 }}
                         >
-                          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: '#fff' }}>{team.name}</Text>
+                          <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: '#fff' }}>{team.name}</Text>
                           <Text style={LBL}>{full ? 'Full' : `${count}/${knockout.matchConfig.playersPerTeam}`}</Text>
                         </Pressable>
                       );
@@ -244,13 +244,13 @@ export default function JoinQuickMatchScreen() {
                       onPress={() => setTeamId(null)}
                       style={{ marginTop: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1.5, borderColor: teamId === null ? '#F97316' : 'rgba(255,255,255,0.14)', borderRadius: 4, paddingVertical: 12, paddingHorizontal: 12 }}
                     >
-                      <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: '#fff' }}>Any team</Text>
+                      <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: '#fff' }}>Any team</Text>
                       <Text style={LBL}>The draw places you</Text>
                     </Pressable>
                   </>
                 ) : null}
                 <Pressable disabled={busy} onPress={() => enterKnockout(() => (teamId ? joinQuickKnockout(code, teamId) : joinQuickKnockout(code)))} style={{ marginTop: 14, backgroundColor: '#F97316', opacity: busy ? 0.5 : 1, borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
                     {`Join as ${user ? `${user.firstName} ${user.lastName}` : 'yourself'}`}
                   </Text>
                 </Pressable>
@@ -260,7 +260,7 @@ export default function JoinQuickMatchScreen() {
                 {knockout.players.filter((p) => !p.playerId).map((p) => (
                   <Pressable key={p.playerKey} disabled={busy} onPress={() => enterKnockout(() => claimKnockoutGuest(code, p.playerKey))}
                     style={{ marginTop: 8, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 4, paddingVertical: 12, paddingHorizontal: 12 }}>
-                    <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: '#fff' }}>{p.displayName}</Text>
+                    <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: '#fff' }}>{p.displayName}</Text>
                   </Pressable>
                 ))}
               </>

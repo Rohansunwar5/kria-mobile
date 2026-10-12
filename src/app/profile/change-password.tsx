@@ -53,7 +53,7 @@ export default function ChangePassword() {
             {/* The artboard says "last changed 4 months ago"; the profile
                 payload carries no password timestamp, so this states what the
                 change actually does instead of inventing a date. */}
-            <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 13, maxWidth: 300 }}>
+            <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 13, maxWidth: 300 }}>
               You stay signed in on this device. Other devices are signed out and will need the new password.
             </Text>
           </View>
@@ -80,7 +80,7 @@ export default function ChangePassword() {
             {note ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Icon name={note.tone === 'ok' ? 'check' : 'alert'} size={13} color={note.tone === 'ok' ? '#16C46A' : '#FF4438'} strokeWidth={2.6} />
-                <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: note.tone === 'ok' ? '#16C46A' : '#FF4438' }}>
+                <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: note.tone === 'ok' ? '#16C46A' : '#FF4438' }}>
                   {note.text}
                 </Text>
               </View>

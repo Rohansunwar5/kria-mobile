@@ -5,7 +5,7 @@ import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hairlines } from '@/components/canvas';
 import { Ghost } from '@/components/states';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 /** The fields read here: a tournament CricketMatch, or one a quick match builds from its sides. */
 type HeroMatch = {
@@ -75,7 +75,7 @@ export function HeroScore({
           ) : null}
         </View>
         {live ? (
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>
             {`INN ${live.currentInnings}`}
           </Text>
         ) : null}
@@ -84,38 +84,38 @@ export function HeroScore({
       {live ? (
         <View style={{ paddingHorizontal: 16, paddingVertical: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 46, lineHeight: 49, color: '#fff' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 46, lineHeight: 49, color: '#fff' }}>
               {live.runs}
               <Text style={{ color: '#F97316' }}>/</Text>
               <Text style={{ fontSize: 32 }}>{live.wickets}</Text>
             </Text>
             <View style={{ alignItems: 'flex-end', paddingBottom: 4 }}>
               <Text style={LBL}>Overs</Text>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>
                 {oversDisplay(live)}
                 {maxOvers ? <Text style={{ color: '#7d7d7d' }}>/{maxOvers}</Text> : null}
               </Text>
             </View>
           </View>
 
-          {chase ? <Text style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 13, color: '#F97316', marginTop: 10 }}>{chase}</Text> : null}
+          {chase ? <Text style={{ fontFamily: 'Barlow_700Bold', fontSize: 13, color: '#F97316', marginTop: 10 }}>{chase}</Text> : null}
 
           <View style={{ flexDirection: 'row', gap: 24, marginTop: 12 }}>
             <View>
               <Text style={LBL}>CRR</Text>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>{crr.toFixed(2)}</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>{crr.toFixed(2)}</Text>
             </View>
             {innings ? (
               <>
                 <View>
                   <Text style={LBL}>Extras</Text>
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>
                     {innings.totals.extras.total}
                   </Text>
                 </View>
                 <View>
                   <Text style={LBL}>Boundaries</Text>
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 17, color: '#fff', marginTop: 3 }}>
                     {innings.battingCard.reduce((s, b) => s + b.fours, 0)}
                     <Text style={{ fontSize: 12, color: '#7d7d7d' }}>x4 </Text>
                     {innings.battingCard.reduce((s, b) => s + b.sixes, 0)}

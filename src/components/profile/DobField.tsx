@@ -36,7 +36,7 @@ export function DobField({ value, onChange }: { value: string; onChange: (v: str
         }}
       >
         <Icon name="calendar" size={15} color="#7d7d7d" strokeWidth={2} />
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 14, color: value ? '#fff' : '#7d7d7d' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 14, color: value ? '#fff' : '#7d7d7d' }}>
           {value
             ? parseLocal(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
             : 'SELECT'}

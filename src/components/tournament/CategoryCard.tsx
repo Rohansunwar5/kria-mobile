@@ -50,7 +50,7 @@ export function CategoryCard({
     .filter(Boolean)
     .join(' · ');
 
-  const label = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9.5, letterSpacing: 0.08 * 9.5, textTransform: 'uppercase' as const };
+  const label = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9.5, letterSpacing: 0.08 * 9.5, textTransform: 'uppercase' as const };
 
   return (
     <View style={{ backgroundColor: theme.surface, borderWidth: 1.5, borderColor: theme.line, borderRadius: 6, overflow: 'hidden', marginBottom: 9 }}>
@@ -64,7 +64,7 @@ export function CategoryCard({
           <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 19, lineHeight: 23, color: theme.text }}>
             {category.name}
           </Text>
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9.5, letterSpacing: 0.06 * 9.5, textTransform: 'uppercase', color: theme.textMeta, marginTop: 4 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9.5, letterSpacing: 0.06 * 9.5, textTransform: 'uppercase', color: theme.textMeta, marginTop: 4 }}>
             {meta}
           </Text>
         </View>

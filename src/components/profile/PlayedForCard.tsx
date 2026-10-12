@@ -31,7 +31,7 @@ export interface PlayedForEntry {
 }
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.12 * 9,
   textTransform: 'uppercase' as const,
@@ -42,7 +42,7 @@ function StatCell({ label, value, theme, tone }: { label: string; value: string;
   return (
     <View style={{ flex: 1, paddingTop: 8 }}>
       <Text style={LBL(theme)}>{label}</Text>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 14, color: tone || theme.text, marginTop: 3 }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 14, color: tone || theme.text, marginTop: 3 }}>
         {value}
       </Text>
     </View>
@@ -103,7 +103,7 @@ export function PlayedForCard({
           </Text>
           <Text
             numberOfLines={1}
-            style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, color: theme.textMeta, marginTop: 4 }}
+            style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, color: theme.textMeta, marginTop: 4 }}
           >
             {sub}
           </Text>

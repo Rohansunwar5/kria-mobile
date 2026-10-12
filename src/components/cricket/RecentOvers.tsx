@@ -23,7 +23,7 @@ export function RecentOvers({ innings, matchId }: { innings: InningsScorecard | 
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
           Recent
         </Text>
         {matchId ? (
@@ -34,7 +34,7 @@ export function RecentOvers({ innings, matchId }: { innings: InningsScorecard | 
             hitSlop={8}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
           >
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#F97316' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#F97316' }}>
               Ball by ball
             </Text>
             <Icon name="chevron-right" size={12} color="#F97316" strokeWidth={2.6} />
@@ -59,7 +59,7 @@ export function RecentOvers({ innings, matchId }: { innings: InningsScorecard | 
                   ...(skin.border ? { borderWidth: 1.5, borderColor: skin.border } : null),
                 }}
               >
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: b.label.length > 1 ? 10 : 12, color: skin.fg }}>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: b.label.length > 1 ? 10 : 12, color: skin.fg }}>
                   {b.label}
                 </Text>
               </View>

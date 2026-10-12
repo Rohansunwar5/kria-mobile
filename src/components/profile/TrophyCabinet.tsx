@@ -9,7 +9,7 @@ import type { Palette } from '@/lib/theme/palette';
 import type { Achievement } from '@/api/career';
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.16 * 9,
   textTransform: 'uppercase' as const,
@@ -86,11 +86,11 @@ function NextMilestones({ locked }: { locked: Achievement[] }) {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <Text
                 numberOfLines={1}
-                style={{ flex: 1, fontFamily: i === 0 ? 'SpaceGrotesk_700Bold' : 'SpaceGrotesk_400Regular', fontSize: 13, color: i === 0 ? theme.text : theme.textBody }}
+                style={{ flex: 1, fontFamily: i === 0 ? 'Barlow_700Bold' : 'Barlow_400Regular', fontSize: 13, color: i === 0 ? theme.text : theme.textBody }}
               >
                 {a.label}
               </Text>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: theme.text }}>{`${a.progress}/${a.target}`}</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, color: theme.text }}>{`${a.progress}/${a.target}`}</Text>
             </View>
             <View style={{ height: 5, borderRadius: 3, backgroundColor: theme.fillSoft, overflow: 'hidden' }}>
               <View style={{ width, height: 5, backgroundColor: theme.brand }} />
@@ -188,7 +188,7 @@ export function TrophyCabinet({
         </ScrollView>
       ) : !loading && !error ? (
         <View style={{ marginHorizontal: 16, padding: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: theme.keyline, borderRadius: 6 }}>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta }}>
             Honours from organisers, knockout titles and earned milestones are kept here.
           </Text>
         </View>

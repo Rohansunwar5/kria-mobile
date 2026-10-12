@@ -12,7 +12,7 @@ import { cricketOutcomeLabel, panelFor, tossLine } from '@/lib/quickCricketView'
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 
-const label = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
+const label = (t: Palette) => ({ fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
 
 type Section = 'live' | 'card';
 
@@ -30,7 +30,7 @@ export function QuickCricketLive({ match, scorecard, playerId }: { match: QuickM
   if (match.status === 'live' && panelFor(match) === 'cricket-setup') {
     return (
       <View style={{ paddingHorizontal: 16, gap: 12 }}>
-        <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.textBody }}>{toss ?? 'Waiting for the toss'}</Text>
+        <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: t.textBody }}>{toss ?? 'Waiting for the toss'}</Text>
         <Text style={label(t)}>Squads</Text>
         <View style={{ flexDirection: 'row', gap: 10 }}>
           {match.sides.map((side) => (
@@ -39,7 +39,7 @@ export function QuickCricketLive({ match, scorecard, playerId }: { match: QuickM
               {side.slots.map((slot) => {
                 const you = Boolean(playerId) && slot.playerId === playerId;
                 return (
-                  <Text key={slot.slotId} numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, color: you ? t.brandInk : t.textBody }}>
+                  <Text key={slot.slotId} numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, color: you ? t.brandInk : t.textBody }}>
                     {you ? `${slot.displayName} (you)` : slot.displayName}
                   </Text>
                 );

@@ -55,7 +55,7 @@ export function FeaturedTournament({ tournament, onPress }: { tournament: Tourna
             shimmer
           />
           <View style={{ position: 'absolute', right: 0, top: 0, backgroundColor: theme.brand, borderBottomLeftRadius: 6, paddingHorizontal: 10, paddingTop: 7, paddingBottom: 6, alignItems: 'flex-end' }}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, textTransform: 'uppercase', color: theme.onBrand }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, textTransform: 'uppercase', color: theme.onBrand }}>
               {clock.label}
             </Text>
             <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: theme.onBrand }}>
@@ -76,7 +76,7 @@ export function FeaturedTournament({ tournament, onPress }: { tournament: Tourna
           </Text>
           <Text
             numberOfLines={1}
-            style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: theme.textMeta, marginTop: 7 }}
+            style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.06 * 10, textTransform: 'uppercase', color: theme.textMeta, marginTop: 7 }}
           >
             {[tournament.venue?.name, tournament.venue?.city].filter(Boolean).join(' · ') || 'Venue TBD'}
           </Text>
@@ -94,10 +94,10 @@ export function FeaturedTournament({ tournament, onPress }: { tournament: Tourna
                 ...(i > 0 ? { borderLeftWidth: 1.5, borderLeftColor: theme.lineFaint } : null),
               }}
             >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, textTransform: 'uppercase', color: theme.textFaint }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, textTransform: 'uppercase', color: theme.textFaint }}>
                 {c.label}
               </Text>
-              <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 15, color: theme.text, marginTop: 3 }}>
+              <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 15, color: theme.text, marginTop: 3 }}>
                 {c.value}
               </Text>
             </View>

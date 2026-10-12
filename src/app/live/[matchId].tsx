@@ -30,7 +30,7 @@ import { GamesTable } from '@/components/badminton/GamesTable';
 import { RallyLog } from '@/components/badminton/RallyLog';
 import { currentGame } from '@/lib/badmintonLive';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 function Header({ title, sub, live }: { title: string; sub?: string; live?: boolean }) {
   const router = useRouter();
@@ -50,7 +50,7 @@ function Header({ title, sub, live }: { title: string; sub?: string; live?: bool
           {title}
         </Text>
         {sub ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
             {sub}
           </Text>
         ) : null}

@@ -106,7 +106,7 @@ function CityChip({
     >
       <Text
         style={{
-          fontFamily: 'SpaceMono_700Bold',
+          fontFamily: 'JetBrainsMono_700Bold',
           fontSize: 10,
           letterSpacing: 0.1 * 10,
           textTransform: 'uppercase',
@@ -155,7 +155,7 @@ function StageSwatch({
       <View style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: toneColor }} />
       <Text
         style={{
-          fontFamily: 'SpaceMono_700Bold',
+          fontFamily: 'JetBrainsMono_700Bold',
           fontSize: 11,
           letterSpacing: 0.1 * 11,
           textTransform: 'uppercase',
@@ -266,7 +266,7 @@ export function FilterSheet({
               accessibilityLabel="Clear all filters"
               style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
             >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.14 * 10, textTransform: 'uppercase', color: theme.textFaint }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.14 * 10, textTransform: 'uppercase', color: theme.textFaint }}>
                 Clear all
               </Text>
             </Pressable>

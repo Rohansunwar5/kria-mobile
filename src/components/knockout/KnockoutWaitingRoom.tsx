@@ -11,9 +11,9 @@ import { PlayerLine } from './PlayerLine';
 import { CricketTeams } from './CricketTeams';
 import { bracketColumns, drawBlocker, entrantShortName, formatLabel, isKnockoutHost, startBlocker, unpairedPlayers } from '@/lib/quickKnockoutView';
 
-const label = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
-const body = (t: Palette) => ({ fontFamily: 'SpaceGrotesk_400Regular' as const, fontSize: 13, lineHeight: 19, color: t.textMeta });
-const button = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
+const label = (t: Palette) => ({ fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
+const body = (t: Palette) => ({ fontFamily: 'Barlow_400Regular' as const, fontSize: 13, lineHeight: 19, color: t.textMeta });
+const button = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
 
 /** Type a guest's name, or 3+ letters to find a Kria player. */
 function AddPlayer({ onAddGuest, onAddPlayer, excludeIds }: { onAddGuest: (name: string) => void; onAddPlayer: (id: string) => void; excludeIds: string[] }) {
@@ -42,7 +42,7 @@ function AddPlayer({ onAddGuest, onAddPlayer, excludeIds }: { onAddGuest: (name:
           placeholder="Name, or search Kria players"
           placeholderTextColor={t.textFaint}
           maxLength={40}
-          style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 15, color: t.text, borderWidth: 1.5, borderColor: t.line, borderRadius: 5, backgroundColor: t.fillSoft, paddingHorizontal: 12, minHeight: 48 }}
+          style={{ flex: 1, fontFamily: 'Barlow_500Medium', fontSize: 15, color: t.text, borderWidth: 1.5, borderColor: t.line, borderRadius: 5, backgroundColor: t.fillSoft, paddingHorizontal: 12, minHeight: 48 }}
         />
         <Pressable accessibilityRole="button" disabled={!text.trim()} onPress={() => { onAddGuest(text.trim()); reset(); }}
           style={{ minHeight: 48, paddingHorizontal: 12, borderRadius: 5, borderWidth: 1.5, borderColor: t.line, alignItems: 'center', justifyContent: 'center', opacity: text.trim() ? 1 : 0.4 }}>
@@ -52,7 +52,7 @@ function AddPlayer({ onAddGuest, onAddPlayer, excludeIds }: { onAddGuest: (name:
       {hits.map((hit) => (
         <Pressable key={hit._id} accessibilityRole="button" onPress={() => { onAddPlayer(hit._id); reset(); }}
           style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 4, borderBottomWidth: 1.5, borderBottomColor: t.lineSoft }}>
-          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.text }}>{`${hit.firstName} ${hit.lastName}`}</Text>
+          <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: t.text }}>{`${hit.firstName} ${hit.lastName}`}</Text>
         </Pressable>
       ))}
     </View>
@@ -103,7 +103,7 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
       {host && k.joinCode ? (
         <View style={{ marginTop: 16, padding: 16, borderRadius: 6, borderWidth: 1.5, borderColor: t.line, backgroundColor: t.surface }}>
           <Text style={label(t)}>Code</Text>
-          <Text selectable style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 34, letterSpacing: 0.2 * 34, color: t.brandInk, marginTop: 4 }}>{k.joinCode}</Text>
+          <Text selectable style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 34, letterSpacing: 0.2 * 34, color: t.brandInk, marginTop: 4 }}>{k.joinCode}</Text>
           <Pressable accessibilityRole="button" onPress={share} style={{ flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', minHeight: 48, marginTop: 12, borderRadius: 5, borderWidth: 1.5, borderColor: t.brand }}>
             <Icon name="share" size={16} color={t.brandInk} />
             <Text style={{ ...button, color: t.brandInk }}>Share code</Text>
@@ -180,8 +180,8 @@ export function KnockoutWaitingRoom({ knockout: k, playerId, busy, onAddGuest, o
                 <Text style={label(t)}>{col.name}</Text>
                 {col.fixtures.map((f) => (
                   <View key={f.fixtureId} style={{ borderRadius: 5, borderWidth: 1.5, borderColor: t.line, backgroundColor: t.surface, padding: 6 }}>
-                    <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 12, color: f.entrantA ? t.text : t.textFaint }}>{entrantShortName(k, f.entrantA) || '—'}</Text>
-                    <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 12, color: f.entrantB ? t.text : t.textFaint }}>{f.bye ? 'Bye' : entrantShortName(k, f.entrantB) || '—'}</Text>
+                    <Text numberOfLines={1} style={{ fontFamily: 'Barlow_500Medium', fontSize: 12, color: f.entrantA ? t.text : t.textFaint }}>{entrantShortName(k, f.entrantA) || '—'}</Text>
+                    <Text numberOfLines={1} style={{ fontFamily: 'Barlow_500Medium', fontSize: 12, color: f.entrantB ? t.text : t.textFaint }}>{f.bye ? 'Bye' : entrantShortName(k, f.entrantB) || '—'}</Text>
                   </View>
                 ))}
               </View>

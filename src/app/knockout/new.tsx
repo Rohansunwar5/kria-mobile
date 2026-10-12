@@ -57,7 +57,7 @@ export default function NewKnockoutScreen() {
     }
   };
 
-  const label = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint };
+  const label = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint };
 
   return (
     <Screen>
@@ -67,7 +67,7 @@ export default function NewKnockoutScreen() {
             <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={back} hitSlop={8} style={{ width: 44, height: 44, justifyContent: 'center' }}>
               <Icon name="arrow-left" size={22} color={t.text} />
             </Pressable>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, color: t.textMeta }}>{`0${index + 1} / 0${STEPS.length}`}</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, color: t.textMeta }}>{`0${index + 1} / 0${STEPS.length}`}</Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 4, marginTop: 2 }}>
             {STEPS.map((s, n) => <View key={s} style={{ flex: 1, height: 4, borderRadius: 1, backgroundColor: n <= index ? t.brand : t.fill }} />)}
@@ -77,7 +77,7 @@ export default function NewKnockoutScreen() {
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 22, paddingBottom: 32 }}>
           <Text style={{ ...label, color: t.brandInk }}>New knockout</Text>
           <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 32, lineHeight: 39, textTransform: 'uppercase', color: t.text, marginTop: 6 }}>{COPY[step].title}</Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: t.textMeta, marginTop: 4, marginBottom: 24 }}>{COPY[step].sub}</Text>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: t.textMeta, marginTop: 4, marginBottom: 24 }}>{COPY[step].sub}</Text>
 
           {step === 'sport' ? (
             <View style={{ gap: 12 }}>
@@ -109,7 +109,7 @@ export default function NewKnockoutScreen() {
               placeholder={defaultName}
               placeholderTextColor={t.textFaint}
               maxLength={40}
-              style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 15, color: t.text, borderWidth: 1.5, borderColor: t.line, borderRadius: 5, backgroundColor: t.fillSoft, paddingHorizontal: 12, minHeight: 48 }}
+              style={{ fontFamily: 'Barlow_500Medium', fontSize: 15, color: t.text, borderWidth: 1.5, borderColor: t.line, borderRadius: 5, backgroundColor: t.fillSoft, paddingHorizontal: 12, minHeight: 48 }}
             />
           ) : null}
 
@@ -117,7 +117,7 @@ export default function NewKnockoutScreen() {
             <View style={{ borderRadius: 6, borderWidth: 1.5, borderColor: t.line, backgroundColor: t.surface, padding: 18 }}>
               <Text style={{ ...label, color: t.brandInk }}>{`Knockout · ${sport === 'cricket' ? 'cricket' : format}`}</Text>
               <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 28, lineHeight: 34, textTransform: 'uppercase', color: t.text, marginTop: 8 }}>{name.trim() || defaultName}</Text>
-              <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: t.textMeta, marginTop: 6 }}>
+              <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: t.textMeta, marginTop: 6 }}>
                 {sport === 'cricket'
                   ? `${maxOvers} overs · up to ${squad} a side · ${teamCount} teams`
                   : `${BEST_OF[bestOf].label} · ${pointsToWin} points · 3 to 16 entrants`}
@@ -127,14 +127,14 @@ export default function NewKnockoutScreen() {
         </ScrollView>
 
         <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 + insets.bottom, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg }}>
-          {problem ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk, marginBottom: 10 }}>{problem}</Text> : null}
+          {problem ? <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: t.failInk, marginBottom: 10 }}>{problem}</Text> : null}
           <Pressable
             accessibilityRole="button"
             disabled={busy}
             onPress={step === 'review' ? create : () => setIndex(index + 1)}
             style={{ minHeight: 52, borderRadius: 5, backgroundColor: t.brand, alignItems: 'center', justifyContent: 'center', opacity: busy ? 0.5 : 1 }}
           >
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, letterSpacing: 0.14 * 13, textTransform: 'uppercase', color: t.onBrand }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, letterSpacing: 0.14 * 13, textTransform: 'uppercase', color: t.onBrand }}>
               {step === 'review' ? 'Create knockout' : 'Continue'}
             </Text>
           </Pressable>

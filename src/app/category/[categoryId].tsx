@@ -11,8 +11,8 @@ import { registerForCategory, fetchMyRegistrations, type Category } from '@/stor
 import { getCategory, getSportConfig, slotPressure, type SportConfig } from '@/api/category';
 import { computeAge } from '@/lib/format';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
-const DATA = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 15, color: '#fff' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const DATA = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 15, color: '#fff' };
 
 function monogram(name: string) {
   return name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -22,7 +22,7 @@ function Rule({ ok, text }: { ok: boolean; text: string }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
       <Icon name={ok ? 'check' : 'info'} size={15} color={ok ? '#16C46A' : '#7d7d7d'} strokeWidth={ok ? 2.6 : 2.2} />
-      <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: ok ? '#d4d4d4' : '#a3a3a3' }}>
+      <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: ok ? '#d4d4d4' : '#a3a3a3' }}>
         {text}
       </Text>
     </View>
@@ -135,7 +135,7 @@ export default function CategoryRegister() {
       </Pressable>
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Category</Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
           {currentTournament?.name || ' '}
         </Text>
       </View>
@@ -175,7 +175,7 @@ export default function CategoryRegister() {
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={{ paddingHorizontal: 16, paddingTop: 16, overflow: 'hidden' }}>
           <Ghost text={monogram(category.name)} size={84} style={{ right: -6, top: 2 }} />
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }}>
             {[currentTournament?.sport, category.bracketType?.replace('_', ' ')].filter(Boolean).join(' · ')}
           </Text>
           <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 38, lineHeight: 46, color: '#fff', marginTop: 8 }}>
@@ -191,13 +191,13 @@ export default function CategoryRegister() {
                 <View>
                   <Text style={LBL}>Slots filled</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 3 }}>
-                    <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, color: '#fff' }}>{filled}</Text>
-                    <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 13, color: '#7d7d7d' }}>/ {cap}</Text>
+                    <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 26, color: '#fff' }}>{filled}</Text>
+                    <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 13, color: '#7d7d7d' }}>/ {cap}</Text>
                   </View>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={LBL}>Max age</Text>
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: '#F97316', marginTop: 5 }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, color: '#F97316', marginTop: 5 }}>
                     {category.maxAge ? `${category.maxAge}` : 'Any'}
                   </Text>
                 </View>
@@ -206,7 +206,7 @@ export default function CategoryRegister() {
                 <View style={{ width: `${slots.ratio * 100}%`, height: '100%', backgroundColor: '#F97316' }} />
               </View>
               {slots.filling ? (
-                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#FA4C93', marginTop: 8 }}>
+                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#FA4C93', marginTop: 8 }}>
                   {slots.left} slot{slots.left === 1 ? '' : 's'} left — filling fast
                 </Text>
               ) : null}
@@ -242,7 +242,7 @@ export default function CategoryRegister() {
               {sport.scoringConfig.tieBreakerRules || category.description ? (
                 <>
                   <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.10)' }} />
-                  <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4', padding: 13 }}>
+                  <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4', padding: 13 }}>
                     {category.description || sport.scoringConfig.tieBreakerRules}
                   </Text>
                 </>
@@ -274,12 +274,12 @@ export default function CategoryRegister() {
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 11 }}>
           <View>
             <Text style={LBL}>Entry fee</Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 24, color: '#16C46A', marginTop: 2 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 24, color: '#16C46A', marginTop: 2 }}>
               {paid ? `₹${fee.toLocaleString('en-IN')}` : 'Free'}
             </Text>
           </View>
           {paid ? (
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.06 * 9, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'right', lineHeight: 14 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.06 * 9, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'right', lineHeight: 14 }}>
               + Platform &amp; GST{'\n'}shown at checkout
             </Text>
           ) : null}

@@ -145,7 +145,7 @@ export function SpinWheel({ status, teams }: { status: AuctionStatus; teams: Auc
               <Text
                 numberOfLines={1}
                 style={{
-                  fontFamily: won ? 'Anton_400Regular' : 'SpaceGrotesk_400Regular',
+                  fontFamily: won ? 'Anton_400Regular' : 'Barlow_400Regular',
                   textTransform: won ? 'uppercase' : 'none',
                   fontSize: 12, color: won ? '#06240F' : '#d4d4d4', maxWidth: 110,
                 }}

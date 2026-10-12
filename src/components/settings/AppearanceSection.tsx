@@ -50,12 +50,12 @@ export default function AppearanceSection({ forceVisible = false }: { forceVisib
               }}
             >
               <View>
-                <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 14, color: theme.text }}>
+                <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 14, color: theme.text }}>
                   {option.label}
                 </Text>
                 <Text
                   style={{
-                    fontFamily: 'SpaceMono_400Regular',
+                    fontFamily: 'JetBrainsMono_400Regular',
                     fontSize: 9,
                     letterSpacing: 0.08 * 9,
                     textTransform: 'uppercase',
@@ -71,7 +71,7 @@ export default function AppearanceSection({ forceVisible = false }: { forceVisib
               {selected ? (
                 <Text
                   style={{
-                    fontFamily: 'SpaceMono_700Bold',
+                    fontFamily: 'JetBrainsMono_700Bold',
                     fontSize: 9,
                     letterSpacing: 0.1 * 9,
                     textTransform: 'uppercase',

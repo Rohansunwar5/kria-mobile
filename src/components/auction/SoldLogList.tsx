@@ -53,10 +53,10 @@ export function SoldLogList({
 
       {totalRevenue > 0 ? (
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 7, marginBottom: 8 }}>
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
             Total spend
           </Text>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 14, color: '#16C46A' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 14, color: '#16C46A' }}>
             ₹{totalRevenue.toLocaleString('en-IN')}
           </Text>
         </View>
@@ -67,27 +67,27 @@ export function SoldLogList({
           const unsold = !log.teamId || log.finalPrice <= 0;
           return (
             <Row key={log._id || `${log.registrationId}-${i}`} first={i === 0}>
-              <Text style={{ width: 20, fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: '#7d7d7d' }}>
+              <Text style={{ width: 20, fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, color: '#7d7d7d' }}>
                 {String(rows.length - i).padStart(2, '0')}
               </Text>
               <InitialsAvatar name={log.playerName} logo={log.playerPhoto || undefined} size={26} neutral />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: unsold ? '#d4d4d4' : '#fff' }}>
+                  <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: 'Barlow_400Regular', fontSize: 12, color: unsold ? '#d4d4d4' : '#fff' }}>
                     {log.playerName}
                   </Text>
                   {isYou(log.playerName) ? (
-                    <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#FA4C93' }}>YOU</Text>
+                    <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#FA4C93' }}>YOU</Text>
                   ) : null}
                 </View>
                 {unsold ? null : (
-                  <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+                  <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
                     {log.teamName}
                   </Text>
                 )}
               </View>
               {unsold ? <Tag label="Unsold" variant="end" /> : null}
-              <Text style={{ fontFamily: unsold ? 'SpaceMono_400Regular' : 'SpaceMono_700Bold', fontSize: 12, color: unsold ? '#7d7d7d' : '#16C46A', minWidth: 58, textAlign: 'right' }}>
+              <Text style={{ fontFamily: unsold ? 'JetBrainsMono_400Regular' : 'JetBrainsMono_700Bold', fontSize: 12, color: unsold ? '#7d7d7d' : '#16C46A', minWidth: 58, textAlign: 'right' }}>
                 {unsold ? '—' : `₹${log.finalPrice.toLocaleString('en-IN')}`}
               </Text>
             </Row>
@@ -96,18 +96,18 @@ export function SoldLogList({
 
         {preAssigned.map((p, i) => (
           <Row key={p.registrationId} first={rows.length === 0 && i === 0}>
-            <Text style={{ width: 20, fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: '#7d7d7d' }}>—</Text>
+            <Text style={{ width: 20, fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, color: '#7d7d7d' }}>—</Text>
             <InitialsAvatar name={p.playerName} logo={p.playerPhoto || undefined} size={26} neutral />
             <View style={{ flex: 1, minWidth: 0 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#fff' }}>
+                <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: 'Barlow_400Regular', fontSize: 12, color: '#fff' }}>
                   {p.playerName}
                 </Text>
                 {isYou(p.playerName) ? (
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#FA4C93' }}>YOU</Text>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#FA4C93' }}>YOU</Text>
                 ) : null}
               </View>
-              <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+              <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
                 {p.teamName}
               </Text>
             </View>

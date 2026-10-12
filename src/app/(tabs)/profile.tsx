@@ -18,7 +18,7 @@ import { groupMenu } from '@/lib/profileMenu';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 
-const LBL = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
+const LBL = (t: Palette) => ({ fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
 
 /**
  * The You tab, read like a player card: who you are and your numbers, how you

@@ -71,7 +71,7 @@ function TeamTile({ team, players, isMine, isChampion }: { team: Team; players?:
           {team.name}
         </Text>
         {meta ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textMeta, marginTop: 3 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textMeta, marginTop: 3 }}>
             {meta}
           </Text>
         ) : null}

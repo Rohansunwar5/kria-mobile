@@ -3,7 +3,7 @@ import { StandingEntry } from '@/api/teamLeague';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hazard } from '@/components/canvas';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 // The artboard drops a hazard rule under the qualifying places, so where the
 // cut falls is readable without counting rows.
@@ -59,7 +59,7 @@ export function StandingsTable({
                 ...(first ? { borderLeftWidth: 4, borderLeftColor: '#F97316' } : null),
               }}
             >
-              <Text style={{ width: first ? 16 : 20, fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: first ? '#F97316' : '#a3a3a3' }}>
+              <Text style={{ width: first ? 16 : 20, fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: first ? '#F97316' : '#a3a3a3' }}>
                 {idx + 1}
               </Text>
               <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -68,15 +68,15 @@ export function StandingsTable({
                   {e.teamName}
                 </Text>
                 {championTeamId === e.teamId ? (
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#16C46A' }}>WON</Text>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#16C46A' }}>WON</Text>
                 ) : null}
               </View>
-              <Text style={{ width: 24, textAlign: 'right', fontFamily: 'SpaceMono_400Regular', fontSize: 12, color: '#d4d4d4' }}>{e.played}</Text>
-              <Text style={{ width: 24, textAlign: 'right', fontFamily: 'SpaceMono_400Regular', fontSize: 12, color: '#d4d4d4' }}>{e.won}</Text>
-              <Text style={{ width: 46, textAlign: 'right', fontFamily: 'SpaceMono_400Regular', fontSize: 11, color: '#a3a3a3' }}>
+              <Text style={{ width: 24, textAlign: 'right', fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#d4d4d4' }}>{e.played}</Text>
+              <Text style={{ width: 24, textAlign: 'right', fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#d4d4d4' }}>{e.won}</Text>
+              <Text style={{ width: 46, textAlign: 'right', fontFamily: 'JetBrainsMono_400Regular', fontSize: 11, color: '#a3a3a3' }}>
                 {e.subMatchesWon}-{e.subMatchesLost}
               </Text>
-              <Text style={{ width: 30, textAlign: 'right', fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: first ? '#F97316' : '#fff' }}>
+              <Text style={{ width: 30, textAlign: 'right', fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, color: first ? '#F97316' : '#fff' }}>
                 {e.points}
               </Text>
             </View>

@@ -103,7 +103,7 @@ export function Chip({
       {icon}
       <Text
         style={{
-          fontFamily: 'SpaceMono_700Bold',
+          fontFamily: 'JetBrainsMono_700Bold',
           fontSize: 10,
           letterSpacing: 0.1 * 10,
           textTransform: 'uppercase',
@@ -131,7 +131,7 @@ export function Chip({
 /** `.lbl` — mono 9px caps, the field/section label used on every screen. */
 export function Lbl({ children, style }: { children: React.ReactNode; style?: TextStyle }) {
   return (
-    <Text style={[{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d' }, style as any]}>
+    <Text style={[{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d' }, style as any]}>
       {children}
     </Text>
   );
@@ -140,7 +140,7 @@ export function Lbl({ children, style }: { children: React.ReactNode; style?: Te
 /** `.kick` — same shape as `.lbl` but brand-coloured and wider tracked. */
 export function Kick({ children, style }: { children: React.ReactNode; style?: TextStyle }) {
   return (
-    <Text style={[{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }, style as any]}>
+    <Text style={[{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#F97316' }, style as any]}>
       {children}
     </Text>
   );
@@ -271,7 +271,7 @@ export function ScreenHeader({
           </Text>
         ) : null}
         {subtitle ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
             {subtitle}
           </Text>
         ) : null}

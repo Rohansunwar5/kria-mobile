@@ -11,7 +11,7 @@ import { useAppSelector } from '@/store/hooks';
 import { getTeam, getTeamRoster, type Team, type RosterPlayer } from '@/api/profileApi';
 import { purseHealth, shortMoney, teamSpent } from '@/lib/auctionView';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 function initials(name?: string) {
   return (name || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -110,7 +110,7 @@ export default function TeamDetail() {
               <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 28, lineHeight: 34, color: '#fff' }}>
                 {team.name}
               </Text>
-              <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 6 }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 6 }}>
                 {roster.length} player{roster.length === 1 ? '' : 's'}
                 {isMine ? ' · your team' : ''}
               </Text>
@@ -122,17 +122,17 @@ export default function TeamDetail() {
         <View style={{ flexDirection: 'row', borderTopWidth: 1.5, borderBottomWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)' }}>
           <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 11, borderRightWidth: 1.5, borderRightColor: 'rgba(255,255,255,0.12)' }}>
             <Text style={LBL}>Purse left</Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 20, color: purse.color, marginTop: 2 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 20, color: purse.color, marginTop: 2 }}>
               {shortMoney(team.budget ?? 0)}
             </Text>
           </View>
           <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 11, borderRightWidth: 1.5, borderRightColor: 'rgba(255,255,255,0.12)' }}>
             <Text style={LBL}>Spent</Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 20, color: '#fff', marginTop: 2 }}>{shortMoney(spent)}</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 20, color: '#fff', marginTop: 2 }}>{shortMoney(spent)}</Text>
           </View>
           <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 11 }}>
             <Text style={LBL}>Squad</Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 20, color: '#fff', marginTop: 2 }}>{roster.length}</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 20, color: '#fff', marginTop: 2 }}>{roster.length}</Text>
           </View>
         </View>
 
@@ -172,15 +172,15 @@ export default function TeamDetail() {
                     >
                       <InitialsAvatar name={name} logo={p.profile.photo} size={32} color={color} />
                       <View style={{ flex: 1 }}>
-                        <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 13, color: '#fff' }}>
+                        <Text numberOfLines={1} style={{ fontFamily: 'Barlow_700Bold', fontSize: 13, color: '#fff' }}>
                           {name}
                         </Text>
-                        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+                        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
                           {[p.profile.gender, p.profile.skillLevel].filter(Boolean).join(' · ')}
                         </Text>
                       </View>
                       {p.auctionData?.soldPrice ? (
-                        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#16C46A' }}>
+                        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: '#16C46A' }}>
                           ₹{p.auctionData.soldPrice.toLocaleString('en-IN')}
                         </Text>
                       ) : null}

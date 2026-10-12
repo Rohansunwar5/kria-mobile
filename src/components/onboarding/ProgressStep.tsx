@@ -22,7 +22,7 @@ export function ProgressStep({ label, done }: { label: string; done: boolean }) 
         {done ? <Icon name="check" size={14} color="#0B0B0B" strokeWidth={3.2} /> : null}
       </View>
       {done ? (
-        <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: '#fff' }}>{label}</Text>
+        <Text style={{ flex: 1, fontFamily: 'Barlow_500Medium', fontSize: 14, color: '#fff' }}>{label}</Text>
       ) : (
         <View style={{ flex: 1 }}>
           <Skeleton h={11} w="72%" line />

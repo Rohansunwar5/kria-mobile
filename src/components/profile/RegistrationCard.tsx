@@ -53,7 +53,7 @@ export function RegistrationCard({ reg, onWithdraw }: { reg: Registration; onWit
         <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 19, lineHeight: 23, color: '#fff' }}>
           {reg.tournamentDetails?.name || 'Tournament'}
         </Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 6 }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3', marginTop: 6 }}>
           {[reg.categoryDetails?.name, fee ? `₹${fee.toLocaleString('en-IN')}` : 'Free'].filter(Boolean).join(' · ')}
         </Text>
       </Pressable>
@@ -89,7 +89,7 @@ export function RegistrationCard({ reg, onWithdraw }: { reg: Registration; onWit
               ...(owes ? { borderLeftWidth: 1.5, borderLeftColor: 'rgba(255,255,255,0.10)' } : null),
             }}
           >
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
               Withdraw
             </Text>
           </Pressable>
@@ -101,7 +101,7 @@ export function RegistrationCard({ reg, onWithdraw }: { reg: Registration; onWit
             onPress={() => router.push({ pathname: '/tournament/[id]', params: { id: reg.tournamentId } })}
             style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44, paddingHorizontal: 13 }}
           >
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
               Open tournament
             </Text>
             <Icon name="chevron-right" size={13} color="#7d7d7d" />

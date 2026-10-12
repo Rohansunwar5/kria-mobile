@@ -16,7 +16,7 @@ type Segment = 'matches' | 'knockouts' | 'teams';
 export type TeamEntry = PlayedForEntry & { _id: string; auctionData?: { soldPrice?: number } };
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 10,
   letterSpacing: 0.12 * 10,
   textTransform: 'uppercase' as const,
@@ -29,7 +29,7 @@ function Empty({ text }: { text: string }) {
   const theme = useTheme();
   return (
     <View style={{ padding: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: theme.keyline, borderRadius: 6 }}>
-      <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta }}>{text}</Text>
+      <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta }}>{text}</Text>
     </View>
   );
 }
@@ -98,7 +98,7 @@ export function ProfileHistory({
           <KnockoutRow key={k._id} knockout={k} viewerId={viewerId} onPress={() => onOpenKnockout?.(k._id)} />
         ))}
         {cancelled > 0 ? (
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 17, color: theme.textFaint }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 17, color: theme.textFaint }}>
             {cancelled === 1
               ? '1 cancelled knockout is left out here. It stays in All knockouts.'
               : `${cancelled} cancelled knockouts are left out here. They stay in All knockouts.`}

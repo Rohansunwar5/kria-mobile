@@ -29,7 +29,7 @@ export default function LiveScreen() {
       </View>
 
       <Text style={{
-        fontFamily: 'SpaceMono_700Bold',
+        fontFamily: 'JetBrainsMono_700Bold',
         fontSize: 9,
         letterSpacing: 0.14 * 9,
         textTransform: 'uppercase',
@@ -55,7 +55,7 @@ export default function LiveScreen() {
             // read the same. The hook clears the list on failure, so this is
             // the only place that distinction is visible to the user.
             <Text style={{
-              fontFamily: 'SpaceGrotesk_400Regular',
+              fontFamily: 'Barlow_400Regular',
               fontSize: 14,
               lineHeight: 21,
               color: error ? theme.failInk : theme.textMeta,

@@ -37,7 +37,7 @@ function Header({ title, sub, right }: { title: string; sub?: string; right?: Re
           {title}
         </Text>
         {sub ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
             {sub}
           </Text>
         ) : null}
@@ -56,10 +56,10 @@ function ProgressBar({ index, total, sold, unsold, rotation }: { index: number; 
         <View style={{ width: `${pct}%`, height: '100%', backgroundColor: '#FA4C93' }} />
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
           Lot {index + 1} of {total}
         </Text>
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
           {sold} sold · {unsold} unsold{rotation > 0 ? ` · round ${rotation + 1}` : ''}
         </Text>
       </View>
@@ -87,10 +87,10 @@ function Tabs({ active, onChange, counts }: { active: TabKey; onChange: (k: TabK
             onPress={() => onChange(t.key)}
             style={{ flex: 1, alignItems: 'center', paddingVertical: 11, borderBottomWidth: 2.5, borderBottomColor: on ? '#F97316' : 'transparent' }}
           >
-            <Text style={{ fontFamily: on ? 'SpaceMono_700Bold' : 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: on ? '#fff' : '#7d7d7d' }}>
+            <Text style={{ fontFamily: on ? 'JetBrainsMono_700Bold' : 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: on ? '#fff' : '#7d7d7d' }}>
               {t.label}
             </Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, color: on ? '#F97316' : '#5a5a5a', marginTop: 3 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, color: on ? '#F97316' : '#5a5a5a', marginTop: 3 }}>
               {String(counts[t.key]).padStart(2, '0')}
             </Text>
           </Pressable>
@@ -159,13 +159,13 @@ export default function AuctionBroadcast() {
         <Header title={title} />
         <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20, overflow: 'hidden' }}>
           <Ghost text="SOON" size={150} style={{ right: -20, top: 40 }} />
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#FA4C93' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#FA4C93' }}>
             {data.tournament?.name || 'Kria'}
           </Text>
           <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 40, lineHeight: 48, color: '#fff', marginTop: 10 }}>
             Starting{'\n'}soon
           </Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
             {categoryName} goes under the hammer shortly. Leave this open — the board fills itself the moment bidding starts.
           </Text>
         </View>
@@ -252,7 +252,7 @@ export default function AuctionBroadcast() {
               {tiePending ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 16, paddingVertical: 9, backgroundColor: '#FA4C93' }}>
                   <Icon name="flame" size={12} color="#240614" strokeWidth={2.8} />
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#240614' }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#240614' }}>
                     {tiedCount} teams tied at the cap · tie-breaker pending
                   </Text>
                 </View>

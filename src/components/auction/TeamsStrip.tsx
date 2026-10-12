@@ -4,7 +4,7 @@ import { purseHealth } from '@/lib/auctionView';
 import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { SectionLabel } from '@/components/auction/SectionLabel';
 
-const MICRO = { fontFamily: 'SpaceMono_400Regular' as const, fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const MICRO = { fontFamily: 'JetBrainsMono_400Regular' as const, fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 // One row per team: purse left, what they have spent, how many they hold.
 // Rows rather than tiles — at phone width a tile cannot fit a real team name,
@@ -27,7 +27,7 @@ export function TeamsStrip({ teams }: { teams: AuctionTeam[] }) {
                   <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, color: '#fff' }}>
                     {team.name}
                   </Text>
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 14, color }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 14, color }}>
                     ₹{team.budget.toLocaleString('en-IN')}
                   </Text>
                 </View>
@@ -38,10 +38,10 @@ export function TeamsStrip({ teams }: { teams: AuctionTeam[] }) {
 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
                   <Text style={MICRO}>
-                    Spent <Text style={{ fontFamily: 'SpaceMono_700Bold', color: '#d4d4d4' }}>₹{team.totalSpent.toLocaleString('en-IN')}</Text>
+                    Spent <Text style={{ fontFamily: 'JetBrainsMono_700Bold', color: '#d4d4d4' }}>₹{team.totalSpent.toLocaleString('en-IN')}</Text>
                   </Text>
                   <Text style={MICRO}>
-                    Squad <Text style={{ fontFamily: 'SpaceMono_700Bold', color: '#d4d4d4' }}>{team.playersCount}</Text>
+                    Squad <Text style={{ fontFamily: 'JetBrainsMono_700Bold', color: '#d4d4d4' }}>{team.playersCount}</Text>
                   </Text>
                 </View>
               </View>

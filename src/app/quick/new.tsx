@@ -104,7 +104,7 @@ export default function NewQuickMatchScreen() {
             <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={back} hitSlop={8} style={{ width: 44, height: 44, justifyContent: 'center' }}>
               <Icon name="arrow-left" size={22} color={t.text} />
             </Pressable>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, color: t.textMeta }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, color: t.textMeta }}>
               {`${pad(index + 1)} / ${pad(STEPS.length)}`}
             </Text>
           </View>
@@ -121,13 +121,13 @@ export default function NewQuickMatchScreen() {
           style={{ flex: 1 }}
         >
           <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 22, paddingBottom: 32 }}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: t.brandInk }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: t.brandInk }}>
               New quick match
             </Text>
             <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 32, lineHeight: 39, textTransform: 'uppercase', color: t.text, marginTop: 6 }}>
               {title}
             </Text>
-            <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: t.textMeta, marginTop: 4, marginBottom: 24 }}>
+            <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: t.textMeta, marginTop: 4, marginBottom: 24 }}>
               {sub}
             </Text>
 
@@ -142,7 +142,7 @@ export default function NewQuickMatchScreen() {
         {cta ? (
           <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 + insets.bottom, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg }}>
             {problem ? (
-              <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk, marginBottom: 10 }}>{problem}</Text>
+              <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: t.failInk, marginBottom: 10 }}>{problem}</Text>
             ) : null}
             <Animated.View style={pressStyle}>
               <Pressable
@@ -163,7 +163,7 @@ export default function NewQuickMatchScreen() {
                 }}
               >
                 {submitting ? <ActivityIndicator color={t.onBrand} /> : null}
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 13, letterSpacing: 0.14 * 13, textTransform: 'uppercase', color: t.onBrand }}>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, letterSpacing: 0.14 * 13, textTransform: 'uppercase', color: t.onBrand }}>
                   {cta}
                 </Text>
                 {submitting ? null : <Icon name="arrow-right" size={18} color={t.onBrand} />}

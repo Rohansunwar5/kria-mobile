@@ -37,21 +37,21 @@ export function UpNextList({ upcoming, remaining }: { upcoming: AuctionUpcoming[
           <View key={p.registrationId}>
             {i > 0 ? <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} /> : null}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13, paddingVertical: 9 }}>
-              <Text style={{ width: 20, fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: '#7d7d7d' }}>
+              <Text style={{ width: 20, fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, color: '#7d7d7d' }}>
                 {String(i + 1).padStart(2, '0')}
               </Text>
               <InitialsAvatar name={p.playerName} logo={p.playerPhoto || undefined} size={26} neutral />
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#fff' }}>
+                <Text numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: '#fff' }}>
                   {p.playerName}
                 </Text>
                 {p.skillLevel ? (
-                  <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+                  <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
                     {p.skillLevel}
                   </Text>
                 ) : null}
               </View>
-              <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 11, color: '#a3a3a3' }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 11, color: '#a3a3a3' }}>
                 ₹{p.basePrice.toLocaleString('en-IN')}
               </Text>
             </View>
@@ -60,7 +60,7 @@ export function UpNextList({ upcoming, remaining }: { upcoming: AuctionUpcoming[
         {hidden > 0 ? (
           <>
             <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} />
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', paddingHorizontal: 13, paddingVertical: 9 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', paddingHorizontal: 13, paddingVertical: 9 }}>
               + {hidden} more in the queue
             </Text>
           </>

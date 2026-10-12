@@ -47,7 +47,7 @@ export default function Register() {
         <IconBtn icon="chevron-left" label="Go back" onPress={() => goBack(router)} />
         <View style={{ flex: 1 }} />
         <Pressable accessibilityRole="button" onPress={() => router.replace('/(auth)/login')} hitSlop={10}>
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, color: '#7d7d7d' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, color: '#7d7d7d' }}>
             HAVE AN ACCOUNT? <Text style={{ color: '#F97316' }}>SIGN IN</Text>
           </Text>
         </Pressable>
@@ -67,7 +67,7 @@ export default function Register() {
           <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 42, lineHeight: 51, color: '#fff' }}>
             Create your{'\n'}account
           </Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
             We send a 6-digit code to verify it. No password yet — you set that next.
           </Text>
 
@@ -85,7 +85,7 @@ export default function Register() {
               onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
               right={emailOk ? <Icon name="check" size={16} color="#16C46A" strokeWidth={2.8} /> : undefined}
             />
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#7d7d7d', marginTop: -10, marginBottom: 14 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#7d7d7d', marginTop: -10, marginBottom: 14 }}>
               THIS IS WHERE RECEIPTS AND MATCH ALERTS GO
             </Text>
 
@@ -121,7 +121,7 @@ export default function Register() {
               >
                 {agreed ? <Icon name="check" size={13} color="#0B0B0B" strokeWidth={3.4} /> : null}
               </View>
-              <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 11, lineHeight: 16, color: '#737373' }}>
+              <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 11, lineHeight: 16, color: '#737373' }}>
                 I agree to the <Text style={{ color: '#F97316' }}>terms</Text> and{' '}
                 <Text style={{ color: '#F97316' }}>privacy policy</Text>. Organizers of tournaments you enter can see your
                 name, city and record.
@@ -131,7 +131,7 @@ export default function Register() {
             {error ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 }}>
                 <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-                <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+                <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
                   {error}
                 </Text>
               </View>

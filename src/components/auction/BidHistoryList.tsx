@@ -10,7 +10,7 @@ export function BidHistoryList({ bids, teams }: { bids: AuctionBid[]; teams: Auc
 
   return (
     <View>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginBottom: 8 }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginBottom: 8 }}>
         Bid ladder
       </Text>
       <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden' }}>
@@ -31,10 +31,10 @@ export function BidHistoryList({ bids, teams }: { bids: AuctionBid[]; teams: Auc
                 }}
               >
                 <InitialsAvatar name={team?.name || bid.teamName} logo={team?.logo} size={22} color={team?.primaryColor || '#F97316'} />
-                <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: latest ? '#fff' : '#d4d4d4' }}>
+                <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 12, color: latest ? '#fff' : '#d4d4d4' }}>
                   {team?.name || bid.teamName}
                 </Text>
-                <Text style={{ fontFamily: latest ? 'SpaceMono_700Bold' : 'SpaceMono_400Regular', fontSize: latest ? 13 : 12, color: latest ? '#F97316' : '#a3a3a3' }}>
+                <Text style={{ fontFamily: latest ? 'JetBrainsMono_700Bold' : 'JetBrainsMono_400Regular', fontSize: latest ? 13 : 12, color: latest ? '#F97316' : '#a3a3a3' }}>
                   ₹{bid.amount.toLocaleString('en-IN')}
                 </Text>
               </View>

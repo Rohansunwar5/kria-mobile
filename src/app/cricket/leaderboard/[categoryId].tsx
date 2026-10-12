@@ -11,7 +11,7 @@ import { useAppSelector } from '@/store/hooks';
 import { getCricketLeaderboard, SORTS, SORT_LABELS, type CricketPlayerStats, type LeaderboardSort } from '@/api/cricketStats';
 import { sortMetric, sortColumns } from '@/lib/cricketSort';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 function initials(name?: string) {
   return (name || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -65,7 +65,7 @@ export default function CricketLeaderboard() {
       </Pressable>
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Category charts</Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
           {[currentTournament?.name, category?.name].filter(Boolean).join(' · ')}
         </Text>
       </View>
@@ -140,19 +140,19 @@ export default function CricketLeaderboard() {
             <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 17, color: '#F97316' }}>{initials(leader.playerName)}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.16 * 8, color: 'rgba(11,11,11,0.7)' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.16 * 8, color: 'rgba(11,11,11,0.7)' }}>
               {top.headline.toUpperCase()}
             </Text>
             <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 24, lineHeight: 29, color: '#0B0B0B', marginTop: 3 }}>
               {leader.playerName}
             </Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: 'rgba(11,11,11,0.72)', marginTop: 4 }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: 'rgba(11,11,11,0.72)', marginTop: 4 }}>
               {[leader.teamName, leader.batting?.highest ? `HS ${leader.batting.highest}` : null].filter(Boolean).join(' · ')}
             </Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 30, lineHeight: 32, color: '#0B0B0B' }}>{top.value}</Text>
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, color: 'rgba(11,11,11,0.7)' }}>{top.unit}</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 30, lineHeight: 32, color: '#0B0B0B' }}>{top.value}</Text>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, color: 'rgba(11,11,11,0.7)' }}>{top.unit}</Text>
           </View>
         </View>
       </View>
@@ -193,15 +193,15 @@ export default function CricketLeaderboard() {
                     ...(mine ? { borderLeftWidth: 4, borderLeftColor: '#FA4C93' } : null),
                   }}
                 >
-                  <Text style={{ width: mine ? 16 : 20, fontFamily: 'SpaceMono_400Regular', fontSize: 12, color: '#a3a3a3' }}>{i + 2}</Text>
+                  <Text style={{ width: mine ? 16 : 20, fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#a3a3a3' }}>{i + 2}</Text>
                   <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 9 }}>
                     <InitialsAvatar name={r.playerName} size={22} neutral={!mine} color="#FA4C93" />
                     <View style={{ flex: 1 }}>
-                      <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, color: '#fff' }}>
+                      <Text numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, color: '#fff' }}>
                         {r.playerName}
                       </Text>
                       {r.teamName ? (
-                        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+                        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
                           {r.teamName}
                         </Text>
                       ) : null}
@@ -213,7 +213,7 @@ export default function CricketLeaderboard() {
                       style={{
                         width: 44,
                         textAlign: 'right',
-                        fontFamily: ci === 1 ? 'SpaceMono_700Bold' : 'SpaceMono_400Regular',
+                        fontFamily: ci === 1 ? 'JetBrainsMono_700Bold' : 'JetBrainsMono_400Regular',
                         fontSize: 12,
                         color: ci === 1 ? '#fff' : '#a3a3a3',
                       }}

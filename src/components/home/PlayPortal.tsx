@@ -24,7 +24,7 @@ import { RANKED_SPORTS, TopPlayers } from './TopPlayers';
 // enter, how you have played, the ladder. Designed in docs/home-redesign.html.
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.18 * 9,
   textTransform: 'uppercase' as const,
@@ -32,7 +32,7 @@ const LBL = (theme: Palette) => ({
 });
 
 const MONO = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 10,
   letterSpacing: 0.12 * 10,
   textTransform: 'uppercase' as const,
@@ -92,7 +92,7 @@ function LiveRow({ match, playerId }: { match: QuickMatch; playerId?: string }) 
       >
         {`${match.sides[0]?.name} v ${match.sides[1]?.name}`}
       </Text>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.06 * 11, color: colors.brand, marginTop: 5 }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, letterSpacing: 0.06 * 11, color: colors.brand, marginTop: 5 }}>
         {result ? `${summary} · ${result}` : summary}
       </Text>
     </Pressable>
@@ -119,7 +119,7 @@ function KnockoutRow({ knockout }: { knockout: QuickKnockout }) {
 
 function SectionHeading({ title }: { title: string }) {
   return (
-    <View style={{ paddingHorizontal: 16, paddingTop: 18, paddingBottom: 9 }}>
+    <View style={{ paddingHorizontal: 16, paddingTop: 32, paddingBottom: 12 }}>
       <Text style={HEADING}>{title}</Text>
     </View>
   );
@@ -146,7 +146,7 @@ function PeekRow({
   const theme = useTheme();
   return (
     <View>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10, paddingHorizontal: 16, paddingTop: 18, paddingBottom: 9 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10, paddingHorizontal: 16, paddingTop: 32, paddingBottom: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {live ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: theme.brand }} /> : null}
           <Text style={HEADING}>{title}</Text>
@@ -221,7 +221,7 @@ export function TournamentPoster({ tournament }: { tournament: Tournament }) {
         >
           {tournament.name}
         </Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: theme.textMeta }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: theme.textMeta }}>
           {meta}
         </Text>
       </View>
@@ -239,7 +239,7 @@ export function TournamentPoster({ tournament }: { tournament: Tournament }) {
             }}
           >
             <Text numberOfLines={1} style={{ ...LBL(theme), fontSize: 8, letterSpacing: 0.14 * 8 }}>{c.label}</Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 15, color: c.urgent ? theme.brandInk : theme.text }}>
+            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 15, color: c.urgent ? theme.brandInk : theme.text }}>
               {c.value}
             </Text>
           </View>

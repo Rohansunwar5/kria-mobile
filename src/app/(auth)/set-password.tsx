@@ -38,7 +38,7 @@ export default function SetPassword() {
             <View style={{ width: 52, height: 52, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="lock" size={24} color="#F97316" strokeWidth={2} />
             </View>
-            <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 13, maxWidth: 300 }}>
+            <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 13, maxWidth: 300 }}>
               Your email is verified. Pick a password and you are in — this is the last step.
             </Text>
           </View>
@@ -70,7 +70,7 @@ export default function SetPassword() {
             {error ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-                <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+                <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
                   {error}
                 </Text>
               </View>

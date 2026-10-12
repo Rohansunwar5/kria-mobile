@@ -25,7 +25,7 @@ import {
 type Patch = (next: Partial<HostDraft>) => void;
 
 const label = (t: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.18 * 9,
   textTransform: 'uppercase' as const,
@@ -33,14 +33,14 @@ const label = (t: Palette) => ({
 });
 
 const body = (t: Palette) => ({
-  fontFamily: 'SpaceGrotesk_400Regular' as const,
+  fontFamily: 'Barlow_400Regular' as const,
   fontSize: 13,
   lineHeight: 19,
   color: t.textMeta,
 });
 
 const input = (t: Palette) => ({
-  fontFamily: 'SpaceGrotesk_500Medium' as const,
+  fontFamily: 'Barlow_500Medium' as const,
   fontSize: 15,
   color: t.text,
   borderWidth: 1.5,
@@ -138,11 +138,11 @@ export function Segmented<T extends string | number | boolean>({ title, options,
                 backgroundColor: on ? t.brand : t.fillSoft,
               }}
             >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, letterSpacing: 0.1 * 12, textTransform: 'uppercase', color: on ? t.onBrand : t.text }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.1 * 12, textTransform: 'uppercase', color: on ? t.onBrand : t.text }}>
                 {option.label}
               </Text>
               {option.sub ? (
-                <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 11, marginTop: 2, color: on ? t.onBrand : t.textFaint }}>
+                <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 11, marginTop: 2, color: on ? t.onBrand : t.textFaint }}>
                   {option.sub}
                 </Text>
               ) : null}
@@ -183,7 +183,7 @@ export function Stepper({ title, value, min, max, presets, onChange, hint }: {
       <Text style={label(t)}>{title}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 }}>
         {square('minus', -1, value <= min)}
-        <Text style={{ flex: 1, textAlign: 'center', fontFamily: 'SpaceMono_700Bold', fontSize: 34, color: t.text }}>{value}</Text>
+        <Text style={{ flex: 1, textAlign: 'center', fontFamily: 'JetBrainsMono_700Bold', fontSize: 34, color: t.text }}>{value}</Text>
         {square('plus', 1, value >= max)}
       </View>
       <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
@@ -197,7 +197,7 @@ export function Stepper({ title, value, min, max, presets, onChange, hint }: {
               onPress={() => onChange(preset)}
               style={{ flex: 1, minHeight: 44, borderRadius: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? t.brand : t.fillSoft, borderWidth: 1.5, borderColor: on ? t.brand : t.line }}
             >
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: on ? t.onBrand : t.textBody }}>{preset}</Text>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: on ? t.onBrand : t.textBody }}>{preset}</Text>
             </Pressable>
           );
         })}
@@ -212,7 +212,7 @@ function PersonRow({ name, tag, onRemove }: { name: string; tag: string; onRemov
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52, paddingHorizontal: 10, borderRadius: 5, backgroundColor: t.surface, borderWidth: 1.5, borderColor: t.line }}>
       <InitialsAvatar name={name} size={32} color={t.brand} />
-      <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_700Bold', fontSize: 15, color: t.text }}>{name}</Text>
+      <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_700Bold', fontSize: 15, color: t.text }}>{name}</Text>
       <Tag text={tag} tone={tag === 'You' ? 'brand' : 'quiet'} />
       {onRemove ? (
         <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${name}`} onPress={onRemove} hitSlop={8} style={{ width: 36, height: 44, alignItems: 'center', justifyContent: 'center' }}>
@@ -294,7 +294,7 @@ function PlayerField({ slot, placeholder, exclude, onChange }: {
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48, paddingHorizontal: 12 }}
               >
                 <InitialsAvatar name={name} size={28} color={t.brand} logo={hit.profileImage} />
-                <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.text }}>{name}</Text>
+                <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_500Medium', fontSize: 14, color: t.text }}>{name}</Text>
                 {hit.location ? <Text numberOfLines={1} style={{ ...body(t), fontSize: 12, maxWidth: 110 }}>{hit.location}</Text> : null}
               </Pressable>
             );
@@ -352,7 +352,7 @@ function TeamHeader({ side, auto, custom, onCustom, alwaysOpen }: {
         />
       ) : auto ? (
         <Text style={{ ...body(t), marginTop: 2 }}>
-          Plays as <Text style={{ color: t.text, fontFamily: 'SpaceGrotesk_700Bold' }}>{auto}</Text>
+          Plays as <Text style={{ color: t.text, fontFamily: 'Barlow_700Bold' }}>{auto}</Text>
         </Text>
       ) : null}
     </View>
@@ -509,7 +509,7 @@ export function ReviewStep({ draft, host, onEdit }: { draft: HostDraft; host: Sl
       style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52, borderBottomWidth: 1.5, borderBottomColor: t.lineSoft }}
     >
       <Text style={{ ...label(t), width: 76 }}>{title}</Text>
-      <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: t.textBody, paddingVertical: 8 }}>{value}</Text>
+      <Text numberOfLines={2} style={{ flex: 1, fontFamily: 'Barlow_500Medium', fontSize: 14, color: t.textBody, paddingVertical: 8 }}>{value}</Text>
       <Icon name="edit" size={14} color={t.textFaint} />
     </Pressable>
   );

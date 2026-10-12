@@ -34,8 +34,8 @@ function OptionRow({ option, divided, onPress }: { option: (typeof HOST_OPTIONS)
           <Icon name={option.icon} size={19} color={theme.brandInk} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 15, color: theme.text }}>{option.title}</Text>
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: theme.textMeta, marginTop: 2 }}>
+          <Text style={{ fontFamily: 'Barlow_700Bold', fontSize: 15, color: theme.text }}>{option.title}</Text>
+          <Text numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: theme.textMeta, marginTop: 2 }}>
             {option.hint}
           </Text>
         </View>

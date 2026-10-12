@@ -39,7 +39,7 @@ function OtpCells({ value, onChange }: { value: string; onChange: (v: string) =>
               }}
             >
               {digits[i] ? (
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 24, color: '#fff' }}>{digits[i]}</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 24, color: '#fff' }}>{digits[i]}</Text>
               ) : active ? (
                 <View style={{ width: 1.5, height: 26, backgroundColor: '#F97316' }} />
               ) : null}
@@ -119,9 +119,9 @@ export default function VerifyOtp() {
           <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 42, lineHeight: 51, color: '#fff' }}>
             Check your{'\n'}inbox
           </Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
             We sent a 6-digit code to{' '}
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 12, color: '#fff' }}>{registrationEmail}</Text>. It
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#fff' }}>{registrationEmail}</Text>. It
             expires in 10 minutes.
           </Text>
 
@@ -133,19 +133,19 @@ export default function VerifyOtp() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 20, minHeight: 44 }}>
             <Icon name="clock" size={15} color="#7d7d7d" strokeWidth={2} />
             {left > 0 ? (
-              <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, color: '#a3a3a3' }}>
+              <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, color: '#a3a3a3' }}>
                 RESEND AVAILABLE IN <Text style={{ color: '#F97316' }}>{`0:${String(left).padStart(2, '0')}`}</Text>
               </Text>
             ) : (
               <Pressable accessibilityRole="button" accessibilityLabel="Resend code" disabled={resending} onPress={resend} hitSlop={10} style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, color: '#F97316' }}>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, color: '#F97316' }}>
                   {resending ? 'SENDING…' : 'RESEND CODE'}
                 </Text>
               </Pressable>
             )}
           </View>
           {resent ? (
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, color: '#16C46A', marginTop: 8 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, color: '#16C46A', marginTop: 8 }}>
               NEW CODE SENT
             </Text>
           ) : null}
@@ -153,7 +153,7 @@ export default function VerifyOtp() {
           {error ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 }}>
               <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-              <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+              <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
                 {error}
               </Text>
             </View>
@@ -161,7 +161,7 @@ export default function VerifyOtp() {
 
           <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, padding: 13, marginTop: 24 }}>
             <Lbl style={{ marginBottom: 9 }}>Not arriving?</Lbl>
-            <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4' }}>
+            <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4' }}>
               Check spam, and confirm the address above is right. You can go back and change it — nothing is created until
               the code is verified.
             </Text>

@@ -58,7 +58,7 @@ export function TieDetail({
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12 }}>
           <View style={{ alignItems: 'center', width: 74 }}>
             <InitialsAvatar name={team1Name} size={34} color={tie.winnerId === team1Id ? '#F97316' : '#3f3f46'} />
-            <Text numberOfLines={2} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 10, textAlign: 'center', color: tie.winnerId === team1Id ? '#fff' : '#a3a3a3', marginTop: 6 }}>
+            <Text numberOfLines={2} style={{ fontFamily: 'Barlow_500Medium', fontSize: 10, textAlign: 'center', color: tie.winnerId === team1Id ? '#fff' : '#a3a3a3', marginTop: 6 }}>
               {team1Name}
             </Text>
           </View>
@@ -66,9 +66,9 @@ export function TieDetail({
           <View style={{ flex: 1, alignItems: 'center' }}>
             {showScore ? (
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, color: tie.winnerId === team1Id ? '#F97316' : '#a3a3a3' }}>{t1}</Text>
-                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 15, color: '#5c5c5c' }}>—</Text>
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, color: tie.winnerId === team2Id ? '#F97316' : '#a3a3a3' }}>{t2}</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 26, color: tie.winnerId === team1Id ? '#F97316' : '#a3a3a3' }}>{t1}</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 15, color: '#5c5c5c' }}>—</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 26, color: tie.winnerId === team2Id ? '#F97316' : '#a3a3a3' }}>{t2}</Text>
               </View>
             ) : (
               <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, lineHeight: 24, color: '#F97316' }}>VS</Text>
@@ -80,7 +80,7 @@ export function TieDetail({
 
           <View style={{ alignItems: 'center', width: 74 }}>
             <InitialsAvatar name={team2Name} size={34} color={tie.winnerId === team2Id ? '#F97316' : '#3f3f46'} />
-            <Text numberOfLines={2} style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 10, textAlign: 'center', color: tie.winnerId === team2Id ? '#fff' : '#a3a3a3', marginTop: 6 }}>
+            <Text numberOfLines={2} style={{ fontFamily: 'Barlow_500Medium', fontSize: 10, textAlign: 'center', color: tie.winnerId === team2Id ? '#fff' : '#a3a3a3', marginTop: 6 }}>
               {team2Name}
             </Text>
           </View>
@@ -111,7 +111,7 @@ export function TieDetail({
                   <View style={{ width: 46 }}>
                     <Tag label={labelFor(a.slotNumber)} variant="up" />
                   </View>
-                  <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#d4d4d4' }}>
+                  <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 12, color: '#d4d4d4' }}>
                     {a.playerNames?.join(' / ') || 'Not submitted yet'}
                   </Text>
                 </View>
@@ -125,7 +125,7 @@ export function TieDetail({
         <Lbl>Rubbers</Lbl>
         {subMatches.length === 0 ? (
           <Block>
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'center', paddingVertical: 22 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'center', paddingVertical: 22 }}>
               No rubbers yet
             </Text>
           </Block>
@@ -141,13 +141,13 @@ export function TieDetail({
                   <Tag label={v.done ? 'Done' : 'Upcoming'} variant={v.done ? 'open' : 'end'} />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 13, paddingVertical: 10, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.06)' }}>
-                  <Text numberOfLines={2} style={{ flex: 1, textAlign: 'right', paddingRight: 10, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: v.p1Wins ? '#fff' : v.done ? '#7d7d7d' : '#d4d4d4' }}>
+                  <Text numberOfLines={2} style={{ flex: 1, textAlign: 'right', paddingRight: 10, fontFamily: 'Barlow_400Regular', fontSize: 12, color: v.p1Wins ? '#fff' : v.done ? '#7d7d7d' : '#d4d4d4' }}>
                     {p1Name}
                   </Text>
                   <View style={{ minWidth: 62, alignItems: 'center' }}>
                     {v.gameScores.length > 0 ? (
                       v.gameScores.map((gs, gi) => (
-                        <Text key={gi} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: '#d4d4d4' }}>
+                        <Text key={gi} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, color: '#d4d4d4' }}>
                           {gs}
                         </Text>
                       ))
@@ -155,7 +155,7 @@ export function TieDetail({
                       <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 13, color: '#5c5c5c' }}>VS</Text>
                     )}
                   </View>
-                  <Text numberOfLines={2} style={{ flex: 1, paddingLeft: 10, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: v.p2Wins ? '#fff' : v.done ? '#7d7d7d' : '#d4d4d4' }}>
+                  <Text numberOfLines={2} style={{ flex: 1, paddingLeft: 10, fontFamily: 'Barlow_400Regular', fontSize: 12, color: v.p2Wins ? '#fff' : v.done ? '#7d7d7d' : '#d4d4d4' }}>
                     {p2Name}
                   </Text>
                 </View>

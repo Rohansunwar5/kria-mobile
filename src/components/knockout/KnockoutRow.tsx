@@ -26,11 +26,11 @@ export function KnockoutRow({ knockout: k, viewerId, onPress }: { knockout: Quic
       style={{ backgroundColor: theme.surface, borderWidth: 1.5, borderColor: theme.line, borderRadius: 6, padding: 12, gap: 6 }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: theme.text }}>{k.name}</Text>
+        <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, color: theme.text }}>{k.name}</Text>
         {host ? <Tag label="Host" variant="outline" /> : null}
         <Tag label={s.label} variant={s.variant} dot={s.dot} />
       </View>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textFaint }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textFaint }}>
         {formatLabel(k)}{champion ? ` · Champion ${champion}` : ''}
       </Text>
     </Pressable>

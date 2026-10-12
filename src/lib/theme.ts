@@ -13,11 +13,11 @@ export const colors = {
 
 export const fonts = {
   display: 'Anton_400Regular',
-  body: 'SpaceGrotesk_400Regular',
-  bodyMed: 'SpaceGrotesk_500Medium',
-  bodyBold: 'SpaceGrotesk_700Bold',
-  data: 'SpaceMono_400Regular',
-  dataBold: 'SpaceMono_700Bold',
+  body: 'Barlow_400Regular',
+  bodyMed: 'Barlow_500Medium',
+  bodyBold: 'Barlow_700Bold',
+  data: 'JetBrainsMono_400Regular',
+  dataBold: 'JetBrainsMono_700Bold',
 };
 
 // Single import path for the token layer, alongside the legacy `colors` and

@@ -3,7 +3,7 @@ import type { BadmintonMatch } from '@/api/badmintonMatch';
 import { currentGame } from '@/lib/badmintonLive';
 
 const CELL = 34;
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 function surname(name?: string) {
   if (!name) return 'TBD';
@@ -43,7 +43,7 @@ export function GamesTable({ match }: { match: BadmintonMatch }) {
         <View key={side}>
           <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} />
           <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10 }}>
-            <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, color: '#fff' }}>
+            <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 13, color: '#fff' }}>
               {names[side - 1] || 'TBD'}
             </Text>
             {games.map((g) => {
@@ -55,7 +55,7 @@ export function GamesTable({ match }: { match: BadmintonMatch }) {
                   style={{
                     width: CELL,
                     textAlign: 'center',
-                    fontFamily: color === '#7d7d7d' ? 'SpaceMono_400Regular' : 'SpaceMono_700Bold',
+                    fontFamily: color === '#7d7d7d' ? 'JetBrainsMono_400Regular' : 'JetBrainsMono_700Bold',
                     fontSize: 13,
                     color,
                   }}

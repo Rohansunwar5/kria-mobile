@@ -10,7 +10,7 @@ import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
 import { useAppSelector } from '@/store/hooks';
 import { getCategoryLeaderboard, type CategoryLeaderboard, type LeaderboardEntry } from '@/api/leaderboard';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 function record(e: LeaderboardEntry) {
   return [e.teamName, `${e.matchesWon}W ${Math.max(0, e.matchesPlayed - e.matchesWon)}L`].filter(Boolean).join(' · ');
@@ -20,7 +20,7 @@ function record(e: LeaderboardEntry) {
 function Leader({ e }: { e: LeaderboardEntry }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 13, backgroundColor: '#F97316' }}>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 34, lineHeight: 37, color: '#0B0B0B' }}>1</Text>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 34, lineHeight: 37, color: '#0B0B0B' }}>1</Text>
       <View style={{ width: 44, height: 44, borderRadius: 4, backgroundColor: '#0B0B0B', alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 16, color: '#F97316' }}>
           {e.playerName.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase()}
@@ -30,13 +30,13 @@ function Leader({ e }: { e: LeaderboardEntry }) {
         <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#0B0B0B' }}>
           {e.playerName}
         </Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: 'rgba(11,11,11,0.7)', marginTop: 4 }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: 'rgba(11,11,11,0.7)', marginTop: 4 }}>
           {record(e)}
         </Text>
       </View>
       <View style={{ alignItems: 'flex-end' }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 26, lineHeight: 28, color: '#0B0B0B' }}>{e.totalPointsScored}</Text>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, color: 'rgba(11,11,11,0.7)' }}>PTS</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 26, lineHeight: 28, color: '#0B0B0B' }}>{e.totalPointsScored}</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, color: 'rgba(11,11,11,0.7)' }}>PTS</Text>
       </View>
     </View>
   );
@@ -45,17 +45,17 @@ function Leader({ e }: { e: LeaderboardEntry }) {
 function RunnerUp({ e, place }: { e: LeaderboardEntry; place: number }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 11 }}>
-      <Text style={{ width: 34, fontFamily: 'SpaceMono_700Bold', fontSize: 20, color: '#a3a3a3' }}>{place}</Text>
+      <Text style={{ width: 34, fontFamily: 'JetBrainsMono_700Bold', fontSize: 20, color: '#a3a3a3' }}>{place}</Text>
       <InitialsAvatar name={e.playerName} size={34} neutral />
       <View style={{ flex: 1 }}>
         <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>
           {e.playerName}
         </Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 3 }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 3 }}>
           {record(e)}
         </Text>
       </View>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 18, color: '#fff' }}>{e.totalPointsScored}</Text>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 18, color: '#fff' }}>{e.totalPointsScored}</Text>
     </View>
   );
 }
@@ -106,7 +106,7 @@ export default function LeaderboardScreen() {
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Standings</Text>
         {sub ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
             {sub}
           </Text>
         ) : null}
@@ -207,21 +207,21 @@ export default function LeaderboardScreen() {
                             ...(mine ? { borderLeftWidth: 4, borderLeftColor: '#FA4C93' } : null),
                           }}
                         >
-                          <Text style={{ width: mine ? 18 : 22, fontFamily: 'SpaceMono_400Regular', fontSize: 12, color: '#a3a3a3' }}>
+                          <Text style={{ width: mine ? 18 : 22, fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#a3a3a3' }}>
                             {i + 4}
                           </Text>
                           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 9 }}>
                             <InitialsAvatar name={e.playerName} size={22} neutral={!mine} color="#FA4C93" />
-                            <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, color: '#fff' }}>
+                            <Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 13, color: '#fff' }}>
                               {e.playerName}
                             </Text>
                             {mine ? (
-                              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#FA4C93' }}>YOU</Text>
+                              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#FA4C93' }}>YOU</Text>
                             ) : null}
                           </View>
-                          <Text style={{ width: 28, textAlign: 'right', fontFamily: 'SpaceMono_400Regular', fontSize: 12, color: '#a3a3a3' }}>{e.matchesPlayed}</Text>
-                          <Text style={{ width: 28, textAlign: 'right', fontFamily: 'SpaceMono_400Regular', fontSize: 12, color: '#d4d4d4' }}>{e.matchesWon}</Text>
-                          <Text style={{ width: 34, textAlign: 'right', fontFamily: 'SpaceMono_700Bold', fontSize: 13, color: '#fff' }}>{e.totalPointsScored}</Text>
+                          <Text style={{ width: 28, textAlign: 'right', fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#a3a3a3' }}>{e.matchesPlayed}</Text>
+                          <Text style={{ width: 28, textAlign: 'right', fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#d4d4d4' }}>{e.matchesWon}</Text>
+                          <Text style={{ width: 34, textAlign: 'right', fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, color: '#fff' }}>{e.totalPointsScored}</Text>
                         </View>
                       </View>
                     );

@@ -52,10 +52,10 @@ export function GroupList({ groups, standings, onSelect }: {
               <Icon name="chevron-right" size={15} color="#7d7d7d" />
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
-              <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3' }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#a3a3a3' }}>
                 {g.teamIds?.length ?? 0} teams
               </Text>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: allDone ? '#16C46A' : '#7d7d7d' }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: allDone ? '#16C46A' : '#7d7d7d' }}>
                 {total > 0 ? `${done}/${total} ties` : 'No ties yet'}
               </Text>
             </View>

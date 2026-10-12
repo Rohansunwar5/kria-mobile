@@ -65,13 +65,13 @@ export default function ForgotPassword() {
             <View style={{ marginTop: 24, backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, padding: 13 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 9 }}>
                 <Icon name="check" size={14} color="#16C46A" strokeWidth={2.8} />
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, textTransform: 'uppercase', color: '#16C46A' }}>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, textTransform: 'uppercase', color: '#16C46A' }}>
                   Check your inbox
                 </Text>
               </View>
-              <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4' }}>
+              <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4' }}>
                 If an account exists for{' '}
-                <Text style={{ fontFamily: 'SpaceMono_400Regular', color: '#fff' }}>{email}</Text>, reset instructions are on
+                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', color: '#fff' }}>{email}</Text>, reset instructions are on
                 their way. Check spam if nothing lands in a minute.
               </Text>
             </View>
@@ -89,7 +89,7 @@ export default function ForgotPassword() {
               {error ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-                  <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+                  <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
                     {error}
                   </Text>
                 </View>
@@ -107,7 +107,7 @@ export default function ForgotPassword() {
         )}
         {!sent ? (
           <Pressable accessibilityRole="button" onPress={() => router.replace('/(auth)/login')} hitSlop={10} style={{ alignItems: 'center' }}>
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
               BACK TO <Text style={{ color: '#F97316' }}>SIGN IN</Text>
             </Text>
           </Pressable>

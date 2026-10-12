@@ -7,13 +7,13 @@ import { battingSideId, bowlingSideId, canUndoBall, isFirstBallOfInnings, whoIsN
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme/palette';
 
-const label = (t: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
-const button = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
+const label = (t: Palette) => ({ fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.textFaint });
+const button = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase' as const };
 
 // Key faces, as literal objects so the font-leading fence can read them.
 const RUN_FACE = { fontFamily: 'Anton_400Regular' as const, fontSize: 24, lineHeight: 29, textTransform: 'uppercase' as const };
 const WORD_FACE = { fontFamily: 'Anton_400Regular' as const, fontSize: 16, lineHeight: 20, textTransform: 'uppercase' as const };
-const NAME_FACE = { fontFamily: 'SpaceGrotesk_700Bold' as const, fontSize: 14 };
+const NAME_FACE = { fontFamily: 'Barlow_700Bold' as const, fontSize: 14 };
 const FACES = { run: RUN_FACE, word: WORD_FACE, name: NAME_FACE };
 
 /** One key on the pad. `onPress` is undefined while busy, as every control here has always been. */
@@ -68,7 +68,7 @@ export function CricketHostTools({ match, playerId, busy, onCancel }: {
       {code ? (
         <View>
           <Text style={label(t)}>Share this code to fill the open slots</Text>
-          <Text testID="join-code" selectable style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 24, letterSpacing: 0.2 * 24, color: t.brandInk, marginTop: 4 }}>{code}</Text>
+          <Text testID="join-code" selectable style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 24, letterSpacing: 0.2 * 24, color: t.brandInk, marginTop: 4 }}>{code}</Text>
         </View>
       ) : null}
       <Pressable
@@ -155,8 +155,8 @@ export function CricketScorePanel({ match, playerId, busy, problem, onBall, onUn
   // undefined then.
   const shell = (title: string | null, body: ReactNode, context?: string) => (
     <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 + insets.bottom, gap: 10, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg, opacity: busy ? 0.5 : 1 }}>
-      {problem ? <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: t.failInk }}>{problem}</Text> : null}
-      {context ? <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: t.textMeta }}>{context}</Text> : null}
+      {problem ? <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: t.failInk }}>{problem}</Text> : null}
+      {context ? <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, color: t.textMeta }}>{context}</Text> : null}
       {title ? <Text style={label(t)}>{title}</Text> : null}
       {body}
     </View>

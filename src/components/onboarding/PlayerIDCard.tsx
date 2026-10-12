@@ -52,7 +52,7 @@ export function PlayerIDCard({ name, sport, city, photoUri, variant, playerNo, i
     >
       <View style={{ backgroundColor: '#F97316', paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, color: '#0B0B0B' }}>Kria</Text>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.16 * 8, color: 'rgba(11,11,11,0.72)' }}>PLAYER ID</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.16 * 8, color: 'rgba(11,11,11,0.72)' }}>PLAYER ID</Text>
       </View>
 
       <View style={{ height: 184, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.10)', overflow: 'hidden' }}>
@@ -81,7 +81,7 @@ export function PlayerIDCard({ name, sport, city, photoUri, variant, playerNo, i
             ) : (
               <>
                 <Icon name="person" size={34} color="#5c5c5c" strokeWidth={1.9} />
-                <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.14 * 8, color: '#5c5c5c' }}>ADD A PHOTO</Text>
+                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, letterSpacing: 0.14 * 8, color: '#5c5c5c' }}>ADD A PHOTO</Text>
               </>
             )}
             <View style={{ position: 'absolute', top: 10, right: 10 }}>
@@ -104,13 +104,13 @@ export function PlayerIDCard({ name, sport, city, photoUri, variant, playerNo, i
       <View style={{ flexDirection: 'row', backgroundColor: '#0B0B0B', paddingHorizontal: 12, paddingVertical: 9 }}>
         <View style={{ flex: 1 }}>
           <Lbl style={{ fontSize: 8, letterSpacing: 0.14 * 8 }}>Player no.</Lbl>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: issued ? '#F97316' : '#fff', marginTop: 3 }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: issued ? '#F97316' : '#fff', marginTop: 3 }}>
             {issued && playerNo ? playerNo : 'KRIA·0000'}
           </Text>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
           <Lbl style={{ fontSize: 8, letterSpacing: 0.14 * 8 }}>Issued</Lbl>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: issued ? '#fff' : '#7d7d7d', marginTop: 3 }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: issued ? '#fff' : '#7d7d7d', marginTop: 3 }}>
             {issued ? issuedOn || 'TODAY' : 'PENDING'}
           </Text>
         </View>

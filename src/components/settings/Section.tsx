@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import { useTheme, type Palette } from '@/lib/theme';
 
-export const LBL = (theme: Palette) => ({ fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: theme.textFaint });
+export const LBL = (theme: Palette) => ({ fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: theme.textFaint });
 
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const theme = useTheme();

@@ -31,7 +31,7 @@ export function TieList({ ties, onSelect }: { ties: Tie[]; onSelect: (t: Tie) =>
             style={{
               flex: 1,
               textAlign: align,
-              fontFamily: won ? 'SpaceGrotesk_700Bold' : 'SpaceGrotesk_400Regular',
+              fontFamily: won ? 'Barlow_700Bold' : 'Barlow_400Regular',
               fontSize: 13,
               color: won ? '#16C46A' : completed ? 'rgba(255,255,255,0.5)' : '#fff',
             }}
@@ -54,7 +54,7 @@ export function TieList({ ties, onSelect }: { ties: Tie[]; onSelect: (t: Tie) =>
                 {completed ? (
                   <Tag label="Done" variant="open" />
                 ) : (
-                  <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, color: '#7d7d7d' }}>{progress}</Text>
+                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, color: '#7d7d7d' }}>{progress}</Text>
                 )}
               </View>
               {name(tie.teams?.team2Name || 'TBD', win2, 'left')}

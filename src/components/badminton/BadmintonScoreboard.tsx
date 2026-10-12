@@ -53,7 +53,7 @@ function SideRow({
         {serving === null ? null : (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 5 }}>
             {isServing ? <View style={{ width: 9, height: 9, borderRadius: 999, backgroundColor: '#F97316' }} /> : null}
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: isServing ? '#F97316' : '#7d7d7d' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.12 * 9, textTransform: 'uppercase', color: isServing ? '#F97316' : '#7d7d7d' }}>
               {isServing ? 'Serving' : 'Receiving'}
             </Text>
           </View>
@@ -61,9 +61,9 @@ function SideRow({
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 11 }}>
         {past ? (
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 12, letterSpacing: 0.06 * 12, color: '#7d7d7d' }}>{past}</Text>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, letterSpacing: 0.06 * 12, color: '#7d7d7d' }}>{past}</Text>
         ) : null}
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 48, lineHeight: 51, color: '#fff', minWidth: 56, textAlign: 'right' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 48, lineHeight: 51, color: '#fff', minWidth: 56, textAlign: 'right' }}>
           {live}
         </Text>
       </View>
@@ -88,7 +88,7 @@ export function BadmintonScoreboard({ match, serving }: { match: BadmintonMatch;
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, color: '#0B0B0B' }}>
           {matchLine(match)}
         </Text>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#0B0B0B' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#0B0B0B' }}>
           {cfg?.pointsToWin ? `To ${cfg.pointsToWin}` : ''}
           {cfg?.bestOf ? ` · Best of ${cfg.bestOf}` : ''}
           {one || two ? ` · ${one}-${two}` : ''}

@@ -41,9 +41,9 @@ export function LiveMatchCard({ match }: { match: LiveMatchSummary }) {
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 7, paddingHorizontal: 13, paddingTop: 8 }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 30, lineHeight: 32, color: '#fff' }}>{runs}</Text>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 17, color: '#F97316' }}>/{wkts}</Text>
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 12, color: '#a3a3a3' }}>{overs} ov</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 30, lineHeight: 32, color: '#fff' }}>{runs}</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 17, color: '#F97316' }}>/{wkts}</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#a3a3a3' }}>{overs} ov</Text>
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 13, paddingVertical: 10, marginTop: 8, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)' }}>

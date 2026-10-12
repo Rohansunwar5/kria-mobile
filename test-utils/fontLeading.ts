@@ -16,15 +16,16 @@
 export const ANTON_MIN_LEADING = 1.188;
 
 /**
- * Space Mono (both weights, unitsPerEm 1000): capHeight 700 = 0.700em,
- * hhea descent 361 = 0.361em, so the same rule gives 1.061em. Its natural
- * leading is 1.481em, so a style with no lineHeight is safe here too.
+ * JetBrains Mono (both weights, unitsPerEm 1000): capHeight 730 = 0.730em,
+ * hhea descent 300 = 0.300em, so the same rule gives 1.030em. Its natural
+ * leading is 1.320em, so a style with no lineHeight is safe here too.
  *
  * The fence covered only Anton until a cricket score at 46/42 = 0.913em came
- * back with its digits shaved on an iPhone. Nine more SpaceMono styles were
- * sitting at or below the floor at the same time.
+ * back with its digits shaved on an iPhone (the data face was Space Mono
+ * then, floor 1.061). Nine more mono styles were sitting at or below the
+ * floor at the same time.
  */
-export const SPACEMONO_MIN_LEADING = 1.061;
+export const JETBRAINSMONO_MIN_LEADING = 1.03;
 
 /**
  * The faces this fence measures, with the floor each one needs.
@@ -35,8 +36,8 @@ export const SPACEMONO_MIN_LEADING = 1.061;
  */
 export const FENCED_FONTS: { family: string; minLeading: number }[] = [
   { family: 'Anton_400Regular', minLeading: ANTON_MIN_LEADING },
-  { family: 'SpaceMono_700Bold', minLeading: SPACEMONO_MIN_LEADING },
-  { family: 'SpaceMono_400Regular', minLeading: SPACEMONO_MIN_LEADING },
+  { family: 'JetBrainsMono_700Bold', minLeading: JETBRAINSMONO_MIN_LEADING },
+  { family: 'JetBrainsMono_400Regular', minLeading: JETBRAINSMONO_MIN_LEADING },
 ];
 
 /** The marker that opts a style the analyser cannot measure out of the fence. */

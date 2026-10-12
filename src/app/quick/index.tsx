@@ -12,7 +12,7 @@ import { scoreLine } from '@/lib/quickCricketView';
 import { useAppSelector } from '@/store/hooks';
 
 const LBL = {
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.1 * 9,
   textTransform: 'uppercase' as const,
@@ -107,7 +107,7 @@ export default function QuickMatchesScreen() {
           onPress={() => router.push('/quick/new')}
           style={{ flex: 1, backgroundColor: '#F97316', borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}
         >
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: '#0B0B0B' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: '#0B0B0B' }}>
             New match
           </Text>
         </Pressable>
@@ -115,7 +115,7 @@ export default function QuickMatchesScreen() {
           onPress={() => router.push('/quick/join')}
           style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}
         >
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: '#d4d4d4' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, textTransform: 'uppercase', color: '#d4d4d4' }}>
             Join by code
           </Text>
         </Pressable>

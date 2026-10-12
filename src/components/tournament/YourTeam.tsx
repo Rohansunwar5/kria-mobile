@@ -19,7 +19,7 @@ export function YourTeam({ team, assignment }: { team: Team; assignment?: Regist
           <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: theme.text }}>
             {team.name}
           </Text>
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textMeta, marginTop: 3 }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: theme.textMeta, marginTop: 3 }}>
             {sold ? `Sold ₹${sold.toLocaleString('en-IN')}` : 'Drafted'}
           </Text>
         </View>
@@ -33,7 +33,7 @@ export function YourTeam({ team, assignment }: { team: Team; assignment?: Regist
           style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingHorizontal: 12, borderTopWidth: 1.5, borderTopColor: theme.lineFaint, backgroundColor: theme.brandTint }}
         >
           <Icon name="message" size={13} color={theme.brandInk} />
-          <Text style={{ flex: 1, fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: theme.text }}>
+          <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: theme.text }}>
             Team chat · WhatsApp
           </Text>
           <Icon name="chevron-right" size={12} color={theme.textFaint} />

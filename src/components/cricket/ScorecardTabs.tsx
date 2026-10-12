@@ -18,8 +18,8 @@ const SUBS: { key: SubTab; label: string }[] = [
   { key: 'stands', label: 'Stands' },
 ];
 
-const NUM = { fontFamily: 'SpaceMono_400Regular' as const, fontSize: 12, textAlign: 'right' as const };
-const NUM_BOLD = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 12, textAlign: 'right' as const };
+const NUM = { fontFamily: 'JetBrainsMono_400Regular' as const, fontSize: 12, textAlign: 'right' as const };
+const NUM_BOLD = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 12, textAlign: 'right' as const };
 
 function Block({ children }: { children: React.ReactNode }) {
   return (
@@ -73,11 +73,11 @@ function BattingTable({ innings, live }: { innings: InningsScorecard; live: Live
         return (
           <Row key={b.registrationId} active={active}>
             <View style={{ flex: 1, paddingRight: 6 }}>
-              <Text numberOfLines={1} style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: active ? '#fff' : '#d4d4d4' }}>
+              <Text numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: active ? '#fff' : '#d4d4d4' }}>
                 {b.name}
                 {striker ? <Text style={{ color: '#F97316' }}> ★</Text> : null}
               </Text>
-              <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.06 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+              <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, letterSpacing: 0.06 * 8, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
                 {dismissalLine(b.dismissal)}
               </Text>
             </View>
@@ -90,12 +90,12 @@ function BattingTable({ innings, live }: { innings: InningsScorecard; live: Live
         );
       })}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 13, paddingVertical: 9, borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.10)', backgroundColor: 'rgba(255,255,255,0.03)' }}>
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: '#7d7d7d' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: '#7d7d7d' }}>
           EXTRAS {innings.totals.extras.total}
         </Text>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: '#fff' }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: '#fff' }}>
           {innings.totals.runs}/{innings.totals.wickets}
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', color: '#a3a3a3' }}>{`  ${innings.totals.overs} OV`}</Text>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', color: '#a3a3a3' }}>{`  ${innings.totals.overs} OV`}</Text>
         </Text>
       </View>
     </Block>
@@ -110,7 +110,7 @@ function BowlingTable({ innings, live }: { innings: InningsScorecard; live: Live
         const active = b.registrationId === live?.currentBowlerId;
         return (
           <Row key={b.registrationId} active={active}>
-            <Text numberOfLines={1} style={{ flex: 1, paddingRight: 6, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: active ? '#fff' : '#d4d4d4' }}>
+            <Text numberOfLines={1} style={{ flex: 1, paddingRight: 6, fontFamily: 'Barlow_400Regular', fontSize: 12, color: active ? '#fff' : '#d4d4d4' }}>
               {b.name}
               {active ? <Text style={{ color: '#F97316' }}> ★</Text> : null}
             </Text>
@@ -131,7 +131,7 @@ function BowlingTable({ innings, live }: { innings: InningsScorecard; live: Live
 function Nothing({ text }: { text: string }) {
   return (
     <Block>
-      <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'center', paddingVertical: 22 }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#7d7d7d', textAlign: 'center', paddingVertical: 22 }}>
         {text}
       </Text>
     </Block>

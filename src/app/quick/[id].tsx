@@ -99,7 +99,7 @@ export default function QuickMatchScreen() {
     <Screen>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 14 }}>
         <Pressable onPress={() => goBack(router, '/quick')} hitSlop={12}>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
             Back
           </Text>
         </Pressable>
@@ -108,7 +108,7 @@ export default function QuickMatchScreen() {
             {cricket ? `${cricket.sides[0].name} v ${cricket.sides[1].name}` : 'Quick match'}
           </Text>
           {cricket?.matchConfig?.maxOvers ? (
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
               {`${cricket.matchConfig.maxOvers} ${cricket.matchConfig.maxOvers === 1 ? 'over' : 'overs'} a side`}
             </Text>
           ) : null}
@@ -129,14 +129,14 @@ export default function QuickMatchScreen() {
             onPress={() => router.dismissTo({ pathname: '/knockout/[id]', params: { id: String(match.knockoutId) } })}
             style={{ marginHorizontal: 20, marginBottom: 12, minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8 }}
           >
-            <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.14 * 10, textTransform: 'uppercase', color: '#F97316' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.14 * 10, textTransform: 'uppercase', color: '#F97316' }}>
               {barTitle ? `${barTitle} · ← Bracket` : '← Bracket'}
             </Text>
           </Pressable>
         ) : null}
 
         {problem && !padShown ? (
-          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#FF4438', marginBottom: 12, paddingHorizontal: 20 }}>
+          <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: '#FF4438', marginBottom: 12, paddingHorizontal: 20 }}>
             {problem}
           </Text>
         ) : null}
@@ -192,7 +192,7 @@ export default function QuickMatchScreen() {
         ) : null}
 
         {tieProblem ? (
-          <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 13, color: '#FF4438', marginTop: 12, paddingHorizontal: 20 }}>
+          <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: '#FF4438', marginTop: 12, paddingHorizontal: 20 }}>
             {tieProblem}
           </Text>
         ) : null}

@@ -7,7 +7,7 @@ import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme';
 
 const KEY = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 8,
   letterSpacing: 0.14 * 8,
   textTransform: 'uppercase' as const,
@@ -47,7 +47,7 @@ export function AwardsList({ awards }: { awards: Award[] }) {
             <Text numberOfLines={2} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: theme.text }}>
               {award.title}
             </Text>
-            <Text numberOfLines={1} style={{ ...KEY(theme), fontSize: 9, fontFamily: 'SpaceMono_400Regular', color: theme.textMeta, marginTop: 3 }}>
+            <Text numberOfLines={1} style={{ ...KEY(theme), fontSize: 9, fontFamily: 'JetBrainsMono_400Regular', color: theme.textMeta, marginTop: 3 }}>
               {recipientOf(award)}
             </Text>
           </View>
@@ -87,14 +87,14 @@ export function AboutSection({ tournament, onAnnouncements }: { tournament: Tour
             }}
           >
             <Text style={KEY(theme)}>{k}</Text>
-            <Text numberOfLines={2} style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 13, color: theme.text }}>{v}</Text>
+            <Text numberOfLines={2} style={{ fontFamily: 'Barlow_700Bold', fontSize: 13, color: theme.text }}>{v}</Text>
           </View>
         ))}
       </View>
 
       <Text
         numberOfLines={long && !open ? 4 : undefined}
-        style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 20, color: theme.textBody, marginTop: 12 }}
+        style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 20, color: theme.textBody, marginTop: 12 }}
       >
         {about || 'The organiser has not written a description for this tournament yet.'}
       </Text>

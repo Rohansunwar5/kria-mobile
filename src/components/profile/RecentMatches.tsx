@@ -8,7 +8,7 @@ import { SPORT_LABELS } from '@/lib/sports';
 import type { RecentMatch } from '@/api/career';
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.1 * 9,
   textTransform: 'uppercase' as const,
@@ -74,7 +74,7 @@ function Row({ match, first }: { match: RecentMatch; first: boolean }) {
       }}
     >
       <View style={{ width: 30, height: 30, borderRadius: 4, backgroundColor: token.bg, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: token.token.length > 1 ? 10 : 13, color: token.fg }}>{token.token}</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: token.token.length > 1 ? 10 : 13, color: token.fg }}>{token.token}</Text>
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, lineHeight: 18, color: theme.text }}>
@@ -86,7 +86,7 @@ function Row({ match, first }: { match: RecentMatch; first: boolean }) {
       </View>
       <View style={{ alignItems: 'flex-end', maxWidth: 150 }}>
         {match.scoreline ? (
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 12, color: theme.text, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, color: theme.text, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
             {match.scoreline}
           </Text>
         ) : null}

@@ -40,7 +40,7 @@ export function PasswordStrength({ password }: { password: string }) {
           <View key={i} style={{ flex: 1, height: 5, backgroundColor: i < score ? band.fg : 'rgba(255,255,255,0.12)' }} />
         ))}
       </View>
-      <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: password ? band.fg : '#7d7d7d', marginTop: 7 }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: password ? band.fg : '#7d7d7d', marginTop: 7 }}>
         {password ? band.label : 'Enter a password'}
       </Text>
     </View>
@@ -54,7 +54,7 @@ export function PasswordRuleList({ password }: { password: string }) {
       {passwordRules(password).map((r, i, all) => (
         <View key={r.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: i === all.length - 1 ? 0 : 8 }}>
           <Icon name={r.met ? 'check' : 'close'} size={14} color={r.met ? '#16C46A' : '#7d7d7d'} strokeWidth={r.met ? 2.8 : 2.2} />
-          <Text style={{ flex: 1, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: r.met ? '#d4d4d4' : '#7d7d7d' }}>{r.label}</Text>
+          <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 12, color: r.met ? '#d4d4d4' : '#7d7d7d' }}>{r.label}</Text>
         </View>
       ))}
     </View>

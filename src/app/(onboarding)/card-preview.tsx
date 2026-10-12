@@ -18,7 +18,7 @@ export default function CardPreview() {
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>
         <IconBtn icon="chevron-left" label="Go back" onPress={() => goBack(router)} />
         <View style={{ flex: 1 }} />
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>STEP 3 OF 4</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.16 * 9, color: '#7d7d7d' }}>STEP 3 OF 4</Text>
       </View>
 
       <View style={{ flex: 1, alignItems: 'center', paddingHorizontal: 20, overflow: 'hidden' }}>
@@ -39,7 +39,7 @@ export default function CardPreview() {
           <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 28, lineHeight: 34, color: '#fff', textAlign: 'center' }}>
             Let&apos;s make{'\n'}it yours.
           </Text>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 10, maxWidth: 270, textAlign: 'center' }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 10, maxWidth: 270, textAlign: 'center' }}>
             Create your account to claim the card and get your player number.
           </Text>
         </View>

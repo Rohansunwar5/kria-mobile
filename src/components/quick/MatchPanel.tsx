@@ -13,7 +13,7 @@ import {
 } from '@/lib/quickMatchView';
 
 const LBL = {
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.1 * 9,
   textTransform: 'uppercase' as const,
@@ -36,7 +36,7 @@ function SideColumn({ name, score, games }: { name: string; score: number | null
         {name}
       </Text>
       {score !== null ? (
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 54, color: '#fff', marginTop: 4 }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 54, color: '#fff', marginTop: 4 }}>
           {String(score)}
         </Text>
       ) : null}
@@ -62,7 +62,7 @@ function GameScores({ gameScores }: { gameScores: QuickMatch['gameScores'] }) {
         <Text
           key={g.gameNumber}
           style={{
-            fontFamily: 'SpaceMono_700Bold',
+            fontFamily: 'JetBrainsMono_700Bold',
             fontSize: 14,
             color: g.winnerSideId ? '#d4d4d4' : '#F97316',
           }}
@@ -106,7 +106,7 @@ function Action({
     >
       <Text
         style={{
-          fontFamily: 'SpaceMono_700Bold',
+          fontFamily: 'JetBrainsMono_700Bold',
           fontSize: 11,
           letterSpacing: 0.14 * 11,
           textTransform: 'uppercase',
@@ -209,7 +209,7 @@ export function MatchPanel({
           <Text
             testID="join-code"
             style={{
-              fontFamily: 'SpaceMono_700Bold',
+              fontFamily: 'JetBrainsMono_700Bold',
               fontSize: 30,
               letterSpacing: 0.2 * 30,
               color: '#F97316',
@@ -231,7 +231,7 @@ export function MatchPanel({
                 style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8 }}
               >
                 {/* A knockout's guests are named players, not slots waiting for a joiner. */}
-                <Text style={{ fontFamily: 'SpaceGrotesk_500Medium', fontSize: 14, color: slot.playerId || managed ? '#fff' : '#7d7d7d' }}>
+                <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: slot.playerId || managed ? '#fff' : '#7d7d7d' }}>
                   {slot.playerId || managed ? slot.displayName : `${slot.displayName} · open`}
                 </Text>
                 {host && !managed && match.status === 'live' && slot.playerId && String(slot.playerId) !== String(match.hostId) ? (
@@ -240,7 +240,7 @@ export function MatchPanel({
                     onPress={() => onRemovePlayer(String(slot.playerId))}
                     disabled={busy}
                   >
-                    <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+                    <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
                       Remove
                     </Text>
                   </Pressable>

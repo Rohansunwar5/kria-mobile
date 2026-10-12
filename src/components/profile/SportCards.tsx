@@ -9,7 +9,7 @@ import { SPORT_ICON, SPORT_LABELS } from '@/lib/sports';
 import type { CareerProfile, SportSummary } from '@/api/career';
 
 const LBL = (theme: Palette) => ({
-  fontFamily: 'SpaceMono_700Bold' as const,
+  fontFamily: 'JetBrainsMono_700Bold' as const,
   fontSize: 9,
   letterSpacing: 0.12 * 9,
   textTransform: 'uppercase' as const,
@@ -17,7 +17,7 @@ const LBL = (theme: Palette) => ({
 });
 
 const NOTE = (theme: Palette) => ({
-  fontFamily: 'SpaceGrotesk_400Regular' as const,
+  fontFamily: 'Barlow_400Regular' as const,
   fontSize: 12,
   lineHeight: 17,
   color: theme.textFaint,
@@ -70,9 +70,9 @@ function SportCard({ summary, best }: { summary: SportSummary; best: boolean }) 
           </View>
         ) : null}
       </View>
-      <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 36, lineHeight: 40, letterSpacing: -0.5, color: theme.text }}>
+      <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 36, lineHeight: 40, letterSpacing: -0.5, color: theme.text }}>
         {pct.slice(0, -1)}
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 16, color: theme.textMeta }}>%</Text>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 16, color: theme.textMeta }}>%</Text>
       </Text>
       <View style={{ height: 5, borderRadius: 3, backgroundColor: theme.fillSoft, overflow: 'hidden' }}>
         <View style={{ width, height: 5, backgroundColor: theme.brand }} />
@@ -118,7 +118,7 @@ export function SportCards({
     if (sports.length === 0) {
       return (
         <View style={{ borderWidth: 1.5, borderStyle: 'dashed', borderColor: theme.keyline, borderRadius: 6, padding: 14, gap: 12 }}>
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: theme.textMeta }}>
             The record starts with the first match. Win rate and a card per sport appear here once one is played.
           </Text>
           {emptyAction}

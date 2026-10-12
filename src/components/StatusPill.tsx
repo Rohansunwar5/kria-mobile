@@ -33,7 +33,7 @@ export function Tag({ label, variant = 'up', dot }: { label: string; variant?: T
       {dot ? <View style={{ width: 5, height: 5, borderRadius: 999, backgroundColor: v.fg }} /> : null}
       <Text
         style={{
-          fontFamily: 'SpaceMono_700Bold',
+          fontFamily: 'JetBrainsMono_700Bold',
           fontSize: 9,
           letterSpacing: 0.16 * 9,
           textTransform: 'uppercase',

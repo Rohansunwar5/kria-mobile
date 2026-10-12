@@ -108,7 +108,7 @@ export default function Login() {
                 onChangeText={(t) => { setPassword(t); dispatch(clearError()); }}
                 labelRight={
                   <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/forgot-password')} hitSlop={12}>
-                    <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#F97316' }}>FORGOT?</Text>
+                    <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#F97316' }}>FORGOT?</Text>
                   </Pressable>
                 }
               />
@@ -130,7 +130,7 @@ export default function Login() {
             {error ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 11 }}>
                 <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-                <Text style={{ flex: 1, fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
+                <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
                   {error}
                 </Text>
               </View>
@@ -142,7 +142,7 @@ export default function Login() {
       <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 26 }}>
         <Btn label={ctaLabel} arrow busy={isLoading} disabled={!canSubmit} onPress={onCta} style={{ marginBottom: 16 }} />
         <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/register')} hitSlop={10} style={{ alignItems: 'center' }}>
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
             NEW HERE? <Text style={{ color: '#F97316' }}>CREATE AN ACCOUNT</Text>
           </Text>
         </Pressable>

@@ -40,7 +40,7 @@ function BallRow({ b }: { b: DisplayBall }) {
         backgroundColor: wicket ? 'rgba(255,68,56,0.07)' : 'transparent',
       }}
     >
-      <Text style={{ width: 34, paddingTop: 3, fontFamily: 'SpaceMono_400Regular', fontSize: 10, color: '#7d7d7d' }}>
+      <Text style={{ width: 34, paddingTop: 3, fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, color: '#7d7d7d' }}>
         {b.overNumber - 1}.{b.deliveryNumber}
       </Text>
       <View
@@ -54,7 +54,7 @@ function BallRow({ b }: { b: DisplayBall }) {
           ...(skin.border ? { borderWidth: 1.5, borderColor: skin.border } : null),
         }}
       >
-        <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: b.label.text.length > 1 ? 10 : 12, color: skin.fg }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: b.label.text.length > 1 ? 10 : 12, color: skin.fg }}>
           {b.label.text}
         </Text>
       </View>
@@ -65,11 +65,11 @@ function BallRow({ b }: { b: DisplayBall }) {
           </Text>
         ) : null}
         {b.commentary ? (
-          <Text style={{ fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, color: '#fff', marginTop: wicket ? 5 : 0 }}>
+          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: '#fff', marginTop: wicket ? 5 : 0 }}>
             {b.commentary}
           </Text>
         ) : null}
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.06 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 3 }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.06 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 3 }}>
           {detail}
         </Text>
       </View>
@@ -132,7 +132,7 @@ export default function CricketBalls() {
       </Pressable>
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Ball by ball</Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
+        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
           {card?.battingTeamName ? `${card.battingTeamName} innings` : `Innings ${innings}`}
         </Text>
       </View>
@@ -194,7 +194,7 @@ export default function CricketBalls() {
                 <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 16, color: '#0B0B0B' }}>
                   Over {over.overNumber}
                 </Text>
-                <Text numberOfLines={1} style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#0B0B0B' }}>
+                <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: '#0B0B0B' }}>
                   {[over.bowlerName, `${over.runs} runs`, over.wickets ? `${over.wickets} w` : null].filter(Boolean).join(' · ')}
                 </Text>
               </View>

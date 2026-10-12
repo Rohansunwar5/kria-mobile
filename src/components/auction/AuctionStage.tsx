@@ -6,7 +6,7 @@ import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hairlines, Hazard } from '@/components/canvas';
 import { Ghost } from '@/components/states';
 
-const LBL = { fontFamily: 'SpaceMono_700Bold' as const, fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
+const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.14 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
 
 const SKILL_TONE: Record<string, string> = {
   beginner: '#3B82F6',
@@ -40,10 +40,10 @@ function Facts({ player }: { player: AuctionPlayer }) {
             borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.10)', borderRadius: 4,
           }}
         >
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: '#7d7d7d' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: '#7d7d7d' }}>
             {it.label}
           </Text>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 11, color: '#fff', textTransform: 'capitalize' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, color: '#fff', textTransform: 'capitalize' }}>
             {it.value}
           </Text>
         </View>
@@ -99,12 +99,12 @@ export function AuctionStage({
 
       <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#FA4C93' }}>
+          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.22 * 9, textTransform: 'uppercase', color: '#FA4C93' }}>
             On the block
           </Text>
           {skill && tone ? (
             <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: 3, backgroundColor: tone }}>
-              <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 8, letterSpacing: 0.12 * 8, textTransform: 'uppercase', color: '#0B0B0B' }}>
+              <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.12 * 8, textTransform: 'uppercase', color: '#0B0B0B' }}>
                 {skill}
               </Text>
             </View>
@@ -128,7 +128,7 @@ export function AuctionStage({
           <Text style={LBL}>Current bid</Text>
           <Animated.Text
             style={{
-              fontFamily: 'SpaceMono_700Bold',
+              fontFamily: 'JetBrainsMono_700Bold',
               fontSize: 42,
               lineHeight: 46,
               color: '#F97316',
@@ -160,16 +160,16 @@ export function AuctionStage({
             <View style={{ width: `${pct}%`, height: '100%', backgroundColor: pct >= 100 ? '#FF4438' : '#F97316' }} />
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, color: '#7d7d7d' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, color: '#7d7d7d' }}>
               BASE ₹{base.toLocaleString('en-IN')}
             </Text>
-            <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, color: pct >= 100 ? '#FF4438' : '#7d7d7d' }}>
+            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, color: pct >= 100 ? '#FF4438' : '#7d7d7d' }}>
               CAP ₹{hardLimit.toLocaleString('en-IN')}
             </Text>
           </View>
         </View>
       ) : base ? (
-        <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, color: '#7d7d7d', paddingHorizontal: 16, paddingBottom: 12 }}>
+        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, color: '#7d7d7d', paddingHorizontal: 16, paddingBottom: 12 }}>
           BASE ₹{base.toLocaleString('en-IN')}
         </Text>
       ) : null}

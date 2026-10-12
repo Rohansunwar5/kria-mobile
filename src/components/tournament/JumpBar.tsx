@@ -54,7 +54,7 @@ export function JumpBar({
                 onPress={() => onJump(i)}
                 style={{ justifyContent: 'center', paddingHorizontal: 9, borderBottomWidth: 3, borderBottomColor: on ? theme.brand : theme.bg }}
               >
-                <Text style={{ fontFamily: 'SpaceMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: on ? theme.text : theme.textFaint }}>
+                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, textTransform: 'uppercase', color: on ? theme.text : theme.textFaint }}>
                   {s.label}
                 </Text>
               </Pressable>

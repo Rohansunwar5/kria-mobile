@@ -55,7 +55,7 @@ export default function MyKnockouts() {
         ) : !list ? (
           <Skeleton h={58} line />
         ) : list.length === 0 ? (
-          <Text style={{ fontFamily: 'SpaceMono_400Regular', fontSize: 12, color: theme.textMeta }}>No knockouts yet. Host or join one from Quick matches.</Text>
+          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: theme.textMeta }}>No knockouts yet. Host or join one from Quick matches.</Text>
         ) : (
           list.map((k) => (
             <KnockoutRow key={k._id} knockout={k} viewerId={userId} onPress={() => router.push({ pathname: '/knockout/[id]', params: { id: k._id } })} />
