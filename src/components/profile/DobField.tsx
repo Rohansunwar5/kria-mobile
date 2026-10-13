@@ -3,6 +3,11 @@ import { Platform, Pressable, Text, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Icon } from '@/components/icons';
 
+// Local calendar day, not toISOString(): that converts to UTC, which in IST
+// turns a picked local midnight into the previous day.
+const toISODate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 // Emits an ISO YYYY-MM-DD string; `value` is that same string or ''.
 export function DobField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [show, setShow] = useState(false);
@@ -12,9 +17,9 @@ export function DobField({ value, onChange }: { value: string; onChange: (v: str
   };
   const date = value ? parseLocal(value) : new Date(2000, 0, 1);
 
-  const handle = (_e: unknown, picked?: Date) => {
+  const pick = (_e: unknown, picked: Date) => {
     if (Platform.OS === 'android') setShow(false);
-    if (picked) onChange(picked.toISOString().split('T')[0]);
+    onChange(toISODate(picked));
   };
 
   return (
@@ -42,7 +47,29 @@ export function DobField({ value, onChange }: { value: string; onChange: (v: str
             : 'SELECT'}
         </Text>
       </Pressable>
-      {show && <DateTimePicker value={date} mode="date" maximumDate={new Date()} onChange={handle} />}
+      {/* The picker library has no web build (it renders null), so on web an
+          invisible native date input sits over the field and takes the tap. */}
+      {Platform.OS === 'web' ? (
+        <input
+          type="date"
+          aria-label="Date of birth"
+          value={value}
+          max={toISODate(new Date())}
+          onChange={(e) => onChange(e.target.value)}
+          onClick={(e) => e.currentTarget.showPicker?.()}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+        />
+      ) : (
+        show && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            maximumDate={new Date()}
+            onValueChange={pick}
+            onDismiss={() => setShow(false)}
+          />
+        )
+      )}
     </View>
   );
 }
