@@ -68,6 +68,8 @@ export function useCricketMatchSocket(matchId?: string) {
     acquireSocket();
     join();
     socket.on('ball:recorded', onBall);
+    // An undo can reopen a completed match, so reload the whole thing.
+    socket.on('ball:undone', reload);
     socket.on('connect', onReconnect);
 
     return () => {
@@ -75,6 +77,7 @@ export function useCricketMatchSocket(matchId?: string) {
       ready.current = false;
       socket.emit('leave:match', { matchId });
       socket.off('ball:recorded', onBall);
+      socket.off('ball:undone', reload);
       socket.off('connect', onReconnect);
       releaseSocket();
     };
