@@ -8,10 +8,10 @@ export const SPORT_LABELS: Record<string, string> = {
 };
 
 /** Glyph per sport, for history rows and roster headers. */
-export const SPORT_ICON: Record<string, 'shuttlecock' | 'ball' | 'court'> = {
+export const SPORT_ICON: Record<string, 'shuttlecock' | 'paddle' | 'ball' | 'court'> = {
   badminton: 'shuttlecock',
   cricket: 'ball',
-  table_tennis: 'court',
+  table_tennis: 'paddle',
   tennis: 'court',
 };
 

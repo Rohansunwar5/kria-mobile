@@ -54,7 +54,7 @@ describe('icon geometry', () => {
   });
 
   it('ships the sport glyphs that carry the brand', () => {
-    for (const n of ['shuttlecock', 'cricket-bat', 'stumps', 'court', 'gavel', 'bracket', 'ball']) {
+    for (const n of ['shuttlecock', 'paddle', 'cricket-bat', 'stumps', 'court', 'gavel', 'bracket', 'ball']) {
       expect(ICON_NAMES).toContain(n);
     }
   });

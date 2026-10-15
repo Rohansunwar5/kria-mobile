@@ -116,6 +116,14 @@ const ICONS: Record<string, IconDef> = {
       'M9.9 8.5 H14.1',
     ],
   },
+  /** Table tennis paddle: round blade, angled handle, ball. */
+  paddle: {
+    paths: [
+      'M10 3.5 A6.5 6.5 0 1 1 10 16.5 A6.5 6.5 0 1 1 10 3.5 Z',
+      'M15.7 13.5 L20.6 18.4 L18.4 20.6 L13.5 15.7',
+      'M20 3 A1.75 1.75 0 1 1 20 6.5 A1.75 1.75 0 1 1 20 3 Z',
+    ],
+  },
   /** Cricket bat, tilted — upright reads as a bottle, angled reads as a bat. */
   'cricket-bat': {
     paths: [
