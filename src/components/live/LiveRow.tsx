@@ -3,6 +3,10 @@ import { router } from 'expo-router';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme';
 import type { LiveItem } from '@/api/live';
+import { SPORT_LABELS } from '@/lib/sports';
+
+/** "Table Tennis", never the raw `table_tennis` key — the feed is public. */
+const sportName = (item: LiveItem) => SPORT_LABELS[item.sport] ?? item.sport;
 
 const LBL = (theme: Palette) => ({
   fontFamily: 'JetBrainsMono_700Bold' as const,
@@ -55,12 +59,12 @@ export default function LiveRow({ item }: { item: LiveItem }) {
   // title. That is deliberate on the server, so this must render rather than
   // show a blank card — fall back to the one thing every row always has.
   const heading = item.kind === 'tournament'
-    ? (item.tournamentName ?? item.title ?? item.sport)
-    : (item.title ?? item.sport);
+    ? (item.tournamentName ?? item.title ?? sportName(item))
+    : (item.title ?? sportName(item));
 
   const sub = item.kind === 'tournament'
-    ? [item.sport, item.categoryName, item.round].filter(Boolean).join(' · ')
-    : item.sport;
+    ? [sportName(item), item.categoryName, item.round].filter(Boolean).join(' · ')
+    : sportName(item);
 
   return (
     <Pressable
@@ -119,12 +123,12 @@ export default function LiveRow({ item }: { item: LiveItem }) {
 export function LiveChip({ item }: { item: LiveItem }) {
   const theme = useTheme();
   const isQuick = item.kind === 'quick';
-  const name = item.title ?? (item.kind === 'tournament' ? item.tournamentName : undefined) ?? item.sport;
+  const name = item.title ?? (item.kind === 'tournament' ? item.tournamentName : undefined) ?? sportName(item);
   // When the title is missing the tournament name has already become the
   // name, so the line above falls back to the category instead of repeating it.
   const sub = item.kind === 'tournament'
-    ? [item.title ? item.tournamentName : item.categoryName, item.round?.replace(/_/g, ' ')].filter(Boolean).join(' · ') || item.sport
-    : item.sport;
+    ? [item.title ? item.tournamentName : item.categoryName, item.round?.replace(/_/g, ' ')].filter(Boolean).join(' · ') || sportName(item)
+    : sportName(item);
 
   return (
     <Pressable

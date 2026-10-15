@@ -321,8 +321,14 @@ function FirstMatch() {
   );
 }
 
+/** A game column's width. Past five games (table tennis best of 7) the columns
+ *  narrow, or games 6 and 7 squeeze the side names off a 360 dp phone. */
+export function gameCellWidth(games: number): number {
+  return games > 5 ? 30 : 40;
+}
+
 /**
- * Badminton, game by game. The game in progress is the one with no winner yet;
+ * A rally match, game by game. The game in progress is the one with no winner yet;
  * it sits on a lifted cell in the brand ink. Decided games show the winner's
  * score in white and the loser's faint.
  */
@@ -332,7 +338,7 @@ function Scoreboard({ match }: { match: QuickMatch }) {
   const sides = match.sides.slice(0, 2);
   const score = (g: QuickGameScore, i: number) => (i === 0 ? g.side1Score : g.side2Score);
   const label = sides.map((s, i) => `${s.name} ${games.map((g) => score(g, i)).join(', ')}`).join('. ');
-  const cell = { width: 40, alignItems: 'center' as const, justifyContent: 'center' as const };
+  const cell = { width: gameCellWidth(games.length), alignItems: 'center' as const, justifyContent: 'center' as const };
 
   return (
     <View
