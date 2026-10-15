@@ -81,8 +81,6 @@ export function pickSport(d: HostDraft, sport: Sport): Partial<HostDraft> {
   return { sport, ...RALLY_FORMATS[sport].defaults };
 }
 
-export const POINTS: Record<HostDraft['pointsToWin'], string> = { 11: 'Quick', 15: 'Short', 21: 'Standard' };
-
 /** What the form calls each side. Never sent — `teamNames` is what goes out. */
 export function sideLabels(hostPlays: boolean): [string, string] {
   return hostPlays ? ['Your team', 'Opponents'] : ['Team A', 'Team B'];

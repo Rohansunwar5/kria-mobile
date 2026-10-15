@@ -26,7 +26,7 @@ it('walks format → name → review and creates the knockout', async () => {
 
   await waitFor(() => expect(router.replace).toHaveBeenCalledWith({ pathname: '/knockout/[id]', params: { id: 'k9' } }));
   expect(createQuickKnockout).toHaveBeenCalledWith({
-    format: 'doubles', matchConfig: { bestOf: 1, pointsToWin: 21 }, name: 'Sunday Smash',
+    sport: 'badminton', format: 'doubles', matchConfig: { bestOf: 1, pointsToWin: 21 }, name: 'Sunday Smash',
   });
 });
 
@@ -54,4 +54,34 @@ it('creates a cricket knockout with overs, squad and teams', async () => {
   await waitFor(() => expect(createQuickKnockout).toHaveBeenLastCalledWith({
     sport: 'cricket', matchConfig: { maxOvers: 8, playersPerTeam: 6 }, teamCount: 5,
   }));
+});
+
+it('creates a table tennis knockout on table tennis formats', async () => {
+  render(<NewKnockoutScreen />);
+  fireEvent.press(screen.getByText('Table tennis'));
+  fireEvent.press(screen.getByText('Continue'));
+  expect(screen.queryByText('15')).toBeNull();
+  fireEvent.press(screen.getByText('7'));
+  fireEvent.press(screen.getByText('Continue'));
+  fireEvent.press(screen.getByText('Continue'));
+  fireEvent.press(screen.getByText('Create knockout'));
+  await waitFor(() => expect(createQuickKnockout).toHaveBeenCalled());
+  expect((createQuickKnockout as jest.Mock).mock.calls.at(-1)[0]).toEqual({
+    sport: 'table_tennis', format: 'singles', matchConfig: { bestOf: 7, pointsToWin: 11 },
+  });
+});
+
+it('resets to a badminton format when the host switches back from table tennis', async () => {
+  render(<NewKnockoutScreen />);
+  fireEvent.press(screen.getByText('Table tennis'));
+  fireEvent.press(screen.getByText('Continue'));
+  fireEvent.press(screen.getByText('7'));
+  fireEvent.press(screen.getByLabelText('Back'));
+  fireEvent.press(screen.getByText('Badminton'));
+  fireEvent.press(screen.getByText('Continue'));
+  fireEvent.press(screen.getByText('Continue'));
+  fireEvent.press(screen.getByText('Continue'));
+  fireEvent.press(screen.getByText('Create knockout'));
+  await waitFor(() => expect((createQuickKnockout as jest.Mock).mock.calls.at(-1)[0].sport).toBe('badminton'));
+  expect((createQuickKnockout as jest.Mock).mock.calls.at(-1)[0].matchConfig).toEqual({ bestOf: 1, pointsToWin: 21 });
 });

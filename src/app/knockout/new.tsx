@@ -9,7 +9,8 @@ import { createQuickKnockout, type CreateKnockoutBody } from '@/api/quickKnockou
 import { useAppSelector } from '@/store/hooks';
 import { useTheme } from '@/lib/theme';
 import { goBack } from '@/lib/nav';
-import { BEST_OF, POINTS } from '@/lib/quickHostWizard';
+import { BEST_OF, RALLY_FORMATS, type HostDraft, type Sport } from '@/lib/quickHostWizard';
+import { SPORT_LABELS } from '@/lib/sports';
 
 const STEPS = ['sport', 'format', 'name', 'review'] as const;
 const COPY: Record<(typeof STEPS)[number], { title: string; sub: string }> = {
@@ -26,13 +27,13 @@ export default function NewKnockoutScreen() {
   const defaultName = `${user?.firstName ?? 'My'}'s Knockout`;
 
   const [index, setIndex] = useState(0);
-  const [sport, setSport] = useState<'badminton' | 'cricket'>('badminton');
+  const [sport, setSport] = useState<Sport>('badminton');
   const [maxOvers, setMaxOvers] = useState(8);
   const [squad, setSquad] = useState(6);
   const [teamCount, setTeamCount] = useState(4);
   const [format, setFormat] = useState<'singles' | 'doubles'>('singles');
-  const [bestOf, setBestOf] = useState<1 | 3 | 5>(1);
-  const [pointsToWin, setPointsToWin] = useState<11 | 15 | 21>(21);
+  const [bestOf, setBestOf] = useState<HostDraft['bestOf']>(1);
+  const [pointsToWin, setPointsToWin] = useState<HostDraft['pointsToWin']>(21);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
@@ -40,12 +41,22 @@ export default function NewKnockoutScreen() {
   const step = STEPS[index];
   const back = () => (index === 0 ? goBack(router, '/quick') : setIndex(index - 1));
 
+  // A newly picked rally sport starts on one game to its own usual points, so
+  // table tennis's best of 7 never reaches a badminton knockout.
+  const pick = (next: Sport) => {
+    if (next !== sport && next !== 'cricket') {
+      setBestOf(1);
+      setPointsToWin(RALLY_FORMATS[next].defaults.pointsToWin);
+    }
+    setSport(next);
+  };
+
   const create = async () => {
     setBusy(true);
     setProblem('');
     const body: CreateKnockoutBody = sport === 'cricket'
       ? { sport: 'cricket', matchConfig: { maxOvers, playersPerTeam: squad }, teamCount }
-      : { format, matchConfig: { bestOf, pointsToWin } };
+      : { sport, format, matchConfig: { bestOf, pointsToWin } };
     if (name.trim()) body.name = name.trim();
     try {
       const created = await createQuickKnockout(body);
@@ -81,8 +92,9 @@ export default function NewKnockoutScreen() {
 
           {step === 'sport' ? (
             <View style={{ gap: 12 }}>
-              <ChoiceCard icon="shuttlecock" title="Badminton" hint="Singles or doubles, 3 to 16 entrants" selected={sport === 'badminton'} onPress={() => setSport('badminton')} />
-              <ChoiceCard icon="cricket-bat" title="Cricket" hint="Teams of up to 11, 3 to 8 teams" selected={sport === 'cricket'} onPress={() => setSport('cricket')} />
+              <ChoiceCard icon="shuttlecock" title="Badminton" hint="Singles or doubles, 3 to 16 entrants" selected={sport === 'badminton'} onPress={() => pick('badminton')} />
+              <ChoiceCard icon="paddle" title="Table tennis" hint="Singles or doubles, 3 to 16 entrants" selected={sport === 'table_tennis'} onPress={() => pick('table_tennis')} />
+              <ChoiceCard icon="cricket-bat" title="Cricket" hint="Teams of up to 11, 3 to 8 teams" selected={sport === 'cricket'} onPress={() => pick('cricket')} />
             </View>
           ) : null}
 
@@ -94,11 +106,11 @@ export default function NewKnockoutScreen() {
             </>
           ) : null}
 
-          {step === 'format' && sport === 'badminton' ? (
+          {step === 'format' && sport !== 'cricket' ? (
             <>
               <Segmented title="Format" options={[{ value: 'singles' as const, label: 'Singles', sub: '1 v 1' }, { value: 'doubles' as const, label: 'Doubles', sub: '2 v 2' }]} value={format} onChange={setFormat} />
-              <Segmented title="Match length" options={([1, 3, 5] as const).map((n) => ({ value: n, label: BEST_OF[n].label }))} value={bestOf} onChange={setBestOf} hint={BEST_OF[bestOf].hint} />
-              <Segmented title="Points per game" options={([11, 15, 21] as const).map((n) => ({ value: n, label: String(n), sub: POINTS[n] }))} value={pointsToWin} onChange={setPointsToWin} />
+              <Segmented title="Match length" options={RALLY_FORMATS[sport].bestOf.map((n) => ({ value: n, label: String(n), sub: n === 1 ? 'One game' : 'Best of' }))} value={bestOf} onChange={setBestOf} hint={BEST_OF[bestOf].hint} />
+              <Segmented title="Points per game" options={RALLY_FORMATS[sport].points.map((p) => ({ value: p.value, label: String(p.value), sub: p.sub }))} value={pointsToWin} onChange={setPointsToWin} />
             </>
           ) : null}
 
@@ -115,7 +127,7 @@ export default function NewKnockoutScreen() {
 
           {step === 'review' ? (
             <View style={{ borderRadius: 6, borderWidth: 1.5, borderColor: t.line, backgroundColor: t.surface, padding: 18 }}>
-              <Text style={{ ...label, color: t.brandInk }}>{`Knockout · ${sport === 'cricket' ? 'cricket' : format}`}</Text>
+              <Text style={{ ...label, color: t.brandInk }}>{`Knockout · ${sport === 'cricket' ? 'cricket' : `${SPORT_LABELS[sport]} · ${format}`}`}</Text>
               <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 28, lineHeight: 34, textTransform: 'uppercase', color: t.text, marginTop: 8 }}>{name.trim() || defaultName}</Text>
               <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: t.textMeta, marginTop: 6 }}>
                 {sport === 'cricket'
