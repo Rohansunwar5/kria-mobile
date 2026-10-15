@@ -86,8 +86,9 @@ it('names a cricket entrant by its team', () => {
 
 it('labels the format', () => {
   expect(formatLabel(cricket())).toBe('Cricket · 8 overs');
-  expect(formatLabel(k())).toBe('Doubles');
-  expect(formatLabel(k({ format: 'singles' }))).toBe('Singles');
+  expect(formatLabel(k())).toBe('Badminton · Doubles');
+  expect(formatLabel(k({ format: 'singles' }))).toBe('Badminton · Singles');
+  expect(formatLabel(k({ sport: 'table_tennis', format: 'singles' }))).toBe('Table Tennis · Singles');
 });
 
 it('lists a team, or the Any-team pool', () => {

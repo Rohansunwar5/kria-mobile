@@ -23,7 +23,7 @@ export default function HostChooser() {
         </Text>
         {/* replace, not push: Back from either wizard skips the chooser. */}
         <ChoiceCard icon="shuttlecock" title="Quick match" hint="One match: singles, doubles or cricket." selected={false} onPress={() => router.replace('/quick/new')} />
-        <ChoiceCard icon="bracket" title="Knockout" hint="A badminton knockout for 3 to 16 entrants." selected={false} onPress={() => router.replace('/knockout/new')} />
+        <ChoiceCard icon="bracket" title="Knockout" hint="A badminton, table tennis or cricket knockout." selected={false} onPress={() => router.replace('/knockout/new')} />
       </ScrollView>
     </Screen>
   );

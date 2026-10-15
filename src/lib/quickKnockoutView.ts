@@ -1,4 +1,5 @@
 import type { KnockoutFixture, KnockoutPlayer, QuickKnockout } from '@/api/quickKnockout';
+import { SPORT_LABELS } from '@/lib/sports';
 
 const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? '';
 
@@ -27,10 +28,10 @@ export function entrantShortName(k: QuickKnockout, entrantId?: string): string {
 
 export const isKnockoutHost = (k: QuickKnockout, playerId?: string) => Boolean(playerId) && k.hostId === playerId;
 
-/** "Singles", "Doubles", or "Cricket · 8 overs" — the line under a knockout's name. */
+/** "Badminton · Singles", "Table Tennis · Doubles", or "Cricket · 8 overs" — the line under a knockout's name. */
 export function formatLabel(k: QuickKnockout): string {
   if (k.sport === 'cricket') return `Cricket · ${k.matchConfig.maxOvers} overs`;
-  return k.format === 'doubles' ? 'Doubles' : 'Singles';
+  return `${SPORT_LABELS[k.sport] ?? k.sport} · ${k.format === 'doubles' ? 'Doubles' : 'Singles'}`;
 }
 
 /** A cricket team's players, or the Any-team pool when `teamId` is absent. */

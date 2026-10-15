@@ -1,5 +1,6 @@
 import type { QuickGameScore, QuickMatch, QuickMatchSlot } from '@/api/quickMatch';
 import type { TagVariant } from '@/components/StatusPill';
+import { SPORT_LABELS } from '@/lib/sports';
 
 export function isHost(match: QuickMatch, playerId?: string): boolean {
   return Boolean(playerId) && String(match.hostId) === String(playerId);
@@ -49,11 +50,12 @@ export function statusVariant(status: QuickMatch['status']): TagVariant {
   return 'end';
 }
 
+/** "Table Tennis · Best of 3 · to 11" — the sport first, so the two rally sports never look alike. */
 export function formatLabel(match: QuickMatch): string {
   const bestOf = match.matchConfig?.bestOf ?? 3;
   const pointsToWin = match.matchConfig?.pointsToWin ?? 21;
   const games = bestOf === 1 ? 'Single game' : `Best of ${bestOf}`;
-  return `${games} · to ${pointsToWin}`;
+  return `${SPORT_LABELS[match.sport] ?? match.sport} · ${games} · to ${pointsToWin}`;
 }
 
 /**

@@ -243,7 +243,7 @@ function PlayerCard({
 function FirstMatch() {
   const theme = useTheme();
   const steps = [
-    'Host a badminton or cricket match.',
+    'Host a badminton, table tennis or cricket match.',
     'Share the six-character code so the others can join.',
     'Score it live. The result starts your record.',
   ];
@@ -399,7 +399,8 @@ function MatchHero({ match, knockout, playerId }: { match: QuickMatch; knockout?
   // A knockout match says which knockout and round, as its own screen does.
   const fixture = knockout?.fixtures.find((f) => f.fixtureId === match.fixtureId);
   const round = fixture ? knockout?.roundNames[fixture.round - 1] : undefined;
-  const meta = [knockout?.name, round, sportLabel(match.sport), format].filter(Boolean).join(' · ');
+  // A rally format label already names its sport.
+  const meta = [knockout?.name, round, cricket ? sportLabel(match.sport) : null, format].filter(Boolean).join(' · ');
   const slots = match.sides.flatMap((s) => s.slots).length;
   const joined = slots - freeSlots(match).length;
   const cta = !live ? 'Open waiting room' : hosting ? 'Resume scoring' : 'Open match';

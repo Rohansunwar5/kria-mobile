@@ -131,8 +131,9 @@ describe('labels', () => {
   });
 
   it('describes the format', () => {
-    expect(formatLabel(base())).toBe('Best of 3 · to 21');
-    expect(formatLabel(base({ matchConfig: { bestOf: 1, pointsToWin: 11 } }))).toBe('Single game · to 11');
+    expect(formatLabel(base())).toBe('Badminton · Best of 3 · to 21');
+    expect(formatLabel(base({ matchConfig: { bestOf: 1, pointsToWin: 11 } }))).toBe('Badminton · Single game · to 11');
+    expect(formatLabel(base({ sport: 'table_tennis', matchConfig: { bestOf: 7, pointsToWin: 11 } }))).toBe('Table Tennis · Best of 7 · to 11');
   });
 
   it('names the winning side from the stored outcome, never from the scores', () => {

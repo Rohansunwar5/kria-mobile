@@ -11,7 +11,7 @@ import { useTheme } from '@/lib/theme';
  *  screen stays for links that go straight to it. */
 export const HOST_OPTIONS: { title: string; hint: string; icon: IconName; href: '/quick/new' | '/knockout/new' | '/quick/join' }[] = [
   { title: 'Quick match', hint: 'One match: singles, doubles or cricket', icon: 'shuttlecock', href: '/quick/new' },
-  { title: 'Knockout', hint: 'A badminton knockout for 3 to 16', icon: 'bracket', href: '/knockout/new' },
+  { title: 'Knockout', hint: 'Badminton, table tennis or cricket', icon: 'bracket', href: '/knockout/new' },
   { title: 'Join with a code', hint: 'Six characters from the host', icon: 'id-card', href: '/quick/join' },
 ];
 
