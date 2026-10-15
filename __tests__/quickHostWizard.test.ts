@@ -1,8 +1,11 @@
 import {
+  BEST_OF,
   INITIAL_DRAFT,
+  RALLY_FORMATS,
   activeSlots,
   buildCreateBody,
   formatChips,
+  pickSport,
   playersBlocker,
   sideLabels,
   teamNames,
@@ -72,6 +75,10 @@ describe('formatChips', () => {
     expect(formatChips(draft({ doubles: true, bestOf: 1 }))).toEqual(['Doubles', 'One game', '21 points']);
     expect(formatChips(draft({ sport: 'cricket', maxOvers: 10, squadSize: 7 }))).toEqual(['10 overs', '7 a side']);
   });
+
+  it('reads table tennis best of 7 in words too', () => {
+    expect(formatChips(draft({ sport: 'table_tennis', bestOf: 7, pointsToWin: 11 }))).toEqual(['Singles', 'Best of 7', '11 points']);
+  });
 });
 
 describe('buildCreateBody', () => {
@@ -99,9 +106,53 @@ describe('buildCreateBody', () => {
     expect(body.matchConfig).toEqual({ maxOvers: 5, playersPerTeam: 3 });
   });
 
+  it('sends table tennis as its own sport, with names built from players', () => {
+    const body = buildCreateBody(draft({
+      sport: 'table_tennis', bestOf: 7, pointsToWin: 11,
+      side2: [{ displayName: 'Rahul Singh' }, { displayName: '' }],
+    }), host);
+    expect(body).toEqual({
+      sport: 'table_tennis',
+      sides: [
+        { name: 'Arjun Mehta', slots: [{ playerId: 'h1', displayName: 'Arjun Mehta' }] },
+        { name: 'Rahul Singh', slots: [{ displayName: 'Rahul Singh' }] },
+      ],
+      matchConfig: { bestOf: 7, pointsToWin: 11 },
+      waitForPlayers: true,
+    });
+  });
+
   // Both sports open in the waiting room, so the code is shared before play.
   it('asks for the waiting room, whatever the sport', () => {
     expect(buildCreateBody(draft(), host).waitForPlayers).toBe(true);
     expect(buildCreateBody(draft({ sport: 'cricket' }), host).waitForPlayers).toBe(true);
+  });
+});
+
+describe('pickSport', () => {
+  it('starts a newly picked rally sport on its own usual format', () => {
+    expect(pickSport(draft({ bestOf: 5, pointsToWin: 15 }), 'table_tennis'))
+      .toEqual({ sport: 'table_tennis', bestOf: 3, pointsToWin: 11 });
+    expect(pickSport(draft({ sport: 'table_tennis', bestOf: 7, pointsToWin: 11 }), 'badminton'))
+      .toEqual({ sport: 'badminton', bestOf: 3, pointsToWin: 21 });
+  });
+
+  it('keeps the format on a re-tap of the same sport, and for cricket', () => {
+    expect(pickSport(draft({ pointsToWin: 15 }), 'badminton')).toEqual({ sport: 'badminton' });
+    expect(pickSport(draft({ pointsToWin: 15 }), 'cricket')).toEqual({ sport: 'cricket' });
+  });
+});
+
+describe('RALLY_FORMATS', () => {
+  it('offers each sport its own sets, and defaults it can actually pick', () => {
+    expect(RALLY_FORMATS.badminton.bestOf).toEqual([1, 3, 5]);
+    expect(RALLY_FORMATS.badminton.points.map((p) => p.value)).toEqual([11, 15, 21]);
+    expect(RALLY_FORMATS.table_tennis.bestOf).toEqual([1, 3, 5, 7]);
+    expect(RALLY_FORMATS.table_tennis.points.map((p) => p.value)).toEqual([11, 21]);
+    for (const f of Object.values(RALLY_FORMATS)) {
+      expect(f.bestOf).toContain(f.defaults.bestOf);
+      expect(f.points.map((p) => p.value)).toContain(f.defaults.pointsToWin);
+      for (const n of f.bestOf) expect(BEST_OF[n]).toBeDefined();
+    }
   });
 });

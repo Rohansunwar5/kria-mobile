@@ -1,7 +1,9 @@
 import type { CreateQuickMatchBody } from '@/api/quickMatch';
 import { buildCricketCreateBody } from '@/lib/quickCricketCreate';
 
-export type Sport = 'badminton' | 'cricket';
+export type Sport = 'badminton' | 'table_tennis' | 'cricket';
+/** Scored point by point, game by game, on the same panel. */
+export type RallySport = Exclude<Sport, 'cricket'>;
 
 /** The host wizard, one question per step. Sport and role advance on tap. */
 export const STEPS = ['sport', 'role', 'format', 'players', 'review'] as const;
@@ -17,7 +19,7 @@ export interface HostDraft {
    *  host earns figures. See `buildCricketCreateBody` for the full reasoning. */
   hostPlays: boolean;
   doubles: boolean;
-  bestOf: 1 | 3 | 5;
+  bestOf: 1 | 3 | 5 | 7;
   pointsToWin: 11 | 15 | 21;
   maxOvers: number;
   squadSize: number;
@@ -48,7 +50,36 @@ export const BEST_OF: Record<HostDraft['bestOf'], { label: string; hint: string 
   1: { label: 'One game', hint: 'A single game decides it' },
   3: { label: 'Best of 3', hint: 'First to win 2 games takes the match' },
   5: { label: 'Best of 5', hint: 'First to win 3 games takes the match' },
+  7: { label: 'Best of 7', hint: 'First to win 4 games takes the match' },
 };
+
+/**
+ * What each rally sport lets a host pick. Mirrors RALLY_FORMATS on the server
+ * (server/src/models/quickMatch.model.ts), whose validators refuse anything else.
+ */
+export const RALLY_FORMATS: Record<RallySport, {
+  bestOf: HostDraft['bestOf'][];
+  points: { value: HostDraft['pointsToWin']; sub: string }[];
+  defaults: Pick<HostDraft, 'bestOf' | 'pointsToWin'>;
+}> = {
+  badminton: {
+    bestOf: [1, 3, 5],
+    points: [{ value: 11, sub: 'Quick' }, { value: 15, sub: 'Short' }, { value: 21, sub: 'Standard' }],
+    defaults: { bestOf: 3, pointsToWin: 21 },
+  },
+  table_tennis: {
+    bestOf: [1, 3, 5, 7],
+    points: [{ value: 11, sub: 'Standard' }, { value: 21, sub: 'Classic' }],
+    defaults: { bestOf: 3, pointsToWin: 11 },
+  },
+};
+
+/** The draft change for a sport tap. A newly picked rally sport starts on its
+ *  own usual format, so badminton's 15 points never reach table tennis. */
+export function pickSport(d: HostDraft, sport: Sport): Partial<HostDraft> {
+  if (sport === d.sport || sport === 'cricket') return { sport };
+  return { sport, ...RALLY_FORMATS[sport].defaults };
+}
 
 export const POINTS: Record<HostDraft['pointsToWin'], string> = { 11: 'Quick', 15: 'Short', 21: 'Standard' };
 
@@ -71,13 +102,13 @@ function fromPlayers(slots: SlotDraft[]): string {
 }
 
 /**
- * The name each side goes out with: whatever the host typed, else (badminton)
+ * The name each side goes out with: whatever the host typed, else (rally sports)
  * built from its players — "Arjun Mehta", "Arjun & Priya" — else Team A/B.
  * Cricket never builds from players: its slots are placeholders, and the
  * host's own name is not a team.
  */
 export function teamNames(d: HostDraft, host: SlotDraft): [string, string] {
-  const [s1, s2] = d.sport === 'badminton' ? activeSlots(d, host) : [[], []];
+  const [s1, s2] = d.sport !== 'cricket' ? activeSlots(d, host) : [[], []];
   return [
     d.teamNames[0].trim() || fromPlayers(s1) || 'Team A',
     d.teamNames[1].trim() || fromPlayers(s2) || 'Team B',
@@ -116,7 +147,7 @@ export function buildCreateBody(d: HostDraft, host: SlotDraft): CreateQuickMatch
   const out = (slots: SlotDraft[]) => slots.map((s) => ({ playerId: s.playerId, displayName: s.displayName.trim() }));
   const [s1, s2] = activeSlots(d, host);
   return {
-    sport: 'badminton',
+    sport: d.sport,
     sides: [{ name: name1, slots: out(s1) }, { name: name2, slots: out(s2) }],
     matchConfig: { bestOf: d.bestOf, pointsToWin: d.pointsToWin },
     waitForPlayers: true,

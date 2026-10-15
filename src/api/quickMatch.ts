@@ -24,7 +24,7 @@ export interface QuickGameScore {
 export interface QuickMatch {
   _id: string;
   hostId: string;
-  sport: 'badminton' | 'cricket';
+  sport: 'badminton' | 'table_tennis' | 'cricket';
   joinCode: string;
   /** `waiting`: the waiting room — players claim names, nothing is scored
    *  until the host starts it. */
@@ -107,17 +107,17 @@ export interface BallEntry {
 }
 
 export interface CreateQuickMatchBody {
-  sport: 'badminton' | 'cricket';
+  sport: 'badminton' | 'table_tennis' | 'cricket';
   sides: { name: string; slots: { playerId?: string; displayName: string }[] }[];
   /**
-   * Mirrors `createQuickMatchValidator`. The badminton pair are closed sets, so
+   * Mirrors `createQuickMatchValidator`. The rally pair (badminton, table tennis) are closed sets, so
    * a wrong value is a compile error instead of a 422. The cricket three are
    * ranges the validator enforces at runtime — `maxOvers` and
    * `maxOversPerBowler` 1-50, `playersPerTeam` 2-11 — and a union of those is
    * noise, so they stay `number`.
    */
   matchConfig?: {
-    bestOf?: 1 | 3 | 5;
+    bestOf?: 1 | 3 | 5 | 7;
     pointsToWin?: 11 | 15 | 21;
     maxOvers?: number;
     maxOversPerBowler?: number;

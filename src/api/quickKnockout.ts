@@ -32,9 +32,9 @@ export interface QuickKnockout {
   /** Withheld by the server from anyone not in the knockout. */
   joinCode?: string;
   name: string;
-  sport: 'badminton' | 'cricket';
+  sport: 'badminton' | 'table_tennis' | 'cricket';
   format: 'singles' | 'doubles' | 'teams';
-  matchConfig: { bestOf?: 1 | 3 | 5; pointsToWin?: 11 | 15 | 21; maxOvers?: number; playersPerTeam?: number };
+  matchConfig: { bestOf?: 1 | 3 | 5 | 7; pointsToWin?: 11 | 15 | 21; maxOvers?: number; playersPerTeam?: number };
   /** Cricket only. */
   teams?: KnockoutTeam[];
   status: 'waiting' | 'live' | 'completed' | 'cancelled';
@@ -52,7 +52,7 @@ export interface QuickKnockout {
 export type QuickCode = { kind: 'match'; data: QuickMatch } | { kind: 'knockout'; data: QuickKnockout };
 
 export type CreateKnockoutBody =
-  | { sport?: 'badminton'; format: 'singles' | 'doubles'; matchConfig: { bestOf: 1 | 3 | 5; pointsToWin: 11 | 15 | 21 }; name?: string }
+  | { sport?: 'badminton' | 'table_tennis'; format: 'singles' | 'doubles'; matchConfig: { bestOf: 1 | 3 | 5 | 7; pointsToWin: 11 | 15 | 21 }; name?: string }
   | { sport: 'cricket'; matchConfig: { maxOvers: number; playersPerTeam: number }; teamCount: number; name?: string };
 
 const asKnockout = (res: unknown) => unwrap(res) as QuickKnockout;
