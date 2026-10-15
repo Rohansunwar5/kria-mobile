@@ -12,7 +12,7 @@ import { goBack } from '@/lib/nav';
 import { useTheme } from '@/lib/theme';
 import { DUR, OUT, usePress } from '@/lib/motion';
 import { validateCricketConfig } from '@/lib/quickCricketCreate';
-import { INITIAL_DRAFT, STEPS, buildCreateBody, playersBlocker, type HostDraft, type SlotDraft, type Step } from '@/lib/quickHostWizard';
+import { INITIAL_DRAFT, STEPS, buildCreateBody, pickSport, playersBlocker, type HostDraft, type SlotDraft, type Step } from '@/lib/quickHostWizard';
 
 function copyFor(step: Step, d: HostDraft): { title: string; sub: string } {
   switch (step) {
@@ -23,9 +23,9 @@ function copyFor(step: Step, d: HostDraft): { title: string; sub: string } {
     case 'format':
       return { title: 'Set the format', sub: 'Already set to the usual game. Change anything you like.' };
     case 'players':
-      return d.sport === 'badminton'
-        ? { title: "Who's playing?", sub: 'Find someone on Kria, or just type a name.' }
-        : { title: 'Name the teams', sub: 'Or skip it — they go out as Team A and Team B.' };
+      return d.sport === 'cricket'
+        ? { title: 'Name the teams', sub: 'Or skip it — they go out as Team A and Team B.' }
+        : { title: "Who's playing?", sub: 'Find someone on Kria, or just type a name.' };
     case 'review':
       return { title: 'Ready to go?', sub: "Tap anything to change it. Next, you get a code to share with your players." };
   }
@@ -131,7 +131,7 @@ export default function NewQuickMatchScreen() {
               {sub}
             </Text>
 
-            {step === 'sport' ? <SportStep draft={draft} onPick={(sport) => { patch({ sport }); go(1); }} /> : null}
+            {step === 'sport' ? <SportStep draft={draft} onPick={(sport) => { patch(pickSport(draft, sport)); go(1); }} /> : null}
             {step === 'role' ? <RoleStep draft={draft} onPick={(hostPlays) => { patch({ hostPlays }); go(2); }} /> : null}
             {step === 'format' ? <FormatStep draft={draft} patch={patch} /> : null}
             {step === 'players' ? <PlayersStep draft={draft} patch={patch} host={host} /> : null}

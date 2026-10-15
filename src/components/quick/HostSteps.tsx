@@ -9,7 +9,7 @@ import { usePress } from '@/lib/motion';
 import { searchPlayers, type PlayerHit } from '@/api/playerSearch';
 import {
   BEST_OF,
-  POINTS,
+  RALLY_FORMATS,
   activeSlots,
   formatChips,
   sideLabels,
@@ -18,6 +18,7 @@ import {
   type SlotDraft,
   type Sport,
 } from '@/lib/quickHostWizard';
+import { SPORT_LABELS } from '@/lib/sports';
 
 // The bodies of the host wizard's five steps, plus the controls they share.
 // The screen (src/app/quick/new.tsx) owns the draft, the chrome and the CTA.
@@ -376,6 +377,7 @@ export function SportStep({ draft, onPick }: { draft: HostDraft; onPick: (sport:
   return (
     <View style={{ gap: 12 }}>
       <ChoiceCard icon="shuttlecock" title="Badminton" hint="Singles or doubles, rally scoring" selected={draft.sport === 'badminton'} onPress={() => onPick('badminton')} />
+      <ChoiceCard icon="paddle" title="Table tennis" hint="Singles or doubles, games to 11" selected={draft.sport === 'table_tennis'} onPress={() => onPick('table_tennis')} />
       <ChoiceCard icon="cricket-bat" title="Cricket" hint="Limited overs, ball by ball" selected={draft.sport === 'cricket'} onPress={() => onPick('cricket')} />
     </View>
   );
@@ -415,6 +417,7 @@ export function FormatStep({ draft, patch }: { draft: HostDraft; patch: Patch })
       </>
     );
   }
+  const formats = RALLY_FORMATS[draft.sport];
   return (
     <>
       <Segmented
@@ -423,16 +426,17 @@ export function FormatStep({ draft, patch }: { draft: HostDraft; patch: Patch })
         value={draft.doubles}
         onChange={(doubles) => patch({ doubles })}
       />
+      {/* The number leads so four choices fit a narrow phone; the hint spells it out. */}
       <Segmented
         title="Match length"
-        options={([1, 3, 5] as const).map((n) => ({ value: n, label: BEST_OF[n].label }))}
+        options={formats.bestOf.map((n) => ({ value: n, label: String(n), sub: n === 1 ? 'One game' : 'Best of' }))}
         value={draft.bestOf}
         onChange={(bestOf) => patch({ bestOf })}
         hint={BEST_OF[draft.bestOf].hint}
       />
       <Segmented
         title="Points per game"
-        options={([11, 15, 21] as const).map((n) => ({ value: n, label: String(n), sub: POINTS[n] }))}
+        options={formats.points.map((p) => ({ value: p.value, label: String(p.value), sub: p.sub }))}
         value={draft.pointsToWin}
         onChange={(pointsToWin) => patch({ pointsToWin })}
       />
@@ -497,7 +501,7 @@ export function PlayersStep({ draft, patch, host }: { draft: HostDraft; patch: P
 export function ReviewStep({ draft, host, onEdit }: { draft: HostDraft; host: SlotDraft; onEdit: (step: number) => void }) {
   const t = useTheme();
   const [name1, name2] = teamNames(draft, host);
-  const people = draft.sport === 'badminton' ? activeSlots(draft, host).map((side) => side.map((s) => s.displayName.trim()).join(' & ')) : null;
+  const people = draft.sport !== 'cricket' ? activeSlots(draft, host).map((side) => side.map((s) => s.displayName.trim()).join(' & ')) : null;
   const team = { fontFamily: 'Anton_400Regular' as const, fontSize: 32, lineHeight: 39, textTransform: 'uppercase' as const, color: t.text };
 
   const row = (title: string, value: string, step: number) => (
@@ -519,7 +523,7 @@ export function ReviewStep({ draft, host, onEdit }: { draft: HostDraft; host: Sl
       <View style={{ borderRadius: 6, borderWidth: 1.5, borderColor: t.line, backgroundColor: t.surface, overflow: 'hidden' }}>
         <View style={{ height: 5, backgroundColor: t.brand }} />
         <View style={{ padding: 18 }}>
-          <Text style={{ ...label(t), color: t.brandInk }}>{draft.sport}</Text>
+          <Text style={{ ...label(t), color: t.brandInk }}>{SPORT_LABELS[draft.sport]}</Text>
           <Text numberOfLines={2} style={{ ...team, marginTop: 10 }}>{name1}</Text>
           {people && people[0] !== name1 ? <Text style={body(t)}>{people[0]}</Text> : null}
           <VsRule />
@@ -532,10 +536,10 @@ export function ReviewStep({ draft, host, onEdit }: { draft: HostDraft; host: Sl
       </View>
 
       <View style={{ marginTop: 14 }}>
-        {row('Sport', draft.sport === 'badminton' ? 'Badminton' : 'Cricket', 0)}
+        {row('Sport', SPORT_LABELS[draft.sport], 0)}
         {row('Your role', draft.hostPlays ? 'Playing — on your record' : 'Just scoring — off your record', 1)}
         {row('Format', formatChips(draft).join(' · '), 2)}
-        {row(draft.sport === 'badminton' ? 'Players' : 'Teams', `${name1} v ${name2}`, 3)}
+        {row(draft.sport === 'cricket' ? 'Teams' : 'Players', `${name1} v ${name2}`, 3)}
       </View>
     </>
   );

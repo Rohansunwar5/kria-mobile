@@ -82,4 +82,29 @@ describe('New quick match wizard', () => {
     const body = (createQuickMatch as jest.Mock).mock.calls[0][0];
     expect(body.sides.map((s: { name: string }) => s.name)).toEqual(['Arjun Mehta', 'Smashers']);
   });
+
+  it('hosts table tennis on its own formats, and names it properly on review', async () => {
+    render(<NewQuickMatchScreen />);
+    fireEvent.press(screen.getByText('Table tennis'));
+    fireEvent.press(screen.getByText("I'm playing"));
+
+    // Table tennis points are 11 or 21 — badminton's 15 is not offered.
+    expect(screen.queryByText('15')).toBeNull();
+    fireEvent.press(screen.getByText('7'));
+    fireEvent.press(screen.getByText('Continue'));
+
+    fireEvent.changeText(screen.getByPlaceholderText("Opponent's name"), 'Rahul Singh');
+    fireEvent.press(screen.getByText('Continue'));
+
+    expect(screen.getByText('Ready to go?')).toBeTruthy();
+    expect(screen.getAllByText('Table Tennis').length).toBeGreaterThan(0);
+    expect(screen.queryByText('table_tennis')).toBeNull();
+
+    fireEvent.press(screen.getByText('Create match'));
+    await waitFor(() => expect(createQuickMatch).toHaveBeenCalled());
+    expect((createQuickMatch as jest.Mock).mock.calls[0][0]).toMatchObject({
+      sport: 'table_tennis',
+      matchConfig: { bestOf: 7, pointsToWin: 11 },
+    });
+  });
 });
