@@ -109,9 +109,9 @@ export function useQuickMatch(id?: string) {
     }
   }, [load]);
 
-  const point = useCallback((side: 1 | 2) => {
+  const point = useCallback((side: 1 | 2, delta: 1 | -1 = 1) => {
     if (!id) return;
-    return run(() => recordQuickPoint(id, side));
+    return run(() => recordQuickPoint(id, side, delta));
   }, [id, run]);
 
   const undo = useCallback(() => {

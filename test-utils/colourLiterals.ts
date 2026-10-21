@@ -33,25 +33,28 @@
  * "making a failing file pass": the files were never migrated, the assertion
  * was wrong, not the fence. They go back in only when a real migration batch
  * replaces their `colors.*` usage with `useTheme()` tokens.
+ *
+ * 2026-10-21: entries for the old tab bar, Host sheet, nav icons and Explore
+ * tab removed because those files were deleted for the new design (DESIGN.md
+ * v1.1), not un-migrated. Same for `components/quick/WaitingRoom.tsx`, replaced by
+ * `components/room/Roster.tsx` with the new match room, and for the old Events
+ * portal (EventsPortal, FeaturedTournament, FilterBar), replaced by the new Events tab,
+ * and the old host chooser, knockout wizard and HostSteps, folded into `app/quick/new.tsx`.
+ * The knockout screens (`app/knockout/[id].tsx`, `app/knockout/awards/[id].tsx`) were
+ * rewritten on `constants/theme.ts` (dark only), which this light-mode ratchet does not
+ * model; their old components (waiting room, cricket teams, player line, bracket tree) are gone.
+ * Same for the Profile tab (`app/(tabs)/profile.tsx`), whose menu rows (MenuRow) are gone too.
  */
 export const MIGRATED: string[] = [
-  'src/components/home/EventsPortal.tsx',
-  'src/components/icons/nav.tsx',
   'src/components/profile/PlayedForCard.tsx',
   'src/app/player/[playerId].tsx',
-  'src/app/(tabs)/profile.tsx',
   'src/app/profile/settings.tsx',
   'src/components/settings/AppearanceSection.tsx',
   'src/components/settings/Section.tsx',
   'src/app/live/index.tsx',
   'src/components/live/LiveRow.tsx',
-  'src/app/(tabs)/explore.tsx',
-  'src/components/explore/PlayerHitRow.tsx',
-  'src/components/explore/EventHitRow.tsx',
   'src/components/explore/Browse.tsx',
   'src/components/TournamentCard.tsx',
-  'src/components/home/FeaturedTournament.tsx',
-  'src/components/home/FilterBar.tsx',
   'src/app/(tabs)/events.tsx',
   'src/app/tournament/[id].tsx',
   'src/components/tournament/TournamentHero.tsx',
@@ -60,21 +63,9 @@ export const MIGRATED: string[] = [
   'src/components/tournament/AboutSection.tsx',
   'src/components/tournament/YourTeam.tsx',
   'src/components/tournament/JumpBar.tsx',
-  'src/components/navigation/FloatingTabBar.tsx',
-  'src/components/navigation/HostSheet.tsx',
   'src/app/quick/new.tsx',
-  'src/components/quick/HostSteps.tsx',
-  'src/components/quick/WaitingRoom.tsx',
   'src/components/quick/QuickCricketLive.tsx',
-  'src/app/quick/host.tsx',
-  'src/app/knockout/new.tsx',
-  'src/components/knockout/KnockoutWaitingRoom.tsx',
-  'src/components/knockout/PlayerLine.tsx',
-  'src/components/knockout/CricketTeams.tsx',
   'src/components/knockout/TiePick.tsx',
-  'src/components/knockout/BracketTree.tsx',
-  'src/app/knockout/awards/[id].tsx',
-  'src/app/knockout/[id].tsx',
   'src/app/knockout/index.tsx',
   'src/components/knockout/KnockoutRow.tsx',
   'src/app/matches/[playerId].tsx',

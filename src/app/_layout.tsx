@@ -9,10 +9,10 @@ import { Anton_400Regular } from '@expo-google-fonts/anton';
 import {
   Barlow_400Regular,
   Barlow_500Medium,
-  Barlow_600SemiBold,
+    Barlow_600SemiBold,
   Barlow_700Bold,
 } from '@expo-google-fonts/barlow';
-import { JetBrainsMono_400Regular, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
+import { JetBrainsMono_400Regular, JetBrainsMono_600SemiBold, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
 import { store } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { bootstrapAuth, logout } from '@/store/slices/authSlice';
@@ -103,8 +103,6 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="quick/new" />
         <Stack.Screen name="quick/join" />
         <Stack.Screen name="quick/[id]" />
-        <Stack.Screen name="quick/host" />
-        <Stack.Screen name="knockout/new" />
         <Stack.Screen name="knockout/[id]" />
         <Stack.Screen name="knockout/index" />
         <Stack.Screen name="knockout/awards/[id]" />
@@ -135,6 +133,13 @@ export default function RootLayout() {
     Barlow_700Bold,
     JetBrainsMono_400Regular,
     JetBrainsMono_700Bold,
+    // New design (DESIGN.md §4.2). Names match `font` in constants/theme.ts.
+    JetBrainsMono_600SemiBold,
+    'Archivo-400': require('../../assets/fonts/Archivo-400.ttf'),
+    'Archivo-500': require('../../assets/fonts/Archivo-500.ttf'),
+    'Archivo-600': require('../../assets/fonts/Archivo-600.ttf'),
+    'Archivo-700': require('../../assets/fonts/Archivo-700.ttf'),
+    'ArchivoXC-800': require('../../assets/fonts/ArchivoExtraCondensed-800.ttf'),
   });
   return (
     <Provider store={store}>

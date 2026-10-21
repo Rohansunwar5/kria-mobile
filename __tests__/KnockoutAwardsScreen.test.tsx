@@ -39,9 +39,9 @@ beforeEach(() => { jest.clearAllMocks(); mockViewer = 'h1'; mockKo = k(); mockPr
 const given = (n: number) => Array.from({ length: n }, (_, i) => ({ playerId: 'p2', badge: 'fair-play', title: `Award ${i + 1}` }));
 const giveDisabled = () => screen.getByLabelText('Give award').props.accessibilityState.disabled;
 
-it('names the knockout and its champion', () => {
+it('names the knockout', () => {
   render(<AwardsScreen />);
-  expect(screen.getByText('Arjun Mehta won Cup')).toBeTruthy();
+  expect(screen.getByText('Cup')).toBeTruthy();
 });
 
 it('gives an award: pick a player, pick a badge', () => {
@@ -68,7 +68,8 @@ it('Skip goes back to the bracket', () => {
 it('reads Done once an award exists, and lists who got it', () => {
   mockKo = k({ awards: given(1) });
   render(<AwardsScreen />);
-  expect(screen.getByText('Rahul Singh · Award 1')).toBeTruthy();
+  expect(screen.getByText('Award 1')).toBeTruthy();
+  expect(screen.getAllByText('Rahul Singh').length).toBeGreaterThan(0);
   expect(screen.queryByText('Skip')).toBeNull();
   fireEvent.press(screen.getByText('Done'));
   expect(router.dismissTo).toHaveBeenCalledWith({ pathname: '/knockout/[id]', params: { id: 'k1' } });
@@ -79,7 +80,7 @@ it('stops at 3 awards: no picker, only Done', () => {
   render(<AwardsScreen />);
   expect(screen.getByText('All 3 awards given.')).toBeTruthy();
   expect(screen.queryByText('Who gets it?')).toBeNull();
-  expect(screen.getByText('Rahul Singh · Award 3')).toBeTruthy();
+  expect(screen.getByText('Award 3')).toBeTruthy();
   expect(screen.queryByText('Give award')).toBeNull();
   expect(screen.getByText('Done')).toBeTruthy();
 });
@@ -133,7 +134,7 @@ it('marks the chosen player and award as selected', () => {
 it('is for the host only', () => {
   mockViewer = 'p2';
   render(<AwardsScreen />);
-  expect(screen.getByText('Only the host gives awards')).toBeTruthy();
+  expect(screen.getByText('Only the host gives awards.')).toBeTruthy();
   expect(screen.queryByText('Give award')).toBeNull();
   expect(screen.getByLabelText('Back')).toBeTruthy();
 });

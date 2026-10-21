@@ -6,7 +6,7 @@ import { InitialsAvatar } from '@/components/InitialsAvatar';
 import { Hairlines } from '@/components/canvas';
 import { Ghost, Skeleton } from '@/components/states';
 import LiveRow from '@/components/live/LiveRow';
-import { TournamentPoster } from '@/components/home/PlayPortal';
+import { EventCard } from '@/components/EventCard';
 import { RANKED_SPORTS } from '@/components/home/TopPlayers';
 import { useTheme } from '@/lib/theme';
 import type { Palette } from '@/lib/theme';
@@ -211,7 +211,7 @@ export function OpenForEntry({ tournaments }: { tournaments: Tournament[] }) {
       />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}>
         {tournaments.slice(0, 8).map((t) => (
-          <TournamentPoster key={t._id} tournament={t} />
+          <EventCard key={t._id} t={t} />
         ))}
       </ScrollView>
     </View>

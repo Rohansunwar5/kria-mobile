@@ -74,4 +74,7 @@ Router root is `src/app/`; `@/` maps to `src/*`. Prefer `npx expo install` over 
 for native/Expo packages so versions stay SDK-correct. **expo-router 57 vendors react-navigation** —
 import `useIsFocused`, `useFocusEffect` and navigation types from `expo-router`, never from
 `@react-navigation/*`; the standalone packages are a separate, incompatible copy and are not
-installed. Motion tokens live in `src/lib/motion.ts` and are documented in `DESIGN.md` §6.
+installed. New-design tokens (colour, type, spacing, motion durations and curves) live in
+`src/constants/theme.ts`, per `DESIGN.md` §4.5/§9 and `new-ui-designs/Kria Motion.dc.html`.
+`src/lib/motion.ts` is the old UI's motion and goes when its last caller is redesigned.
+Icons are Material Symbols paths: add a name to `scripts/icons.mjs` and run `node scripts/icons.mjs`.

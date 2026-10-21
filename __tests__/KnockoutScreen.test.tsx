@@ -80,14 +80,15 @@ it('live: dismissing the confirmation keeps the knockout going', () => {
 it('live: the tree opens a match', () => {
   mockViewer = 'h1'; mockStatus = 'live';
   render(<KnockoutScreen />);
-  fireEvent.press(screen.getByLabelText('Open Rahul v Sam'));
-  expect(router.push).toHaveBeenCalledWith({ pathname: '/quick/[id]', params: { id: 'm2' } });
+  fireEvent.press(screen.getByLabelText('Rahul vs Sam, live. Open'));
+  expect(router.push).toHaveBeenCalledWith('/quick/m2');
 });
 
 it('completed: champion banner, and the host gets a Give awards button, not inline chips', () => {
   mockViewer = 'h1'; mockStatus = 'completed';
   render(<KnockoutScreen />);
-  expect(screen.getByText('Arjun won Cup')).toBeTruthy();
+  expect(screen.getByText('Knockout winner')).toBeTruthy();
+  expect(screen.getByText('Won Cup. The knockout badge is on their awards.')).toBeTruthy();
   expect(screen.queryByText('Fair Play')).toBeNull();
   fireEvent.press(screen.getByText('Give awards'));
   expect(router.push).toHaveBeenCalledWith({ pathname: '/knockout/awards/[id]', params: { id: 'k1' } });

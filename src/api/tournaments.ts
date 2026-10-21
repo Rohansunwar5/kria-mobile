@@ -48,7 +48,7 @@ export async function searchTournaments(q: string, filters?: Filters): Promise<T
  */
 export async function latestTournaments(
   limit = 10,
-  filters: { sport?: string; city?: string; status?: string } = {},
+  filters: { sport?: string; city?: string; status?: string; q?: string } = {},
 ): Promise<Tournament[]> {
   const params = { limit, ...filters };
   const payload = unwrap<{ tournaments: Tournament[] } | null>(await API.get('/tournament', { params }));

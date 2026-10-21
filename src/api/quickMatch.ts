@@ -164,15 +164,15 @@ export async function claimQuickMatchSlot(joinCode: string, slotId: string): Pro
 }
 
 /**
- * One point to a side. `delta` is always 1.
+ * One point to or from a side: +1 swipe up, -1 swipe down (DESIGN §5.9).
  *
- * The server also accepts `delta: -1`, but it cannot repair a mis-tapped match
- * point — `applyPoint` short-circuits once the match is decided and
- * `recordPoint` refuses a completed match outright. `undoQuickPoint` is the
- * correction path, so -1 is deliberately never sent.
+ * The server applies -1 to the current game only, floors it at 0 and takes the
+ * undo snapshot itself. It cannot repair a mis-tapped MATCH point —
+ * `applyPoint` short-circuits once the match is decided and `recordPoint`
+ * refuses a completed match — so `undoQuickPoint` stays the correction path there.
  */
-export async function recordQuickPoint(id: string, side: 1 | 2): Promise<QuickMatch> {
-  return asMatch(await API.post(`/quick-match/${id}/badminton/point`, { side, delta: 1 }));
+export async function recordQuickPoint(id: string, side: 1 | 2, delta: 1 | -1 = 1): Promise<QuickMatch> {
+  return asMatch(await API.post(`/quick-match/${id}/badminton/point`, { side, delta }));
 }
 
 export async function undoQuickPoint(id: string): Promise<QuickMatch> {

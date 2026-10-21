@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&display=block" rel="stylesheet">
+<style>@keyframes kbShine{0%{background-position:130% 0}45%,100%{background-position:-30% 0}}</style>
+</helmet>
+<div style="position:relative;width:{{ W }};height:{{ W }};flex:none">
+  <div style="position:absolute;inset:0;filter:{{ shadow }}">
+    <sc-for list="{{ leaves }}" as="f" hint-placeholder-count="0"><span style="position:absolute;left:{{ f.x }};top:{{ f.y }};width:{{ f.w }};height:{{ f.h }};border-radius:50%;background:{{ f.bg }};transform:rotate({{ f.r }})"></span></sc-for>
+    <sc-for list="{{ layers }}" as="l" hint-placeholder-count="0"><div style="position:absolute;left:{{ l.x }};top:{{ l.y }};width:{{ l.w }};height:{{ l.h }};border-radius:{{ l.r }};clip-path:{{ l.clip }};background:{{ l.bg }};box-shadow:{{ l.sh }}"></div></sc-for>
+  </div>
+  <div style="position:absolute;left:{{ g.x }};top:{{ g.y }};width:{{ g.w }};height:{{ g.h }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:{{ g.gap }};filter:{{ g.filter }}">
+    <sc-if value="{{ hasIcon }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Outlined';font-size:{{ g.icon }};line-height:1;font-weight:normal;font-variation-settings:'FILL' 1,'wght' 500;background-image:{{ g.bg }};-webkit-background-clip:text;background-clip:text;color:transparent">{{ icon }}</span></sc-if>
+    <sc-if value="{{ hasGlyph }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Archivo',sans-serif;font-size:{{ g.text }};font-stretch:62%;font-weight:800;line-height:.86;letter-spacing:-.01em;white-space:nowrap;background-image:{{ g.bg }};-webkit-background-clip:text;background-clip:text;color:transparent">{{ glyph }}</span></sc-if>
+    <sc-if value="{{ hasSub }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Archivo',sans-serif;font-size:{{ g.sub }};font-weight:800;letter-spacing:.16em;padding-left:.16em;line-height:1;white-space:nowrap;background-image:{{ g.bg }};-webkit-background-clip:text;background-clip:text;color:transparent">{{ sub }}</span></sc-if>
+  </div>
+  <sc-for list="{{ tops }}" as="l" hint-placeholder-count="0"><div style="position:absolute;pointer-events:none;left:{{ l.x }};top:{{ l.y }};width:{{ l.w }};height:{{ l.h }};border-radius:{{ l.r }};clip-path:{{ l.clip }};background:{{ l.bg }}"></div></sc-for>
+  {{ shineEl }}
+  <sc-if value="{{ hasRibbon }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;filter:{{ shadow }}">
+      <div style="position:absolute;left:{{ rb.tlx }};top:{{ rb.ty }};width:{{ rb.tw }};height:{{ rb.h }};background:{{ rb.tail }};clip-path:polygon(0 0,100% 0,100% 100%,0 100%,30% 50%)"></div>
+      <div style="position:absolute;left:{{ rb.trx }};top:{{ rb.ty }};width:{{ rb.tw }};height:{{ rb.h }};background:{{ rb.tail }};clip-path:polygon(0 0,100% 0,70% 50%,100% 100%,0 100%)"></div>
+      <div style="position:absolute;left:{{ rb.x }};top:{{ rb.y }};width:{{ rb.w }};height:{{ rb.h }};border-radius:{{ rb.r }};background:{{ rb.band }};box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(0,0,0,.35);display:grid;place-items:center"><span style="font-family:'Archivo',sans-serif;font-size:{{ rb.fs }};font-weight:800;font-stretch:75%;letter-spacing:.14em;padding-left:.14em;line-height:1;white-space:nowrap;color:{{ rb.ink }};text-shadow:0 1px 0 rgba(255,255,255,.35)">{{ ribbon }}</span></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ hasRing }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border-radius:50%;background:{{ ringBg }};-webkit-mask:{{ ringMask }};mask:{{ ringMask }}"></div></sc-if>
+  <sc-if value="{{ hasCount }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:{{ pip.x }};top:{{ pip.y }};width:{{ pip.d }};height:{{ pip.d }};border-radius:50%;background:#F5F5F5;color:#0B0B0D;box-shadow:0 0 0 {{ pip.ring }} #0B0B0D;display:grid;place-items:center;font-family:'Archivo',sans-serif;font-size:{{ pip.fs }};font-weight:800;font-variant-numeric:tabular-nums">{{ countLabel }}</span></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:240,&quot;height&quot;:240},&quot;shape&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;coin&quot;,&quot;rosette&quot;,&quot;shield&quot;,&quot;hex&quot;],&quot;default&quot;:&quot;shield&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;metal&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;bronze&quot;,&quot;silver&quot;,&quot;gold&quot;,&quot;platinum&quot;,&quot;locked&quot;],&quot;default&quot;:&quot;gold&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;icon&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;emoji_events&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;glyph&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sub&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;ribbon&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;CHAMPION&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;laurel&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;shine&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;progress&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.01,&quot;default&quot;:0.85,&quot;tsType&quot;:&quot;number&quot;},&quot;count&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;min&quot;:0,&quot;max&quot;:99,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;min&quot;:16,&quot;max&quot;:400,&quot;default&quot;:220,&quot;tsType&quot;:&quot;number&quot;}}">
+const METALS = {
+  bronze:   { hi: '#FFE3CC', lt: '#E2A77D', md: '#A8714A', dk: '#6E4428', dp: '#3A2213', en1: '#2A1A10', en2: '#0E0805', glow: 'rgba(226,167,125,.32)' },
+  silver:   { hi: '#FFFFFF', lt: '#E3E7EC', md: '#A9AFB7', dk: '#676D76', dp: '#33373D', en1: '#1F242B', en2: '#0A0C0F', glow: 'rgba(227,231,236,.26)' },
+  gold:     { hi: '#FFF5D6', lt: '#F0D592', md: '#C9A35A', dk: '#8C6A2F', dp: '#4D3A17', en1: '#2C2213', en2: '#0F0B06', glow: 'rgba(240,213,146,.34)' },
+  platinum: { hi: '#FFFFFF', lt: '#EEF2F8', md: '#C3CAD6', dk: '#7C8695', dp: '#3A414C', en1: '#18202C', en2: '#06080C', glow: 'rgba(196,220,255,.34)', iri: true },
+  locked:   { hi: '#6A6A72', lt: '#55555D', md: '#3A3A42', dk: '#2A2A30', dp: '#18181B', en1: '#17171A', en2: '#0E0E10', glow: 'rgba(0,0,0,0)' },
+};
+const SHIELD = 'polygon(0% 8%, 50% 0%, 100% 8%, 100% 50%, 97.5% 62%, 91% 74%, 81% 85%, 67% 94%, 50% 100%, 33% 94%, 19% 85%, 9% 74%, 2.5% 62%, 0% 50%)';
+const HEX = 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)';
+const star = (n, r1, r2) => 'polygon(' + Array.from({ length: n * 2 }, (_, i) => { const a = Math.PI * i / n - Math.PI / 2, r = i % 2 ? r2 : r1; return `${(50 + r * Math.cos(a)).toFixed(2)}% ${(50 + r * Math.sin(a)).toFixed(2)}%`; }).join(',') + ')';
+const ROSETTE = star(20, 50, 45);
+
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props, tf = v => v === true || v === 'true';
+    const S = Math.max(16, Number(p.size) || 120);
+    const metalK = METALS[p.metal] ? p.metal : 'gold', M = METALS[metalK], locked = metalK === 'locked';
+    const shape = ['coin', 'rosette', 'shield', 'hex'].includes(p.shape) ? p.shape : 'coin';
+    const small = S < 64;
+    const ribbon = !small && p.ribbon ? String(p.ribbon) : '';
+    const laurel = !small && tf(p.laurel);
+    const pv = p.progress;
+    const prog = locked && pv !== '' && pv != null && !isNaN(Number(pv)) ? Math.max(0, Math.min(1, Number(pv))) : null;
+    const count = Number(p.count) > 1 ? Number(p.count) : 0;
+    const glyph = p.glyph ? String(p.glyph) : '';
+    const icon = glyph ? '' : (p.icon ?? 'star');
+    const sub = S >= 96 && p.sub ? String(p.sub) : '';
+    const px = v => v.toFixed(2) + 'px';
+
+    const md = (ribbon || laurel) ? S * 0.72 : prog != null ? S * 0.84 : S;
+    const mw = shape === 'shield' ? md * 0.86 : md, mh = md;
+    const mx = (S - mw) / 2, my = ribbon ? S * 0.03 : (S - mh) / 2;
+    const round = shape === 'coin' || shape === 'rosette';
+    const clip = shape === 'shield' ? SHIELD : shape === 'hex' ? HEX : 'none';
+    const rad = round ? '50%' : '0';
+    const box = (ins, bg, sh, c, r) => ({ x: px(mx + ins), y: px(my + ins), w: px(mw - ins * 2), h: px(mh - ins * 2), r: r || rad, clip: c || clip, bg, sh: sh || 'none' });
+
+    const conic = `conic-gradient(from 215deg, ${M.md}, ${M.hi} 7%, ${M.lt} 13%, ${M.md} 21%, ${M.dk} 33%, ${M.dp} 38%, ${M.dk} 43%, ${M.md} 50%, ${M.lt} 56%, ${M.hi} 61%, ${M.lt} 66%, ${M.md} 74%, ${M.dk} 86%, ${M.md})`;
+    const iri = M.iri ? 'linear-gradient(125deg, rgba(255,186,236,.24), rgba(160,226,255,.24) 35%, rgba(186,255,214,.2) 62%, rgba(255,226,170,.22)), ' : '';
+    const rimBg = `${iri}linear-gradient(180deg, rgba(255,255,255,.16), rgba(0,0,0,.24)), ${conic}`;
+    const enamel = `radial-gradient(110% 85% at 50% 14%, ${M.en1} 0%, ${M.en2} 72%)`;
+    const cy = shape === 'shield' ? '44%' : '50%';
+    const field = `radial-gradient(circle at 50% ${cy}, ${M.glow} 0%, rgba(0,0,0,0) 58%), repeating-conic-gradient(from 0deg at 50% ${cy}, rgba(255,255,255,.045) 0deg 3deg, rgba(255,255,255,0) 3deg 7.5deg), ${enamel}`;
+
+    const b0 = shape === 'rosette' ? md * 0.1 : 0;
+    const rimW = md * (small ? 0.1 : 0.075), grooveW = Math.max(1, md * 0.016), hair = md * 0.045, hairW = Math.max(1, md * 0.009);
+    const e = b0 + rimW + grooveW;
+    const inset = round ? `inset 0 ${px(md * 0.03)} ${px(md * 0.05)} rgba(0,0,0,.6)` : null;
+    const layers = [];
+    if (shape === 'rosette') {
+      layers.push(box(0, rimBg, null, ROSETTE, '0'));
+      layers.push(box(b0 - Math.max(1.2, md * 0.012), M.dp, null, 'none', '50%'));
+    }
+    layers.push(box(b0, rimBg));
+    layers.push(box(b0 + rimW, `linear-gradient(180deg, ${M.dp}, ${M.dk})`));
+    let fi = e;
+    if (small) layers.push(box(e, field, inset));
+    else {
+      layers.push(box(e, enamel, inset));
+      layers.push(box(e + hair, `linear-gradient(180deg, ${M.lt}, ${M.dk})`));
+      fi = e + hair + hairW;
+      layers.push(box(fi, field));
+    }
+    const gloss = `radial-gradient(120% 70% at 28% 0%, rgba(255,255,255,${locked ? .07 : .28}) 0%, rgba(255,255,255,${locked ? .02 : .05}) 40%, rgba(255,255,255,0) 56%)`;
+    const tops = [box(b0, gloss)];
+
+    const fw = mw - fi * 2, fh = mh - fi * 2;
+    const k = sub ? 0.8 : 1;
+    const tl = glyph.length;
+    const g = {
+      x: px(mx + fi), y: px(my + fi), w: px(fw), h: px(shape === 'shield' ? fh * 0.88 : fh),
+      icon: px(fw * (shape === 'hex' ? 0.56 : 0.6) * k),
+      text: px(fw * (tl <= 2 ? 0.62 : tl === 3 ? 0.46 : 0.36) * k),
+      sub: px(Math.max(7, fw * 0.1)), gap: px(fw * 0.04),
+      bg: locked ? 'linear-gradient(180deg, #6E6E76, #44444C)' : `linear-gradient(180deg, ${M.hi} 0%, ${M.lt} 36%, ${M.md} 66%, ${M.dk} 100%)`,
+      filter: `drop-shadow(0 ${px(Math.max(.6, md * 0.01))} 0 rgba(0,0,0,.85))` + (locked ? '' : ` drop-shadow(0 0 ${px(md * 0.06)} ${M.glow})`),
+    };
+
+    const leaves = [];
+    if (laurel) {
+      const cx = S / 2, cy2 = my + mh * 0.5, R = md * 0.6, n = 8;
+      for (const side of [-1, 1]) for (let i = 0; i < n; i++) {
+        const deg = side < 0 ? 108 + i * 15.5 : 72 - i * 15.5, a = deg * Math.PI / 180;
+        const h = S * 0.15 * (1 - i * 0.055), w = h * 0.46;
+        const x = cx + R * Math.cos(a), y = cy2 + R * Math.sin(a);
+        leaves.push({ x: px(x - w / 2), y: px(y - h / 2), w: px(w), h: px(h), r: (side < 0 ? deg + 158 : deg + 22).toFixed(1) + 'deg', bg: `linear-gradient(90deg, ${M.hi}, ${M.lt} 30%, ${M.md} 65%, ${M.dk})` });
+      }
+    }
+
+    let rb = null;
+    if (ribbon) {
+      const rh = S * 0.16, rw = S * 0.92, rx = (S - rw) / 2, ry = my + mh - rh * 0.62, tw = rh * 1.15;
+      rb = { x: px(rx), y: px(ry), w: px(rw), h: px(rh), r: px(rh * 0.12), tlx: px(rx - tw * 0.5), trx: px(rx + rw - tw * 0.5), ty: px(ry + rh * 0.34), tw: px(tw), fs: px(rh * 0.44), ink: M.dp,
+        band: `${iri}linear-gradient(180deg, ${M.hi} 0%, ${M.lt} 30%, ${M.md} 70%, ${M.dk} 100%)`, tail: `linear-gradient(180deg, ${M.dk}, ${M.dp})` };
+    }
+
+    const shine = tf(p.shine) && !locked;
+    const sb = box(b0, '');
+    const shineEl = shine ? React.createElement('div', { style: {
+      position: 'absolute', left: sb.x, top: sb.y, width: sb.w, height: sb.h, pointerEvents: 'none',
+      borderRadius: rad, clipPath: clip === 'none' ? undefined : clip,
+      background: 'linear-gradient(105deg, rgba(255,255,255,0) 38%, rgba(255,255,255,.42) 48%, rgba(255,255,255,.1) 52%, rgba(255,255,255,0) 60%)',
+      backgroundSize: '260% 100%', backgroundRepeat: 'no-repeat', animation: 'kbShine 4.2s cubic-bezier(.4,0,.2,1) infinite',
+    } }) : null;
+
+    const t = Math.max(2, S * 0.03), pct = prog != null ? (prog * 100).toFixed(1) : 0;
+    const d = Math.max(18, S * 0.25);
+
+    return {
+      W: px(S), shadow: `drop-shadow(0 ${px(S * 0.04)} ${px(S * 0.05)} rgba(0,0,0,${locked ? .35 : .6}))`,
+      leaves, layers, tops, g, icon, glyph, sub, hasIcon: !!icon, hasGlyph: !!glyph, hasSub: !!sub,
+      shineEl, hasRibbon: !!rb, rb: rb || {}, ribbon,
+      hasRing: prog != null, ringBg: `conic-gradient(#F5F5F5 0 ${pct}%, #2A2A30 ${pct}% 100%)`, ringMask: `radial-gradient(farthest-side, transparent calc(100% - ${t}px), #000 calc(100% - ${t - 0.5}px))`,
+      hasCount: !!count, countLabel: '×' + count, pip: { x: px(S - d * 0.92), y: px(S * 0.03), d: px(d), fs: px(d * 0.42), ring: px(Math.max(2, S * 0.02)) },
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -6,7 +6,8 @@ export type Emblem =
   | 'star' | 'trophy' | 'stumps' | 'shield' | 'gavel' | 'bat'
   | 'bracket' | 'racket' | 'shuttle' | 'flag' | 'medal' | 'target';
 export interface BadgeDef { tier: Tier; emblem: Emblem }
-export interface Honor { title: string; badge: string }
+/** `ref` is the quick knockout that gave it (server: player.model honorSchema). */
+export interface Honor { title: string; badge: string; ref?: string }
 
 export const BADGES: Record<string, BadgeDef> = {
   'player-of-the-match': { tier: 'legendary', emblem: 'star' },

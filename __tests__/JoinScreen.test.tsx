@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import JoinQuickMatchScreen from '../src/app/quick/join';
 import { claimKnockoutGuest, joinQuickKnockout, resolveQuickCode } from '@/api/quickKnockout';
 
-jest.mock('expo-router', () => ({ router: { back: jest.fn(), replace: jest.fn(), canGoBack: () => true } }));
+jest.mock('expo-router', () => ({ router: { back: jest.fn(), replace: jest.fn(), canGoBack: () => true }, useLocalSearchParams: () => ({}) }));
 jest.mock('@/store/hooks', () => ({
   useAppSelector: (pick: (s: unknown) => unknown) => pick({ auth: { user: { _id: 'p5', firstName: 'Rahul', lastName: 'Singh' } } }),
 }));

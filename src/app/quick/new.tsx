@@ -1,177 +1,167 @@
-import { useEffect, useState } from 'react';
-import { ScrollView, View, Text, Pressable, ActivityIndicator, BackHandler, KeyboardAvoidingView, Platform } from 'react-native';
-import Animated, { FadeInLeft, FadeInRight, useAnimatedStyle } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { Screen } from '@/components/Screen';
-import { Icon } from '@/components/icons';
-import { FormatStep, PlayersStep, ReviewStep, RoleStep, SportStep } from '@/components/quick/HostSteps';
+import { useCallback, useEffect, useState } from 'react';
+import { BackHandler, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { createQuickKnockout } from '@/api/quickKnockout';
 import { createQuickMatch } from '@/api/quickMatch';
-import { useAppSelector } from '@/store/hooks';
+import { SpotSheet } from '@/components/host/SpotSheet';
+import { Done, FormatStep, KnockoutNameStep, ReviewStep, SidesStep, SportStep } from '@/components/host/Steps';
+import { FooterBar, TopBar } from '@/components/ui/Bars';
+import { Button } from '@/components/ui/Button';
+import { colors, font, motion, space } from '@/constants/theme';
+import { buildBody, buildKnockoutBody, initialForm, namesReady, setSpot, slotsFor } from '@/lib/hostMatch';
 import { goBack } from '@/lib/nav';
-import { useTheme } from '@/lib/theme';
-import { DUR, OUT, usePress } from '@/lib/motion';
-import { validateCricketConfig } from '@/lib/quickCricketCreate';
-import { INITIAL_DRAFT, STEPS, buildCreateBody, pickSport, playersBlocker, type HostDraft, type SlotDraft, type Step } from '@/lib/quickHostWizard';
+import { useAppSelector } from '@/store/hooks';
 
-function copyFor(step: Step, d: HostDraft): { title: string; sub: string } {
-  switch (step) {
-    case 'sport':
-      return { title: 'What are we playing?', sub: 'Pick a sport to set the match up.' };
-    case 'role':
-      return { title: 'Are you in the match?', sub: 'Only the people playing get it on their record.' };
-    case 'format':
-      return { title: 'Set the format', sub: 'Already set to the usual game. Change anything you like.' };
-    case 'players':
-      return d.sport === 'cricket'
-        ? { title: 'Name the teams', sub: 'Or skip it — they go out as Team A and Team B.' }
-        : { title: "Who's playing?", sub: 'Find someone on Kria, or just type a name.' };
-    case 'review':
-      return { title: 'Ready to go?', sub: "Tap anything to change it. Next, you get a code to share with your players." };
-  }
-}
+const STEPS = 4;
 
-const pad = (n: number) => String(n).padStart(2, '0');
-
-export default function NewQuickMatchScreen() {
-  const t = useTheme();
-  const insets = useSafeAreaInsets();
-  const { user } = useAppSelector((s) => s.auth);
-  const host: SlotDraft = { playerId: user?._id, displayName: user ? `${user.firstName} ${user.lastName}` : 'You' };
-
-  const [draft, setDraft] = useState<HostDraft>(INITIAL_DRAFT);
-  const patch = (next: Partial<HostDraft>) => setDraft((d) => ({ ...d, ...next }));
-  const [index, setIndex] = useState(0);
-  const [forward, setForward] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+/**
+ * Host a match (mock 1d): sport → format → sides → review, then the code.
+ * Format also picks one match or a knockout; a knockout names itself instead
+ * of two sides. Values survive Back.
+ */
+export default function HostMatch() {
+  const user = useAppSelector((s) => s.auth.user);
+  const host = { playerId: user?._id, name: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'You' };
+  const [f, setF] = useState(() => initialForm(user?.sport));
+  const [step, setStep] = useState(1);
+  // What was created, as the done screen needs it.
+  const [created, setCreated] = useState<{ id: string; code: string; live: boolean; knockout: boolean } | null>(null);
+  // The server's own default when a knockout is left unnamed (quickKnockout.service create).
+  const defaultName = `${user?.firstName?.trim().split(/s+/)[0] || 'My'}'s Knockout`;
+  const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
-  const { press, onPressIn, onPressOut } = usePress();
-  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: 1 - press.value * 0.015 }] }));
+  const [editing, setEditing] = useState<{ side: 0 | 1; index: number } | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const step = STEPS[index];
-  const go = (to: number) => {
-    setForward(to > index);
-    setProblem('');
-    setIndex(to);
-  };
-  const back = () => (index === 0 ? goBack(router, '/quick') : go(index - 1));
-
-  // Android's back button walks the steps too; only step 1 leaves the screen.
-  useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (index === 0) return false;
-      go(index - 1);
-      return true;
-    });
+  const leave = () => goBack(router, '/(tabs)/compete');
+  const back = useCallback(() => {
+    if (!created && step > 1) setStep(step - 1);
+    else leave();
+    return true;
+  }, [created, step]);
+  // Android back steps back through the flow too, not straight out of it.
+  useFocusEffect(useCallback(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', back);
     return () => sub.remove();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index]);
+  }, [back]));
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(t);
+  }, [copied]);
 
-  const start = async () => {
-    if (draft.sport === 'cricket') {
-      const invalid = validateCricketConfig(draft);
-      if (invalid) return setProblem(invalid);
+  const canNext = step !== 3 || namesReady(f);
+  const next = async () => {
+    if (!canNext || busy) return;
+    if (step < STEPS) {
+      setStep(step + 1);
+      return;
     }
-    setSubmitting(true);
+    setBusy(true);
     setProblem('');
     try {
-      const created = await createQuickMatch(buildCreateBody(draft, host));
-      router.replace({ pathname: '/quick/[id]', params: { id: created._id } });
+      if (f.kind === 'knockout') {
+        const k = await createQuickKnockout(buildKnockoutBody(f));
+        setCreated({ id: k._id, code: k.joinCode ?? '', live: false, knockout: true });
+      } else {
+        const m = await createQuickMatch(buildBody(f, host));
+        setCreated({ id: m._id, code: m.joinCode, live: m.status === 'live', knockout: false });
+      }
     } catch (err) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setProblem(message || 'Could not create the match. Please try again.');
+      // The validator's own message where it gives one (DESIGN §8).
+      setProblem((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Couldn't create the match. Try again.");
     } finally {
-      setSubmitting(false);
+      setBusy(false);
     }
   };
 
-  const next = () => {
-    if (step === 'review') return start();
-    const blocker = step === 'players' ? playersBlocker(draft, host) : null;
-    if (blocker) return setProblem(blocker);
-    go(index + 1);
-  };
-
-  const { title, sub } = copyFor(step, draft);
-  // Sport and role are one-tap questions: the answer is the button.
-  const cta = step === 'sport' || step === 'role' ? null : step === 'review' ? 'Create match' : 'Continue';
+  const spots = editing ? slotsFor(f, editing.side, host) : [];
+  const taken = [host.playerId, ...f.spotsA.map((s) => s.playerId), ...f.spotsB.map((s) => s.playerId)].filter(Boolean) as string[];
 
   return (
-    <Screen>
+    <SafeAreaView edges={['top']} style={s.screen}>
+      <TopBar
+        title={f.kind === 'knockout' ? 'Host a knockout' : 'Host a match'}
+        icon={created || step === 1 ? 'close' : 'arrow_back'}
+        onBack={back}
+        right={created ? null : <Text style={s.stepLabel}>{`${step} of ${STEPS}`}</Text>}
+      />
+      <View style={s.progress} accessibilityElementsHidden>
+        {Array.from({ length: STEPS }, (_, i) => (
+          <View key={i} style={[s.segment, { backgroundColor: created || i < step ? colors.accent : colors.lineStrong }]} />
+        ))}
+      </View>
+
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={{ paddingHorizontal: 16, paddingTop: 4 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={back} hitSlop={8} style={{ width: 44, height: 44, justifyContent: 'center' }}>
-              <Icon name="arrow-left" size={22} color={t.text} />
-            </Pressable>
-            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 11, letterSpacing: 0.14 * 11, color: t.textMeta }}>
-              {`${pad(index + 1)} / ${pad(STEPS.length)}`}
-            </Text>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 4, marginTop: 2 }}>
-            {STEPS.map((s, n) => (
-              <View key={s} style={{ flex: 1, height: 4, borderRadius: 1, backgroundColor: n <= index ? t.brand : t.fill }} />
-            ))}
-          </View>
-        </View>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 32 }}>
+          <Animated.View key={created ? 'done' : step} entering={FadeIn.duration(motion.enter)}>
+            {created ? (
+              <Done code={created.code} note={created.live ? 'live' : 'wait'} knockout={created.knockout} />
+            ) : step === 1 ? (
+              <SportStep f={f} set={setF} />
+            ) : step === 2 ? (
+              <FormatStep f={f} set={setF} />
+            ) : step === 3 && f.kind === 'knockout' ? (
+              <KnockoutNameStep f={f} set={setF} defaultName={defaultName} />
+            ) : step === 3 ? (
+              <SidesStep f={f} set={setF} host={host} onSpot={(side, index) => setEditing({ side, index })} />
+            ) : (
+              <ReviewStep f={f} set={setF} host={host} defaultName={defaultName} onEdit={setStep} />
+            )}
+          </Animated.View>
+          {problem ? <Text style={s.problem}>{problem}</Text> : null}
+        </ScrollView>
 
-        <Animated.View
-          key={step}
-          entering={(forward ? FadeInRight : FadeInLeft).duration(DUR.sweep).easing(OUT)}
-          style={{ flex: 1 }}
-        >
-          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 22, paddingBottom: 32 }}>
-            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: t.brandInk }}>
-              New quick match
-            </Text>
-            <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 32, lineHeight: 39, textTransform: 'uppercase', color: t.text, marginTop: 6 }}>
-              {title}
-            </Text>
-            <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: t.textMeta, marginTop: 4, marginBottom: 24 }}>
-              {sub}
-            </Text>
-
-            {step === 'sport' ? <SportStep draft={draft} onPick={(sport) => { patch(pickSport(draft, sport)); go(1); }} /> : null}
-            {step === 'role' ? <RoleStep draft={draft} onPick={(hostPlays) => { patch({ hostPlays }); go(2); }} /> : null}
-            {step === 'format' ? <FormatStep draft={draft} patch={patch} /> : null}
-            {step === 'players' ? <PlayersStep draft={draft} patch={patch} host={host} /> : null}
-            {step === 'review' ? <ReviewStep draft={draft} host={host} onEdit={go} /> : null}
-          </ScrollView>
-        </Animated.View>
-
-        {cta ? (
-          <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 + insets.bottom, borderTopWidth: 1.5, borderTopColor: t.lineSoft, backgroundColor: t.bg }}>
-            {problem ? (
-              <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: t.failInk, marginBottom: 10 }}>{problem}</Text>
-            ) : null}
-            <Animated.View style={pressStyle}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={next}
-                onPressIn={onPressIn}
-                onPressOut={onPressOut}
-                disabled={submitting}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 10,
-                  minHeight: 52,
-                  borderRadius: 5,
-                  backgroundColor: t.brand,
-                  opacity: submitting ? 0.5 : 1,
-                }}
-              >
-                {submitting ? <ActivityIndicator color={t.onBrand} /> : null}
-                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 13, letterSpacing: 0.14 * 13, textTransform: 'uppercase', color: t.onBrand }}>
-                  {cta}
-                </Text>
-                {submitting ? null : <Icon name="arrow-right" size={18} color={t.onBrand} />}
-              </Pressable>
-            </Animated.View>
-          </View>
-        ) : null}
+        <FooterBar>
+          {created ? (
+            <>
+              <Button
+                variant="secondary"
+                icon={copied ? 'check' : 'content_copy'}
+                label={copied ? 'Copied' : 'Copy code'}
+                onPress={() => Clipboard.setStringAsync(created.code).then(() => setCopied(true), () => undefined)}
+                style={{ flex: 1 }}
+              />
+              <Button
+                label={created.knockout ? 'Open knockout' : 'Open match room'}
+                onPress={() => router.replace(created.knockout ? `/knockout/${created.id}` : `/quick/${created.id}`)}
+                style={{ flex: 1.3 }}
+              />
+            </>
+          ) : (
+            <Button
+              label={step === STEPS ? (f.kind === 'knockout' ? 'Create knockout' : 'Create match') : 'Continue'}
+              busy={busy}
+              busyLabel={f.kind === 'knockout' ? 'Creating knockout' : 'Creating match'}
+              disabled={!canNext}
+              onPress={next}
+              style={{ flex: 1 }}
+            />
+          )}
+        </FooterBar>
       </KeyboardAvoidingView>
-    </Screen>
+
+      <SpotSheet
+        open={!!editing}
+        current={editing ? spots[editing.index]?.spot ?? { name: '' } : { name: '' }}
+        taken={taken}
+        onClose={() => setEditing(null)}
+        onPick={(spot) => {
+          if (editing) setF(setSpot(f, editing.side, editing.index, spot));
+          setEditing(null);
+        }}
+      />
+    </SafeAreaView>
   );
 }
+
+const s = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.bg },
+  stepLabel: { fontFamily: font.regular, fontSize: 13, color: colors.text3, fontVariant: ['tabular-nums'] },
+  progress: { flexDirection: 'row', gap: 4, paddingHorizontal: space.gutter },
+  segment: { flex: 1, height: 3, borderRadius: 2 },
+  problem: { paddingTop: 16, fontFamily: font.regular, fontSize: 13, color: colors.error },
+});

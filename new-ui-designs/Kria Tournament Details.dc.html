@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&display=block" rel="stylesheet">
+<style>
+html,body{background:#141416}
+body{margin:0;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#F5F5F5;text-decoration:none}
+a:hover{color:#FF5A1F}
+*::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+
+<section id="t2" style="background:#141416;color:#F5F5F5;min-height:100vh;width:max-content;min-width:100%;box-sizing:border-box;padding:56px 56px 72px;display:flex;flex-direction:column;gap:44px">
+
+<header style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start;max-width:1500px">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px"><img src="assets/kria-logo.png" alt="Kria" style="width:46px;height:40px;object-fit:contain"><span style="font:600 11px 'JetBrains Mono',monospace;color:#FF5A1F;letter-spacing:.08em">KRIA · OFFICIAL EVENTS · TOURNAMENT DETAIL</span></div>
+    <h1 style="margin:0;font-size:60px;font-stretch:62%;font-weight:800;line-height:.9;letter-spacing:-.01em">One tournament, from sign-up to final.</h1>
+    <p style="margin:0;font-size:14px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">Arohance Badminton Tournament followed through its whole lifecycle. Each phone is one stage the player sees. Use the Stage tweak to see 2a adapt to each point in the lifecycle. Pairs with the player app in <a href="Kria Player App.dc.html" style="color:#F5F5F5;text-decoration:underline">Kria Player App</a>.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">What the backend gives players (public reads)</div>
+    <p style="margin:0;text-wrap:pretty">Tournament, categories, teams + rosters, the bracket (matches by category, linked by nextMatchId), the category leaderboard, auction status + sold log (polled), and announcements (pinned first). Each category runs its own lifecycle: registration → auction → groups → bracket → ongoing → completed.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Left out on purpose</div>
+    <p style="margin:0;text-wrap:pretty">Organiser and staff actions (approve, bid entry, scoring, reshuffle) stay in the organiser portal. Registration counts are organiser-only analytics, so players see the cap ("limited to 64"), never "41 joined". In a manual auction, bids are called out at the venue and entered by staff, so players watch the auction but can't bid from the app.</p>
+  </div>
+</header>
+
+<div style="display:flex;flex-wrap:wrap;gap:56px 44px;align-items:flex-start;max-width:1740px">
+
+<!-- 2a OVERVIEW -->
+<div id="2a" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#2a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">2a</a><span style="font-size:13px;font-weight:600">Tournament overview</span><span style="font-size:12px;color:#6E6E76">Stage tweak switches state</span></div>
+  <div data-screen-label="2a Tournament overview" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;padding-bottom:110px;box-sizing:border-box">
+      <div style="position:relative;height:218px">
+        <img src="assets/banner-arohance-badminton.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 40%;display:block">
+        <div style="position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between">
+          <a href="Kria Player App.dc.html#1f" style="width:40px;height:40px;border-radius:50%;background:#0B0B0D;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:22px">arrow_back</a>
+          <span style="display:flex;gap:8px"><span style="width:40px;height:40px;border-radius:50%;background:#0B0B0D;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:20px">bookmark</span><span style="width:40px;height:40px;border-radius:50%;background:#0B0B0D;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:20px">ios_share</span></span>
+        </div>
+      </div>
+      <div style="padding:24px 20px 0;display:flex;flex-direction:column;gap:12px">
+        <span style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:{{ ov.stColor }}"><span style="width:7px;height:7px;border-radius:50%;background:{{ ov.stColor }}"></span>{{ ov.status }}</span>
+        <h2 style="margin:0;font-size:38px;font-stretch:62%;font-weight:800;line-height:.95">Arohance Badminton Tournament</h2>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#C6C6CC"><span style="width:22px;height:22px;border-radius:6px;background:#F5F5F5;color:#0B0B0D;display:grid;place-items:center;font-size:12px;font-weight:800">A</span>Organised by Arohance<span style="font-family:'Material Symbols Outlined';font-size:16px;color:#FF5A1F;font-variation-settings:'FILL' 1">verified</span></div>
+      </div>
+      <div style="margin:28px 20px 0;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #1D1D21;border-bottom:1px solid #1D1D21">
+        <div style="display:flex;flex-direction:column;gap:3px;padding:14px 0"><span style="font-size:12px;color:#92929A">When</span><span style="font-size:15px;font-weight:600">Tue 20 Oct 2026</span></div>
+        <div style="display:flex;flex-direction:column;gap:3px;padding:14px 0 14px 16px;border-left:1px solid #1D1D21"><span style="font-size:12px;color:#92929A">Where</span><span style="font-size:15px;font-weight:600">Tiger Stadium</span></div>
+        <div style="display:flex;flex-direction:column;gap:3px;padding:14px 0;border-top:1px solid #1D1D21"><span style="font-size:12px;color:#92929A">Format</span><span style="font-size:15px;font-weight:600">4 teams · auction</span></div>
+        <div style="display:flex;flex-direction:column;gap:3px;padding:14px 0 14px 16px;border-left:1px solid #1D1D21;border-top:1px solid #1D1D21"><span style="font-size:12px;color:#92929A">Entries close</span><span style="font-size:15px;font-weight:600">Sat 17 Oct</span></div>
+      </div>
+
+
+      <div style="display:flex;gap:20px;padding:32px 20px 0;border-bottom:1px solid #1A1A1D;overflow-x:auto;scrollbar-width:none">
+        <span style="flex:none;padding-bottom:12px;font-size:14px;font-weight:600;box-shadow:inset 0 -2px 0 #FF5A1F">Overview</span>
+        <sc-for list="{{ ov.tabs }}" as="tb" hint-placeholder-count="4"><a href="{{ tb.href }}" style="flex:none;padding-bottom:12px;font-size:14px;font-weight:600;color:#85858D">{{ tb.label }}</a></sc-for>
+      </div>
+
+      <div style="padding:28px 20px 0">
+        <div style="display:flex;flex-direction:column;gap:8px;padding:18px 20px;border-radius:20px;background:#151518">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:{{ ov.annColor }}"><span style="font-family:'Material Symbols Outlined';font-size:16px">push_pin</span>{{ ov.annTag }}</span>
+          <span style="font-size:15px;font-weight:600;line-height:1.3">{{ ov.annTitle }}</span>
+          <span style="font-size:13px;line-height:1.45;color:#A3A3AB">{{ ov.annBody }}</span>
+          <span style="font-size:11px;color:#6E6E76">{{ ov.annMeta }}</span>
+        </div>
+      </div>
+
+      <div style="padding:44px 20px 0;display:flex;flex-direction:column">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:12px"><span style="font-size:17px;font-weight:650">Categories</span><span style="font-size:12px;color:#92929A">3</span></div>
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="3">
+          <a href="#2b" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid #18181B">
+            <span style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:15px;font-weight:600">{{ c.name }}</span><span style="font-size:12px;color:#92929A">{{ c.format }}</span><span style="font-size:12px;font-weight:600;color:{{ c.stColor }}">{{ c.status }}</span></span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:14px;font-weight:650">{{ c.fee }}<span style="font-family:'Material Symbols Outlined';font-size:20px;color:#5E5E66">chevron_right</span></span>
+          </a>
+        </sc-for>
+      </div>
+
+      <div style="padding:44px 20px 0;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:650">Teams</span><a href="#2d" style="font-size:13px;color:#92929A">Squads</a></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <sc-for list="{{ teamsMini }}" as="tm" hint-placeholder-count="4">
+            <a href="#2d" style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center"><img src="{{ tm.logo }}" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:{{ tm.fit }};background:#F5F5F5"><span style="font-size:11px;font-weight:600;line-height:1.2">{{ tm.short }}</span></a>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="padding:44px 20px 24px;display:flex;flex-direction:column;gap:18px">
+        <span style="font-size:17px;font-weight:650">About</span>
+        <p style="margin:0;font-size:14px;line-height:1.55;color:#A3A3AB;text-wrap:pretty">A one-day singles event at Tiger Stadium. Registered players go into a team auction. Four club owners build squads, then each category plays out in its own format. Bring non-marking shoes. Shuttles are provided.</p>
+        <span style="display:flex;align-items:center;gap:8px;padding-top:8px;font-size:13px;color:#C6C6CC"><span style="font-family:'Material Symbols Outlined';font-size:18px">location_on</span>Tiger Stadium, Koramangala, Bengaluru<span style="color:#FF5A1F;font-weight:600;margin-left:auto">Directions</span></span>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:22px 20px 34px;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 30%);display:flex;flex-direction:column;gap:8px;z-index:4">
+      <a href="{{ ov.ctaHref }}" style="height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:700"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-variation-settings:'wght' 500">{{ ov.ctaIcon }}</span>{{ ov.cta }}</a>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">The screen follows the stage.</span> The status line, the pinned update, the tabs and the single CTA all change with the tournament: Register → Watch auction → Your next match → Results. Tabs only appear once there's data behind them, so no empty "Standings" tab during registration.</p>
+</div>
+
+<!-- 2b CATEGORY + REGISTER -->
+<div id="2b" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#2b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">2b</a><span style="font-size:13px;font-weight:600">Category + registration</span><span style="font-size:12px;color:#6E6E76">pick skill, pay</span></div>
+  <div data-screen-label="2b Category registration" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;gap:6px;padding:0 12px">
+      <a href="#2a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a>
+      <span style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:600">Men's Singles</span><span style="font-size:11px;color:#92929A">Arohance Badminton Tournament</span></span>
+    </div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;padding:0 20px 120px;box-sizing:border-box">
+      <sc-if value="{{ regForm }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:44px;padding-top:20px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 16px">
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;color:#92929A">Format</span><span style="font-size:15px;font-weight:600;line-height:1.3">Groups of 4, top 2 to knockouts</span></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;color:#92929A">Scoring</span><span style="font-size:15px;font-weight:600;line-height:1.3">Best of 3 · 21 points</span></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;color:#92929A">Eligibility</span><span style="font-size:15px;font-weight:600;line-height:1.3">Men · Open (18+)</span></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;color:#92929A">Entries</span><span style="font-size:15px;font-weight:600;line-height:1.3">Limited to 64</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <span style="font-size:17px;font-weight:650">How it works</span>
+            <sc-for list="{{ howSteps }}" as="hw" hint-placeholder-count="4">
+              <div style="display:flex;gap:14px;align-items:flex-start"><span style="width:24px;height:24px;border-radius:50%;flex:none;background:#1D1D21;display:grid;place-items:center;font-size:12px;font-weight:700">{{ hw.n }}</span><span style="display:flex;flex-direction:column;gap:2px;padding-top:2px"><span style="font-size:14px;font-weight:600">{{ hw.t }}</span><span style="font-size:12px;line-height:1.45;color:#92929A">{{ hw.d }}</span></span></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:650">Your entry</span><a href="Kria Player App.dc.html#1h" style="font-size:13px;color:#92929A">Edit profile</a></div>
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:#151518">
+              <span style="width:48px;height:48px;border-radius:50%;flex:none;background:repeating-linear-gradient(135deg,#1D1D21 0 5px,#232328 5px 10px);display:grid;place-items:center;font:500 8px 'JetBrains Mono',monospace;color:#6E6E76">photo</span>
+              <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600">Aarav Menon</span><span style="font-size:12px;color:#92929A">Male · 27 · +91 98••• ••412</span></span>
+            </div>
+            <span style="font-size:12px;color:#6E6E76;line-height:1.45">Age and gender come from your profile. Organisers see this snapshot and your skill level.</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:13px;font-weight:600;color:#C6C6CC">Skill level</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><sc-for list="{{ skills }}" as="sk" hint-placeholder-count="4"><button onClick="{{ sk.on }}" style="all:unset;cursor:pointer;height:48px;border-radius:14px;display:grid;place-items:center;font-size:14px;font-weight:600;background:{{ sk.bg }};color:{{ sk.fg }}">{{ sk.label }}</button></sc-for></div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <span style="font-size:17px;font-weight:650;padding-bottom:12px">Payment</span>
+            <sc-for list="{{ fees }}" as="f" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;padding:10px 0;font-size:14px;font-variant-numeric:tabular-nums;color:{{ f.color }};font-weight:{{ f.weight }};border-top:{{ f.border }}"><span>{{ f.k }}</span><span>{{ f.v }}</span></div></sc-for>
+            <span style="font-size:12px;color:#6E6E76;padding-top:4px">Paid via Razorpay · UPI, cards, netbanking</span>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ regDone }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:32px;padding-top:44px">
+          <div style="width:56px;height:56px;border-radius:50%;background:#FF5A1F;color:#0B0B0D;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:30px;font-variation-settings:'wght' 600">check</div>
+          <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:40px;font-stretch:62%;font-weight:800;line-height:.95">You're in the queue for approval</span><span style="font-size:14px;line-height:1.5;color:#A3A3AB">₹628.32 paid. Arohance reviews entries before the auction. We'll notify you when they do.</span></div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ regTimeline }}" as="rt" hint-placeholder-count="4">
+              <div style="display:flex;gap:14px">
+                <span style="display:flex;flex-direction:column;align-items:center;width:14px"><span style="width:12px;height:12px;border-radius:50%;margin-top:3px;background:{{ rt.dot }};box-shadow:inset 0 0 0 1.5px {{ rt.ring }}"></span><span style="flex:1;width:1.5px;background:{{ rt.line }};min-height:28px"></span></span>
+                <span style="display:flex;flex-direction:column;gap:2px;padding-bottom:18px"><span style="font-size:15px;font-weight:600;color:{{ rt.color }}">{{ rt.t }}</span><span style="font-size:12px;color:#92929A">{{ rt.d }}</span></span>
+              </div>
+            </sc-for>
+          </div>
+          
+        </div>
+      </sc-if>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:22px 20px 34px;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 30%);display:flex;gap:10px;z-index:4">
+      <sc-if value="{{ regForm }}" hint-placeholder-val="{{ true }}"><button onClick="{{ pay }}" style="all:unset;cursor:pointer;flex:1;height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:grid;place-items:center;font-size:16px;font-weight:700">Pay ₹628.32 and register</button></sc-if>
+      <sc-if value="{{ regDone }}" hint-placeholder-val="{{ false }}"><button onClick="{{ resetReg }}" style="all:unset;cursor:pointer;flex:1;height:56px;border-radius:16px;background:#1D1D21;display:grid;place-items:center;font-size:15px;font-weight:600">Back to tournament (demo reset)</button></sc-if>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">The fee shows the real maths.</span> The ₹600 fee plus 2% gateway, 2% platform and 18% GST on those two fees comes to ₹628.32, exactly as payment.service calculates it. After paying, the timeline shows the real registration statuses: pending → approved → auctioned → assigned.</p>
+</div>
+
+<!-- 2c AUCTION -->
+<div id="2c" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#2c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">2c</a><span style="font-size:13px;font-weight:600">Live auction (watch)</span><span style="font-size:12px;color:#6E6E76">tap "Next bid" to simulate</span></div>
+  <div data-screen-label="2c Live auction" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+      <span style="display:flex;align-items:center;gap:6px"><a href="#2a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a><span style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:600">Auction · Men's Singles</span><span style="font-size:11px;color:#92929A">Player 18 of 32 · 3 unsold</span></span></span>
+      <span style="display:flex;align-items:center;gap:6px;padding:6px 10px;margin-right:8px;border-radius:999px;background:#151518;font-size:12px;font-weight:700"><span style="width:7px;height:7px;border-radius:50%;background:#FF5A1F"></span>Live</span>
+    </div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;padding:0 0 40px;box-sizing:border-box">
+      <div style="margin:8px 20px 0;padding:10px 14px;border-radius:14px;background:#151518;display:flex;align-items:center;gap:10px;font-size:13px">
+        <span style="font-size:11px;font-weight:800;letter-spacing:.06em;color:#0B0B0D;background:#F5F5F5;padding:3px 7px;border-radius:6px">SOLD</span>
+        <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Meera Pillai → Titans Sports Club</span>
+        <span style="font-weight:700;font-variant-numeric:tabular-nums">₹14,000</span>
+      </div>
+      <div style="padding:32px 20px 0;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+        <span style="width:104px;height:104px;border-radius:50%;background:repeating-linear-gradient(135deg,#1D1D21 0 6px,#232328 6px 12px);display:grid;place-items:center;font:500 9px 'JetBrains Mono',monospace;color:#6E6E76">player photo</span>
+        <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:34px;font-stretch:62%;font-weight:800;line-height:1">Rohit Kulkarni</span><span style="font-size:13px;color:#92929A">Advanced · 29 · Base price ₹2,000</span></div>
+      </div>
+      <div style="margin:28px 20px 0;padding:22px;border-radius:24px;background:#151518;display:flex;flex-direction:column;align-items:center;gap:12px">
+        <span style="font-size:12px;color:#92929A">Current bid</span>
+        <span style="font-size:72px;font-stretch:62%;font-weight:800;line-height:.9;font-variant-numeric:tabular-nums">{{ bidNow }}</span>
+        <span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><img src="{{ bidTeam.logo }}" alt="" style="width:26px;height:26px;border-radius:50%;object-fit:{{ bidTeam.fit }};background:#F5F5F5">{{ bidTeam.name }}</span>
+        <button onClick="{{ nextBid }}" style="all:unset;cursor:pointer;margin-top:6px;padding:8px 14px;border-radius:10px;background:#1D1D21;font-size:12px;font-weight:600;color:#C6C6CC">Next bid (demo)</button>
+      </div>
+      <div style="padding:44px 20px 0;display:flex;flex-direction:column">
+        <span style="font-size:17px;font-weight:650;padding-bottom:12px">Bids · min raise ₹500</span>
+        <sc-for list="{{ bidHist }}" as="bh" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #18181B;font-size:14px;color:{{ bh.color }}"><img src="{{ bh.logo }}" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:{{ bh.fit }};background:#F5F5F5;opacity:{{ bh.op }}"><span style="flex:1">{{ bh.team }}</span><span style="font-weight:650;font-variant-numeric:tabular-nums">{{ bh.amt }}</span></div>
+        </sc-for>
+      </div>
+      <div style="padding:44px 20px 0;display:flex;flex-direction:column;gap:18px">
+        <span style="font-size:17px;font-weight:650">Purses</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <sc-for list="{{ purses }}" as="p" hint-placeholder-count="4">
+            <div style="padding:14px;border-radius:18px;background:#151518;display:flex;flex-direction:column;gap:10px">
+              <span style="display:flex;align-items:center;gap:8px"><img src="{{ p.logo }}" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:{{ p.fit }};background:#F5F5F5"><span style="font-size:12px;font-weight:600;line-height:1.2">{{ p.short }}</span></span>
+              <span style="font-size:24px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums;line-height:1">{{ p.left }}</span>
+              <div style="height:3px;border-radius:2px;background:#26262B;overflow:hidden"><div style="height:100%;width:{{ p.pct }};background:#F5F5F5"></div></div>
+              <span style="font-size:11px;color:#92929A">{{ p.sub }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="margin:44px 20px 0;padding:16px 18px;border-radius:20px;box-shadow:inset 0 0 0 1px #2A2A30;display:flex;gap:14px;align-items:center">
+        <img src="assets/team-sunrise.png" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;background:#F5F5F5;flex:none">
+        <span style="display:flex;flex-direction:column;gap:3px;flex:1"><span style="font-size:14px;font-weight:600">You went to Sunrise Sports Club</span><span style="font-size:12px;color:#92929A">Sold for ₹16,500 · player 9 of 32</span></span>
+        <a href="#2d" style="font-family:'Material Symbols Outlined';font-size:22px;color:#92929A">chevron_right</a>
+      </div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">A broadcast, not a control panel.</span> It mirrors the public status endpoint: who's on the block, the live bid and bidder, bid history, the last sale and team purses. Your own result is pinned at the bottom, and the status pill switches to Paused or Tie-breaker when the organiser triggers them.</p>
+</div>
+
+<!-- 2d TEAMS -->
+<div id="2d" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#2d" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">2d</a><span style="font-size:13px;font-weight:600">Teams + my squad</span><span style="font-size:12px;color:#6E6E76">tap a team</span></div>
+  <div data-screen-label="2d Teams" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;gap:6px;padding:0 12px">
+      <a href="#2a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a>
+      <span style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:600">Teams</span><span style="font-size:11px;color:#92929A">Arohance Badminton Tournament</span></span>
+    </div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;padding:0 20px 40px;box-sizing:border-box">
+      <div style="display:flex;gap:10px;padding:8px 0 4px;overflow-x:auto;scrollbar-width:none">
+        <sc-for list="{{ teamTabs }}" as="tt" hint-placeholder-count="4">
+          <button onClick="{{ tt.on }}" style="all:unset;cursor:pointer;flex:none;display:flex;flex-direction:column;align-items:center;gap:8px;width:72px;padding:10px 0;border-radius:18px;background:{{ tt.bg }}">
+            <img src="{{ tt.logo }}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:{{ tt.fit }};background:#F5F5F5;box-shadow:0 0 0 2px {{ tt.ring }}">
+            <span style="font-size:11px;font-weight:600;color:{{ tt.color }}">{{ tt.short }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding-top:28px">
+        <sc-if value="{{ tSel.mine }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:600;color:#FF5A1F">Your team</span></sc-if>
+        <span style="font-size:36px;font-stretch:62%;font-weight:800;line-height:.95">{{ tSel.name }}</span>
+        <span style="font-size:13px;color:#92929A">Owner {{ tSel.owner }}</span>
+      </div>
+      <div style="margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #1D1D21;border-bottom:1px solid #1D1D21">
+        <div style="padding:14px 0;display:flex;flex-direction:column;gap:3px"><span style="font-size:24px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums">{{ tSel.count }}</span><span style="font-size:12px;color:#92929A">Players</span></div>
+        <div style="padding:14px 0 14px 14px;border-left:1px solid #1D1D21;display:flex;flex-direction:column;gap:3px"><span style="font-size:24px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums">{{ tSel.spent }}</span><span style="font-size:12px;color:#92929A">Spent</span></div>
+        <div style="padding:14px 0 14px 14px;border-left:1px solid #1D1D21;display:flex;flex-direction:column;gap:3px"><span style="font-size:24px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums">{{ tSel.left }}</span><span style="font-size:12px;color:#92929A">Purse left</span></div>
+      </div>
+      <sc-if value="{{ tSel.mine }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:24px;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:#151518">
+          <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#C6C6CC">forum</span>
+          <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600">Team WhatsApp group</span><span style="font-size:12px;color:#92929A">Only visible to Sunrise players</span></span>
+          <span style="padding:8px 14px;border-radius:10px;background:#F5F5F5;color:#0B0B0D;font-size:13px;font-weight:700">Join</span>
+        </div>
+      </sc-if>
+      <div style="padding-top:44px;display:flex;flex-direction:column">
+        <span style="font-size:17px;font-weight:650;padding-bottom:12px">Squad</span>
+        <sc-for list="{{ tSel.squad }}" as="pl" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid #18181B">
+            <span style="width:40px;height:40px;border-radius:50%;background:#1D1D21;box-shadow:inset 0 0 0 1.5px {{ pl.ring }};display:grid;place-items:center;font-size:13px;font-weight:650">{{ pl.ini }}</span>
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600">{{ pl.name }}<sc-if value="{{ pl.hasRole }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:700;letter-spacing:.04em;color:#0B0B0D;background:{{ pl.roleBg }};padding:2px 6px;border-radius:5px">{{ pl.role }}</span></sc-if></span><span style="font-size:12px;color:#92929A">{{ pl.cat }}</span></span>
+            <span style="font-size:14px;font-weight:650;font-variant-numeric:tabular-nums;color:#C6C6CC">{{ pl.price }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Club identity carries the screen:</span> the logo row is the navigation. The purse figures (initialBudget vs budget) tell the auction story at a glance. Captain and icon roles come from the registration. The WhatsApp link appears only for that team's own players, as the post-auction flow intends.</p>
+</div>
+
+<!-- 2e BRACKET -->
+<div id="2e" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#2e" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">2e</a><span style="font-size:13px;font-weight:600">Knockout bracket</span><span style="font-size:12px;color:#6E6E76">swipe sideways, switch category</span></div>
+  <div data-screen-label="2e Bracket" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;gap:6px;padding:0 12px">
+      <a href="#2a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a>
+      <span style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:600">Matches</span><span style="font-size:11px;color:#92929A">Arohance Badminton Tournament</span></span>
+    </div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;padding-bottom:40px;box-sizing:border-box">
+      <div style="display:flex;gap:8px;padding:8px 20px 0;overflow-x:auto;scrollbar-width:none">
+        <sc-for list="{{ catChips }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="all:unset;cursor:pointer;flex:none;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</button></sc-for>
+      </div>
+      <sc-if value="{{ brHas }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:20px;padding:24px 20px 0;border-bottom:1px solid #1A1A1D">
+          <span style="padding-bottom:12px;font-size:14px;font-weight:600;box-shadow:inset 0 -2px 0 #FF5A1F">Knockouts</span>
+          <a href="#2f" style="padding-bottom:12px;font-size:14px;font-weight:600;color:#85858D">Groups</a>
+        </div>
+        <div style="margin:28px 20px 0;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:22px;background:#151518">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600;color:#FF5A1F">Your next match · Semi-final 1</span><span style="font-size:12px;color:#92929A">Court 1</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:20px;font-stretch:62%;font-weight:800">Aarav Menon</span><span style="font-size:12px;color:#92929A">Sunrise SC</span></span>
+            <span style="font-size:13px;font-weight:600;color:#6E6E76">vs</span>
+            <span style="display:flex;flex-direction:column;gap:2px;text-align:right"><span style="font-size:20px;font-stretch:62%;font-weight:800">Vikram Hegde</span><span style="font-size:12px;color:#92929A">Titans SC</span></span>
+          </div>
+          <span style="font-size:13px;color:#C6C6CC">Tue 20 Oct · 4:30 PM · Best of 3 to 21</span>
+        </div>
+        <div style="overflow-x:auto;scrollbar-width:none;padding:22px 0 0">
+          <div style="position:relative;width:712px;height:452px;margin:0 20px">
+            <sc-for list="{{ brHeads }}" as="bh" hint-placeholder-count="3"><span style="position:absolute;top:0;left:{{ bh.left }};font-size:12px;font-weight:600;color:#92929A">{{ bh.label }}</span></sc-for>
+            <sc-for list="{{ brLinks }}" as="ln" hint-placeholder-count="3">
+              <div style="position:absolute;left:{{ ln.left }};top:{{ ln.top }};width:18px;height:{{ ln.h }};box-shadow:inset -1.5px 0 0 #34343B,inset 0 1.5px 0 #34343B,inset 0 -1.5px 0 #34343B;border-radius:0 8px 8px 0"></div>
+              <div style="position:absolute;left:{{ ln.left2 }};top:{{ ln.mid }};width:18px;height:1.5px;background:#34343B"></div>
+            </sc-for>
+            <sc-for list="{{ brCards }}" as="m" hint-placeholder-count="7">
+              <div style="position:absolute;left:{{ m.left }};top:{{ m.top }};width:200px;height:92px;box-sizing:border-box;border-radius:16px;background:#151518;box-shadow:inset 0 0 0 1.5px {{ m.ring }};padding:9px 12px;display:flex;flex-direction:column;gap:5px">
+                <span style="display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:{{ m.hColor }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ m.hDot }}"></span>{{ m.hdr }}</span>
+                <sc-for list="{{ m.rows }}" as="r" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:8px;height:26px">
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.1"><span style="font-size:13px;font-weight:{{ r.w }};color:{{ r.c }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:10px;color:#6E6E76;white-space:nowrap">{{ r.team }}</span></span>
+                    <span style="display:flex;gap:6px;font-size:13px;font-variant-numeric:tabular-nums"><sc-for list="{{ r.scores }}" as="sc" hint-placeholder-count="2"><span style="width:16px;text-align:right;font-weight:{{ sc.w }};color:{{ sc.c }}">{{ sc.v }}</span></sc-for></span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="padding:6px 20px 0;display:flex;gap:16px;font-size:11px;color:#92929A"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;box-shadow:inset 0 0 0 1.5px #FF5A1F"></span>Your matches</span><span style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#FF5A1F"></span>Live</span></div>
+      </sc-if>
+      <sc-if value="{{ brEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:90px 36px 0;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+          <span style="font-family:'Material Symbols Outlined';font-size:40px;color:#4A4A52;font-variation-settings:'wght' 200">account_tree</span>
+          <span style="font-size:26px;font-stretch:62%;font-weight:800;line-height:1.05">{{ brEmptyTitle }}</span>
+          <span style="font-size:14px;line-height:1.5;color:#92929A">{{ brEmptyBody }}</span>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">A real tree, made for thumbs.</span> Rounds come from bracketRound and the lines from nextMatchId. Columns scroll sideways while your next match stays pinned above. Unfilled slots read "Winner of QF 4", never TBD. Categories without a draw yet explain when it will appear.</p>
+</div>
+
+<!-- 2f GROUPS -->
+<div id="2f" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#2f" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">2f</a><span style="font-size:13px;font-weight:600">League / group standings</span><span style="font-size:12px;color:#6E6E76">switch groups</span></div>
+  <div data-screen-label="2f Group standings" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;gap:6px;padding:0 12px">
+      <a href="#2a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a>
+      <span style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:600">Matches</span><span style="font-size:11px;color:#92929A">Men's Singles</span></span>
+    </div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;padding:0 20px 40px;box-sizing:border-box">
+      <div style="display:flex;gap:20px;padding-top:8px;border-bottom:1px solid #1A1A1D">
+        <a href="#2e" style="padding-bottom:12px;font-size:14px;font-weight:600;color:#85858D">Knockouts</a>
+        <span style="padding-bottom:12px;font-size:14px;font-weight:600;box-shadow:inset 0 -2px 0 #FF5A1F">Groups</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:24px;padding:3px;border-radius:14px;background:#151518">
+        <sc-for list="{{ grpTabs }}" as="g" hint-placeholder-count="4"><button onClick="{{ g.on }}" style="all:unset;cursor:pointer;height:38px;border-radius:11px;display:grid;place-items:center;font-size:13px;font-weight:600;background:{{ g.bg }};color:{{ g.fg }}">{{ g.label }}</button></sc-for>
+      </div>
+      <div style="height:12px"></div>
+      <div style="display:grid;grid-template-columns:22px minmax(0,1fr) 26px 26px 26px 34px;gap:8px;padding:10px 0;font-size:11px;font-weight:600;color:#6E6E76;border-bottom:1px solid #1D1D21"><span></span><span>Player</span><span style="text-align:center">P</span><span style="text-align:center">W</span><span style="text-align:center">L</span><span style="text-align:right">Pts</span></div>
+      <sc-for list="{{ grpRows }}" as="r" hint-placeholder-count="4">
+        <div style="display:grid;grid-template-columns:22px minmax(0,1fr) 26px 26px 26px 34px;gap:8px;align-items:center;padding:12px 0;border-bottom:{{ r.border }};background:{{ r.bg }};margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:{{ r.radius }}">
+          <span style="font-size:18px;font-stretch:62%;font-weight:800;color:{{ r.rankColor }};font-variant-numeric:tabular-nums">{{ r.rank }}</span>
+          <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:11px;color:#92929A">{{ r.team }}</span></span>
+          <span style="text-align:center;font-size:14px;color:#C6C6CC;font-variant-numeric:tabular-nums">{{ r.p }}</span>
+          <span style="text-align:center;font-size:14px;color:#C6C6CC;font-variant-numeric:tabular-nums">{{ r.w }}</span>
+          <span style="text-align:center;font-size:14px;color:#C6C6CC;font-variant-numeric:tabular-nums">{{ r.l }}</span>
+          <span style="text-align:right;font-size:20px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums">{{ r.pts }}</span>
+        </div>
+        <sc-if value="{{ r.cut }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:10.5px;font-weight:600;color:#FF5A1F"><span style="flex:1;height:1px;background:#FF5A1F;opacity:.6"></span>Quarter-final line<span style="flex:1;height:1px;background:#FF5A1F;opacity:.6"></span></div></sc-if>
+      </sc-for>
+      <div style="padding-top:44px;display:flex;flex-direction:column">
+        <span style="font-size:17px;font-weight:650;padding-bottom:12px">Group {{ grp }} results</span>
+        <sc-for list="{{ grpFix }}" as="f" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #18181B">
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13px"><span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.w }} <span style="color:#6E6E76;font-weight:400">d.</span> <span style="color:#92929A;font-weight:500">{{ f.l }}</span></span><span style="font-size:11px;color:#6E6E76">{{ f.meta }}</span></span>
+            <span style="font-size:13px;color:#C6C6CC;font-variant-numeric:tabular-nums">{{ f.s }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">The table answers "am I through?"</span> The qualifying line is drawn from hybridConfig.topN and points from the category's win/loss/draw values, both stated above the table. Your row is lifted. The same table serves league-only categories, just without the line.</p>
+</div>
+
+</div>
+<p style="margin:0;font-size:12.5px;color:#6E6E76">Try next: "tournament match detail with live cricket scorecard" · "team-league ties (badminton team_league)" · "completed state with awards ceremony"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;stage&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;registration&quot;,&quot;auction&quot;,&quot;ongoing&quot;,&quot;completed&quot;],&quot;default&quot;:&quot;registration&quot;,&quot;tsType&quot;:&quot;'registration'|'auction'|'ongoing'|'completed'&quot;}}">
+class Component extends DCLogic {
+  state = { reg: 'form', skill: 'advanced', team: 'sunrise', cat: 'mens', grp: 'A', bid: 0 };
+
+  renderVals() {
+    const S = this.state, ACC = '#FF5A1F';
+    const sel = on => on ? { bg: '#F5F5F5', fg: '#0B0B0D' } : { bg: '#1D1D21', fg: '#F5F5F5' };
+    const ini = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const T = {
+      titans: { name: 'Titans Sports Club', short: 'Titans SC', logo: 'assets/team-titans.png', fit: 'contain', owner: 'Deepak Shetty', init: 100000, left: 18500, count: 6 },
+      tigr: { name: 'Tigr', short: 'Tigr', logo: 'assets/team-tigr.png', fit: 'cover', owner: 'Ritesh Rao', init: 100000, left: 32000, count: 5 },
+      sunrise: { name: 'Sunrise Sports Club', short: 'Sunrise SC', logo: 'assets/team-sunrise.png', fit: 'cover', owner: 'Priya Nambiar', init: 100000, left: 9000, count: 7 },
+      rawnat: { name: 'Rawnat United', short: 'Rawnat Utd', logo: 'assets/team-rawnat.png', fit: 'contain', owner: 'Imran Qureshi', init: 100000, left: 41500, count: 5 },
+    };
+    const inr = n => '₹' + n.toLocaleString('en-IN');
+
+    // Overview stages
+    const STG = {
+      registration: { status: 'Registration open · closes Sat 17 Oct', stColor: ACC, cta: 'Register · from ₹600', ctaIcon: 'how_to_reg', ctaHref: '#2b', tabs: [['Categories', '#2b'], ['Teams', '#2d']],
+        annTag: 'Pinned · Important', annColor: '#C6C6CC', annTitle: 'Auction on Sun 18 Oct, 7 PM', annBody: 'Approved players are auctioned at the Tiger Stadium lobby. You can follow it live in the app.', annMeta: 'Arohance · organiser · 2 days ago' },
+      auction: { status: 'Team auction live · Men\u2019s Singles', stColor: ACC, cta: 'Watch the auction', ctaIcon: 'gavel', ctaHref: '#2c', tabs: [['Auction', '#2c'], ['Teams', '#2d'], ['Categories', '#2b']],
+        annTag: 'Pinned · Info', annColor: '#C6C6CC', annTitle: 'Women\u2019s Singles auction follows at 8:30 PM', annBody: 'Unsold players go back in the queue for a second round.', annMeta: 'Arohance · staff · 20 min ago' },
+      ongoing: { status: 'In progress · Semi-finals today', stColor: '#F5F5F5', cta: 'Your semi-final · 4:30 PM', ctaIcon: 'sports_tennis', ctaHref: '#2e', tabs: [['Matches', '#2e'], ['Standings', '#2f'], ['Teams', '#2d']],
+        annTag: 'Pinned · Schedule change', annColor: ACC, annTitle: 'Semi-finals moved to Court 1', annBody: 'Both semi-finals now start at 4:30 PM on Court 1. Court 3 is closed for repairs.', annMeta: 'Arohance · organiser · 1 hr ago' },
+      completed: { status: 'Completed · Sunrise SC top the table', stColor: '#92929A', cta: 'See results and awards', ctaIcon: 'emoji_events', ctaHref: '#2e', tabs: [['Matches', '#2e'], ['Standings', '#2f'], ['Teams', '#2d']],
+        annTag: 'Pinned · Info', annColor: '#C6C6CC', annTitle: 'Thanks for playing', annBody: 'Awards have been added to player profiles. See you at the next edition.', annMeta: 'Arohance · organiser · yesterday' },
+    };
+    const stage = STG[this.props.stage] ? this.props.stage : 'registration';
+    const st = STG[stage];
+    const ov = { ...st, tabs: st.tabs.map(([label, href]) => ({ label, href })) };
+    const order = ['registration', 'auction', 'ongoing', 'completed'];
+    const idx = order.indexOf(stage);
+    const stages = [['registration', 'Registration'], ['auction', 'Auction'], ['ongoing', 'Matches'], ['completed', 'Done']].map(([k, l], i) => ({
+      label: l, bar: i <= idx ? ACC : '#26262B', color: i === idx ? '#F5F5F5' : i < idx ? '#A3A3AB' : '#6E6E76', weight: i === idx ? 700 : 500, on: () => this.setState({ stage: k }),
+    }));
+    const catStatus = {
+      registration: [['Registration open', ACC], ['Registration open', ACC], ['Registration open', ACC]],
+      auction: [['Auction live', ACC], ['Auction at 8:30 PM', '#C6C6CC'], ['Registration closed', '#92929A']],
+      ongoing: [['Semi-finals today', '#F5F5F5'], ['Quarter-finals', '#F5F5F5'], ['Bracket not drawn yet', '#92929A']],
+      completed: [['Completed', '#92929A'], ['Completed', '#92929A'], ['Completed', '#92929A']],
+    }[stage];
+    const cats = [
+      { name: "Men's Singles", format: 'Groups → knockouts · Best of 3 to 21', fee: '₹600' },
+      { name: "Women's Singles", format: 'Knockout · Best of 3 to 21', fee: '₹600' },
+      { name: 'Boys U-17 Singles', format: 'Knockout · Best of 3 to 15', fee: 'Free' },
+    ].map((c, i) => ({ ...c, status: catStatus[i][0], stColor: catStatus[i][1] }));
+    const teamsMini = Object.values(T).map(t => ({ logo: t.logo, fit: t.fit, short: t.short }));
+
+    // Registration
+    const skills = [['beginner', 'Beginner'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced'], ['professional', 'Professional']].map(([k, l]) => ({ label: l, ...sel(S.skill === k), on: () => this.setState({ skill: k }) }));
+    const fees = [['Entry fee', '₹600.00'], ['Payment gateway (2%)', '₹12.00'], ['Platform fee (2%)', '₹12.00'], ['GST (18% on fees)', '₹4.32'], ['Total', '₹628.32']].map(([k, v], i, a) => {
+      const last = i === a.length - 1;
+      return { k, v, color: last ? '#F5F5F5' : '#A3A3AB', weight: last ? 700 : 400, border: last ? '1px solid #26262B' : '0' };
+    });
+    const howSteps = [
+      { n: 1, t: 'Register and pay', d: 'Your profile and skill level go to the organiser.' },
+      { n: 2, t: 'Organiser approves', d: 'Approved players join the auction pool at a base price.' },
+      { n: 3, t: 'Team auction', d: 'Four clubs bid for players. You join the team that buys you.' },
+      { n: 4, t: 'Groups, then knockouts', d: 'Groups of 4 play each other; the top 2 go through.' },
+    ];
+    const regTimeline = [['Payment received', 'Today, 9:41 AM', 'done'], ['Pending approval', 'Usually within a day', 'now'], ['In the auction pool', 'After approval', 'next'], ['Assigned to a team', 'At the auction · Sun 18 Oct', 'next']].map(([t, d, s], i, a) => ({
+      t, d, dot: s === 'done' ? '#F5F5F5' : s === 'now' ? ACC : 'transparent', ring: s === 'next' ? '#3A3A42' : 'transparent', line: i === a.length - 1 ? 'transparent' : (s === 'done' ? '#F5F5F5' : '#26262B'), color: s === 'next' ? '#92929A' : '#F5F5F5',
+    }));
+
+    // Auction
+    const BIDS = [['tigr', 6500], ['rawnat', 9000], ['titans', 11000], ['rawnat', 11500], ['titans', 12000], ['rawnat', 12500], ['tigr', 13000]];
+    const shown = BIDS.slice(0, 4 + Math.min(S.bid, BIDS.length - 4));
+    const top = shown[shown.length - 1];
+    const bidHist = shown.slice().reverse().slice(0, 5).map(([k, a], i) => ({ team: T[k].name, logo: T[k].logo, fit: T[k].fit, amt: inr(a), color: i === 0 ? '#F5F5F5' : '#92929A', op: i === 0 ? 1 : 0.6 }));
+    const purses = Object.values(T).map(t => ({ logo: t.logo, fit: t.fit, short: t.short, left: inr(t.left), pct: Math.round((t.init - t.left) / t.init * 100) + '%', sub: `${t.count} players · ${inr(t.init - t.left)} spent` }));
+
+    // Teams
+    const SQUADS = {
+      sunrise: [['Priyanka Rao', "Women's Singles", 'CAPTAIN', 21000], ['Aarav Menon', "Men's Singles", '', 16500, true], ['Kabir Rao', "Men's Singles", 'ICON', 19000], ['Ananya Iyer', "Women's Singles", '', 12500], ['Sameer Khan', "Men's Singles", '', 8000], ['Tanvi Kapoor', "Women's Singles", '', 7500], ['Ishaan Bhat', 'Boys U-17 Singles', '', 6500]],
+      titans: [['Vikram Hegde', "Men's Singles", 'ICON', 24000], ['Meera Pillai', "Women's Singles", 'CAPTAIN', 14000], ['Karthik Nair', "Men's Singles", '', 15500], ['Sneha Reddy', "Women's Singles", '', 12000], ['Aditya Rao', 'Boys U-17 Singles', '', 9000], ['Divya Bhat', "Women's Singles", '', 7000]],
+      tigr: [["Rohan D'Souza", "Men's Singles", 'CAPTAIN', 22000], ['Pranav Joshi', "Men's Singles", '', 14000], ['Nisha Menon', "Women's Singles", 'ICON', 18000], ['Ritu Sharma', "Women's Singles", '', 8000], ['Yash Malhotra', 'Boys U-17 Singles', '', 6000]],
+      rawnat: [['Rohit Kulkarni', "Men's Singles", 'ICON', 11500], ['Farhan Shaikh', "Men's Singles", 'CAPTAIN', 13500], ['Arjun Patil', "Men's Singles", '', 12000], ['Kavya Iyer', "Women's Singles", '', 14500], ['Manoj Kumar', 'Boys U-17 Singles', '', 7000]],
+    };
+    const teamTabs = Object.entries(T).map(([k, t]) => ({ logo: t.logo, fit: t.fit, short: t.short, bg: S.team === k ? '#1D1D21' : 'transparent', ring: S.team === k ? ACC : 'transparent', color: S.team === k ? '#F5F5F5' : '#92929A', on: () => this.setState({ team: k }) }));
+    const tt = T[S.team];
+    const tSel = {
+      name: tt.name, owner: tt.owner, mine: S.team === 'sunrise', count: SQUADS[S.team].length, spent: inr(tt.init - tt.left), left: inr(tt.left),
+      squad: SQUADS[S.team].map(([n, c, r, p, me]) => ({ name: me ? n + ' (you)' : n, ini: ini(n), cat: c, role: r === 'CAPTAIN' ? 'C' : r === 'ICON' ? 'ICON' : '', hasRole: !!r, roleBg: r === 'CAPTAIN' ? '#F5F5F5' : '#C9A35A', price: inr(p), ring: me ? ACC : 'transparent' })),
+    };
+
+    // Bracket
+    const W = 200, G = 36, X = [0, W + G, 2 * (W + G)], H0 = 28;
+    const P = (name, team, scores, win, me) => ({ name, team, win, me, scores });
+    const MS = [
+      { col: 0, top: 0, hdr: 'QF 1 · Final score', rows: [P('Vikram Hegde', 'Titans SC', [21, 21], true), P('Pranav Joshi', 'Tigr', [15, 18], false)] },
+      { col: 0, top: 108, hdr: 'QF 2 · Final score', me: true, rows: [P('Aarav Menon', 'Sunrise SC', [19, 21, 21], true, true), P('Arjun Patil', 'Rawnat Utd', [21, 17, 16], false)] },
+      { col: 0, top: 216, hdr: 'QF 3 · Final score', rows: [P("Rohan D'Souza", 'Tigr', [21, 21], true), P('Farhan Shaikh', 'Rawnat Utd', [11, 13], false)] },
+      { col: 0, top: 324, hdr: 'QF 4 · Live · Court 2', live: true, rows: [P('Rohit Kulkarni', 'Rawnat Utd', [18, 11], null), P('Karthik Nair', 'Titans SC', [21, 7], null)] },
+      { col: 1, top: 54, hdr: 'SF 1 · 4:30 PM · Court 1', me: true, rows: [P('Vikram Hegde', 'Titans SC', [], null), P('Aarav Menon', 'Sunrise SC', [], null, true)] },
+      { col: 1, top: 270, hdr: 'SF 2 · 4:30 PM · Court 1', rows: [P("Rohan D'Souza", 'Tigr', [], null), P('Winner of QF 4', 'Kulkarni or Nair', [], null)] },
+      { col: 2, top: 162, hdr: 'Final · 6:30 PM · Court 1', rows: [P('Winner of SF 1', '', [], null), P('Winner of SF 2', '', [], null)] },
+    ];
+    const brCards = MS.map(m => {
+      const done = m.rows.some(r => r.win === true);
+      return {
+        left: X[m.col] + 'px', top: (m.top + H0) + 'px', ring: m.me ? ACC : 'transparent', hdr: m.hdr,
+        hColor: m.live ? ACC : '#6E6E76', hDot: m.live ? ACC : 'transparent',
+        rows: m.rows.map((r, ri) => {
+          const opp = m.rows[1 - ri];
+          return {
+            name: r.name, team: r.team || ' ', w: r.win || !done ? 600 : 500, c: r.win === false ? '#6E6E76' : (r.name.startsWith('Winner') ? '#92929A' : '#F5F5F5'),
+            scores: r.scores.map((v, gi) => { const wonGame = opp.scores[gi] !== undefined && v > opp.scores[gi]; return { v, w: wonGame ? 700 : 400, c: wonGame ? '#F5F5F5' : '#6E6E76' }; }),
+          };
+        }),
+      };
+    });
+    const cy = (t) => t + H0 + 46;
+    const link = (col, tA, tB) => ({ left: (X[col] + W) + 'px', top: cy(tA) + 'px', h: (tB - tA) + 'px', left2: (X[col] + W + 18) + 'px', mid: ((cy(tA) + cy(tB)) / 2) + 'px' });
+    const brLinks = [link(0, 0, 108), link(0, 216, 324), link(1, 54, 270)];
+    const brHeads = [['Quarter-finals', 0], ['Semi-finals', 1], ['Final', 2]].map(([l, c]) => ({ label: l, left: X[c] + 'px' }));
+    const catChips = [['mens', "Men's Singles"], ['womens', "Women's Singles"], ['u17', 'Boys U-17']].map(([k, l]) => ({ label: l, ...sel(S.cat === k), on: () => this.setState({ cat: k }) }));
+    const EMPTY = {
+      womens: ['Quarter-finals start at 2 PM', 'The draw is set. Matches appear here with live scores once the first one starts.'],
+      u17: ['Bracket not drawn yet', 'The organiser draws the U-17 bracket after the auction closes. You\u2019ll get a notification.'],
+    };
+
+    // Groups
+    const GR = {
+      A: [['Aarav Menon', 'Sunrise SC', 3, 3, 0, true], ['Karthik Nair', 'Titans SC', 3, 2, 1], ['Sameer Khan', 'Sunrise SC', 3, 1, 2], ['Ishaan Rao', 'Tigr', 3, 0, 3]],
+      B: [['Vikram Hegde', 'Titans SC', 3, 3, 0], ['Farhan Shaikh', 'Rawnat Utd', 3, 2, 1], ['Kunal Desai', 'Tigr', 3, 1, 2], ['Rahul Menon', 'Sunrise SC', 3, 0, 3]],
+      C: [["Rohan D'Souza", 'Tigr', 3, 3, 0], ['Pranav Joshi', 'Tigr', 3, 2, 1], ['Nikhil Shetty', 'Titans SC', 3, 1, 2], ['Varun Gowda', 'Rawnat Utd', 3, 0, 3]],
+      D: [['Rohit Kulkarni', 'Rawnat Utd', 3, 2, 1], ['Arjun Patil', 'Rawnat Utd', 3, 2, 1], ['Kabir Rao', 'Sunrise SC', 3, 2, 1], ['Siddharth N', 'Titans SC', 3, 0, 3]],
+    };
+    const grpRows = GR[S.grp].map((r, i) => ({ rank: i + 1, name: r[5] ? r[0] + ' (you)' : r[0], team: r[1], p: r[2], w: r[3], l: r[4], pts: r[3] * 2, cut: i === 1, rankColor: i < 2 ? '#F5F5F5' : '#6E6E76', bg: r[5] ? '#1D1D21' : 'transparent', radius: r[5] ? '12px' : '0', border: r[5] || i === 1 ? '0' : '1px solid #18181B' }));
+    const pl = GR[S.grp].map(r => r[0]);
+    const SC = [['21-14, 21-17', 'Court 2'], ['21-19, 18-21, 21-16', 'Court 1'], ['21-12, 21-10', 'Court 4'], ['21-18, 21-15', 'Court 3'], ['22-20, 21-19', 'Court 2'], ['17-21, 21-14, 21-18', 'Court 1']];
+    const pairs = [[0, 3], [1, 2], [0, 2], [1, 3], [0, 1], [2, 3]];
+    const grpFix = pairs.map(([a, b], i) => { const ra = GR[S.grp][a], rb = GR[S.grp][b]; const aw = ra[3] >= rb[3]; return { w: aw ? pl[a] : pl[b], l: aw ? pl[b] : pl[a], s: SC[i][0], meta: `Round ${Math.floor(i / 2) + 1} · ${SC[i][1]}` }; });
+    const grpTabs = ['A', 'B', 'C', 'D'].map(g => ({ label: 'Group ' + g, ...(S.grp === g ? { bg: '#2A2A30', fg: '#F5F5F5' } : { bg: 'transparent', fg: '#85858D' }), on: () => this.setState({ grp: g }) }));
+
+    return {
+      ov, stages, cats, teamsMini,
+      regForm: S.reg === 'form', regDone: S.reg === 'done', skills, fees, howSteps, regTimeline,
+      pay: () => this.setState({ reg: 'done' }), resetReg: () => this.setState({ reg: 'form' }),
+      bidNow: inr(top[1]), bidTeam: T[top[0]], bidHist, purses, nextBid: () => this.setState(s => ({ bid: s.bid >= BIDS.length - 4 ? 0 : s.bid + 1 })),
+      teamTabs, tSel,
+      catChips, brHas: S.cat === 'mens', brEmpty: S.cat !== 'mens', brEmptyTitle: (EMPTY[S.cat] || [])[0], brEmptyBody: (EMPTY[S.cat] || [])[1], brCards, brLinks, brHeads,
+      grp: S.grp, grpTabs, grpRows, grpFix,
+    };
+  }
+}
+</script>
+</body>
+</html>

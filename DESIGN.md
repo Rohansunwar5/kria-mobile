@@ -1,319 +1,352 @@
-# Kria Player — design system
+# Kria Player App — Design System & Implementation Spec
 
-The visual language for the player app. This file is the **reference**.
+Version 1.1 · 21 October 2026 · Dark-first · Player app only (organiser tools live in the organiser portal)
 
-**The artboards were retired on 2026-10-06** once the screens they drew were built — the code and
-this file are now the source of truth. Every `docs/design-canvas/...` path below (and in code
-comments) names an artboard that lives on in git history; restore the whole set with
-`git checkout 6c83edc -- docs/design-canvas`. That includes the build handoff
-(`IMPLEMENTATION.md`), the 31 screen artboards and the 7 in `home-portals/`.
+Kria is a player's sporting career in their pocket. Every screen answers at least one of: *Where do I stand? What have I achieved? Who can I play? What's next?*
 
-The old `Main`, `Profile` and `PlayerProfile` artboards were deleted when `home-portals/`
-superseded them — that is why the entry artboard is no longer named `Main`.
-
-The direction is **maximalist and industrial** — sports-broadcast, not consumer-soft. Heavy type,
-flat colour blocks, hard edges, visible texture. It deliberately replaces the earlier rounded
-dark-card look.
+> **Precedence:** where this doc and an older note disagree, this doc wins. Where this doc and a `.dc.html` mock disagree on a value, the mock wins — flag it so the doc can be fixed.
 
 ---
 
-## 1. Type — three faces, three jobs
+## 1. Source files
 
-Separating display, interface and data is what makes the app feel designed rather than assembled.
-
-| Face | Job | Weights |
-|---|---|---|
-| **Anton** | Display. Screen titles, section heads, buttons, the hero name. Always uppercase. **Leading never below 1.188 × size** — see the floor below. | 400 |
-| **Barlow** | Interface. Card and row titles (600, as typed — never uppercased), body copy, descriptions, form labels. | 400, 500, 600, 700 |
-| **JetBrains Mono** | Data. Every score, price, over, timestamp, and all overline labels. Tabular figures. | 400, 700 |
-
-All three are grotesques, so the skeletons agree. Anton is ultra-condensed; Barlow is slightly
-narrow, with the plain highway-sign lettering of sport, so it sits closer to Anton than a wide
-grotesque would. JetBrains Mono is *not* Barlow's companion — it is there for clean, unambiguous
-digits, so keep it to data and labels and never set running text in it.
-
-These replaced Space Grotesk and Space Mono on 2026-10-12: their quirky, retro letterforms dated
-the app.
-
-**Use JetBrains Mono for anything numeric.** Live scores tick; tabular figures stop columns jittering.
-
-Fallbacks matter — PNG/PDF export and first paint show them:
-
-```
-Anton          → 'Arial Narrow', Haettenschweiler, Impact, sans-serif
-Barlow         → 'Segoe UI', system-ui, sans-serif
-JetBrains Mono → ui-monospace, 'Cascadia Mono', Menlo, monospace
-```
-
-**One face per level.** Anton names a section; Barlow names a thing inside it. When a card title
-was Anton too, every level read as one wall of condensed caps and the tournament title (21)
-outranked its own heading (20). Home and the shared cards it uses (live chips and the live list,
-tournament posters, results rows, top players) moved on 2026-10-12. Other screens still set row
-titles in Anton — move them to Barlow 600 when you next touch them.
-
-### Scale
-
-| Role | Size / leading | Face |
-|---|---|---|
-| Screen title | 30–40 / 36–48 | Anton |
-| Section head | 24 / 29 | Anton |
-| Card and row title | 15–18 / 19–23 | Barlow 600 |
-| Body | 13 / 19 | Barlow 400 |
-| Row label, emphasis | 12–13 | Barlow 700 |
-| Meta | 11–12 | Barlow 400 |
-| Overline label | 9 / 0.18em tracking | JetBrains Mono 700 |
-| Big data | 26–52 | JetBrains Mono 700 |
-
-### The Anton leading floor — 1.188 × size, enforced
-
-**An earlier version of this file said Anton runs at ≈0.88 × size, and the artboards are still
-drawn that way. That was wrong, and it shipped clipped capitals on iPhone.** Anton's metrics
-(unitsPerEm 2048) give capHeight 1760 = 0.859em and hhea descent 674 = 0.329em, so the glyphs
-need `capHeight + descent = 1.188em` of line box. iOS compresses the line box to `lineHeight` and
-**clips** whatever sticks out; Android overlaps instead, which is exactly why the tight leading
-looked fine in review and shaved the caps on a real iPhone.
-
-[`__tests__/fontLeading.test.ts`](__tests__/fontLeading.test.ts) enforces the floor across every
-`.tsx` under `src/`. **Never weaken it to make a screen pass** — raise the `lineHeight`, never
-shrink the `fontSize`, because the sizes are the design and the leading is not.
-
-JetBrains Mono is fenced the same way at its own floor, **1.030 × size** (capHeight 730 + descent
-300, over 1000) — a clipped cricket score is how the data face got fenced. Barlow's floor is
-0.900 and nothing sets it anywhere near that, so it is not fenced.
-
-**The fence no longer skips anything in silence.** Its analyser lives in
-[`test-utils/fontLeading.ts`](test-utils/fontLeading.ts) and is itself unit-tested in
-[`__tests__/fontLeadingFence.test.ts`](__tests__/fontLeadingFence.test.ts) — a fence cannot
-prove it would catch a shape it never meets, so those tests feed it synthetic source.
-
-It now reads multi-line styles, ternaries and computed values, and scans `.ts` as well as `.tsx`.
-Every Anton style has exactly three possible outcomes:
-
-1. **Measured and safe** — a ratio at or above 1.188. For a ternary it takes the worst case, the
-   tightest leading over the largest size, because a style must be safe on every branch.
-2. **Measured and failing** — reported with the ratio. Raise the `lineHeight`.
-3. **Unmeasurable** — no integer it can trust (`fontSize: size`). **This is not a pass.** It is
-   reported until someone writes `anton-leading-exempt: <reason>` next to it.
-
-The marker must sit **adjacent** to the style it exempts — within a couple of lines, above the
-`style=` — so one comment can never drift into exempting something further down the file. Put the
-prose above it and the marker on the last line. There is exactly one exemption in the codebase:
-`Ghost` in `src/components/states.tsx`, where 0.78em is the point.
-
-The two violations this section used to list as deferred are fixed: `.hdr`'s header title ran at
-0.941em with a subtitle and now uses one flat `lineHeight: 22` that clears the floor for both of
-its sizes. If a decimal `lineHeight` ever appears it will read as unmeasurable rather than
-truncating — the analyser refuses to guess.
+| File | What it covers |
+|---|---|
+| `Kria Onboarding.dc.html` | 7a–7c sign-up intros · 5a–5h welcome, log in, register, OTP, password, sport + city, DOB + gender, notifications |
+| `Kria Player App.dc.html` | 1a–1h Home, Rankings, Quick matches, Host a match, Match room (swipe scoring), Events, Awards, Profile — established player |
+| `Kria Player App - New Player.dc.html` | 4a–4e same screens for a player with zero matches |
+| `Kria Tournament Details.dc.html` | 2a–2f overview, category + registration + payment, live auction, teams, bracket, group standings |
+| `Kria Live Matches.dc.html` | 3a–3c live feed, badminton scoreboard, cricket live / scorecard / overs |
+| `Kria Motion.dc.html` | 6a–6c launch animations, loaders, micro-interactions, motion tokens |
+| `Kria Awards.dc.html` | 8a–8e badge families, metals, sizes, locked/progress, detail sheet |
+| `AwardBadge.dc.html` | Reusable badge (`shape`, `metal`, `glyph`, `size`, `progress`, `count`, `laurel`, `shine`) |
+| `assets/` | Logo, tournament banners, team crests |
+| `github.md` | Screen → backend file map (`Rohansunwar5/kria-server`) |
 
 ---
 
-## 2. Colour
+## 2. Principles
 
-```
-ink      #0B0B0B   app background
-panel    #151515   blocks, cards, rows
-panel2   #1E1E1E   insets, nested tiles
-line     rgba(255,255,255,0.14)   every border
-```
+1. **Backend truth only.** Never show a number the API can't produce. No invented ratings, rank movement, registration counts or "trending" labels. Missing data → the UI says how to get it.
+2. **One focal point per screen.** Rank on Home, the score in a live match, the chase in cricket, the coin in an award.
+3. **Typography does the work.** Hierarchy from condensed display type, scale and spacing — not boxes or gradients.
+4. **Orange is earned.** Primary action, selected state, live, the player's own position, and "won". Never decoration.
+5. **Empty means "here's how".** Every empty slot names the shortest real path to filling it ("0 of 10 decided matches").
+6. **Players watch, staff operate.** Approvals, bidding and bracket edits are not in this app. The only scoring a player does is as host of their own quick match.
 
-Three accents, **one lightness and chroma, hue rotated** — `oklch(0.70 0.19 h)`:
+---
 
-| Token | Hex | Hue | Means |
+## 3. Information architecture
+
+Bottom navigation (5 tabs, floating bar):
+
+| Tab | Icon (Material Symbols) | Contains |
+|---|---|---|
+| Home | `home` | Status hero, Host a match / Join, Up next, Tournaments rail, milestone, Recent matches |
+| Compete | `leaderboard` | Segmented: **Rankings** · **Matches** |
+| Events | `stadium` | Official tournaments → Tournament detail → Live matches |
+| Awards | `military_tech` | Titles, organiser honours, quick knockouts, milestones |
+| Profile | avatar | Identity, per-sport win-rate circles, analytics, tournaments, settings |
+
+Pushed (full-screen, no tab bar): Host a match, Match room, Tournament detail + sub-screens, live match screens, onboarding.
+
+**Quick matches ≠ Official events.** Quick matches: player-hosted, join-by-code, no venue/time, under Compete. Official events: organiser-run, banners, dates, venues, lifecycles, under Events. They never share a feed.
+
+---
+
+## 4. Tokens
+
+### 4.1 Colour
+
+**Neutrals**
+
+| Token | Hex | Use |
+|---|---|---|
+| `bg` | `#0B0B0D` | App background, date-pill fill on images |
+| `surface1` | `#151518` | Cards, sheets, nav bar, inputs |
+| `surface2` | `#1D1D21` | Secondary buttons, chips (off), flip-card lower half |
+| `surface3` | `#2A2A30` | Active segment, active nav pill, avatars |
+| `line` | `#18181B` | List dividers |
+| `lineStrong` | `#26262B` | Section rules, input outlines, empty progress track |
+| `text` | `#F5F5F5` | Primary text |
+| `text2` | `#C6C6CC` | Secondary emphasis |
+| `text3` | `#92929A` | Labels, meta (≥4.5:1 on bg) |
+| `text4` | `#6E6E76` | Non-essential hints only |
+| `disabled` | `#5E5E66` | Disabled labels/icons |
+
+**Brand + state**
+
+| Token | Value | Use |
+|---|---|---|
+| `accent` | `#FF5A1F` | Primary CTA fill (Host a match, Continue, Pay), selected, live dot, own-row highlight, win-rate ring, Won segment |
+| `onAccent` | `#0B0B0D` | Text on solid orange |
+| `accentTint` | `rgba(255,90,31,.16)` | Orange pill background (Auction live, price, Won badge) |
+| `accentInk` | `#FF7A45` | Text/icon on `accentTint` |
+| `loss` | `#F0525F` | Lost segment in W/L bar |
+| `lossTint` | `rgba(240,68,82,.14)` | Lost badge background |
+| `lossInk` | `#F26B76` | Text on `lossTint` |
+| `tie` | `#3B9EFF` (tint `rgba(59,158,255,.16)`) | Tied — profile bar + form only |
+| `noResult` | `#4A4A52` | No-result segment |
+| `error` | `#FF7A4D` | Inline validation |
+
+**Metals** — `gold #C9A35A` (glyph `#E6CB8E`) rank #1 / honours · `silver #A9AFB7` rank #2 / milestones · `bronze #A8714A` rank #3 / knockouts · `platinum #C3CAD6` top milestone tier. Full ramps in §5.12.
+
+**Colour rules**
+- One **solid** orange fill per viewport (the primary CTA). Orange *tint pills* may repeat.
+- Results: Won = `accentTint`/`accentInk`, Lost = `lossTint`/`lossInk`, always with the W/L letter (never colour alone).
+- Status = dot + word; never a coloured card background.
+
+### 4.2 Typography
+
+Family **Archivo** (variable, `wdth 62–125`, `wght 100–900`). Mono **JetBrains Mono** (join codes only). Icons **Material Symbols Outlined** (wght 300, FILL 1 when active).
+
+| Style | Size / line-height | Width · weight | Use |
 |---|---|---|---|
-| `brand` | `#F97316` | 46 | Live, primary action, the brand itself |
-| `auction` | `#FA4C93` | 350 | The auction, and "you" in any list |
-| `open` | `#16C46A` | 145 | Entry open, won, money received |
-| `fail` | `#FF4438` | — | Failed payment, lost, destructive |
+| Hero numeral | 112–132 / .78 | 62% · 800 | Rank on Home |
+| Flip score | 104 / 1 | 62% · 800 | Match room score cards |
+| Display XL | 56–64 / .88 | 62% · 800 | Onboarding, profile name |
+| Display L | 36–44 / .92 | 62% · 800 | Screen titles |
+| Display M | 24–34 / 1 | 62% · 800 | Card titles, stat values, win-rate % |
+| Title | 17 / 1.3 | 100% · 650 | Section headings |
+| Body strong | 14–16 / 1.4 | 100% · 600 | Row titles, buttons, card names (16 / 650) |
+| Body | 13–14 / 1.5 | 100% · 400 | Descriptions |
+| Label | 12 / 1.4 | 100% · 400–600 | Meta, status words |
+| Pill | 11–12 | 100% · 700 | Date, price, Live, Auction live, format/sport |
+| Micro | 10.5–11 | 100% · 600 | Nav labels, chart axes |
 
-Because they share L and C, all three carry equal weight beside each other — none shouts. **Derive
-any future accent the same way** rather than picking a hex by eye.
+All numbers `tabular-nums`. No uppercase headings (uppercase only for month abbreviations in date pills and "SOLD").
 
-Text: `#FFFFFF` → `#d4d4d4` (body) → `#a3a3a3` (meta) → `#7d7d7d` (labels, disabled).
+### 4.3 Spacing
 
-**Status is a solid fill in mono caps, never a tinted outline** — readable at 9px on a phone in
-daylight. Only `live` carries a dot.
-
----
-
-## 3. Surfaces
-
-- **Radii 5–6px.** Blocks 6, controls and tags 5, small squares 3–4. Nothing is a soft card.
-- **Borders 1.5px** at `rgba(255,255,255,0.14)`. In React Native this is `borderWidth: 1.5`, not
-  a `box-shadow` inset.
-- **Screen padding 16px** (the previous system used 20).
-- **No drop shadows** except the bottom nav.
-- **Avatars and team badges are squares**, 4px radius — players on brand orange, teams in their
-  own colour. Circles are used only for genuinely round things (a cricket ball, a live dot).
-
-**The bottom nav is the one exception, and it is deliberate.** It is a floating capsule of
-frosted glass (redesigned 2026-10-09) — `expo-blur` under the `glass` tint, a lit top edge
-(`fill` fading out), a 0.5px `keyline`, inset 14px from both edges. Icons only, Instagram-style:
-the active glyph fills in `brandInk`, and a lighter pane of glass (`glassLens`) glides under it.
-The You tab is the player's own photo or initials, **round**, ringed in orange when selected.
-Host is a plain plus-in-a-square in the middle that opens the Host sheet (Quick match, Knockout,
-Join with a code) on the same glass; it never takes the selected state, so the lens only ever
-marks where you are. Nothing else in the app may take a pill radius, glass or a round avatar on
-the strength of this; if a second exception is ever wanted, change this rule rather than quietly
-widening it. The previous pill + lifted Host circle lives in git history
-(`docs/design-canvas/home-portals/NavBar.dc.html`).
-
-### Texture — four devices, used sparingly
-
-| Device | What it is | Where |
+| Token | px | Rule |
 |---|---|---|
-| Grain | Fractal-noise overlay at 16% | Whole screen, always last child |
-| Hairlines | 115° 1px lines at 5% white | Hero and scoreboard panels |
-| Hazard rule | 115° orange bars, 5px tall | Section breaks that need weight |
-| Ghost type | Oversized Anton at 9% (outline) or 4.5% (fill), bleeding off frame edges | Behind heroes and empty states |
+| `gutter` | **20** | Screen side padding (onboarding 24) |
+| `sectionGap` | **44** | Between top-level sections on every scrolling screen |
+| `headerToContent` | **18** | Section header → its first content |
+| `cardInner` | 14–16 | Padding inside cards |
+| `rowY` | 12–16 | Vertical padding of list rows |
+| `stack` | 5–10 | Title ↔ meta inside a card |
 
-The shared 115° angle across hairlines and hazard rules is what ties them into one family.
+Scale: 2 · 4 · 5 · 6 · 8 · 10 · 12 · 14 · 16 · 18 · 20 · 24 · 28 · 32 · 44.
 
-**In React Native:** hazard rules want `expo-linear-gradient` or a tiled image; grain wants one
-low-opacity image or nothing. Ghost type has no `-webkit-text-stroke` equivalent — use low-opacity
-`<Text>`. If a device can't be done cheaply, **drop it rather than approximate it badly.**
+### 4.4 Radius & elevation
 
----
+- Radius: pills `999` (date pill on images `9`) · inputs `14` · buttons `16` · flip cards `16` · cards `18–24` (rail 20, featured 24) · sheets `30` top · nav `24`.
+- Flat by default. Shadows only on things that float: nav bar, bottom sheets, flip score cards (`0 10px 24px rgba(0,0,0,.45)`).
+- Touch targets ≥ 44×44; buttons 52–56 tall.
 
-## 4. Icons
+### 4.5 `constants/theme.ts`
 
-`src/components/icons/` — a custom set, not a library. Drawn to the same rules as the type:
-
-- **24×24 grid, 2px stroke** (scales with `size`)
-- **square caps, mitred joins** — no round terminals anywhere. This is the single biggest
-  departure from Ionicons and what makes the set read industrial rather than friendly.
-- **angular construction**: chevron-bowl trophy, straight-sided map pin, square inner details
-  where a library would use a circle.
-- **sport glyphs no generic set has** — `shuttlecock`, `cricket-bat`, `stumps`, `ball`, `court`,
-  `gavel` (the auction), `bracket` (the knockout draw). These carry most of the brand character.
-
-### The nav set is the second language, and the boundary is fixed
-
-The five bottom-nav glyphs — `home`, `search`, `create`, `calendar`, `user` — are drawn to **1.8 stroke
-with round caps and round joins**, the opposite of the rule above. At 22px in a floating bar the
-industrial set read spiky rather than precise; the nav is chrome you see on every screen, and it
-should recede. Each has an `active` form: closed glyphs fill solid with their detail (the door,
-the calendar's band) cut back out in the ground colour; `search`, which has nothing to fill,
-goes heavier instead.
-
-**The boundary is: nav is soft, everything else is industrial.** That is the whole of it. A round
-terminal anywhere in content — a tag, a scoreboard, a row, an empty state — is a bug, not a style
-choice. Two icon languages only stay legible while the line between them is this blunt.
-
-```tsx
-import { Icon } from '@/components/icons';
-
-<Icon name="trophy" size={20} color="#F97316" />
-<Icon name="trophy" size={20} color="#F97316" filled />   // active / selected
+```ts
+export const colors = {
+  bg: '#0B0B0D', surface1: '#151518', surface2: '#1D1D21', surface3: '#2A2A30',
+  line: '#18181B', lineStrong: '#26262B',
+  text: '#F5F5F5', text2: '#C6C6CC', text3: '#92929A', text4: '#6E6E76', disabled: '#5E5E66',
+  accent: '#FF5A1F', onAccent: '#0B0B0D', accentTint: 'rgba(255,90,31,0.16)', accentInk: '#FF7A45',
+  loss: '#F0525F', lossTint: 'rgba(240,68,82,0.14)', lossInk: '#F26B76',
+  tie: '#3B9EFF', tieTint: 'rgba(59,158,255,0.16)', noResult: '#4A4A52',
+  error: '#FF7A4D',
+  gold: '#C9A35A', silver: '#A9AFB7', bronze: '#A8714A', platinum: '#C3CAD6',
+};
+export const space = { gutter: 20, sectionGap: 44, headerToContent: 18, cardInner: 16, rowY: 14 };
+export const radius = { pill: 999, datePill: 9, input: 14, button: 16, card: 20, cardLg: 24, sheet: 30, nav: 24 };
+export const font = { family: 'Archivo', mono: 'JetBrainsMono', condensed: { fontStretch: '62%', fontWeight: '800' } };
+export const motion = { fast: 100, base: 160, flipHalf: 170, enter: 220, slow: 320, launch: 620 };
 ```
 
-The API mirrors Ionicons, so migrating a screen is close to a find-and-replace. `filled` only
-reads correctly on closed shapes — `SOLID_CAPABLE` is the authoritative list, and
-`__tests__/icons.test.tsx` enforces it. Open-stroke glyphs (`stumps`, `court`, `shuttlecock`)
-would collapse into a blob if filled.
-
-**Reference sheet:** open `docs/icon-sheet.html` — every glyph at 36px and 20px, plus the filled
-form where one exists. It is generated from the source, so regenerate it rather than hand-editing.
-
-Requires `react-native-svg` (installed via `npx expo install`, pinned by SDK 54).
-
-**Third-party logos are not in this set.** Anything like the WhatsApp mark should keep using
-`@expo/vector-icons` or the vendor's official asset — do not redraw trademarks.
-
 ---
 
-## 5. State patterns
+## 5. Components
 
-Designed in `docs/design-canvas/Patterns.dc.html`. This is the highest-value part of the system.
+### 5.1 Navigation bar
+Floating, inset 12, height 64, radius 24, `surface1` + 1px `#24242A` ring, fade to `bg` behind. Active item: one `surface3` pill (radius 18) covering icon + label; icon accent, FILL 1; label 700. Profile tab = avatar with accent ring when active. 52px hit area per item.
 
-Every screen currently does `if (loading) return <ActivityIndicator />`, which blanks the whole
-view — header, hero and nav — then snaps back. Replace that with:
-
-| Pattern | Rule |
-|---|---|
-| **Skeleton** | Keep the chrome. Render masthead and avatar from cached auth state; block shapes match the real geometry so nothing shifts when data lands. |
-| **Empty** | Name what *would* appear here, and offer the single action that fills it. |
-| **Error** | Scope the failure to the section that failed. Hero, tabs and back button survive; retry sits in place. Never a dead-end screen. |
-| **Stale** | Live data (auction, scores) dims and states how old the number is. Never blank, and never silently show a wrong price. |
-
----
-
-## 6. Motion
-
-Tokens live in [`src/lib/motion.ts`](src/lib/motion.ts); the options and the reasoning are the
-seven artboards in [`docs/design-canvas/motion/`](docs/design-canvas/motion/).
-
-| ms | Token | Job |
+### 5.2 Buttons
+| Variant | Fill / text | Use |
 |---|---|---|
-| 120 | `pressIn` | Finger-down. Deliberately faster than the release. |
-| 150 | focus | Input border and label colour. |
-| 180 | `pressOut` | Release settles slower than the press. |
-| 260 | `sweep` | Hazard bar scaling across a block. |
-| 320 | `glide` | The nav bar's glass lens moving to the active tab. |
-| 350 | fade | Overlay in/out. |
-| 420 | `reveal` | Art wipe, and the type rising behind it. |
-| 650 | brand | Splash only. Never in a list. |
-| 850 | pulse | Skeleton breathing, reversing. |
-| 14000 | ambient | Ken Burns drift. One surface at a time, ever. |
+| Primary | accent / onAccent | Host a match, Continue, Pay, Register — one per screen |
+| Secondary | surface2 / text | Join with code, Copy, alternatives |
+| Tertiary | none / text3 | Skip, Not now, Clear |
+| Destructive | surface1 / error | Cancel match |
+| Disabled | surface2 / disabled | Until valid; never hidden |
 
-**Two curves, no more.** `Easing.out(Easing.cubic)` for anything that arrives or responds;
-`Easing.inOut(Easing.cubic)` for anything that loops or travels. No springs — overshoot fights
-hard edges and 1.5px borders, and softness is the one thing this system is not. Linear only ever
-reads as a progress bar.
+Labels state the outcome ("Pay ₹628.32 and register"), never "Next".
 
-- **One idle animation per card.** A card with a banner drifts; a card without one shimmers; never
-  both. The land reveal is one-shot, so it does not count against that.
-- **Never animate the seeded art hue.** It is identity: the same tournament is the same colour on
-  its card and on its detail screen.
-- **Never animate height or layout in a list.** Only `opacity`, `transform` and `clipPath` — the
-  three the UI thread carries without a re-layout.
-- **Idle animation stops off-screen.** `cancelAnimation()` on screen blur (`useIsFocused`); rows
-  outside the FlatList window are unmounted, so they stop on their own.
-- **Honour reduce-motion.** Reveals become instant, ambient drift does not run. The design must be
-  complete with every animation off — and it is, because the art itself does the differentiating.
+### 5.3 Pills
+| Pill | Style | Where |
+|---|---|---|
+| Date | `bg` fill, radius 9, 11/700, uppercase month ("12 OCT") | Top-left on event/tournament images |
+| Price | `accentTint` + `accentInk`, radius 999 | Top-right on event cards (when not live) |
+| Live | `accentTint` + `accentInk` + 6px accent dot | Top-right on event cards / Up next right slot |
+| Auction live | `accentTint` + `accentInk` | Bottom-left of event card body |
+| Format / Sport | surface2 + text2, sport icon 16px | Up next card, top-left |
+| W / L badge | `accentTint`/`accentInk` or `lossTint`/`lossInk`, 1 letter, 700 | Recent matches, right-aligned |
+
+### 5.4 Event / tournament card (one layout everywhere: Home rail, Events list, featured)
+```
+┌─────────────────────────────┐
+│ [12 OCT]          [₹500|●Live]│  image 160 (rail) / 196 (featured), cover
+│                             │
+└─────────────────────────────┘
+Name (16/650, featured 30 condensed)
+📍 Venue (12, text3, pin icon `location_on`)
+[Auction live]                    ← only when auction running
+```
+- Top-left: date pill. Top-right: Live pill if ongoing, else price pill (price hidden while Live).
+- No status lines ("Registration open", "x days left") — removed.
+- Missing banner → sport cover: radial `#232328 → #141416`, 56px outline sport icon + sport name.
+- Rail card width 300, scroll-snap start, gap 12. Past events collapse to compact date-led rows.
+
+### 5.5 Up next card (Home)
+```
+[Doubles] [🏸 Badminton]              ABX-42K | ●Live | Sat 19 Oct
+Title (condensed 22)
+2 slots left                                       (AM)(RK)(SS)
+```
+- Top-left: format + sport pills. Top-right: join code (mono) when waiting, Live pill when live, else date.
+- Bottom-left: "N slots left" (text3; hide when full). Bottom-right: overlapping avatars (28px, −6px overlap, `bg` 2px ring).
+- Show up to 3 avatars; "+N" chip only when 4 or more players have joined.
+
+### 5.6 Recent matches row
+Title (14/600) · score (text2, tabular) · context (12, text3, "Quick match · Cricket · Sat"). Right-aligned W/L badge (§5.3). Divider `line`. Max 3 on Home, then "See all".
+
+### 5.7 Rankings (Compete › Rankings)
+- Max **6 rows** visible per sport, top of list; "See full rankings" below.
+- Row: rank (condensed 20; top 3 at 26 in metal colour) · 40px avatar (metal hairline for top 3) · name + "W won · D decided" · win rate (condensed 24).
+- **Your row** highlighted: `accentTint` background, rank + rate in `accentInk`, radius 14. If you're outside the visible 6, append your row as the 7th with a `…` gap row above.
+- **No pinned "You" bar** — removed.
+- Always state the metric above the list ("Win rate · min 10 decided matches").
+
+### 5.8 Profile win-rate circles
+- One circle per sport played (sideways scroll, sorted by volume), plus "All sports".
+- Ring 72–88px, stroke 6, track `lineStrong`, progress `accent`, round caps; animate fill 0 → value in 620ms on first view.
+- Centre: percentage only (Display M, condensed). Sport name below (12, text3).
+- **No W-L record** inside or under the circle. Detailed W/L/T/NR bar and last-10 form live in the per-sport section below.
+- Unranked / <10 decided: ring shows progress to 10 ("4/10") in text3 instead of %.
+
+### 5.9 Match room — swipe scoring (host only)
+- Two score cards side by side (grid 1fr 1fr, gap 8): side name (13/600, text2), flip score (120×140 card, 104px numeral), hint "Swipe up +1 · down −1" (11.5, text4).
+- Gesture: pointer down → up; `dy < −28px` = +1, `dy > 28px` = −1. Score can't go below 0. Tap does nothing.
+- **Flip-calendar animation:** split card (top `#222227`, bottom `#1D1D21`, 2px `bg` seam). +1 flips top half down; −1 flips bottom half up. Each half 170ms (`cubic-bezier(.5,0,1,1)` out, `cubic-bezier(0,0,.3,1.4)` in), perspective 420. Reduced motion → instant swap.
+- One-level **Undo** (disabled colour when nothing to undo). Header: "Game N · first to 21" and games tally.
+- Light haptic on each accepted swipe. Non-hosts see the score read-only with "Only the host can score".
+
+### 5.10 Other components
+- **Inputs** — 54 tall, surface1, no border; error = 1.5px `error` inner ring + message below. Validate as typed; persist on Back. OTP = 6 boxes over one `one-time-code` input.
+- **Chips / filters** — on: text fill + bg text; off: surface2. ▾ opens a bottom sheet. Show "Clear" when any filter is active.
+- **Segmented control** — surface1 track, surface3 thumb. 2–4 peers.
+- **List row** — no card; 1px `line`; 12–16 vertical padding.
+- **Bottom sheet** — surface1, radius 30 top, 36×5 grabber, 62% black scrim, title + one-line explanation, options with accent check.
+- **Status indicator** — 6–7px dot + word. Accent = live / waiting / registration open; text = in progress; text3 = completed; text4 = cancelled.
+- **Bracket** — horizontal columns (200px cards, 36px gutter), connectors from `nextMatchId`, 1.5px `#34343B`. Winner bright, loser text4. Own matches accent ring. Unfilled = "Winner of QF 4".
+- **Standings table** — rank, player + team, P W L Pts (Pts condensed 20); accent "Quarter-final line" after `topN`. Points-rule line above the table (see §14, open).
+
+### 5.11 Award badge
+| Family | Shape | Glyph | Source |
+|---|---|---|---|
+| Title | Shield + laurel + ribbon | Trophy / placement | Tournament winner, runner-up |
+| Honour | Rosette | Organiser icon or 2-letter monogram | MVP, Best Player |
+| Knockout | Hexagon | Sport icon, ×N repeats | Quick-match knockout win |
+| Milestone | Coin | Numeral + MATCHES / WINS / SPORTS | Career counts |
+
+Below 64px: drop laurel, ribbon, hairline, sub-label. Shine: 4.2s sweep, one badge per viewport, off under reduced motion. Tap → detail sheet (tier, name, description, criteria, progress).
+
+### 5.12 Metal ramps
+| Metal | Highlight · light · base · dark · deep | Enamel |
+|---|---|---|
+| Bronze | `#FFE3CC` `#E2A77D` `#A8714A` `#6E4428` `#3A2213` | `#2A1A10` → `#0E0805` |
+| Silver | `#FFFFFF` `#E3E7EC` `#A9AFB7` `#676D76` `#33373D` | `#1F242B` → `#0A0C0F` |
+| Gold | `#FFF5D6` `#F0D592` `#C9A35A` `#8C6A2F` `#4D3A17` | `#2C2213` → `#0F0B06` |
+| Platinum | `#FFFFFF` `#EEF2F8` `#C3CAD6` `#7C8695` `#3A414C` + faint iridescence | `#18202C` → `#06080C` |
+| Locked | `#6A6A72` `#55555D` `#3A3A42` `#2A2A30` `#18181B` + white progress ring | `#17171A` → `#0E0E10` |
 
 ---
 
-## 7. Accessibility & platform
+## 6. Screen rules
 
-- **44px minimum hit target**, even where an artboard draws a control smaller.
-- **No fake chrome.** Never draw an iOS status bar or virtual keyboard — the real ones render on
-  top, and the artboards leave that space empty on purpose.
-- Colour is never the only signal: status carries a word as well as a fill.
-- **The app has two palettes: `dark` (the default) and `light`.** Both live in
-  `src/lib/theme/palette.ts`; reach them only through `useTheme()`, never as a literal.
-- **An accent is a fill; an accent-as-text is an ink.** `brand`/`auction`/`open`/`fail` keep
-  their vivid values in both palettes and always carry `onBrand`/`onAuction`/`onOpen`/`onFail`
-  as the ink riding on top. For the accent used as text or an icon directly on the page
-  ground, use `brandInk`/`auctionInk`/`openInk`/`failInk` — they darken under light because
-  `#F97316` as text on `#FAFAF8` is 2.68:1 and fails. The two are byte-equal in dark, which is
-  exactly why the distinction is easy to lose: a wrong choice is invisible until someone
-  switches theme.
-- **The light palette is the approved artboard `docs/design-canvas/home-portals/body-Light.html`,
-  not an inversion of dark.** An invented light palette was rejected once. The alpha ladder
-  mirrors dark's rungs with ink in place of white; `surfaceAlt` is the sole exception and
-  steps *down* into grey, because light cannot climb past `#FFFFFF`.
-- **The four text tiers stay a closed set in both palettes.** Snap a stray grey to the nearest
-  tier; never add a fifth.
-- Contrast floors are enforced by `__tests__/paletteFences.test.ts`: 4.5:1 for `text`,
-  `textBody`, `textMeta` and the four inks; **3.0:1 for `textFaint`**, which is the
-  labels/disabled tier and sits at 3.30:1 on paper in the approved design. Raising that floor
-  means re-approving the artboard, not editing the fence.
-- **Light mode is built and tested but not user-reachable.** The appearance toggle is disabled
-  (`SHOW_APPEARANCE_CONTROL = false` in `src/components/settings/AppearanceSection.tsx`)
-  because it is only correct on screens with tokenized colours; 103 files still hold hardcoded
-  literals. Migration progress lives in `test-utils/colourLiterals.ts` under `MIGRATED`
-  (17 files migrated so far). Flipping the flag is a deliberate release step in the final
-  migration's commit — `__tests__/appearanceSection.test.tsx` asserts the value and changes
-  in that commit too, so the flip cannot happen by accident.
+- **Home** — order: status hero → Host a match (primary) / Join with code (secondary) → Up next → Tournaments rail → milestone → Recent matches. 44 between sections, 18 header → content. Hero opens on the most recently played sport; sport button opens a sheet of sports played, each with rank.
+- **Rankings** — win rate among players with ≥10 decided matches, top 50 per sport, refreshed ~5 min. Outside top 50 → "Outside top 50". Unranked → distance to 10.
+- **Quick matches** — join-with-code + your matches. Host flow: sport → format (badminton best of 1/3/5 to 11/15/21; cricket overs 1–50, 2–11 a side) → sides + slots → review + waiting-room toggle. Placeholder slots earn no stats.
+- **Profile** — win-rate circles (§5.8), then per sport: rank, W/L/T/NR bar, last-10 form, ranking note, recent matches. "Best sport" only past 10 decided.
+- **Events** — filters mirror the API (sport, status, city). Featured = most relevant open event with a banner. All cards per §5.4.
+- **Tournament detail** — status, pinned announcement, tabs and single CTA follow lifecycle (registration → auction → matches → completed). Tabs appear only once data exists. Fee = fee + 2% gateway + 2% platform + 18% GST on those two fees.
+- **Auction** — watch-only: player on the block, live bid, history, last sold, purses, your result.
+- **New player** — same layouts, honest blanks ("—", 0/10). Profile checklist (DOB + gender required for tournament entry) on Home and Profile.
+- **Onboarding** — Welcome → Create account → 3 intros (dots + Skip) → register → OTP → password (8+) → sport + city → DOB + gender (skippable, cost stated) → notification pre-prompt → new-player Home. Log in / Google bypass intros.
+- **Awards** — grouped by source; earned first, then locked with progress; one shining badge (most recent).
 
 ---
 
-## 8. Status
+## 7. Live matches
 
-| | |
+Feed row (`/live-feed`) → sport scoreboard → detail tabs.
+- **Badminton:** current-game points 68px condensed hero; finished games small beside (winner bright). Game / match point chip only when true.
+- **Cricket:** hero is the chase ("Need 32 off 22") + required and current rate from `cricketLiveState`. Live tab: batters (striker *), bowler, this-over ball chips (4/6 white, W accent, extras grey). Scorecard per innings. Overs tab: runs-per-over bars, wicket overs ringed.
+- Updates via socket room `match:{id}`; only motion is the digit flip (§5.9 timing).
+
+---
+
+## 8. States
+
+| State | Pattern |
 |---|---|
-| Designed | 38 screens: the full player journey for badminton and cricket, onboarding/auth, the account screens, and the two-portal home set in `home-portals/` |
-| Built | Foundation complete — fonts, tokens, icon set, state patterns. Most of the app surface migrated. |
-| Not yet migrated | All 12 onboarding and auth screens, `profile/edit`, `profile/invoices`, `team-league` |
-| Designed, not built | Everything in `home-portals/`: the two-portal home, the filter sheet, the floating nav, the new player profile. Three of these need server work first — a platform-wide top-players aggregate, an achievements aggregate over `MatchParticipation`, and a count for the filter sheet's result button. Follow and Challenge on the profile have no model at all. |
-| Sport scope | Badminton and cricket only. `src/lib/tournamentConstants.ts` still offers bowling, basketball and volleyball, which `SportConfig` cannot serve. |
+| Loading | Skeletons in final shapes; fixed heights |
+| Empty | Outline icon (wght 200) + condensed title + one line on how to fill it + one action |
+| Error | Inline above content: what failed + Retry; keep cached data |
+| Success | Check + condensed statement + next action (code shown huge after hosting) |
+| Permission denied | Explain why ("Only the host can score") instead of hiding |
+| Validation | Inline under field, server message where available |
+
+---
+
+## 9. Motion
+
+150–250ms, ease-out. Tokens 100 / 160 / 220 / 320 / 620ms. Allowed: selection feedback, sheet slide-up, segment thumb slide, score digit flip, win-rate ring fill, progress fill, one award-unlock reveal. Not allowed: floating cards, parallax, confetti, animated gradients, looping pulses. `prefers-reduced-motion` → opacity only. Full demos in `Kria Motion.dc.html`.
+
+---
+
+## 10. Accessibility
+
+- Text ≥ 4.5:1; text4 only for non-essential hints.
+- Never colour alone: status = dot + word; results = W/L letters.
+- Targets ≥ 44px. Swipe score cards expose `accessibilityActions` increment/decrement (VoiceOver/TalkBack adjustable) as a non-gesture alternative.
+- Dynamic Type: condensed display caps at 1.3×; rows wrap rather than truncate numbers.
+- Icon-only buttons have labels.
+
+---
+
+## 11. Voice
+
+Short, direct, sporting. Second person. Numbers over adjectives ("7 more decided matches"). Explain why when asking for data. No exclamation marks, emoji or hype.
+
+---
+
+## 12. Imagery & assets
+
+- Photography only on Welcome, event banners and tournament heroes. Gradients only for text legibility over photos.
+- Crests on a `#F5F5F5` circle.
+- Banners 16:9, cropped via `object-position`; never a poster with baked-in text as a background.
+- Logo `assets/kria-logo.png`, 40px tall in headers.
+
+---
+
+## 13. Don'ts
+
+Glassmorphism · neon glows · podium graphics · cards for every section · solid orange backgrounds on cards · status lines on event cards · W-L record on win-rate circles · pinned You bar · "+N" avatar chip under 4 players · tap-to-score · fake stats · lorem ipsum · emoji · more than one primary button per screen · uppercase headings · organiser controls in the player app.
+
+---
+
+## 14. Open items
+
+- [ ] **Points-rule line above group tables** — keep or move to a tooltip/info icon? (Currently shown.)
+- [ ] Milestone tiers pending backend: 10 · 50 · 100 · 250 matches; 10 · 50 · 100 wins; Runner-up title.
+
+---
+
+## 15. Implementation checklist
+
+1. Add `constants/theme.ts` (§4.5); load Archivo (variable) + JetBrains Mono + Material Symbols.
+2. Build primitives: `Pill`, `Button`, `SectionHeader` (enforces 18 below), `Screen` (gutter 20, sectionGap 44), `StatusDot`, `ResultBadge`, `Avatar`/`AvatarStack`.
+3. Build composites: `EventCard`, `UpNextCard`, `RecentMatchRow`, `RankingList` (6 + own row), `WinRateRing`, `FlipScore` + `SwipeScoreCard`, `BottomSheet`, `AwardBadge`.
+4. Wire screens in IA order (§3) against the endpoints in `github.md`.
+5. QA against each `.dc.html` mock: spacing 44/18, one solid orange per viewport, W/L letters present, reduced-motion paths.

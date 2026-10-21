@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&display=block" rel="stylesheet">
+<style>
+html,body{background:#141416}
+body{margin:0;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#F5F5F5;text-decoration:none}
+a:hover{color:#FF5A1F}
+*::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+
+<section id="t6" style="background:#141416;color:#F5F5F5;min-height:100vh;width:max-content;min-width:100%;box-sizing:border-box;padding:56px 56px 80px;display:flex;flex-direction:column;gap:56px">
+
+<header style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start;max-width:1500px">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px"><img src="assets/kria-logo.png" alt="Kria" style="width:46px;height:40px;object-fit:contain"><span style="font:600 11px 'JetBrains Mono',monospace;color:#FF5A1F;letter-spacing:.08em">KRIA · MOTION</span></div>
+    <h1 style="margin:0;font-size:60px;font-stretch:62%;font-weight:800;line-height:.9;letter-spacing:-.01em">The ball is the brand. Let it move.</h1>
+    <p style="margin:0;font-size:14px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">The mark's head is a ball, so every brand motion starts there. The ball drops, gets thrown or orbits, and the runner meets it. Everything below is live: launches loop, and every tile has a trigger.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Rules</div>
+    <p style="margin:0;text-wrap:pretty">The launch plays once per cold start and is cut short the moment Home is ready. Brand motion stays on launch and loading. Everything else is functional, 100–320ms, with no loops except loaders. Reduced motion swaps every movement for a fade (try the Tweak).</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Production notes</div>
+    <p style="margin:0;text-wrap:pretty">The logo provided is an 80×70 PNG, so it looks soft at launch size. Ship an SVG with the ball as its own layer and build these in Lottie or Reanimated. "KRIA" is set in Archivo as a stand-in until there's a real wordmark.</p>
+  </div>
+</header>
+
+<!-- LAUNCH -->
+<div style="display:flex;flex-direction:column;gap:22px">
+  <div style="display:flex;align-items:baseline;gap:14px"><span style="font-size:28px;font-stretch:62%;font-weight:800">App launch</span><span style="font-size:13px;color:#92929A">Loops for review · tap Replay to restart one</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:44px;align-items:flex-start">
+
+    <div id="6a" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><a href="#6a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">6a</a><span style="font-size:13px;font-weight:600">Ball drop · cold start</span><span style="font-size:12px;color:#6E6E76">1.4s</span><button onClick="{{ replayA }}" style="all:unset;cursor:pointer;margin-left:auto;font-size:12px;font-weight:600;color:#FF5A1F">Replay</button></div>
+      <div data-screen-label="6a Launch ball drop" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+        <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+        <div ref="{{ r.AWrap }}" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
+          <div ref="{{ r.AMark }}" style="position:relative;width:112px;height:98px">
+            <span ref="{{ r.AL1 }}" style="position:absolute;left:-56px;top:44px;width:48px;height:5px;border-radius:3px;background:#FF5A1F;transform-origin:right center;opacity:0"></span>
+            <span ref="{{ r.AL2 }}" style="position:absolute;left:-44px;top:58px;width:36px;height:5px;border-radius:3px;background:#FF5A1F;transform-origin:right center;opacity:0"></span>
+            <span ref="{{ r.AL3 }}" style="position:absolute;left:-30px;top:72px;width:22px;height:5px;border-radius:3px;background:#FF5A1F;transform-origin:right center;opacity:0"></span>
+            <img ref="{{ r.ABody }}" src="assets/kria-logo.png" alt="" style="position:absolute;inset:0;width:112px;height:98px;-webkit-mask-image:radial-gradient(ellipse 13% 15% at 64% 13%,transparent 97%,#000 100%);mask-image:radial-gradient(ellipse 13% 15% at 64% 13%,transparent 97%,#000 100%);opacity:0">
+            <img ref="{{ r.AHead }}" src="assets/kria-logo.png" alt="" style="position:absolute;inset:0;width:112px;height:98px;clip-path:ellipse(13% 15% at 64% 13%);transform-origin:64% 28%;opacity:0">
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+            <span ref="{{ r.AWord }}" style="font-size:46px;font-stretch:62%;font-weight:800;letter-spacing:.16em;padding-left:.16em;line-height:1;opacity:0">KRIA</span>
+            <span ref="{{ r.ATag }}" style="font-size:13px;color:#92929A;opacity:0">Play. Compete. Get on the board.</span>
+          </div>
+        </div>
+      </div>
+      <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">The signature.</span> The ball falls and squashes as it lands where the head belongs. The runner sprints in under it with three speed lines, then the wordmark tightens into place. 0–450ms ball, 380–900 runner, 820–1350 type.</p>
+    </div>
+
+    <div id="6b" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><a href="#6b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">6b</a><span style="font-size:13px;font-weight:600">Sprint and catch · first launch</span><span style="font-size:12px;color:#6E6E76">1.6s</span><button onClick="{{ replayB }}" style="all:unset;cursor:pointer;margin-left:auto;font-size:12px;font-weight:600;color:#FF5A1F">Replay</button></div>
+      <div data-screen-label="6b Launch sprint" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+        <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+        <div ref="{{ r.BWrap }}" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
+          <div ref="{{ r.BMark }}" style="position:relative;width:112px;height:98px">
+            <span ref="{{ r.BL1 }}" style="position:absolute;left:-150px;top:40px;width:140px;height:3px;border-radius:2px;background:#FF5A1F;transform-origin:right center;opacity:0"></span>
+            <span ref="{{ r.BL2 }}" style="position:absolute;left:-120px;top:54px;width:110px;height:3px;border-radius:2px;background:#FF5A1F;transform-origin:right center;opacity:0"></span>
+            <span ref="{{ r.BL3 }}" style="position:absolute;left:-160px;top:68px;width:150px;height:3px;border-radius:2px;background:#FF5A1F;transform-origin:right center;opacity:0"></span>
+            <span ref="{{ r.BL4 }}" style="position:absolute;left:-100px;top:82px;width:90px;height:3px;border-radius:2px;background:#FF5A1F;transform-origin:right center;opacity:0"></span>
+            <img ref="{{ r.BBody }}" src="assets/kria-logo.png" alt="" style="position:absolute;inset:0;width:112px;height:98px;-webkit-mask-image:radial-gradient(ellipse 13% 15% at 64% 13%,transparent 97%,#000 100%);mask-image:radial-gradient(ellipse 13% 15% at 64% 13%,transparent 97%,#000 100%);opacity:0">
+            <img ref="{{ r.BHead }}" src="assets/kria-logo.png" alt="" style="position:absolute;inset:0;width:112px;height:98px;clip-path:ellipse(13% 15% at 64% 13%);transform-origin:64% 13%;opacity:0">
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+            <span ref="{{ r.BWord }}" style="font-size:46px;font-stretch:62%;font-weight:800;letter-spacing:.16em;padding-left:.16em;line-height:1;opacity:0">KRIA</span>
+            <span ref="{{ r.BTag }}" style="font-size:13px;color:#92929A;opacity:0">Your sporting career, in your pocket.</span>
+          </div>
+        </div>
+      </div>
+      <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">For the very first open.</span> The runner sprints in from off-screen and the ball is thrown in on a spinning arc. The figure settles slightly on the catch, then the wordmark wipes in left to right. A little longer and more playful. It's only ever seen once.</p>
+    </div>
+
+    <div id="6c" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px"><a href="#6c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">6c</a><span style="font-size:13px;font-weight:600">Quiet · warm start + reduced motion</span><span style="font-size:12px;color:#6E6E76">0.6s</span><button onClick="{{ replayC }}" style="all:unset;cursor:pointer;margin-left:auto;font-size:12px;font-weight:600;color:#FF5A1F">Replay</button></div>
+      <div data-screen-label="6c Launch quiet" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+        <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+        <div ref="{{ r.CWrap }}" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
+          <div ref="{{ r.CMark }}" style="position:relative;width:112px;height:98px">
+            <img ref="{{ r.CBody }}" src="assets/kria-logo.png" alt="" style="position:absolute;inset:0;width:112px;height:98px;-webkit-mask-image:radial-gradient(ellipse 13% 15% at 64% 13%,transparent 97%,#000 100%);mask-image:radial-gradient(ellipse 13% 15% at 64% 13%,transparent 97%,#000 100%);opacity:0">
+            <img ref="{{ r.CHead }}" src="assets/kria-logo.png" alt="" style="position:absolute;inset:0;width:112px;height:98px;clip-path:ellipse(13% 15% at 64% 13%);opacity:0">
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+            <span ref="{{ r.CWord }}" style="font-size:46px;font-stretch:62%;font-weight:800;letter-spacing:.16em;padding-left:.16em;line-height:1;opacity:0">KRIA</span>
+            <span ref="{{ r.CTag }}" style="font-size:13px;color:#92929A;opacity:0">Play. Compete. Get on the board.</span>
+          </div>
+        </div>
+      </div>
+      <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Out of the way.</span> A single left-to-right wipe on the mark and a fade on the type. This is used when the app resumes from the background, and in place of 6a and 6b whenever the system's reduced-motion setting is on.</p>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div style="display:flex;flex-direction:column;gap:22px;max-width:1500px">
+  <div style="display:flex;align-items:baseline;gap:14px"><span style="font-size:28px;font-stretch:62%;font-weight:800">Loading</span><span style="font-size:13px;color:#92929A">One loader per context, never two at once</span></div>
+  <div style="display:grid;grid-template-columns:repeat(4,300px);gap:20px">
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:220px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:grid;place-items:center">
+        <div style="position:relative;width:56px;height:56px">
+          <div style="position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 1.5px #26262B"></div>
+          <div ref="{{ r.orbit }}" style="position:absolute;inset:0">
+            <div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 200deg,rgba(255,90,31,0) 0deg,rgba(255,90,31,.6) 160deg,rgba(255,90,31,0) 160.5deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px))"></div>
+            <div style="position:absolute;left:50%;top:-6px;margin-left:-7px;width:14px;height:14px;border-radius:50%;background:#FF5A1F;overflow:hidden"><div ref="{{ r.orbitBall }}" style="position:absolute;left:6px;top:-2px;width:2px;height:18px;background:#7A2A0E;border-radius:1px"></div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Ball orbit · brand spinner</span><span style="font-size:12px;line-height:1.45;color:#92929A">56px. Full-screen first loads that last more than 400ms. One lap per 1s, linear, with the ball spinning against the orbit.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:220px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:grid;place-items:center">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+          <img ref="{{ r.runBody }}" src="assets/kria-logo.png" alt="" style="width:80px;height:70px;-webkit-mask-image:radial-gradient(ellipse 13% 15% at 64% 13%,transparent 97%,#000 100%);mask-image:radial-gradient(ellipse 13% 15% at 64% 13%,transparent 97%,#000 100%);position:relative;z-index:1">
+          <img ref="{{ r.runHead }}" src="assets/kria-logo.png" alt="" style="width:80px;height:70px;clip-path:ellipse(13% 15% at 64% 13%);margin-top:-70px;transform-origin:64% 28%;position:relative;z-index:2">
+          <span ref="{{ r.runShadow }}" style="margin-top:10px;width:46px;height:5px;border-radius:50%;background:#26262B"></span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Runner · splash-to-Home bridge</span><span style="font-size:12px;line-height:1.45;color:#92929A">Only if Home is still loading after the launch ends. The ball keeps bouncing on the runner's head, so launch and loading read as one movement.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:220px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;height:66px;justify-content:flex-end">
+          <div ref="{{ r.bounce }}" style="width:20px;height:20px;border-radius:50%;background:#FF5A1F;position:relative;overflow:hidden"><div style="position:absolute;left:9px;top:-2px;width:2px;height:24px;background:#7A2A0E;transform:rotate(25deg)"></div></div>
+          <span ref="{{ r.bounceShadow }}" style="width:26px;height:4px;border-radius:50%;background:#2A2A30"></span>
+        </div>
+        <span style="font-size:12px;color:#92929A">Refreshing rankings</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Bounce · pull to refresh</span><span style="font-size:12px;line-height:1.45;color:#92929A">The ball drops in as you pull, then bounces while refreshing. 700ms per bounce, squashing on contact. A short label says what's updating.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:220px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:0 22px">
+        <div style="height:52px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:700"><span ref="{{ r.arcBtn }}" style="width:16px;height:16px;border-radius:50%;box-sizing:border-box;border:2px solid rgba(11,11,13,.25);border-top-color:#0B0B0D"></span>Joining match</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;color:#92929A"><span ref="{{ r.arcInline }}" style="width:20px;height:20px;border-radius:50%;box-sizing:border-box;border:2px solid #26262B;border-top-color:#FF5A1F"></span>Loading more matches</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Arc · buttons and inline</span><span style="font-size:12px;line-height:1.45;color:#92929A">16px inside buttons (the label changes to say what's happening), 20px at list ends. 750ms per turn. The button keeps its width so nothing jumps.</span></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:1260px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;padding:20px 22px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:34px 40px minmax(0,1fr) 52px;gap:12px;align-items:center"><span ref="{{ r.sk1 }}" style="height:18px;border-radius:5px;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span><span ref="{{ r.sk2 }}" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span><span style="display:flex;flex-direction:column;gap:6px"><span ref="{{ r.sk3 }}" style="height:12px;width:70%;border-radius:4px;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span><span ref="{{ r.sk4 }}" style="height:10px;width:45%;border-radius:4px;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span></span><span ref="{{ r.sk5 }}" style="height:20px;border-radius:5px;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span></div>
+        <div style="display:grid;grid-template-columns:34px 40px minmax(0,1fr) 52px;gap:12px;align-items:center"><span ref="{{ r.sk6 }}" style="height:18px;border-radius:5px;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span><span ref="{{ r.sk7 }}" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span><span style="display:flex;flex-direction:column;gap:6px"><span ref="{{ r.sk8 }}" style="height:12px;width:58%;border-radius:4px;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span><span ref="{{ r.sk9 }}" style="height:10px;width:40%;border-radius:4px;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span></span><span ref="{{ r.sk10 }}" style="height:20px;border-radius:5px;background:linear-gradient(90deg,#17171A 0%,#17171A 35%,#232328 50%,#17171A 65%,#17171A 100%);background-size:300% 100%"></span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Skeleton · lists and cards</span><span style="font-size:12px;line-height:1.45;color:#92929A">Drawn in the exact shapes of the final rows, so nothing shifts when data lands. A 1.4s shimmer moves left to right, and content crossfades in over 160ms. Lists never use a spinner.</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0;border-radius:24px;box-shadow:inset 0 0 0 1px #222227;padding:6px 22px;font-size:13px">
+      <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid #1D1D21;font-size:11px;font-weight:600;color:#6E6E76"><span>Context</span><span>Loader</span></div>
+      <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid #18181B"><span style="color:#92929A">Cold start</span><span>Launch (6a/6b) → Runner if Home isn't ready</span></div>
+      <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid #18181B"><span style="color:#92929A">Screen first load</span><span>Skeleton; Ball orbit only for screens with no list shape</span></div>
+      <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid #18181B"><span style="color:#92929A">Pull to refresh</span><span>Bounce, with cached content kept visible</span></div>
+      <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid #18181B"><span style="color:#92929A">Button action</span><span>Arc 16px + verb-ing label ("Joining match")</span></div>
+      <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid #18181B"><span style="color:#92929A">Pagination</span><span>Arc 20px + "Loading more"</span></div>
+      <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:12px 0"><span style="color:#92929A">Under 400ms</span><span>Nothing, because a flash of spinner reads as lag</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MICRO -->
+<div style="display:flex;flex-direction:column;gap:22px;max-width:1500px">
+  <div style="display:flex;align-items:baseline;gap:14px"><span style="font-size:28px;font-stretch:62%;font-weight:800">Micro-interactions</span><span style="font-size:13px;color:#92929A">Tap each one</span></div>
+  <div style="display:grid;grid-template-columns:repeat(4,300px);gap:20px">
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:200px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:grid;place-items:center;padding:0 24px">
+        <button ref="{{ r.btnBody }}" onClick="{{ pressBtn }}" style="all:unset;cursor:pointer;position:relative;width:220px;height:54px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;font-size:15px;font-weight:700;overflow:hidden">
+          <span ref="{{ r.btnLabel }}" style="position:absolute;inset:0;display:grid;place-items:center">Join match</span>
+          <span ref="{{ r.btnSpin }}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;opacity:0"><span ref="{{ r.btnArc }}" style="width:16px;height:16px;border-radius:50%;box-sizing:border-box;border:2px solid rgba(11,11,13,.25);border-top-color:#0B0B0D"></span>Joining</span>
+          <span ref="{{ r.btnDone }}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-variation-settings:'wght' 600">check</span>You're in</span>
+        </button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Press → working → done</span><span style="font-size:12px;line-height:1.45;color:#92929A">Press scales to 0.96 in 100ms. The label swaps to an arc, and on success the check pops in at 1.15 then settles. Success haptic. The button never changes size.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:200px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:grid;place-items:center;padding:0 24px">
+        <div style="position:relative;display:grid;grid-template-columns:1fr 1fr;width:240px;padding:3px;border-radius:12px;background:#151518">
+          <span style="position:absolute;top:3px;left:3px;width:calc(50% - 3px);height:calc(100% - 6px);border-radius:9px;background:#2A2A30;transform:translateX({{ segX }});transition:transform 220ms cubic-bezier(.2,0,0,1)"></span>
+          <button onClick="{{ seg0 }}" style="all:unset;cursor:pointer;position:relative;height:38px;display:grid;place-items:center;font-size:13px;font-weight:600;color:{{ seg0c }};transition:color 160ms">Rankings</button>
+          <button onClick="{{ seg1 }}" style="all:unset;cursor:pointer;position:relative;height:38px;display:grid;place-items:center;font-size:13px;font-weight:600;color:{{ seg1c }};transition:color 160ms">Matches</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Segment slide</span><span style="font-size:12px;line-height:1.45;color:#92929A">The thumb slides in 220ms with the standard ease. Labels change colour at 160ms. The content below crossfades instead of sliding, so the two motions don't compete. Selection haptic.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:200px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:grid;place-items:center;padding:0 14px">
+        <div style="position:relative;width:270px;height:60px;border-radius:22px;background:#151518;box-shadow:0 0 0 1px #24242A;display:grid;grid-template-columns:repeat(4,1fr);align-items:center">
+          <span style="position:absolute;top:5px;left:4px;width:calc(25% - 8px);height:50px;border-radius:17px;background:#2A2A30;transform:translateX({{ navX }});transition:transform 280ms cubic-bezier(.2,.9,.3,1)"></span>
+          <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="4"><button onClick="{{ n.on }}" style="all:unset;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;color:{{ n.color }};transition:color 160ms"><span style="font-family:'Material Symbols Outlined';font-size:22px;color:{{ n.ic }};font-variation-settings:{{ n.fill }};transition:color 160ms">{{ n.icon }}</span><span style="font-size:10px;font-weight:{{ n.w }}">{{ n.label }}</span></button></sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Tab pill</span><span style="font-size:12px;line-height:1.45;color:#92929A">The pill travels between tabs in 280ms with a soft decelerate and no bounce. The icon fills and turns orange as the pill arrives. Re-tapping the active tab scrolls to the top.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:200px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:grid;place-items:center;padding:0 24px">
+        <button onClick="{{ toggle }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:16px">
+          <span style="font-size:14px;font-weight:600">Waiting room</span>
+          <span style="position:relative;width:52px;height:32px;border-radius:16px;background:{{ togTrack }};transition:background 180ms"><span style="position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#F5F5F5;transform:translateX({{ togX }});transition:transform 180ms cubic-bezier(.2,0,0,1)"></span></span>
+        </button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Toggle</span><span style="font-size:12px;line-height:1.45;color:#92929A">The knob slides in 180ms and the track colour changes at the same time. Light haptic. The whole row is the hit target, not just the switch.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:200px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:flex;align-items:center;justify-content:center;gap:22px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="font-size:12px;color:#92929A">Rohit</span><span style="position:relative;width:84px;height:80px;overflow:hidden;display:block"><span ref="{{ r.scPrev }}" style="position:absolute;inset:0;display:grid;place-items:center;font-size:72px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums;opacity:0">{{ scPrev }}</span><span ref="{{ r.scCur }}" style="position:absolute;inset:0;display:grid;place-items:center;font-size:72px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums">{{ score }}</span></span></div>
+        <span style="font-size:44px;font-stretch:62%;font-weight:800;color:#6E6E76">7</span>
+        <button onClick="{{ addPoint }}" style="all:unset;cursor:pointer;padding:8px 12px;border-radius:10px;background:#1D1D21;font-size:12px;font-weight:600">+1</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Live score flip</span><span style="font-size:12px;line-height:1.45;color:#92929A">When the socket pushes a new score, the old digit rolls up and out while the new one rolls in (180ms). Only the number that changed moves, never the card.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:200px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:0 26px">
+        <div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:600">Play 100 matches</span><span style="color:#92929A;font-variant-numeric:tabular-nums">{{ prog }} / 100</span></div>
+        <div style="height:5px;border-radius:3px;background:#1D1D21;overflow:hidden"><div style="height:100%;width:{{ progW }};background:#FF5A1F;border-radius:3px;transition:width 520ms cubic-bezier(.2,0,0,1)"></div></div>
+        <button onClick="{{ addMatch }}" style="all:unset;cursor:pointer;align-self:flex-start;padding:8px 12px;border-radius:10px;background:#1D1D21;font-size:12px;font-weight:600">Finish a match</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Progress fill</span><span style="font-size:12px;line-height:1.45;color:#92929A">Progress bars ease forward over 520ms the next time the screen is seen after a match, never on every visit. Reaching the target hands off to the award unlock.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="height:200px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;display:flex;align-items:center;justify-content:center;gap:22px;perspective:600px">
+        <div style="position:relative;width:96px;height:96px">
+          <span ref="{{ r.awLocked }}" style="position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#1A1A1D,#111113 70%);box-shadow:inset 0 0 0 2.5px #2C2C32,inset 0 0 0 8px #111113,inset 0 0 0 9px #232328;font-size:30px;font-stretch:62%;font-weight:800;color:#4A4A52">100</span>
+          <span ref="{{ r.awCoin }}" style="position:absolute;inset:0;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle at 50% 28%,#212326,#121315 70%);box-shadow:inset 0 0 0 2.5px #A9AFB7,inset 0 0 0 8px #131213,inset 0 0 0 9px rgba(169,175,183,.4);font-size:30px;font-stretch:62%;font-weight:800;color:#D9DDE2;opacity:0">100<span ref="{{ r.awShine }}" style="position:absolute;top:-20%;left:0;width:30%;height:140%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.22),rgba(255,255,255,0));transform:translateX(-200%) rotate(20deg)"></span></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px"><span ref="{{ r.awLabel }}" style="font-size:12px;font-weight:600;color:#A9AFB7;opacity:0">Milestone earned</span><span style="font-size:20px;font-stretch:62%;font-weight:800">100 matches</span><button onClick="{{ unlock }}" style="all:unset;cursor:pointer;align-self:flex-start;padding:7px 11px;border-radius:9px;background:#1D1D21;font-size:12px;font-weight:600">{{ awBtn }}</button></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Award unlock</span><span style="font-size:12px;line-height:1.45;color:#92929A">The locked coin turns edge-on, the minted one turns face-up with a slight overshoot (620ms), and one shine passes across the rim. Medium haptic. It plays once, only for a real unlock, and never as confetti.</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="position:relative;height:200px;border-radius:24px;background:#0B0B0D;box-shadow:0 0 0 1px #222227;overflow:hidden">
+        <div style="position:absolute;inset:0;display:grid;place-items:center"><button onClick="{{ openSheet }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:4px;height:36px;padding:0 10px 0 14px;border-radius:999px;background:#1D1D21;font-size:13px;font-weight:600">Sport<span style="font-family:'Material Symbols Outlined';font-size:18px">expand_more</span></button></div>
+        <button onClick="{{ closeSheet }}" style="all:unset;cursor:pointer;position:absolute;inset:0;background:rgba(0,0,0,.62);opacity:{{ scrimOp }};pointer-events:{{ scrimPe }};transition:opacity 200ms"></button>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:150px;border-radius:24px 24px 0 0;background:#151518;transform:translateY({{ sheetY }});transition:{{ sheetTr }};padding:8px 18px 0;display:flex;flex-direction:column;gap:8px">
+          <span style="align-self:center;width:32px;height:4px;border-radius:2px;background:#3A3A42"></span>
+          <span style="font-size:15px;font-weight:650">Sport</span>
+          <button onClick="{{ closeSheet }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #222227;font-size:14px"><span>Badminton</span><span style="font-family:'Material Symbols Outlined';font-size:18px;color:#FF5A1F">check</span></button>
+          <button onClick="{{ closeSheet }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;padding:8px 0;font-size:14px"><span>Cricket</span></button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">Bottom sheet</span><span style="font-size:12px;line-height:1.45;color:#92929A">Opens in 320ms (decelerate) with the scrim fading over 200ms. Closes faster, in 220ms (accelerate). Drag down or tap the scrim to dismiss. Choosing an option closes it.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOKENS -->
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;max-width:1260px">
+  <div style="display:flex;flex-direction:column;border-radius:24px;box-shadow:inset 0 0 0 1px #222227;padding:6px 22px;font-size:13px">
+    <div style="display:grid;grid-template-columns:110px 70px minmax(0,1fr);gap:14px;padding:12px 0;border-bottom:1px solid #1D1D21;font-size:11px;font-weight:600;color:#6E6E76"><span>Duration</span><span>ms</span><span>Used for</span></div>
+    <sc-for list="{{ durations }}" as="d" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:110px 70px minmax(0,1fr);gap:14px;padding:11px 0;border-bottom:1px solid #18181B"><span style="font-weight:600">{{ d.n }}</span><span style="font-variant-numeric:tabular-nums;color:#C6C6CC">{{ d.ms }}</span><span style="color:#92929A">{{ d.u }}</span></div></sc-for>
+  </div>
+  <div style="display:flex;flex-direction:column;border-radius:24px;box-shadow:inset 0 0 0 1px #222227;padding:6px 22px;font-size:13px">
+    <div style="display:grid;grid-template-columns:110px minmax(0,1.1fr) minmax(0,1fr);gap:14px;padding:12px 0;border-bottom:1px solid #1D1D21;font-size:11px;font-weight:600;color:#6E6E76"><span>Easing</span><span>Curve</span><span>Used for</span></div>
+    <sc-for list="{{ easings }}" as="e" hint-placeholder-count="4"><div style="display:grid;grid-template-columns:110px minmax(0,1.1fr) minmax(0,1fr);gap:14px;padding:11px 0;border-bottom:1px solid #18181B"><span style="font-weight:600">{{ e.n }}</span><span style="font:500 11.5px 'JetBrains Mono',monospace;color:#C6C6CC">{{ e.c }}</span><span style="color:#92929A">{{ e.u }}</span></div></sc-for>
+  </div>
+</div>
+
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;reducedMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;splashSpeed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.25,&quot;max&quot;:2,&quot;step&quot;:0.25,&quot;unit&quot;:&quot;×&quot;,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  R = {}; G = {}; T = {};
+  state = { seg: 0, tab: 0, tog: true, score: 11, prog: 84, sheet: false, busy: false, aw: false };
+
+  ref(k) { return this.R[k] || (this.R[k] = React.createRef()); }
+  el(k) { return this.R[k] && this.R[k].current; }
+  play(g, k, kf, o) { const e = this.el(k); if (!e || !e.animate) return null; const a = e.animate(kf, { fill: 'both', ...o }); (this.G[g] = this.G[g] || []).push(a); return a; }
+  clear(g) { (this.G[g] || []).forEach(a => { try { a.cancel(); } catch (e) {} }); this.G[g] = []; }
+
+  componentDidMount() {
+    this.spin();
+    ['A', 'B', 'C'].forEach((id, i) => { this.T['s' + id] = setTimeout(() => this.loop(id), 300 + i * 350); });
+  }
+  componentWillUnmount() { Object.values(this.T).forEach(clearTimeout); Object.keys(this.G).forEach(g => this.clear(g)); }
+
+  loop(id) { clearTimeout(this.T[id]); const total = this.splash(id); this.T[id] = setTimeout(() => this.loop(id), total); }
+
+  splash(id) {
+    const s = Math.max(0.25, +(this.props.splashSpeed ?? 1)), rm = !!this.props.reducedMotion;
+    const t = x => x / s;
+    this.clear(id);
+    const P = (k, kf, o) => this.play(id, id + k, kf, { ...o, duration: t(o.duration), delay: t(o.delay || 0) });
+    const std = 'cubic-bezier(.2,0,0,1)', out = 'cubic-bezier(.2,.8,.2,1)';
+    const exit = (at) => { P('Wrap', [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(1.03)' }], { duration: 320, delay: at, easing: 'cubic-bezier(.3,0,.8,.15)' }); return t(at + 320 + 450); };
+    const show = (k) => P(k, [{ opacity: 1 }, { opacity: 1 }], { duration: 1 });
+
+    if (rm || id === 'C') {
+      show('Body'); show('Head');
+      P('Mark', [{ clipPath: 'inset(0 100% 0 0)', opacity: 0 }, { clipPath: 'inset(0 0% 0 0)', opacity: 1 }], { duration: 420, easing: 'cubic-bezier(.65,0,.35,1)' });
+      P('Word', [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 220, easing: std });
+      P('Tag', [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 320, easing: std });
+      return exit(1500);
+    }
+
+    if (id === 'A') {
+      P('Head', [
+        { opacity: 1, transform: 'translateY(-340px) scale(1,1)', easing: 'cubic-bezier(.55,0,1,.45)' },
+        { offset: .45, opacity: 1, transform: 'translateY(0) scale(1.2,.78)', easing: 'cubic-bezier(0,.55,.45,1)' },
+        { offset: .68, opacity: 1, transform: 'translateY(-18px) scale(.96,1.05)', easing: 'cubic-bezier(.55,0,1,.45)' },
+        { offset: .86, opacity: 1, transform: 'translateY(0) scale(1.06,.94)', easing: 'ease-out' },
+        { offset: 1, opacity: 1, transform: 'translateY(0) scale(1,1)' },
+      ], { duration: 900 });
+      P('Body', [{ opacity: 0, transform: 'translateX(-44px) skewX(-14deg)' }, { offset: .7, opacity: 1, transform: 'translateX(3px) skewX(2deg)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: 380, easing: out });
+      ['L1', 'L2', 'L3'].forEach((k, i) => P(k, [{ opacity: 0, transform: 'translateX(0) scaleX(0)' }, { offset: .35, opacity: 1, transform: 'translateX(-6px) scaleX(1)' }, { opacity: 0, transform: 'translateX(-34px) scaleX(0)' }], { duration: 480, delay: 400 + i * 45, easing: 'ease-out' }));
+      P('Word', [{ opacity: 0, letterSpacing: '.5em', transform: 'translateY(10px)' }, { opacity: 1, letterSpacing: '.16em', transform: 'none' }], { duration: 540, delay: 820, easing: out });
+      P('Tag', [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 400, delay: 1050, easing: std });
+      return exit(2700);
+    }
+
+    // B
+    P('Body', [{ opacity: 0, transform: 'translateX(-240px) skewX(-22deg)' }, { offset: .62, opacity: 1, transform: 'translateX(8px) skewX(4deg)' }, { opacity: 1, transform: 'none' }], { duration: 580, easing: 'cubic-bezier(.16,.9,.3,1)' });
+    ['L1', 'L2', 'L3', 'L4'].forEach((k, i) => P(k, [{ opacity: 0, transform: 'translateX(-140px) scaleX(.2)' }, { offset: .5, opacity: .9, transform: 'translateX(0) scaleX(1)' }, { opacity: 0, transform: 'translateX(12px) scaleX(0)' }], { duration: 560, delay: i * 30, easing: 'ease-out' }));
+    P('Head', [
+      { opacity: 1, transform: 'translate(170px,-210px) rotate(0deg)', easing: 'cubic-bezier(.25,0,.6,.5)' },
+      { offset: .55, opacity: 1, transform: 'translate(46px,-74px) rotate(320deg)', easing: 'cubic-bezier(.3,.5,.6,1)' },
+      { offset: .86, opacity: 1, transform: 'translate(0,0) rotate(530deg)', easing: 'ease-out' },
+      { offset: 1, opacity: 1, transform: 'translate(0,0) rotate(540deg)' },
+    ], { duration: 640, delay: 360 });
+    P('Mark', [{ transform: 'none' }, { offset: .4, transform: 'translateY(3px) scale(1.03,.96)' }, { transform: 'none' }], { duration: 280, delay: 920, easing: 'ease-out' });
+    P('Word', [{ opacity: 1, clipPath: 'inset(0 100% 0 0)' }, { opacity: 1, clipPath: 'inset(0 0% 0 0)' }], { duration: 460, delay: 1080, easing: 'cubic-bezier(.65,0,.35,1)' });
+    P('Tag', [{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: 1350, easing: std });
+    return exit(2900);
+  }
+
+  spin() {
+    this.clear('spin');
+    const rm = !!this.props.reducedMotion;
+    const inf = { iterations: Infinity, fill: 'none' };
+    this.play('spin', 'orbit', [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], { ...inf, duration: rm ? 2000 : 1000, easing: 'linear' });
+    this.play('spin', 'orbitBall', [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-720deg)' }], { ...inf, duration: 1000, easing: 'linear' });
+    ['arcBtn', 'arcInline', 'btnArc'].forEach(k => this.play('spin', k, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], { ...inf, duration: 750, easing: 'linear' }));
+    const drop = [
+      { transform: 'translateY(-30px) scale(1,1)', easing: 'cubic-bezier(.55,0,1,.45)' },
+      { offset: .5, transform: 'translateY(0) scale(1.18,.82)', easing: 'cubic-bezier(0,.55,.45,1)' },
+      { transform: 'translateY(-30px) scale(1,1)' },
+    ];
+    const shadow = [{ transform: 'scaleX(.45)', opacity: .35 }, { offset: .5, transform: 'scaleX(1)', opacity: 1 }, { transform: 'scaleX(.45)', opacity: .35 }];
+    this.play('spin', 'bounce', drop, { ...inf, duration: 700 });
+    this.play('spin', 'bounceShadow', shadow, { ...inf, duration: 700, easing: 'linear' });
+    this.play('spin', 'runHead', [
+      { transform: 'translateY(-14px) scale(1,1)', easing: 'cubic-bezier(.55,0,1,.45)' },
+      { offset: .5, transform: 'translateY(0) scale(1.15,.85)', easing: 'cubic-bezier(0,.55,.45,1)' },
+      { transform: 'translateY(-14px) scale(1,1)' },
+    ], { ...inf, duration: 640 });
+    this.play('spin', 'runBody', [{ transform: 'translateY(0)' }, { offset: .5, transform: 'translateY(2px)' }, { transform: 'translateY(0)' }], { ...inf, duration: 640, easing: 'ease-in-out' });
+    this.play('spin', 'runShadow', [{ transform: 'scaleX(.8)', opacity: .5 }, { offset: .5, transform: 'scaleX(1)', opacity: 1 }, { transform: 'scaleX(.8)', opacity: .5 }], { ...inf, duration: 640, easing: 'linear' });
+    for (let i = 1; i <= 10; i++) this.play('spin', 'sk' + i, [{ backgroundPosition: '100% 0' }, { backgroundPosition: '-50% 0' }], { ...inf, duration: 1400, easing: 'linear' });
+  }
+
+  componentDidUpdate(prev) {
+    if (prev.reducedMotion !== this.props.reducedMotion) this.spin();
+  }
+
+  renderVals() {
+    const S = this.state, ACC = '#FF5A1F';
+    const keys = ['AWrap', 'AMark', 'AL1', 'AL2', 'AL3', 'ABody', 'AHead', 'AWord', 'ATag', 'BWrap', 'BMark', 'BL1', 'BL2', 'BL3', 'BL4', 'BBody', 'BHead', 'BWord', 'BTag', 'CWrap', 'CMark', 'CBody', 'CHead', 'CWord', 'CTag',
+      'orbit', 'orbitBall', 'runBody', 'runHead', 'runShadow', 'bounce', 'bounceShadow', 'arcBtn', 'arcInline', 'sk1', 'sk2', 'sk3', 'sk4', 'sk5', 'sk6', 'sk7', 'sk8', 'sk9', 'sk10',
+      'btnBody', 'btnLabel', 'btnSpin', 'btnArc', 'btnDone', 'scPrev', 'scCur', 'awLocked', 'awCoin', 'awShine', 'awLabel'];
+    const r = {}; keys.forEach(k => { r[k] = this.ref(k); });
+    const replay = id => () => this.loop(id);
+    const std = 'cubic-bezier(.2,0,0,1)';
+
+    const pressBtn = () => {
+      if (S.busy) return;
+      this.setState({ busy: true });
+      this.clear('btn');
+      this.play('btn', 'btnBody', [{ transform: 'scale(1)' }, { transform: 'scale(.96)', offset: .4 }, { transform: 'scale(1)' }], { duration: 200, easing: std, fill: 'none' });
+      this.play('btn', 'btnLabel', [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-8px)' }], { duration: 150, easing: std });
+      this.play('btn', 'btnSpin', [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 160, delay: 90, easing: std });
+      this.T.btn1 = setTimeout(() => {
+        this.play('btn', 'btnSpin', [{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: std });
+        this.play('btn', 'btnDone', [{ opacity: 0, transform: 'scale(.5)' }, { offset: .6, opacity: 1, transform: 'scale(1.15)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 340, delay: 80, easing: 'ease-out' });
+      }, 1000);
+      this.T.btn2 = setTimeout(() => { this.clear('btn'); this.setState({ busy: false }); }, 2600);
+    };
+
+    const addPoint = () => {
+      this.setState(s => ({ score: s.score >= 21 ? 0 : s.score + 1 }), () => {
+        this.clear('sc');
+        this.play('sc', 'scPrev', [{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-70%)', opacity: 0 }], { duration: 180, easing: std });
+        this.play('sc', 'scCur', [{ transform: 'translateY(70%)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 180, easing: std });
+      });
+    };
+
+    const unlock = () => {
+      this.clear('aw');
+      if (S.aw) { this.setState({ aw: false }); return; }
+      this.setState({ aw: true });
+      this.play('aw', 'awLocked', [{ transform: 'rotateY(0deg)', opacity: 1 }, { transform: 'rotateY(90deg)', opacity: 1 }], { duration: 160, easing: 'cubic-bezier(.4,0,1,1)' });
+      this.play('aw', 'awCoin', [{ transform: 'rotateY(-90deg) scale(.9)', opacity: 1 }, { offset: .65, transform: 'rotateY(10deg) scale(1.06)', opacity: 1 }, { transform: 'rotateY(0deg) scale(1)', opacity: 1 }], { duration: 620, delay: 160, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      this.play('aw', 'awShine', [{ transform: 'translateX(-200%) rotate(20deg)' }, { transform: 'translateX(420%) rotate(20deg)' }], { duration: 520, delay: 700, easing: 'ease-in-out' });
+      this.play('aw', 'awLabel', [{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 260, delay: 640, easing: std });
+    };
+
+    const navDef = [['home', 'Home'], ['leaderboard', 'Compete'], ['stadium', 'Events'], ['military_tech', 'Awards']];
+    const navItems = navDef.map(([icon, label], i) => { const on = S.tab === i; return { icon, label, color: on ? '#F5F5F5' : '#85858D', ic: on ? ACC : '#85858D', w: on ? 700 : 500, fill: on ? "'FILL' 1, 'wght' 400" : "'FILL' 0, 'wght' 300", on: () => this.setState({ tab: i }) }; });
+
+    return {
+      r, replayA: replay('A'), replayB: replay('B'), replayC: replay('C'),
+      pressBtn,
+      segX: S.seg ? '100%' : '0%', seg0: () => this.setState({ seg: 0 }), seg1: () => this.setState({ seg: 1 }), seg0c: S.seg ? '#85858D' : '#F5F5F5', seg1c: S.seg ? '#F5F5F5' : '#85858D',
+      navItems, navX: `calc(${S.tab} * (100% + 8px))`,
+      toggle: () => this.setState({ tog: !S.tog }), togTrack: S.tog ? ACC : '#2A2A30', togX: S.tog ? '20px' : '0px',
+      score: S.score, scPrev: S.score === 0 ? 21 : S.score - 1, addPoint,
+      prog: S.prog, progW: S.prog + '%', addMatch: () => this.setState({ prog: S.prog >= 100 ? 84 : S.prog + 4 }),
+      unlock, awBtn: S.aw ? 'Reset' : 'Unlock',
+      openSheet: () => this.setState({ sheet: true }), closeSheet: () => this.setState({ sheet: false }),
+      scrimOp: S.sheet ? 1 : 0, scrimPe: S.sheet ? 'auto' : 'none', sheetY: S.sheet ? '0%' : '102%',
+      sheetTr: S.sheet ? 'transform 320ms cubic-bezier(.05,.7,.1,1)' : 'transform 220ms cubic-bezier(.3,0,.8,.15)',
+      durations: [['Instant', '100', 'Press feedback, haptic-paired'], ['Fast', '160–180', 'Toggles, colour changes, score flip'], ['Base', '220–280', 'Segments, tab pill, crossfades'], ['Emphasis', '320', 'Sheets, screen push, launch exit'], ['Celebrate', '520–620', 'Progress fill, award unlock (once)']].map(([n, ms, u]) => ({ n, ms, u })),
+      easings: [['Standard', 'cubic-bezier(.2, 0, 0, 1)', 'Most state changes'], ['Enter', 'cubic-bezier(.05, .7, .1, 1)', 'Sheets and things arriving'], ['Exit', 'cubic-bezier(.3, 0, .8, .15)', 'Dismissals, launch exit'], ['Gravity', 'in (.55,0,1,.45) / out (0,.55,.45,1)', 'The ball: launch, bounce, refresh']].map(([n, c, u]) => ({ n, c, u })),
+    };
+  }
+}
+</script>
+</body>
+</html>

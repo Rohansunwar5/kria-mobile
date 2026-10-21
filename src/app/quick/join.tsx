@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, View, Text, TextInput, Pressable } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Screen } from '@/components/Screen';
 import { claimQuickMatchSlot, type QuickMatch } from '@/api/quickMatch';
 import { claimKnockoutGuest, joinQuickKnockout, resolveQuickCode, type QuickKnockout } from '@/api/quickKnockout';
@@ -42,7 +42,9 @@ const serverMessage = (err: unknown, fallback: string) => {
 };
 
 export default function JoinQuickMatchScreen() {
-  const [code, setCode] = useState('');
+  // Compete › Matches hands over a complete code; look it up straight away.
+  const params = useLocalSearchParams<{ code?: string }>();
+  const [code, setCode] = useState(normalise(params.code ?? ''));
   const [match, setMatch] = useState<QuickMatch | null>(null);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
@@ -52,6 +54,7 @@ export default function JoinQuickMatchScreen() {
   const [teamId, setTeamId] = useState<string | null>(null);
 
   const lookup = async () => {
+    if (code.length < CODE_LENGTH) return;
     setBusy(true);
     setProblem('');
     setTeamId(null);
@@ -67,6 +70,11 @@ export default function JoinQuickMatchScreen() {
       setBusy(false);
     }
   };
+
+  useEffect(() => {
+    if (params.code) lookup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const enterKnockout = async (action: () => Promise<QuickKnockout>) => {
     setBusy(true);

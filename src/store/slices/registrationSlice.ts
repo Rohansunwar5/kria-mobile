@@ -91,7 +91,8 @@ export interface TournamentHistoryEntry {
     stats?: { matchesPlayed: number; matchesWon: number; pointsContributed: number };
     tournament?: { _id: string; name: string; sport: string; startDate: string; endDate: string; status: string; venue?: { name: string; city: string } };
     category?: { _id: string; name: string; gender: string };
-    team?: { _id: string; name: string; primaryColor?: string };
+    // The server selects `logo` too (playerAuth.service _buildTournamentHistory).
+    team?: { _id: string; name: string; primaryColor?: string; logo?: string };
     createdAt: string;
 }
 

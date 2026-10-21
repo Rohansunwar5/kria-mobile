@@ -7,6 +7,12 @@ export const SPORT_LABELS: Record<string, string> = {
   kabaddi: 'Kabaddi',
 };
 
+/**
+ * Sports `GET /player/rankings` accepts: the server's sport registry. No endpoint
+ * lists them, so this mirrors it by hand (SERVER-GAPS.md #3).
+ */
+export const RANKED_SPORTS = ['badminton', 'cricket'];
+
 /** Glyph per sport, for history rows and roster headers. */
 export const SPORT_ICON: Record<string, 'shuttlecock' | 'paddle' | 'ball' | 'court'> = {
   badminton: 'shuttlecock',

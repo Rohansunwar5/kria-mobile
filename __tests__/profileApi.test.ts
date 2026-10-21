@@ -2,7 +2,6 @@ import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
 import { getPublicPlayer, getTeam, getTeamRoster, listAnnouncements } from '@/api/profileApi';
 import { changePassword, sendContactMessage, registerFcmToken, unregisterFcmToken } from '@/api/settings';
-import { groupMenu } from '@/lib/profileMenu';
 
 describe('public profile and team api', () => {
   let mock: MockAdapter;
@@ -95,24 +94,3 @@ describe('settings api', () => {
   });
 });
 
-describe('groupMenu', () => {
-  it('splits the flat menu into Playing and Account', () => {
-    const groups = groupMenu();
-    expect(groups.map((g) => g.title)).toEqual(['Playing', 'Account']);
-  });
-
-  it('keeps registrations, quick matches, history and invoices under Playing', () => {
-    const playing = groupMenu().find((g) => g.title === 'Playing')!;
-    expect(playing.items.map((i) => i.label)).toEqual(['My entries', 'Quick matches', 'Tournament history', 'Payments']);
-  });
-
-  it('drops the redundant Find Tournaments row — the Events tab is one tap away', () => {
-    const labels = groupMenu().flatMap((g) => g.items.map((i) => i.label));
-    expect(labels).not.toContain('Find Tournaments');
-  });
-
-  it('keeps log out out of the groups so it can sit apart', () => {
-    const labels = groupMenu().flatMap((g) => g.items.map((i) => i.label));
-    expect(labels).not.toContain('Log out');
-  });
-});

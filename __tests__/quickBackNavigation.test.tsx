@@ -20,11 +20,15 @@ jest.mock('@/lib/useQuickMatch', () => ({
 
 beforeEach(() => jest.clearAllMocks());
 
-it.each([
-  ['the match screen', QuickMatchScreen],
-  ['the join screen', JoinQuickMatchScreen],
-])('%s falls back to the quick match list when there is no history', (_name, Screen) => {
-  render(<Screen />);
+it('the match screen falls back to Compete when there is no history', () => {
+  render(<QuickMatchScreen />);
+  fireEvent.press(screen.getByLabelText('Back'));
+  expect(router.back).not.toHaveBeenCalled();
+  expect(router.replace).toHaveBeenCalledWith('/(tabs)/compete');
+});
+
+it('the join screen falls back to the quick match list when there is no history', () => {
+  render(<JoinQuickMatchScreen />);
   fireEvent.press(screen.getByText('Back'));
   expect(router.back).not.toHaveBeenCalled();
   expect(router.replace).toHaveBeenCalledWith('/quick');

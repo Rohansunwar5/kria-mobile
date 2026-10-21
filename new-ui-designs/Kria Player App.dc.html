@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&display=block" rel="stylesheet">
+<style>
+html,body{background:#141416}body{margin:0;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#F5F5F5;text-decoration:none}
+a:hover{color:#FF5A1F}
+input{font-family:inherit}
+*::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+
+<section id="t1" style="background:#141416;color:#F5F5F5;min-height:100vh;width:max-content;min-width:100%;box-sizing:border-box;padding:56px 56px 72px;display:flex;flex-direction:column;gap:48px">
+
+<header style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start;max-width:1740px">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px"><img src="assets/kria-logo.png" alt="Kria" style="width:46px;height:40px;object-fit:contain"><span style="font:600 11px 'JetBrains Mono',monospace;color:#FF5A1F;letter-spacing:.08em">KRIA · PLAYER APP · DIRECTION 1</span></div>
+    <h1 style="margin:0;font-size:64px;font-stretch:62%;font-weight:800;line-height:.9;letter-spacing:-.01em">Your sporting career, in your pocket.</h1>
+    <p style="margin:0;font-size:14px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">Eight key screens, each tappable. Links inside a phone jump to the screen they open. Data is realistic mock data shaped exactly like the kria-server responses.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Built to what the backend actually does</div>
+    <p style="margin:0;text-wrap:pretty"><strong style="color:#F5F5F5;font-weight:600">Rankings are win rate, not points.</strong> rankBySport orders by won ÷ decided, only for players with 10+ decided matches, top 50, per sport. Every ranking screen says so. No rank movement is shown because none is stored.</p>
+    <p style="margin:0;text-wrap:pretty"><strong style="color:#F5F5F5;font-weight:600">Quick matches are join-by-code.</strong> No venue, time or public feed exists, so Compete › Matches is "your matches + join with code", not a map of games.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Reference patterns, adapted</div>
+    <p style="margin:0;text-wrap:pretty"><strong style="color:#F5F5F5;font-weight:600">Status-first home</strong> (fitness summary apps): one number answers "where do I stand", then one action.</p>
+    <p style="margin:0;text-wrap:pretty"><strong style="color:#F5F5F5;font-weight:600">Editorial ranked rows + pinned self</strong> (segment leaderboards): no podium, your row always reachable.</p>
+    <p style="margin:0;text-wrap:pretty"><strong style="color:#F5F5F5;font-weight:600">Minted medals</strong> (run-club trophy cases): one coin language, tier carried by the rim metal only.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="font-size:13px;font-weight:650">System</div>
+    <div style="display:flex;gap:6px">
+      <div style="flex:none;width:40px;height:40px;border-radius:10px;background:#0B0B0D;box-shadow:inset 0 0 0 1px #2A2A30"></div>
+      <div style="flex:none;width:40px;height:40px;border-radius:10px;background:#151518"></div>
+      <div style="flex:none;width:40px;height:40px;border-radius:10px;background:#1D1D21"></div>
+      <div style="flex:none;width:40px;height:40px;border-radius:10px;background:#92929A"></div>
+      <div style="flex:none;width:40px;height:40px;border-radius:10px;background:#F5F5F5"></div>
+      <div style="flex:none;width:40px;height:40px;border-radius:10px;background:#FF5A1F"></div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div style="flex:none;width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px #C9A35A"></div>
+      <div style="flex:none;width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px #A9AFB7"></div>
+      <div style="flex:none;width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px #A8714A"></div>
+      <span style="font-size:12px;color:#92929A;margin-left:6px">Honour · Milestone · Knockout</span>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:40px;font-stretch:62%;font-weight:800;line-height:1">#7 68.9%</span>
+      <span style="font-size:12px;color:#92929A;line-height:1.4">Archivo Condensed 800 for identity + numbers (tabular). Archivo 400–650 for reading.</span>
+    </div>
+  </div>
+</header>
+
+<div style="display:flex;flex-wrap:wrap;gap:56px 44px;align-items:flex-start;max-width:1740px">
+
+<!-- 01 HOME -->
+<div id="1a" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#1a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">1a</a><span style="font-size:13px;font-weight:600">01 Home</span></div>
+  <div data-screen-label="01 Home" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;bottom:0;padding-bottom:96px;box-sizing:border-box;overflow-y:auto;scrollbar-width:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px 0">
+        <div style="display:flex;align-items:center;gap:12px">
+          <img src="assets/kria-logo.png" alt="Kria" style="width:40px;height:35px;object-fit:contain">
+          <div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12px;color:#92929A">Thursday, 15 Oct</span><span style="font-size:16px;font-weight:650">Evening, Aarav</span></div>
+        </div>
+        <div style="position:relative;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:#151518"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-variation-settings:'wght' 300">notifications</span><span style="position:absolute;top:11px;right:12px;width:7px;height:7px;border-radius:50%;background:#FF5A1F;box-shadow:0 0 0 2px #151518"></span></div>
+      </div>
+
+      <div style="padding:22px 20px 0;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;justify-content:flex-end">
+          <button onClick="{{ openHeroSheet }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 12px;border-radius:12px;background:#151518"><span style="font-family:'Material Symbols Outlined';font-size:18px;font-variation-settings:'wght' 300">{{ hero.icon }}</span><span style="font-size:14px;font-weight:650">{{ hero.sport }}</span><span style="font-family:'Material Symbols Outlined';font-size:20px;color:#92929A">expand_more</span></button>
+        </div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:18px">
+          <div style="display:flex;flex-direction:column;gap:6px;padding-bottom:4px">
+            <div style="font-size:34px;font-stretch:62%;font-weight:800;line-height:.9;font-variant-numeric:tabular-nums">{{ hero.rate }}</div>
+            <div style="font-size:13px;color:#92929A;font-variant-numeric:tabular-nums">{{ hero.sub }}</div>
+          </div>
+          <div style="font-size:132px;font-stretch:62%;font-weight:800;line-height:.78;letter-spacing:-.02em;font-variant-numeric:tabular-nums;text-align:right">{{ hero.big }}</div>
+        </div>
+        <a href="#1b" style="margin-top:6px;display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid #1D1D21;border-bottom:1px solid #1D1D21">
+          <span style="font-size:14px"><span style="color:#FF5A1F;font-weight:600">{{ hero.gapA }}</span>{{ hero.gapB }}</span>
+          <span style="display:flex;align-items:center;gap:2px;font-size:13px;color:#92929A">Rankings<span style="font-family:'Material Symbols Outlined';font-size:18px">chevron_right</span></span>
+        </a>
+      </div>
+
+      <div style="padding:20px 20px 0;display:grid;grid-template-columns:1fr 1.3fr;gap:10px">
+        <a href="#1c" style="height:56px;border-radius:16px;background:#1D1D21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:20px">pin</span>Join with code</a>
+        <a href="#1d" style="height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-variation-settings:'wght' 500">add</span>Host a match</a>
+      </div>
+
+      <div style="padding:44px 20px 0;display:flex;flex-direction:column;gap:18px">
+        <div style="font-size:17px;font-weight:650">Up next</div>
+        <a href="#1e" style="display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:22px;background:#151518">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="display:flex;gap:6px"><span style="height:26px;padding:0 10px;border-radius:999px;background:#2A2A30;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:650;color:#F5F5F5"><span style="font-family:'Material Symbols Outlined';font-size:15px;font-weight:normal">sports_tennis</span>Badminton</span><span style="height:26px;padding:0 10px;border-radius:999px;background:#2A2A30;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:650;color:#F5F5F5">Doubles</span></span><span style="font:600 12px 'JetBrains Mono',monospace;color:#92929A;letter-spacing:.06em">K7QX2M</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:24px;font-stretch:62%;font-weight:800;line-height:1">Smash Bros vs Net Gains</span><span style="font-size:13px;color:#92929A">Best of 3 to 21 · You're hosting</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid #222227">
+            <span style="font-size:15px;font-weight:650;font-variant-numeric:tabular-nums">1 slot left</span>
+            <div style="display:flex"><span style="width:28px;height:28px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:10px;font-weight:650;box-shadow:0 0 0 2px #151518">AM</span><span style="width:28px;height:28px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:10px;font-weight:650;margin-left:-6px;box-shadow:0 0 0 2px #151518">KR</span><span style="width:28px;height:28px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:10px;font-weight:650;margin-left:-6px;box-shadow:0 0 0 2px #151518">NS</span></div>
+          </div>
+        </a>
+      </div>
+      <div style="padding:44px 0 0;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 20px"><span style="font-size:17px;font-weight:650">Tournaments near you</span><a href="#1f" style="font-size:13px;color:#92929A">All events</a></div>
+        <div style="display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:0 20px;scroll-snap-type:x mandatory;scroll-padding:0 20px">
+          <sc-for list="{{ homeEvents }}" as="he" hint-placeholder-count="2">
+            <a href="#1f" style="flex:none;width:300px;display:flex;flex-direction:column;gap:10px;scroll-snap-align:start">
+              <div style="position:relative;height:160px;border-radius:20px;overflow:hidden;background:#151518"><img src="{{ he.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ he.pos }};display:block"><span style="position:absolute;top:10px;left:10px;display:flex;gap:6px"><span style="padding:5px 9px;border-radius:9px;background:#0B0B0D;font-size:11px;font-weight:700;letter-spacing:.03em;white-space:nowrap">{{ he.date }}</span></span><sc-if value="{{ he.auction }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;bottom:10px;left:10px;display:flex;align-items:center;gap:6px;white-space:nowrap;padding:5px 9px;border-radius:9px;background:#0B0B0D;font-size:11px;font-weight:700"><span style="width:6px;height:6px;border-radius:50%;background:#FF5A1F"></span>Auction live</span></sc-if><sc-if value="{{ he.hasPrice }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:10px;right:10px;padding:5px 9px;border-radius:9px;background:#FF5A1F;color:#0B0B0D;font-size:11px;font-weight:750;font-variant-numeric:tabular-nums">{{ he.price }}</span></sc-if></div>
+              <span style="display:flex;flex-direction:column;gap:5px"><span style="font-size:16px;font-weight:650;line-height:1.25">{{ he.name }}</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#92929A"><span style="font-family:'Material Symbols Outlined';font-size:15px">location_on</span>{{ he.where }}</span></span>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="padding:44px 20px 0;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:650">Next milestone</span><a href="#1g" style="font-size:13px;color:#92929A">Awards</a></div>
+        <div style="display:flex;align-items:center;gap:18px">
+          <div style="position:relative;width:96px;height:96px;flex:none">
+            <div style="position:absolute;inset:0"><dc-import name="AwardBadge" shape="coin" metal="locked" glyph="100" sub="MATCHES" size="96" hint-size="96px,96px"></dc-import></div>
+            <div style="position:absolute;inset:0;clip-path:inset({{ msClip }} 0 0 0);transition:clip-path 1.6s cubic-bezier(.2,.7,.2,1)"><dc-import name="AwardBadge" shape="coin" metal="silver" glyph="100" sub="MATCHES" size="96" hint-size="96px,96px"></dc-import></div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
+            <span style="font-size:15px;font-weight:650">Play 100 matches</span>
+            <span style="display:flex;align-items:baseline;gap:6px"><span style="font-size:34px;font-stretch:62%;font-weight:800;line-height:.9;font-variant-numeric:tabular-nums">85%</span></span>
+            <span style="font-size:12px;color:#92929A">15 more, any sport, quick or tournament</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:44px 20px 28px;display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:10px"><span style="font-size:17px;font-weight:650">Recent</span><a href="#1h" style="font-size:13px;color:#92929A">All matches</a></div>
+        <sc-for list="{{ recent }}" as="r" hint-placeholder-count="3">
+          <div style="display:flex;gap:14px;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid #18181B">
+            <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+              <span style="font-size:14px;font-weight:600">{{ r.title }}</span>
+              <span style="font-size:13px;color:#C6C6CC;font-variant-numeric:tabular-nums">{{ r.score }}</span>
+            </div>
+            <span style="width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:13px;font-weight:750;background:{{ r.badgeBg }};color:{{ r.badgeFg }}">{{ r.res }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:106px;padding:16px 12px 0;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 34%);z-index:5">
+      <nav style="height:64px;border-radius:24px;background:#151518;box-shadow:0 0 0 1px #24242A;display:grid;grid-template-columns:repeat(5,1fr);align-items:center">
+        <sc-for list="{{ nav.home }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;background:{{ t.pill }};color:{{ t.color }}"><span style="height:26px;display:grid;place-items:center"><sc-if value="{{ t.isIcon }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Material Symbols Outlined';font-size:23px;color:{{ t.iconColor }};font-variation-settings:{{ t.fill }}">{{ t.icon }}</span></sc-if><sc-if value="{{ t.isAvatar }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:50%;background:#2A2A30;box-shadow:0 0 0 1.5px {{ t.ring }};display:grid;place-items:center;font-size:9px;font-weight:700;color:#F5F5F5">AM</span></sc-if></span><span style="font-size:10.5px;font-weight:{{ t.weight }}">{{ t.label }}</span></a></sc-for>
+      </nav>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+    <sc-if value="{{ heroSheet }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <button onClick="{{ closeHeroSheet }}" style="all:unset;cursor:pointer;position:absolute;inset:0;background:rgba(0,0,0,.62)"></button>
+        <div style="position:relative;background:#151518;border-radius:30px 30px 0 0;padding:10px 20px 38px;display:flex;flex-direction:column;gap:14px">
+          <span style="align-self:center;width:36px;height:5px;border-radius:3px;background:#3A3A42"></span>
+          <div style="display:flex;flex-direction:column;gap:3px;padding-top:6px"><span style="font-size:20px;font-weight:650">Show ranking for</span><span style="font-size:12px;color:#92929A">Only sports you've played · most recent first</span></div>
+          <div style="display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:12px;background:#0B0B0D;box-shadow:inset 0 0 0 1px #26262B;color:#6E6E76;font-size:14px"><span style="font-family:'Material Symbols Outlined';font-size:20px">search</span>Search sports</div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ heroList }}" as="hl" hint-placeholder-count="3">
+              <button onClick="{{ hl.on }}" style="all:unset;cursor:pointer;display:grid;grid-template-columns:40px minmax(0,1fr) auto 24px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #222227">
+                <span style="width:40px;height:40px;border-radius:12px;background:#1D1D21;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:22px;font-variation-settings:'wght' 300">{{ hl.icon }}</span>
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:15px;font-weight:600">{{ hl.name }}</span><span style="font-size:12px;color:#92929A">{{ hl.sub }}</span></span>
+                <span style="font-size:20px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums;color:{{ hl.rankColor }}">{{ hl.rank }}</span>
+                <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#FF5A1F;opacity:{{ hl.check }}">check</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ showRationale }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">One hero, every sport one tap away.</span> The hero opens on the sport you played most recently, not your "best" one (best needs 10 decided matches, and it isn't always what you're playing this week). The sport button opens a searchable sheet of only the sports you've played, each with its rank. That scales to 10+ sports where tabs can't. Tournaments are a swipeable banner rail, one card fully visible with the next peeking in.</p></sc-if>
+</div>
+
+<!-- 02 RANKINGS -->
+<div id="1b" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#1b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">1b</a><span style="font-size:13px;font-weight:600">02 Compete · Rankings</span><span style="font-size:12px;color:#6E6E76">tap sports</span></div>
+  <div data-screen-label="02 Rankings" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;bottom:0;padding-bottom:96px;box-sizing:border-box;overflow-y:auto;scrollbar-width:none">
+      <div style="padding:10px 20px 0;display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0;font-size:40px;font-stretch:62%;font-weight:800;line-height:1">Compete</h2>
+        <div style="display:flex;padding:3px;border-radius:12px;background:#151518">
+          <span style="padding:8px 14px;border-radius:9px;background:#2A2A30;font-size:13px;font-weight:600">Rankings</span>
+          <a href="#1c" style="padding:8px 14px;font-size:13px;font-weight:600;color:#92929A">Matches</a>
+        </div>
+      </div>
+      <div style="display:flex;gap:22px;padding:22px 20px 0;border-bottom:1px solid #1A1A1D">
+        <sc-for list="{{ lbTabs }}" as="s" hint-placeholder-count="3"><button onClick="{{ s.on }}" style="all:unset;cursor:pointer;padding:0 0 12px;font-size:15px;font-weight:600;color:{{ s.color }};box-shadow:inset 0 -2px 0 {{ s.line }}">{{ s.label }}</button></sc-for>
+      </div>
+
+      <sc-if value="{{ lbHas }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:12px 12px 24px;display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{ lbRows }}" as="p" hint-placeholder-count="10">
+            <sc-if value="{{ p.gapBefore }}" hint-placeholder-val="{{ false }}"><div style="padding:10px 0;text-align:center;font-size:16px;letter-spacing:.3em;color:#3A3A42">···</div></sc-if>
+            <a href="#1h" style="display:grid;grid-template-columns:34px 44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:20px 10px;border-radius:18px;background:{{ p.bg }};box-shadow:{{ p.line }}">
+              <span style="font-size:{{ p.rankSize }};font-stretch:62%;font-weight:800;color:{{ p.rankColor }};text-align:center;font-variant-numeric:tabular-nums">{{ p.rank }}</span>
+              <span style="width:44px;height:44px;border-radius:50%;background:{{ p.avBg }};color:{{ p.avFg }};box-shadow:inset 0 0 0 1.5px {{ p.ring }};display:grid;place-items:center;font-size:13px;font-weight:650">{{ p.ini }}</span>
+              <span style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-size:15px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ p.nameColor }}">{{ p.name }}</span><span style="font-size:12px;color:{{ p.subColor }};font-variant-numeric:tabular-nums">{{ p.sub }}</span></span>
+              <span style="font-size:24px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums;color:{{ p.nameColor }}">{{ p.rate }}</span>
+            </a>
+          </sc-for>
+          <div style="padding:16px 8px 0;font-size:12px;color:#6E6E76;text-align:center">Showing top 10 of 50 · refreshed every few minutes</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ lbEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:64px 32px 0;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+          <div style="width:72px;height:72px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #2C2C32;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:30px;color:#6A6A72;font-variation-settings:'wght' 200">leaderboard</div>
+          <div style="font-size:26px;font-stretch:62%;font-weight:800;line-height:1.05">No one's ranked in table tennis yet</div>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#92929A">The first player to 10 decided matches opens this board. You're 7 away.</p>
+          <a href="#1f" style="margin-top:8px;padding:13px 20px;border-radius:14px;background:#1D1D21;font-size:14px;font-weight:600">Find a table tennis event</a>
+        </div>
+      </sc-if>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:106px;padding:16px 12px 0;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 34%);z-index:5">
+      <nav style="height:64px;border-radius:24px;background:#151518;box-shadow:0 0 0 1px #24242A;display:grid;grid-template-columns:repeat(5,1fr);align-items:center">
+        <sc-for list="{{ nav.compete }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;background:{{ t.pill }};color:{{ t.color }}"><span style="height:26px;display:grid;place-items:center"><sc-if value="{{ t.isIcon }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Material Symbols Outlined';font-size:23px;color:{{ t.iconColor }};font-variation-settings:{{ t.fill }}">{{ t.icon }}</span></sc-if><sc-if value="{{ t.isAvatar }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:50%;background:#2A2A30;box-shadow:0 0 0 1.5px {{ t.ring }};display:grid;place-items:center;font-size:9px;font-weight:700;color:#F5F5F5">AM</span></sc-if></span><span style="font-size:10.5px;font-weight:{{ t.weight }}">{{ t.label }}</span></a></sc-for>
+      </nav>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+  </div>
+  <sc-if value="{{ showRationale }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Rows, not a podium.</span> Top three get metal numerals and a hairline ring — nothing more. Your position is pinned above the tab bar in every sport: inside the list (badminton), outside the top 10 (cricket), or unranked with the exact distance to qualify (table tennis).</p></sc-if>
+</div>
+
+<!-- 03 MATCHES -->
+<div id="1c" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#1c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">1c</a><span style="font-size:13px;font-weight:600">03 Compete · Quick matches</span><span style="font-size:12px;color:#6E6E76">type a code, filter</span></div>
+  <div data-screen-label="03 Quick matches" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;bottom:0;padding-bottom:96px;box-sizing:border-box;overflow-y:auto;scrollbar-width:none">
+      <div style="padding:10px 20px 0;display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0;font-size:40px;font-stretch:62%;font-weight:800;line-height:1">Compete</h2>
+        <div style="display:flex;padding:3px;border-radius:12px;background:#151518">
+          <a href="#1b" style="padding:8px 14px;font-size:13px;font-weight:600;color:#92929A">Rankings</a>
+          <span style="padding:8px 14px;border-radius:9px;background:#2A2A30;font-size:13px;font-weight:600">Matches</span>
+        </div>
+      </div>
+
+      <div style="margin:28px 20px 0;padding:20px;border-radius:22px;background:#151518;display:flex;flex-direction:column;gap:14px">
+        <span style="font-size:16px;font-weight:650">Join with a code</span>
+        <div style="display:flex;gap:8px">
+          <input value="{{ code }}" onChange="{{ setCode }}" maxlength="6" placeholder="K7QX2M" style="flex:1;min-width:0;height:52px;padding:0 16px;border:none;outline:none;border-radius:14px;background:#0B0B0D;box-shadow:inset 0 0 0 1px #2A2A30;color:#F5F5F5;font:600 20px 'JetBrains Mono',monospace;letter-spacing:.24em;text-transform:uppercase">
+          <button onClick="{{ joinCode }}" style="all:unset;cursor:pointer;height:52px;padding:0 20px;border-radius:14px;font-size:15px;font-weight:700;background:{{ joinBg }};color:{{ joinFg }}">Join</button>
+        </div>
+        <span style="font-size:12px;color:{{ joinHintColor }}">{{ joinHint }}</span>
+      </div>
+
+      <a href="#1d" style="margin:14px 20px 0;height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-variation-settings:'wght' 500">add</span>Host a match</a>
+
+      <div style="padding:44px 20px 0;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:650">Your matches</span></div>
+      <div style="display:flex;gap:8px;padding:18px 20px 4px;overflow-x:auto;scrollbar-width:none">
+        <sc-for list="{{ mfChips }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.on }}" style="all:unset;cursor:pointer;flex:none;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</button></sc-for>
+      </div>
+      <div style="padding:18px 20px 28px;display:flex;flex-direction:column;gap:16px">
+        <sc-for list="{{ mList }}" as="m" hint-placeholder-count="4">
+          <a href="#1e" style="display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:22px;background:#151518;opacity:{{ m.op }}">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <span style="display:flex;gap:6px"><span style="height:26px;padding:0 10px;border-radius:999px;background:#2A2A30;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:650;color:#F5F5F5"><span style="font-family:'Material Symbols Outlined';font-size:15px;font-weight:normal">{{ m.icon }}</span>{{ m.sportLabel }}</span><span style="height:26px;padding:0 10px;border-radius:999px;background:#2A2A30;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:650;color:#F5F5F5">{{ m.fmt }}</span></span>
+              <span style="display:flex;align-items:center;gap:6px;font:{{ m.trFont }};color:{{ m.trColor }};letter-spacing:{{ m.trLs }}"><sc-if value="{{ m.isLive }}" hint-placeholder-val="{{ false }}"><span style="width:7px;height:7px;border-radius:50%;background:#FF5A1F"></span></sc-if>{{ m.tr }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:24px;font-stretch:62%;font-weight:800;line-height:1">{{ m.title }}</span><span style="font-size:13px;color:#92929A">{{ m.line }}</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid #222227">
+              <span style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:15px;font-weight:650;font-variant-numeric:tabular-nums;color:{{ m.footColor }}">{{ m.foot }}</span><sc-if value="{{ m.hasFootSub }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:#92929A">{{ m.footSub }}</span></sc-if></span>
+              <sc-if value="{{ m.hasAv }}" hint-placeholder-val="{{ false }}"><div style="display:flex"><sc-for list="{{ m.av }}" as="v" hint-placeholder-count="3"><span style="width:28px;height:28px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:10px;font-weight:650;margin-left:{{ v.ml }};box-shadow:0 0 0 2px #151518">{{ v.t }}</span></sc-for></div></sc-if>
+              <sc-if value="{{ m.hasRes }}" hint-placeholder-val="{{ false }}"><span style="width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:13px;font-weight:750;background:{{ m.resBg }};color:{{ m.resFg }}">{{ m.res }}</span></sc-if>
+            </div>
+          </a>
+        </sc-for>
+        <sc-if value="{{ mNone }}" hint-placeholder-val="{{ false }}"><div style="padding:36px 0;text-align:center;font-size:14px;color:#92929A">Nothing here. Matches you host or join will show up in this list.</div></sc-if>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:106px;padding:16px 12px 0;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 34%);z-index:5">
+      <nav style="height:64px;border-radius:24px;background:#151518;box-shadow:0 0 0 1px #24242A;display:grid;grid-template-columns:repeat(5,1fr);align-items:center">
+        <sc-for list="{{ nav.compete }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;background:{{ t.pill }};color:{{ t.color }}"><span style="height:26px;display:grid;place-items:center"><sc-if value="{{ t.isIcon }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Material Symbols Outlined';font-size:23px;color:{{ t.iconColor }};font-variation-settings:{{ t.fill }}">{{ t.icon }}</span></sc-if><sc-if value="{{ t.isAvatar }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:50%;background:#2A2A30;box-shadow:0 0 0 1.5px {{ t.ring }};display:grid;place-items:center;font-size:9px;font-weight:700;color:#F5F5F5">AM</span></sc-if></span><span style="font-size:10.5px;font-weight:{{ t.weight }}">{{ t.label }}</span></a></sc-for>
+      </nav>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+  </div>
+  <sc-if value="{{ showRationale }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Code first, honestly.</span> The API has no open-match feed (only /mine and /by-code), so discovery is the code field plus your own history. Status is a dot + word, never a colored card. The four real statuses: waiting, live, completed, cancelled.</p></sc-if>
+</div>
+
+<!-- 04 HOST -->
+<div id="1d" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#1d" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">1d</a><span style="font-size:13px;font-weight:600">04 Host a match</span><span style="font-size:12px;color:#6E6E76">full 4-step flow</span></div>
+  <div data-screen-label="04 Host a match" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+      <button onClick="{{ hBack }}" style="all:unset;cursor:pointer;width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">{{ hBackIcon }}</button>
+      <span style="font-size:15px;font-weight:600">Host a match</span>
+      <span style="width:44px;text-align:center;font-size:13px;color:#92929A;font-variant-numeric:tabular-nums">{{ hStepLabel }}</span>
+    </div>
+    <div style="position:absolute;top:106px;left:20px;right:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+      <sc-for list="{{ hSegs }}" as="g" hint-placeholder-count="4"><div style="height:3px;border-radius:2px;background:{{ g.c }}"></div></sc-for>
+    </div>
+    <div style="position:absolute;top:122px;left:0;right:0;bottom:112px;overflow-y:auto;scrollbar-width:none;padding:0 20px">
+
+      <sc-if value="{{ h1 }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:22px;padding-top:20px">
+          <h3 style="margin:0;font-size:36px;font-stretch:62%;font-weight:800;line-height:1">What are you playing?</h3>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ hSports }}" as="s" hint-placeholder-count="2">
+              <button onClick="{{ s.on }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:16px;padding:20px;border-radius:22px;background:#151518;box-shadow:inset 0 0 0 {{ s.ring }}">
+                <span style="width:48px;height:48px;border-radius:14px;background:#1D1D21;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:26px;font-variation-settings:'wght' 300">{{ s.icon }}</span>
+                <span style="flex:1;font-size:17px;font-weight:650">{{ s.label }}</span>
+                <span style="width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 {{ s.dot }}"></span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ h2bad }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:28px;padding-top:20px">
+          <h3 style="margin:0;font-size:36px;font-stretch:62%;font-weight:800;line-height:1">Set the format</h3>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">Players</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><sc-for list="{{ hTypeOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.on }}" style="all:unset;cursor:pointer;height:52px;border-radius:14px;display:grid;place-items:center;font-size:15px;font-weight:600;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">Best of</span>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><sc-for list="{{ hBestOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="all:unset;cursor:pointer;height:52px;border-radius:14px;display:grid;place-items:center;font-size:15px;font-weight:600;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">Points to win a game</span>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><sc-for list="{{ hPtsOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="all:unset;cursor:pointer;height:52px;border-radius:14px;display:grid;place-items:center;font-size:15px;font-weight:600;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ h2cri }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:22px;padding-top:20px">
+          <h3 style="margin:0;font-size:36px;font-stretch:62%;font-weight:800;line-height:1">Set the format</h3>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ hSteppers }}" as="st" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid #18181B">
+                <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600">{{ st.label }}</span><span style="font-size:12px;color:#92929A">{{ st.range }}</span></span>
+                <span style="display:flex;align-items:center;gap:14px">
+                  <button onClick="{{ st.dec }}" style="all:unset;cursor:pointer;width:44px;height:44px;border-radius:12px;background:#1D1D21;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:20px">remove</button>
+                  <span style="width:34px;text-align:center;font-size:28px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums">{{ st.val }}</span>
+                  <button onClick="{{ st.inc }}" style="all:unset;cursor:pointer;width:44px;height:44px;border-radius:12px;background:#1D1D21;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:20px">add</button>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ h3 }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:24px;padding-top:20px">
+          <h3 style="margin:0;font-size:36px;font-stretch:62%;font-weight:800;line-height:1">Name the sides</h3>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <input value="{{ h.sideA }}" onChange="{{ setSideA }}" placeholder="Side name" style="height:52px;padding:0 16px;border:none;outline:none;border-radius:14px;background:#151518;box-shadow:inset 0 0 0 {{ errARing }};color:#F5F5F5;font-size:18px;font-weight:650">
+            <sc-if value="{{ errA }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:6px;align-items:center;font-size:12px;color:#FF7A4D"><span style="font-family:'Material Symbols Outlined';font-size:15px">error</span>Each side needs a name.</span></sc-if>
+            <div style="display:flex;flex-direction:column;padding-left:4px">
+              <sc-for list="{{ hSlotsA }}" as="sl" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
+                  <span style="width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:650;background:{{ sl.avBg }};box-shadow:inset 0 0 0 {{ sl.avRing }}">{{ sl.ini }}</span>
+                  <span style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:14px;font-weight:600">{{ sl.name }}</span><span style="font-size:12px;color:#92929A">{{ sl.sub }}</span></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <input value="{{ h.sideB }}" onChange="{{ setSideB }}" placeholder="Side name" style="height:52px;padding:0 16px;border:none;outline:none;border-radius:14px;background:#151518;box-shadow:inset 0 0 0 {{ errBRing }};color:#F5F5F5;font-size:18px;font-weight:650">
+            <sc-if value="{{ errB }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:6px;align-items:center;font-size:12px;color:#FF7A4D"><span style="font-family:'Material Symbols Outlined';font-size:15px">error</span>Each side needs a name.</span></sc-if>
+            <div style="display:flex;flex-direction:column;padding-left:4px">
+              <sc-for list="{{ hSlotsB }}" as="sl" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
+                  <span style="width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:650;background:{{ sl.avBg }};box-shadow:inset 0 0 0 {{ sl.avRing }}">{{ sl.ini }}</span>
+                  <span style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:14px;font-weight:600">{{ sl.name }}</span><span style="font-size:12px;color:#92929A">{{ sl.sub }}</span></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ h4 }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:22px;padding-top:20px">
+          <h3 style="margin:0;font-size:36px;font-stretch:62%;font-weight:800;line-height:1">Ready to go?</h3>
+          <div style="display:flex;flex-direction:column;border-radius:22px;background:#151518;padding:4px 18px">
+            <sc-for list="{{ hReview }}" as="rv" hint-placeholder-count="4">
+              <button onClick="{{ rv.edit }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid #1F1F23">
+                <span style="font-size:13px;color:#92929A">{{ rv.k }}</span>
+                <span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;text-align:right">{{ rv.v }}<span style="font-family:'Material Symbols Outlined';font-size:16px;color:#5E5E66">edit</span></span>
+              </button>
+            </sc-for>
+          </div>
+          <button onClick="{{ toggleWait }}" style="all:unset;cursor:pointer;display:flex;gap:14px;align-items:flex-start">
+            <span style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">Open a waiting room first</span><span style="font-size:13px;line-height:1.45;color:#92929A">Players claim their spot with your code. Nothing is scored until you tap Start.</span></span>
+            <span style="width:50px;height:30px;border-radius:15px;flex:none;position:relative;background:{{ waitTrack }}"><span style="position:absolute;top:3px;left:{{ waitKnob }};width:24px;height:24px;border-radius:50%;background:#F5F5F5;transition:left .18s ease"></span></span>
+          </button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hDone }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:18px;padding-top:56px;text-align:center">
+          <div style="width:56px;height:56px;border-radius:50%;background:#FF5A1F;color:#0B0B0D;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:30px;font-variation-settings:'wght' 600">check</div>
+          <div style="font-size:15px;font-weight:600;color:#C6C6CC">Match created. Share the code.</div>
+          <div style="font-size:84px;font-stretch:62%;font-weight:800;letter-spacing:.06em;line-height:1">K7QX2M</div>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#92929A;max-width:280px">{{ hDoneNote }}</p>
+        </div>
+      </sc-if>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:#0B0B0D;display:flex;gap:10px">
+      <sc-if value="{{ hNotDone }}" hint-placeholder-val="{{ true }}"><button onClick="{{ hNext }}" style="all:unset;cursor:pointer;flex:1;height:56px;border-radius:16px;display:grid;place-items:center;font-size:16px;font-weight:700;background:{{ hNextBg }};color:{{ hNextFg }}">{{ hNextLabel }}</button></sc-if>
+      <sc-if value="{{ hDone }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ hReset }}" style="all:unset;cursor:pointer;flex:1;height:56px;border-radius:16px;display:grid;place-items:center;font-size:15px;font-weight:600;background:#1D1D21">Copy code</button>
+        <a href="#1e" style="flex:1.3;height:56px;border-radius:16px;display:grid;place-items:center;font-size:15px;font-weight:700;background:#FF5A1F;color:#0B0B0D">Open match room</a>
+      </sc-if>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+  </div>
+  <sc-if value="{{ showRationale }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Only what the API takes:</span> sport, format (bestOf 1/3/5, points 11/15/21 — or overs, squad 2–11), two named sides, waitForPlayers. Values survive Back; review rows jump to their step. Clear a side name to see the validator's own message inline.</p></sc-if>
+</div>
+
+<!-- 05 MATCH ROOM -->
+<div id="1e" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#1e" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">1e</a><span style="font-size:13px;font-weight:600">05 Match details</span><span style="font-size:12px;color:#6E6E76">start it, tap to score</span></div>
+  <div data-screen-label="05 Match details" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+      <a href="#1c" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a>
+      <span style="font-size:15px;font-weight:600">Quick match</span>
+      <span style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:22px">ios_share</span>
+    </div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:112px;overflow-y:auto;scrollbar-width:none;padding:0 20px">
+      <div style="display:flex;flex-direction:column;gap:10px;padding-top:18px">
+        <span style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:{{ roomStColor }}"><span style="width:7px;height:7px;border-radius:50%;background:{{ roomStColor }}"></span>{{ roomStLabel }}</span>
+        <h3 style="margin:0;font-size:40px;font-stretch:62%;font-weight:800;line-height:.95">Smash Bros vs Net Gains</h3>
+        <span style="font-size:13px;color:#92929A">Badminton · Doubles · Best of 3 to 21 · Hosted by you</span>
+      </div>
+
+      <sc-if value="{{ rWaiting }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:44px;padding-top:32px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-radius:20px;background:#151518">
+            <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#92929A">Join code</span><span style="font:600 26px 'JetBrains Mono',monospace;letter-spacing:.14em">K7QX2M</span></span>
+            <span style="height:40px;padding:0 14px;border-radius:12px;background:#1D1D21;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:17px">content_copy</span>Copy</span>
+          </div>
+          <sc-for list="{{ roomSides }}" as="sd" hint-placeholder-count="2">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:14px"><span style="font-size:20px;font-stretch:62%;font-weight:800">{{ sd.name }}</span><span style="font-size:12px;color:#92929A">{{ sd.count }}</span></div>
+              <sc-for list="{{ sd.slots }}" as="sl" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #18181B">
+                  <span style="width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:12px;font-weight:650;background:{{ sl.avBg }};box-shadow:inset 0 0 0 {{ sl.avRing }};color:{{ sl.avFg }}">{{ sl.ini }}</span>
+                  <span style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:15px;font-weight:600;color:{{ sl.nameColor }}">{{ sl.name }}</span><span style="font-size:12px;color:#92929A">{{ sl.sub }}</span></span>
+                  <sc-if value="{{ sl.removable }}" hint-placeholder-val="{{ false }}"><button onClick="{{ sl.remove }}" style="all:unset;cursor:pointer;width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:20px;color:#6E6E76">close</button></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:#92929A"><span style="font-family:'Material Symbols Outlined';font-size:16px">info</span><span>{{ roomNote }}</span></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ rLive }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px;padding-top:32px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#92929A"><span>Game {{ gameNo }} · first to 21</span><span style="font-variant-numeric:tabular-nums">Games {{ gA }}–{{ gB }}</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div onPointerDown="{{ swipeDownA }}" onPointerUp="{{ swipeUpA }}" onPointerCancel="{{ swipeCancel }}" role="group" aria-label="Smash Bros score, swipe up to add a point, down to remove one" style="cursor:grab;touch-action:none;user-select:none;height:300px;border-radius:24px;background:#151518;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+              <span style="font-size:13px;font-weight:600;color:#C6C6CC">Smash Bros</span>
+              {{ flipA }}
+              <span style="display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;color:#6E6E76;pointer-events:none"><span style="font-family:'Material Symbols Outlined';font-size:20px;color:#92929A">swipe_vertical</span>Up +1 · Down −1</span>
+            </div>
+            <div onPointerDown="{{ swipeDownB }}" onPointerUp="{{ swipeUpB }}" onPointerCancel="{{ swipeCancel }}" role="group" aria-label="Net Gains score, swipe up to add a point, down to remove one" style="cursor:grab;touch-action:none;user-select:none;height:300px;border-radius:24px;background:#151518;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+              <span style="font-size:13px;font-weight:600;color:#C6C6CC">Net Gains</span>
+              {{ flipB }}
+              <span style="display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;color:#6E6E76;pointer-events:none"><span style="font-family:'Material Symbols Outlined';font-size:20px;color:#92929A">swipe_vertical</span>Up +1 · Down −1</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ gamesDone }}" as="gd" hint-placeholder-count="0"><div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #18181B;font-size:14px;font-variant-numeric:tabular-nums"><span style="color:#92929A">Game {{ gd.n }}</span><span style="font-weight:600">{{ gd.s }}</span></div></sc-for>
+          </div>
+          <span style="font-size:12px;color:#6E6E76;text-align:center">Only the host scores.</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ rDone }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:28px;padding-top:32px">
+          <div style="font-size:64px;font-stretch:62%;font-weight:800;line-height:.9">{{ winnerLine }}</div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ gamesDone }}" as="gd" hint-placeholder-count="2"><div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #18181B;font-size:15px;font-variant-numeric:tabular-nums"><span style="color:#92929A">Game {{ gd.n }}</span><span style="font-weight:600">{{ gd.s }}</span></div></sc-for>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:16px 18px;border-radius:20px;background:#151518"><span style="font-family:'Material Symbols Outlined';font-size:22px;color:#FF5A1F">trending_up</span><span style="font-size:13px;line-height:1.45;color:#C6C6CC">Result added to the careers of the 3 claimed players. Sameer's guest spot earns nothing.</span></div>
+        </div>
+      </sc-if>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:#0B0B0D;display:flex;gap:10px">
+      <sc-if value="{{ rWaiting }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ cancelRoom }}" style="all:unset;cursor:pointer;height:56px;padding:0 18px;border-radius:16px;display:grid;place-items:center;font-size:15px;font-weight:600;color:#FF7A4D;background:#151518">Cancel</button>
+        <button onClick="{{ startRoom }}" style="all:unset;cursor:pointer;flex:1;height:56px;border-radius:16px;display:grid;place-items:center;font-size:16px;font-weight:700;background:#FF5A1F;color:#0B0B0D">Start match</button>
+      </sc-if>
+      <sc-if value="{{ rLive }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ undoPt }}" style="all:unset;cursor:pointer;flex:1;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600;background:#1D1D21;color:{{ undoColor }}"><span style="font-family:'Material Symbols Outlined';font-size:20px">undo</span>Undo last point</button>
+      </sc-if>
+      <sc-if value="{{ rEnded }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ resetRoom }}" style="all:unset;cursor:pointer;flex:1;height:56px;border-radius:16px;display:grid;place-items:center;font-size:15px;font-weight:600;background:#1D1D21">Back to waiting room (demo)</button>
+      </sc-if>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+    <sc-if value="{{ rCancelled }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;top:106px;left:0;right:0;bottom:112px;background:#0B0B0D;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 40px;text-align:center">
+        <span style="font-family:'Material Symbols Outlined';font-size:36px;color:#6E6E76;font-variation-settings:'wght' 200">block</span>
+        <span style="font-size:28px;font-stretch:62%;font-weight:800">Match cancelled</span>
+        <span style="font-size:14px;line-height:1.5;color:#92929A">Players who claimed a spot see it as cancelled. Nothing was added to anyone's record.</span>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ showRationale }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">One room, three lives:</span> waiting → live → completed, matching the model. Host can remove a claimed player (x) — the spot reopens. Scoring uses half-screen tap targets; undo is one level deep because the backend keeps exactly one snapshot.</p></sc-if>
+</div>
+
+<!-- 06 EVENTS -->
+<div id="1f" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#1f" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">1f</a><span style="font-size:13px;font-weight:600">06 Events</span><span style="font-size:12px;color:#6E6E76">filter by sport</span></div>
+  <div data-screen-label="06 Events" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;bottom:0;padding-bottom:96px;box-sizing:border-box;overflow-y:auto;scrollbar-width:none">
+      <div style="padding:10px 20px 0;display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:40px;font-stretch:62%;font-weight:800;line-height:1">Events</h2><span style="font-size:13px;color:#92929A">Tournaments run by Kria organisers</span></div>
+        <span style="width:44px;height:44px;border-radius:50%;background:#151518;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:22px">search</span>
+      </div>
+      <div style="display:flex;gap:8px;padding:18px 20px 0;overflow-x:auto;scrollbar-width:none">
+        <sc-for list="{{ evFilters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.on }}" style="all:unset;cursor:pointer;flex:none;display:flex;align-items:center;gap:2px;height:36px;padding:0 8px 0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }}<span style="font-family:'Material Symbols Outlined';font-size:18px">expand_more</span></button></sc-for>
+        <sc-if value="{{ evAnyFilter }}" hint-placeholder-val="{{ false }}"><button onClick="{{ clearEv }}" style="all:unset;cursor:pointer;flex:none;height:36px;padding:0 10px;font-size:13px;font-weight:600;color:#92929A">Clear</button></sc-if>
+      </div>
+
+      <sc-if value="{{ evShowFeat }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:28px 20px 0;display:flex;flex-direction:column;gap:18px">
+          <div style="position:relative;height:196px;border-radius:24px;overflow:hidden;background:#151518"><img src="{{ feat.img }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:{{ feat.pos }};display:block"><span style="position:absolute;top:12px;left:12px;display:flex;gap:6px"><span style="padding:5px 9px;border-radius:9px;background:#0B0B0D;font-size:11px;font-weight:700;letter-spacing:.03em;white-space:nowrap">{{ feat.date }}</span></span><sc-if value="{{ feat.auction }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;bottom:10px;left:10px;display:flex;align-items:center;gap:6px;white-space:nowrap;padding:5px 9px;border-radius:9px;background:#0B0B0D;font-size:11px;font-weight:700"><span style="width:6px;height:6px;border-radius:50%;background:#FF5A1F"></span>Auction live</span></sc-if><sc-if value="{{ feat.hasPrice }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:12px;right:12px;padding:5px 9px;border-radius:9px;background:#FF5A1F;color:#0B0B0D;font-size:11px;font-weight:750;font-variant-numeric:tabular-nums">{{ feat.price }}</span></sc-if></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:30px;font-stretch:62%;font-weight:800;line-height:.98">{{ feat.name }}</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#92929A"><span style="font-family:'Material Symbols Outlined';font-size:15px">location_on</span>{{ feat.where }}</span>
+            <span style="font-size:13px;color:#C6C6CC">{{ feat.detail }}</span>
+          </div>
+          <sc-if value="{{ feat.hasTeams }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="display:flex"><sc-for list="{{ teams }}" as="tm" hint-placeholder-count="4"><img src="{{ tm.src }}" alt="{{ tm.name }}" style="width:36px;height:36px;border-radius:50%;object-fit:{{ tm.fit }};background:#F5F5F5;box-shadow:0 0 0 2px #0B0B0D;margin-right:-8px"></sc-for></div>
+              <span style="font-size:13px;color:#C6C6CC;padding-left:8px">4 teams bidding for players</span>
+            </div>
+          </sc-if>
+          <div style="display:flex;gap:10px">
+            <a href="Kria Tournament Details.dc.html#2a" style="flex:1;height:50px;border-radius:14px;background:#F5F5F5;color:#0B0B0D;display:grid;place-items:center;font-size:15px;font-weight:700">{{ feat.cta }}</a>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="padding:0 20px 28px;display:flex;flex-direction:column">
+        <sc-for list="{{ evCardGroups }}" as="gr" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="padding:44px 0 12px;font-size:17px;font-weight:650">{{ gr.title }}</div>
+            <sc-for list="{{ gr.items }}" as="e" hint-placeholder-count="2">
+              <div style="display:flex;flex-direction:column;gap:12px;padding-bottom:28px">
+                <div style="position:relative;height:150px;border-radius:20px;overflow:hidden;background:#151518">
+                  <sc-if value="{{ e.hasImg }}" hint-placeholder-val="{{ false }}"><img src="{{ e.img }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:{{ e.pos }}"></sc-if>
+                  <sc-if value="{{ e.noImg }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:0;background:radial-gradient(120% 90% at 100% 0%,#232328,#141416 60%);display:flex;align-items:flex-end;justify-content:space-between;padding:16px 18px"><span style="font-family:'Material Symbols Outlined';font-size:56px;color:#34343B;font-variation-settings:'wght' 200">{{ e.icon }}</span><span style="font-size:13px;font-weight:600;color:#5E5E66">{{ e.sportLabel }}</span></div></sc-if>
+                  <span style="position:absolute;top:10px;left:10px;display:flex;gap:6px"><span style="padding:5px 9px;border-radius:9px;background:#0B0B0D;font-size:11px;font-weight:700;letter-spacing:.03em;white-space:nowrap">{{ e.day }} {{ e.mon }}</span></span><sc-if value="{{ e.auction }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;bottom:10px;left:10px;display:flex;align-items:center;gap:6px;white-space:nowrap;padding:5px 9px;border-radius:9px;background:#0B0B0D;font-size:11px;font-weight:700"><span style="width:6px;height:6px;border-radius:50%;background:#FF5A1F"></span>Auction live</span></sc-if><sc-if value="{{ e.hasPrice }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:10px;right:10px;padding:5px 9px;border-radius:9px;background:#FF5A1F;color:#0B0B0D;font-size:11px;font-weight:750;font-variant-numeric:tabular-nums">{{ e.price }}</span></sc-if>
+                  <sc-if value="{{ e.live }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#0B0B0D;font-size:11px;font-weight:700"><span style="width:6px;height:6px;border-radius:50%;background:#FF5A1F"></span>Live</span></sc-if>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                  <span style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:16px;font-weight:650;line-height:1.25">{{ e.name }}</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#92929A"><span style="font-family:'Material Symbols Outlined';font-size:15px">location_on</span>{{ e.venue }}</span></span>
+                  <sc-if value="{{ e.hasTeams }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex:none;padding-top:4px"><sc-for list="{{ teams }}" as="tm" hint-placeholder-count="4"><img src="{{ tm.src }}" alt="{{ tm.name }}" style="width:26px;height:26px;border-radius:50%;object-fit:{{ tm.fit }};background:#F5F5F5;box-shadow:0 0 0 2px #0B0B0D;margin-left:-7px"></sc-for></span></sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+        <sc-if value="{{ evHasPast }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:44px 0 12px;font-size:17px;font-weight:650">Past</div>
+          <sc-for list="{{ evPast }}" as="e" hint-placeholder-count="2">
+            <div style="display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #18181B">
+              <span style="display:flex;flex-direction:column;align-items:center;line-height:1"><span style="font-size:11px;font-weight:600;color:#92929A;letter-spacing:.04em">{{ e.mon }}</span><span style="font-size:28px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums;color:#92929A">{{ e.day }}</span></span>
+              <span style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:15px;font-weight:600;line-height:1.25">{{ e.name }}</span><span style="font-size:12px;color:#92929A">{{ e.venue }}</span><span style="font-size:12px;font-weight:600;color:{{ e.stColor }}">{{ e.status }}</span></span>
+              <span style="font-family:'Material Symbols Outlined';font-size:20px;color:#5E5E66">chevron_right</span>
+            </div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ evNone }}" hint-placeholder-val="{{ false }}"><div style="padding:48px 0;text-align:center;font-size:14px;color:#92929A">No events for this sport right now.</div></sc-if>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:106px;padding:16px 12px 0;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 34%);z-index:5">
+      <nav style="height:64px;border-radius:24px;background:#151518;box-shadow:0 0 0 1px #24242A;display:grid;grid-template-columns:repeat(5,1fr);align-items:center">
+        <sc-for list="{{ nav.events }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;background:{{ t.pill }};color:{{ t.color }}"><span style="height:26px;display:grid;place-items:center"><sc-if value="{{ t.isIcon }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Material Symbols Outlined';font-size:23px;color:{{ t.iconColor }};font-variation-settings:{{ t.fill }}">{{ t.icon }}</span></sc-if><sc-if value="{{ t.isAvatar }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:50%;background:#2A2A30;box-shadow:0 0 0 1.5px {{ t.ring }};display:grid;place-items:center;font-size:9px;font-weight:700;color:#F5F5F5">AM</span></sc-if></span><span style="font-size:10.5px;font-weight:{{ t.weight }}">{{ t.label }}</span></a></sc-for>
+      </nav>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+    <sc-if value="{{ evSheetOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <button onClick="{{ closeEvSheet }}" style="all:unset;cursor:pointer;position:absolute;inset:0;background:rgba(0,0,0,.62)"></button>
+        <div style="position:relative;background:#151518;border-radius:30px 30px 0 0;padding:10px 20px 38px;display:flex;flex-direction:column;gap:14px">
+          <span style="align-self:center;width:36px;height:5px;border-radius:3px;background:#3A3A42"></span>
+          <div style="display:flex;flex-direction:column;gap:3px;padding-top:6px"><span style="font-size:20px;font-weight:650">{{ evSheetTitle }}</span><span style="font-size:12px;color:#92929A">{{ evSheetSub }}</span></div>
+          <sc-if value="{{ evSheetSearch }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:12px;background:#0B0B0D;box-shadow:inset 0 0 0 1px #26262B;color:#6E6E76;font-size:14px"><span style="font-family:'Material Symbols Outlined';font-size:20px">search</span>Search sports</div></sc-if>
+          <div style="display:flex;flex-direction:column;max-height:380px;overflow-y:auto;scrollbar-width:none">
+            <sc-for list="{{ evSheetOpts }}" as="o" hint-placeholder-count="5">
+              <button onClick="{{ o.on }}" style="all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;min-height:50px;border-bottom:1px solid #222227"><span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:{{ o.weight }}">{{ o.label }}</span><span style="font-size:12px;color:#6E6E76">{{ o.sub }}</span></span><span style="font-family:'Material Symbols Outlined';font-size:20px;color:#FF5A1F;opacity:{{ o.check }}">check</span></button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ showRationale }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Every upcoming event gets a banner.</span> bannerImage is optional in the model, so events without one get a quiet sport cover instead of a broken image (Electronic City, Whitefield). Past events drop to compact rows. Filters mirror the API's own (sport, status, city), each in a sheet, so the sport list can grow without crowding the screen.</p></sc-if>
+</div>
+
+<!-- 07 AWARDS -->
+<div id="1g" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#1g" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">1g</a><span style="font-size:13px;font-weight:600">07 Awards</span><span style="font-size:12px;color:#6E6E76">tap any medal</span></div>
+  <div data-screen-label="07 Awards" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;bottom:0;padding-bottom:96px;box-sizing:border-box;overflow-y:auto;scrollbar-width:none">
+      <div style="padding:10px 20px 0;display:flex;justify-content:space-between;align-items:baseline">
+        <h2 style="margin:0;font-size:40px;font-stretch:62%;font-weight:800;line-height:1">Awards</h2>
+        <span style="font-size:13px;color:#92929A;font-variant-numeric:tabular-nums">7 earned</span>
+      </div>
+
+      <button onClick="{{ openFeatured }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:20px;margin:28px 20px 0;padding:22px;border-radius:24px;background:#151518">
+        <span style="width:108px;height:108px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 50% 28%,#26241F,#141312 70%);box-shadow:inset 0 0 0 3px #C9A35A,inset 0 0 0 9px #141312,inset 0 0 0 10px rgba(201,163,90,.45);font-size:34px;font-stretch:62%;font-weight:800;color:#E6CB8E;letter-spacing:.02em">POM</span>
+        <span style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-size:12px;font-weight:600;color:#C9A35A">Signature honour</span>
+          <span style="font-size:26px;font-stretch:62%;font-weight:800;line-height:1">Player of the Match</span>
+          <span style="font-size:13px;line-height:1.4;color:#92929A">Indiranagar Smash Open · given by the organiser</span>
+        </span>
+      </button>
+
+      <div style="padding:44px 20px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:17px;font-weight:650">Honours</span><span style="font-size:12px;color:#92929A">Given by organisers, or won in a quick knockout</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px 8px;padding:18px 20px 0">
+        <sc-for list="{{ honours }}" as="b" hint-placeholder-count="4">
+          <button onClick="{{ b.open }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+            <span style="width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:{{ b.face }};box-shadow:{{ b.rim }};font-size:{{ b.gsize }};font-stretch:62%;font-weight:800;color:{{ b.glyphColor }}">{{ b.glyph }}</span>
+            <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:600;line-height:1.2">{{ b.name }}</span><span style="font-size:11px;color:#92929A;line-height:1.3">{{ b.ctx }}</span></span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="padding:44px 20px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:17px;font-weight:650">Career milestones</span><span style="font-size:12px;color:#92929A">Counted from every match you play</span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px 6px;padding:18px 16px 0">
+        <sc-for list="{{ milestones }}" as="b" hint-placeholder-count="4">
+          <button onClick="{{ b.open }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+            <span style="position:relative;width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:{{ b.face }};box-shadow:{{ b.rim }};font-size:{{ b.gsize }};font-stretch:62%;font-weight:800;color:{{ b.glyphColor }}">{{ b.glyph }}</span>
+            <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:600;line-height:1.2">{{ b.name }}</span><span style="font-size:11px;color:{{ b.ctxColor }};font-variant-numeric:tabular-nums">{{ b.ctx }}</span></span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="padding:44px 20px 28px;display:flex;flex-direction:column;gap:18px">
+        <span style="font-size:17px;font-weight:650">Titles</span>
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid #18181B;border-bottom:1px solid #18181B">
+          <span style="font-family:'Material Symbols Outlined';font-size:24px;color:#C9A35A;font-variation-settings:'wght' 300">workspace_premium</span>
+          <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600">Winner of Men's Doubles</span><span style="font-size:12px;color:#92929A">HSR Shuttle Cup 2026</span></span>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:106px;padding:16px 12px 0;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 34%);z-index:5">
+      <nav style="height:64px;border-radius:24px;background:#151518;box-shadow:0 0 0 1px #24242A;display:grid;grid-template-columns:repeat(5,1fr);align-items:center">
+        <sc-for list="{{ nav.awards }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;background:{{ t.pill }};color:{{ t.color }}"><span style="height:26px;display:grid;place-items:center"><sc-if value="{{ t.isIcon }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Material Symbols Outlined';font-size:23px;color:{{ t.iconColor }};font-variation-settings:{{ t.fill }}">{{ t.icon }}</span></sc-if><sc-if value="{{ t.isAvatar }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:50%;background:#2A2A30;box-shadow:0 0 0 1.5px {{ t.ring }};display:grid;place-items:center;font-size:9px;font-weight:700;color:#F5F5F5">AM</span></sc-if></span><span style="font-size:10.5px;font-weight:{{ t.weight }}">{{ t.label }}</span></a></sc-for>
+      </nav>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+    <sc-if value="{{ awardOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <button onClick="{{ closeAward }}" style="all:unset;cursor:pointer;position:absolute;inset:0;background:rgba(0,0,0,.62)"></button>
+        <div style="position:relative;background:#151518;border-radius:30px 30px 0 0;padding:10px 24px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center">
+          <span style="width:36px;height:5px;border-radius:3px;background:#3A3A42"></span>
+          <span style="margin-top:12px;width:132px;height:132px;border-radius:50%;display:grid;place-items:center;background:{{ aw.face }};box-shadow:{{ aw.rimLg }};font-size:{{ aw.gsizeLg }};font-stretch:62%;font-weight:800;color:{{ aw.glyphColor }}">{{ aw.glyph }}</span>
+          <span style="font-size:12px;font-weight:600;color:{{ aw.tierColor }}">{{ aw.tier }}</span>
+          <span style="font-size:32px;font-stretch:62%;font-weight:800;line-height:1">{{ aw.name }}</span>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#C6C6CC;max-width:300px;text-wrap:pretty">{{ aw.desc }}</p>
+          <div style="align-self:stretch;display:flex;flex-direction:column;text-align:left;margin-top:4px">
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid #222227;font-size:13px"><span style="color:#92929A">How it's earned</span><span style="font-weight:600;text-align:right;max-width:200px">{{ aw.criteria }}</span></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid #222227;font-size:13px"><span style="color:#92929A">{{ aw.statusK }}</span><span style="font-weight:600;text-align:right;font-variant-numeric:tabular-nums">{{ aw.statusV }}</span></div>
+          </div>
+          <sc-if value="{{ aw.locked }}" hint-placeholder-val="{{ false }}"><div style="align-self:stretch;height:4px;border-radius:2px;background:#26262B;overflow:hidden"><div style="height:100%;width:{{ aw.pct }};background:#FF5A1F"></div></div></sc-if>
+          <button onClick="{{ closeAward }}" style="all:unset;cursor:pointer;align-self:stretch;height:52px;border-radius:16px;background:#1D1D21;display:grid;place-items:center;font-size:15px;font-weight:600;margin-top:4px">Done</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ showRationale }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">One minted language:</span> double-ring coin, condensed glyph, metal = source. Gold for organiser honours, bronze for knockout wins (the code calls it a low-tier badge), steel for career milestones. Honours carry no date in the schema, so cards show where they came from instead.</p></sc-if>
+</div>
+
+<!-- 08 PROFILE -->
+<div id="1h" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#1h" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">1h</a><span style="font-size:13px;font-weight:600">08 Profile</span></div>
+  <div data-screen-label="08 Profile" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;bottom:0;padding-bottom:96px;box-sizing:border-box;overflow-y:auto;scrollbar-width:none">
+      <div style="padding:6px 12px 0;display:flex;justify-content:flex-end;gap:4px">
+        <span style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:22px">ios_share</span>
+        <span style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:22px">settings</span>
+      </div>
+      <div style="padding:0 20px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:18px">
+          <div style="width:128px;height:128px;border-radius:50%;flex:none;background:repeating-linear-gradient(135deg,#17171A 0 6px,#1D1D21 6px 12px);display:grid;place-items:center;font:500 9px 'JetBrains Mono',monospace;color:#5E5E66">photo</div>
+          <div style="display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0">
+            <h2 style="margin:0;font-size:44px;font-stretch:62%;font-weight:800;line-height:.9;letter-spacing:-.01em">Aarav<br>Menon</h2>
+            <span style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;padding:5px 10px;border-radius:8px;background:#1D1D21"><span style="color:#FF5A1F">#7</span> Badminton</span></span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 28%,#26241F,#141312 70%);box-shadow:inset 0 0 0 2px #C9A35A;font-size:12px;font-stretch:62%;font-weight:800;color:#E6CB8E">POM</span>
+          <span style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 28%,#26241F,#141312 70%);box-shadow:inset 0 0 0 2px #C9A35A;font-size:12px;font-stretch:62%;font-weight:800;color:#E6CB8E">RK</span>
+          <span style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 28%,#241F1B,#131110 70%);box-shadow:inset 0 0 0 2px #A8714A;font-size:12px;font-stretch:62%;font-weight:800;color:#D39B73">KO</span>
+          <a href="#1g" style="font-size:13px;color:#92929A;margin-left:4px">+4 more</a>
+          <span style="flex:1"></span>
+          <span style="height:40px;padding:0 16px;border-radius:12px;background:#1D1D21;display:grid;place-items:center;font-size:13px;font-weight:600">Edit profile</span>
+        </div>
+      </div>
+
+      <div style="margin:32px 20px 0;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #1D1D21;border-bottom:1px solid #1D1D21">
+        <div style="padding:16px 0;display:flex;flex-direction:column;gap:3px"><span style="font-size:32px;font-stretch:62%;font-weight:800;line-height:1;font-variant-numeric:tabular-nums">85</span><span style="font-size:12px;color:#92929A">Matches</span></div>
+        <div style="padding:16px 0 16px 16px;display:flex;flex-direction:column;gap:3px;border-left:1px solid #1D1D21"><span style="font-size:32px;font-stretch:62%;font-weight:800;line-height:1;font-variant-numeric:tabular-nums">53</span><span style="font-size:12px;color:#92929A">Wins</span></div>
+        <div style="padding:16px 0 16px 16px;display:flex;flex-direction:column;gap:3px;border-left:1px solid #1D1D21"><span style="font-size:32px;font-stretch:62%;font-weight:800;line-height:1;font-variant-numeric:tabular-nums">6</span><span style="font-size:12px;color:#92929A">Tournaments</span></div>
+      </div>
+
+      <div style="padding:44px 0 0;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 20px"><span style="font-size:17px;font-weight:650">Analytics</span><span style="font-size:12px;color:#92929A">3 sports played</span></div>
+        <div style="display:flex;gap:8px;padding:0 20px;overflow-x:auto;scrollbar-width:none">
+          <sc-for list="{{ paChips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="all:unset;cursor:pointer;flex:none;display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}<span style="font-size:12px;font-weight:500;opacity:.6;font-variant-numeric:tabular-nums">{{ c.n }}</span></button></sc-for>
+        </div>
+        <sc-if value="{{ paAll }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:0 20px;display:flex;flex-direction:column">
+            <sc-for list="{{ sportRows }}" as="s" hint-placeholder-count="3">
+              <button onClick="{{ s.on }}" style="all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid #18181B">
+                <span style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                  <span style="display:flex;align-items:center;gap:8px"><span style="font-size:17px;font-weight:650">{{ s.name }}</span><sc-if value="{{ s.best }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;color:#FF5A1F">Best sport</span></sc-if></span>
+                  <span style="display:flex;gap:14px;font-size:13px;color:#92929A;font-variant-numeric:tabular-nums"><span>Won <span style="color:#F5F5F5;font-weight:600">{{ s.w }}</span></span><span>Played <span style="color:#F5F5F5;font-weight:600">{{ s.played }}</span></span></span>
+                  <sc-if value="{{ s.unranked }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:#6E6E76">Not ranked yet</span></sc-if>
+                </span>
+                <span style="position:relative;width:76px;height:76px;flex:none;border-radius:50%;background:{{ s.ring }};display:grid;place-items:center">
+                  <span style="width:64px;height:64px;border-radius:50%;background:#0B0B0D;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+                    <span style="font-size:22px;font-stretch:62%;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:{{ s.rateColor }}">{{ s.rateShort }}</span>
+                  </span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ paOne }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:0 20px;display:flex;flex-direction:column;gap:36px">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);padding:16px 0;border-top:1px solid #1D1D21;border-bottom:1px solid #1D1D21">
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:34px;font-stretch:62%;font-weight:800;line-height:1;font-variant-numeric:tabular-nums">{{ ps.rate }}</span><span style="font-size:12px;color:#92929A">Win rate</span></div>
+              <div style="display:flex;flex-direction:column;gap:4px;padding-left:16px;border-left:1px solid #1D1D21"><span style="font-size:34px;font-stretch:62%;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:{{ ps.rankColor }}">{{ ps.rank }}</span><span style="font-size:12px;color:#92929A">Rank</span></div>
+              <div style="display:flex;flex-direction:column;gap:4px;padding-left:16px;border-left:1px solid #1D1D21"><span style="font-size:34px;font-stretch:62%;font-weight:800;line-height:1;font-variant-numeric:tabular-nums">{{ ps.played }}</span><span style="font-size:12px;color:#92929A">Played</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Results</span><span style="font-size:12px;color:#92929A;font-variant-numeric:tabular-nums">{{ ps.decided }} decided</span></div>
+              <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px"><sc-for list="{{ ps.bar }}" as="b" hint-placeholder-count="4"><div style="width:{{ b.pct }};background:{{ b.color }}"></div></sc-for></div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><sc-for list="{{ ps.bar }}" as="b" hint-placeholder-count="4"><span style="display:flex;flex-direction:column;gap:2px"><span style="display:flex;align-items:center;gap:6px;font-size:11px;color:#92929A"><span style="width:8px;height:8px;border-radius:2px;background:{{ b.color }}"></span>{{ b.label }}</span><span style="font-size:18px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums">{{ b.v }}</span></span></sc-for></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Form</span><span style="font-size:12px;color:#92929A">{{ ps.formNote }}</span></div>
+              <div style="display:flex;gap:4px"><sc-for list="{{ ps.form }}" as="f" hint-placeholder-count="10"><span style="flex:1;max-width:30px;height:30px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:700;background:{{ f.bg }};color:{{ f.fg }}">{{ f.ch }}</span></sc-for></div>
+              <span style="font-size:11px;color:#6E6E76">Newest first · tournament and quick matches</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;background:#151518">
+              <span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:18px;color:#FF5A1F">leaderboard</span>{{ ps.rankTitle }}</span>
+              <span style="font-size:13px;line-height:1.45;color:#A3A3AB">{{ ps.rankNote }}</span>
+              <sc-if value="{{ ps.unranked }}" hint-placeholder-val="{{ false }}"><div style="height:4px;border-radius:2px;background:#26262B;overflow:hidden"><div style="height:100%;width:{{ ps.pct }};background:#FF5A1F"></div></div></sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <span style="font-size:14px;font-weight:600;padding-bottom:10px">Recent in {{ ps.name }}</span>
+              <sc-for list="{{ ps.recent }}" as="r" hint-placeholder-count="2">
+                <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #18181B">
+                  <span style="width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;font-size:12px;font-weight:700;background:{{ r.badgeBg }};color:{{ r.badgeFg }}">{{ r.res }}</span>
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:14px;font-weight:600">{{ r.title }}</span><span style="font-size:13px;color:#C6C6CC;font-variant-numeric:tabular-nums">{{ r.score }}</span><span style="font-size:12px;color:#92929A">{{ r.ctx }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+
+      <div style="padding:44px 20px 28px;display:flex;flex-direction:column">
+        <span style="font-size:17px;font-weight:650;padding-bottom:12px">Tournaments</span>
+        <sc-for list="{{ tHistory }}" as="t" hint-placeholder-count="3">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #18181B">
+            <span style="display:flex;align-items:center;gap:12px;min-width:0"><img src="{{ t.logo }}" alt="" style="width:36px;height:36px;border-radius:50%;flex:none;object-fit:{{ t.fit }};background:{{ t.logoBg }}"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;font-weight:600">{{ t.name }}</span><span style="font-size:12px;color:#92929A">{{ t.cat }}</span></span></span>
+            <span style="font-size:13px;font-weight:600;color:{{ t.color }};flex:none">{{ t.result }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:106px;padding:16px 12px 0;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 34%);z-index:5">
+      <nav style="height:64px;border-radius:24px;background:#151518;box-shadow:0 0 0 1px #24242A;display:grid;grid-template-columns:repeat(5,1fr);align-items:center">
+        <sc-for list="{{ nav.profile }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;background:{{ t.pill }};color:{{ t.color }}"><span style="height:26px;display:grid;place-items:center"><sc-if value="{{ t.isIcon }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Material Symbols Outlined';font-size:23px;color:{{ t.iconColor }};font-variation-settings:{{ t.fill }}">{{ t.icon }}</span></sc-if><sc-if value="{{ t.isAvatar }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:50%;background:#2A2A30;box-shadow:0 0 0 1.5px {{ t.ring }};display:grid;place-items:center;font-size:9px;font-weight:700;color:#F5F5F5">AM</span></sc-if></span><span style="font-size:10.5px;font-weight:{{ t.weight }}">{{ t.label }}</span></a></sc-for>
+      </nav>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+  </div>
+  <sc-if value="{{ showRationale }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Analytics per sport, built to scale.</span> Chips list only sports played, ordered by volume, and scroll sideways, so 10+ sports cost nothing. Each sport shows what the backend knows: win rate, rank, the won/lost/tied/no-result split (summariseBySport), last-10 form (recent matches filtered by sport) and distance to a ranking. "All sports" compares them side by side.</p></sc-if>
+</div>
+
+</div>
+<p style="margin:0;font-size:12.5px;color:#6E6E76">Try next: "design the new-player state across Home, Rankings and Awards" · "add Event detail + registration/payment" · "organizer entry point in Profile"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showRationale&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const FW = 120, FH = 140;
+function flipHalf(v, pos, extra, ref) {
+  const top = pos === 'top';
+  return React.createElement('div', { ref, style: { position: 'absolute', left: 0, right: 0, height: FH / 2, top: top ? 0 : FH / 2, overflow: 'hidden', background: top ? '#222227' : '#1D1D21', borderRadius: top ? '16px 16px 0 0' : '0 0 16px 16px', backfaceVisibility: 'hidden', transformOrigin: top ? '50% 100%' : '50% 0%', ...extra } },
+    React.createElement('div', { style: { position: 'absolute', left: 0, right: 0, height: FH, top: top ? 0 : -FH / 2, display: 'grid', placeItems: 'center', fontFamily: 'Archivo', fontSize: 104, fontStretch: '62%', fontWeight: 800, lineHeight: 1, fontVariantNumeric: 'tabular-nums', color: '#F5F5F5' } }, String(v)));
+}
+class FlipNum extends React.Component {
+  constructor(p) { super(p); this.state = { cur: p.value, prev: p.value }; this.fT = React.createRef(); this.fB = React.createRef(); this.anims = []; }
+  componentDidUpdate(pp) {
+    if (pp.value !== this.props.value) { this.anims.forEach(a => a.cancel()); this.setState(s => ({ prev: s.cur, cur: this.props.value }), () => this.run()); }
+  }
+  componentWillUnmount() { this.anims.forEach(a => a.cancel()); clearTimeout(this.t); }
+  run() {
+    const { cur, prev } = this.state;
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { this.setState({ prev: cur }); return; }
+    const up = cur > prev, d = 170, o = { duration: d, fill: 'both' };
+    const first = up ? this.fT.current : this.fB.current, second = up ? this.fB.current : this.fT.current;
+    if (!first || !second) return;
+    this.anims = [
+      first.animate([{ transform: 'rotateX(0deg)' }, { transform: `rotateX(${up ? -90 : 90}deg)` }], { ...o, easing: 'cubic-bezier(.5,0,1,1)' }),
+      second.animate([{ transform: `rotateX(${up ? 90 : -90}deg)` }, { transform: 'rotateX(0deg)' }], { ...o, delay: d, easing: 'cubic-bezier(0,0,.3,1.4)' }),
+    ];
+    clearTimeout(this.t); this.t = setTimeout(() => this.setState({ prev: this.state.cur }), d * 2 + 20);
+  }
+  render() {
+    const { cur, prev } = this.state, up = cur >= prev, flipping = cur !== prev;
+    const hide = flipping ? {} : { visibility: 'hidden' };
+    return React.createElement('div', { style: { position: 'relative', width: FW, height: FH, perspective: 420, borderRadius: 16, boxShadow: '0 10px 24px rgba(0,0,0,.45)' } },
+      flipHalf(up ? cur : prev, 'top', {}), flipHalf(up ? prev : cur, 'bottom', {}),
+      flipHalf(up ? prev : cur, 'top', { zIndex: 2, ...hide, transform: flipping && !up ? 'rotateX(-90deg)' : 'none' }, this.fT),
+      flipHalf(up ? cur : prev, 'bottom', { zIndex: 2, ...hide, transform: flipping && up ? 'rotateX(90deg)' : 'none' }, this.fB),
+      React.createElement('div', { style: { position: 'absolute', left: 0, right: 0, top: FH / 2 - 1, height: 2, background: '#0B0B0D', zIndex: 3 } }));
+  }
+}
+class Component extends DCLogic {
+  componentDidMount() { this._msT = setTimeout(() => this.setState({ msFill: true }), 400); }
+  componentWillUnmount() { clearTimeout(this._msT); }
+  state = {
+    msFill: false, lb: 'badminton', hs: 'badminton', heroSheet: false, ps: 'badminton', mf: 'all', code: '', ev: 'all', evSt: 'any', evCity: 'any', evSheet: null, award: null,
+    h: { step: 1, sport: 'badminton', type: 'doubles', bestOf: 3, points: 21, ppt: 6, overs: 8, opb: 2, sideA: 'Smash Bros', sideB: 'Net Gains', wait: true, done: false },
+    room: { phase: 'waiting', games: [], a: 0, b: 0, prev: null, removed: false },
+  };
+
+  setH(p) { this.setState(s => ({ h: { ...s.h, ...p } })); }
+  setRoom(p) { this.setState(s => ({ room: { ...s.room, ...p } })); }
+
+  swipe(side, e) {
+    if (this._sy == null) return;
+    const dy = e.clientY - this._sy; this._sy = null;
+    if (dy < -28) this.point(side); else if (dy > 28) this.minus(side);
+  }
+  minus(side) {
+    const r = this.state.room;
+    if (r.phase !== 'live' || r[side] === 0) return;
+    this.setRoom({ [side]: r[side] - 1, prev: { games: r.games, a: r.a, b: r.b } });
+  }
+  point(side) {
+    const r = this.state.room;
+    if (r.phase !== 'live') return;
+    const prev = { games: r.games, a: r.a, b: r.b };
+    let a = r.a + (side === 'a' ? 1 : 0), b = r.b + (side === 'b' ? 1 : 0);
+    let games = r.games, phase = 'live';
+    const won = (x, y) => (x >= 21 && x - y >= 2) || x === 30;
+    if (won(a, b) || won(b, a)) {
+      games = [...games, { a, b }];
+      a = 0; b = 0;
+      const wa = games.filter(g => g.a > g.b).length, wb = games.length - wa;
+      if (wa === 2 || wb === 2) phase = 'done';
+    }
+    this.setRoom({ a, b, games, phase, prev });
+  }
+
+  renderVals() {
+    const S = this.state, h = S.h, r = S.room;
+    const GOLD = '#C9A35A', SILVER = '#A9AFB7', BRONZE = '#A8714A', ACC = '#FF5A1F';
+    const hsel = on => on ? { bg: '#FF5A1F', fg: '#0B0B0D' } : { bg: '#1D1D21', fg: '#F5F5F5' };
+    const sel = on => on ? { bg: '#F5F5F5', fg: '#0B0B0D' } : { bg: '#1D1D21', fg: '#F5F5F5' };
+    const ini = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+    const tabsDef = [['home', 'Home', '#1a'], ['leaderboard', 'Compete', '#1b'], ['stadium', 'Events', '#1f'], ['military_tech', 'Awards', '#1g'], ['', 'Profile', '#1h']];
+    const navFor = k => tabsDef.map((t, i) => { const on = i === k; return { icon: t[0], label: t[1], href: t[2], isIcon: i !== 4, isAvatar: i === 4, color: on ? '#F5F5F5' : '#85858D', iconColor: on ? ACC : '#85858D', pill: on ? '#2A2A30' : 'transparent', ring: on ? ACC : '#3A3A42', weight: on ? 700 : 500, fill: on ? "'FILL' 1, 'wght' 400" : "'FILL' 0, 'wght' 300" }; });
+    const nav = { home: navFor(0), compete: navFor(1), events: navFor(2), awards: navFor(3), profile: navFor(4) };
+
+    const recent = [
+      { res: 'W', title: 'Smash Bros vs Shuttle Club', score: '21-17, 18-21, 21-15', ctx: 'Quick match · Badminton · Sun' },
+      { res: 'L', title: 'Sunday XI vs Office Strikers', score: '112/6 (10.0) vs 118/4 (9.3)', ctx: 'Quick match · Cricket · Sat' },
+      { res: 'W', title: 'Aarav Menon vs Farhan Shaikh', score: '21-12, 21-18', ctx: 'Sunday Smash #14 · Final' },
+    ].map(x => ({ ...x, badgeBg: x.res === 'W' ? 'rgba(255,90,31,.16)' : 'rgba(240,68,82,.14)', badgeFg: x.res === 'W' ? '#FF7A45' : '#F26B76' }));
+
+    // Rankings
+    const LB = {
+      badminton: [['Vikram Hegde', 39, 48], ['Ananya Iyer', 33, 42], ["Rohan D'Souza", 45, 60], ['Meera Pillai', 28, 38], ['Karthik Nair', 25, 35], ['Rohit Kulkarni', 26, 37], ['Aarav Menon', 42, 61, true], ['Sneha Reddy', 20, 30], ['Farhan Shaikh', 22, 34], ['Divya Bhat', 15, 24]],
+      cricket: [['Harsh Vardhan', 10, 13], ['Arjun Patil', 11, 15], ['Kabir Rao', 12, 17], ['Sai Prakash', 11, 16], ['Nikhil Shetty', 14, 21], ['Yash Malhotra', 9, 14], ['Pranav Joshi', 7, 11], ['Tanvi Kapoor', 8, 13], ['Aditya Rao', 12, 20], ['Manoj Kumar', 7, 12]],
+      table_tennis: [],
+    };
+    const ME = {
+      badminton: { rank: '#7', rate: '68.9%', note: '1.4 pts behind #6 Rohit Kulkarni' },
+      cricket: { rank: '#23', rate: '52.9%', note: '9 won · 17 decided · 5.4 pts off the top 10' },
+      table_tennis: { rank: '—', rate: '', note: 'Unranked · 3 of 10 decided matches' },
+    };
+    const medal = [GOLD, SILVER, BRONZE];
+    const HERO = {
+      badminton: { sport: 'Badminton', icon: 'sports_tennis', label: 'Ranked by win rate · last played Sun', big: '#7', rate: '68.9%', sub: '42 won · 61 decided', gapA: '1.4 pts', gapB: ' behind #6 Rohit Kulkarni' },
+      cricket: { sport: 'Cricket', icon: 'sports_cricket', label: 'Ranked by win rate · last played Sat', big: '#23', rate: '52.9%', sub: '9 won · 17 decided', gapA: '5.4 pts', gapB: ' off the top 10' },
+      table_tennis: { sport: 'Table tennis', icon: 'table_restaurant', label: 'Not ranked yet · needs 10 decided matches', big: '3/10', rate: '66.7%', sub: '2 won · 3 decided', gapA: '7 more', gapB: ' decided matches to get ranked' },
+    };
+    const heroList = [['badminton', 'Badminton', 'sports_tennis', '64 played · last Sun', '#7'], ['cricket', 'Cricket', 'sports_cricket', '18 played · last Sat', '#23'], ['table_tennis', 'Table tennis', 'table_restaurant', '3 played · 28 Sep', 'Unranked']].map(([k, n, ic, sub, r]) => ({ name: n, icon: ic, sub, rank: r, rankColor: r === 'Unranked' ? '#6E6E76' : (S.hs === k ? ACC : '#F5F5F5'), check: S.hs === k ? 1 : 0, on: () => this.setState({ hs: k, heroSheet: false }) }));
+    const heroTabs = [['badminton', 'Badminton', '#7'], ['cricket', 'Cricket', '#23'], ['table_tennis', 'Table tennis', 'Unranked']].map(([k, l, v]) => { const on = S.hs === k; return { label: l, val: v, bg: on ? '#26262B' : 'transparent', labelColor: on ? '#F5F5F5' : '#85858D', valColor: on ? ACC : '#C6C6CC', on: () => this.setState({ hs: k }) }; });
+    const homeEvents = [
+      { img: 'assets/banner-arohance-badminton.png', pos: '50% 40%', date: '20 OCT', name: 'Arohance Badminton Tournament', where: 'Tiger Stadium · Singles', price: 'from ₹600', hasPrice: true },
+      { img: 'assets/banner-cricket.png', pos: '55% 35%', date: '26 OCT', name: 'HSR Corporate Cricket Cup', where: 'HSR Layout Grounds · T10 · 4 teams', hasPrice: false, auction: true },
+    ];
+    const rowOf = (p, rank, me, i) => ({
+      rank, name: me ? 'You' : p[0], ini: ini(p[0]), gapBefore: false,
+      sub: me && ME[S.lb].note ? ME[S.lb].note : `${p[1]} won · ${p[2]} decided`, rate: (p[1] / p[2] * 100).toFixed(1) + '%',
+      rankColor: me ? '#0B0B0D' : i < 3 ? medal[i] : '#92929A', rankSize: i < 3 || me ? '26px' : '20px', ring: !me && i < 3 ? medal[i] : 'transparent',
+      bg: me ? ACC : 'transparent', line: me ? 'none' : 'inset 0 -1px 0 #18181B',
+      nameColor: me ? '#0B0B0D' : '#F5F5F5', subColor: me ? 'rgba(11,11,13,.78)' : '#92929A',
+      avBg: me ? '#0B0B0D' : '#1D1D21', avFg: me ? '#FF5A1F' : '#F5F5F5',
+    });
+    const lbRows = LB[S.lb].map((p, i) => rowOf(p, i + 1, !!p[3], i));
+    if (S.lb === 'cricket') lbRows.push({ ...rowOf(['Aarav Menon', 9, 17], ME.cricket.rank, true, 99), gapBefore: true });
+    const lbTabs = [['badminton', 'Badminton'], ['cricket', 'Cricket'], ['table_tennis', 'Table tennis']].map(([k, l]) => ({
+      label: l, color: S.lb === k ? '#F5F5F5' : '#7E7E87', line: S.lb === k ? ACC : 'transparent', on: () => this.setState({ lb: k }),
+    }));
+
+    // Matches
+    const MATCHES = [
+      { st: 'waiting', sport: 'badminton', fmt: 'Doubles', title: 'Smash Bros vs Net Gains', line: "Best of 3 to 21 · You're hosting", tr: 'K7QX2M', foot: '1 slot left', av: ['AM', 'KR', 'NS'] },
+      { st: 'live', sport: 'cricket', fmt: '6 a side', title: 'Sunday XI vs Office Strikers', line: '8 overs · Hosted by Kabir Rao', tr: 'Live', foot: '64/3 (5.2)', footSub: 'You bat for Sunday XI' },
+      { st: 'completed', sport: 'badminton', fmt: 'Doubles', title: 'Smash Bros vs Shuttle Club', line: 'Best of 3 to 21', tr: 'Sun 13 Oct', foot: '21-17, 18-21, 21-15', res: 'W' },
+      { st: 'completed', sport: 'cricket', fmt: '10 overs', title: 'Sunday XI vs Office Strikers', line: 'Quick match', tr: 'Sat 12 Oct', foot: '112/6 vs 118/4', footSub: 'Lost by 6 wickets', res: 'L' },
+      { st: 'cancelled', sport: 'badminton', fmt: 'Singles', title: 'Aarav Menon vs Farhan Shaikh', line: 'Best of 1 to 21', tr: 'Thu 10 Oct', foot: 'Cancelled by host' },
+    ];
+    const ST = { waiting: ['Waiting for players', ACC], live: ['Live', '#F5F5F5'], completed: ['Completed', '#92929A'], cancelled: ['Cancelled', '#6E6E76'] };
+    const mList = MATCHES.filter(m => S.mf === 'all' || m.st === S.mf).map(m => ({
+      ...m, stLabel: ST[m.st][0], stColor: ST[m.st][1],
+      isLive: m.st === 'live', op: m.st === 'cancelled' ? 0.6 : 1,
+      trFont: m.st === 'waiting' ? "600 12px 'JetBrains Mono',monospace" : '600 12px Archivo', trLs: m.st === 'waiting' ? '.06em' : '0',
+      trColor: m.st === 'live' ? '#FF5A1F' : '#92929A', footColor: m.st === 'cancelled' ? '#92929A' : '#F5F5F5',
+      hasFootSub: !!m.footSub, hasAv: !!m.av, av: (m.av || []).map((t, i) => ({ t, ml: i ? '-6px' : '0' })),
+      hasRes: !!m.res, resBg: m.res === 'W' ? 'rgba(255,90,31,.16)' : 'rgba(240,68,82,.14)', resFg: m.res === 'W' ? '#FF7A45' : '#F26B76',
+      icon: m.sport === 'badminton' ? 'sports_tennis' : 'sports_cricket', sportLabel: m.sport === 'badminton' ? 'Badminton' : 'Cricket',
+    }));
+    const mfChips = [['all', 'All'], ['live', 'Live'], ['waiting', 'Waiting'], ['completed', 'Completed'], ['cancelled', 'Cancelled']].map(([k, l]) => ({ label: l, ...sel(S.mf === k), on: () => this.setState({ mf: k }) }));
+    const codeOk = S.code.length === 6;
+    const known = S.code === 'K7QX2M';
+
+    // Host flow
+    const isBad = h.sport === 'badminton';
+    const errA = h.sideA.trim() === '', errB = h.sideB.trim() === '';
+    const canNext = h.step !== 3 || (!errA && !errB);
+    const per = isBad ? (h.type === 'doubles' ? 2 : 1) : h.ppt;
+    const mkSlots = (names, withMe) => Array.from({ length: Math.min(per, isBad ? 2 : 3) }, (_, i) => {
+      if (withMe && i === 0) return { ini: 'AM', name: 'Aarav Menon', sub: 'You · host', avBg: '#2A2A30', avRing: '0 transparent' };
+      const n = names[i];
+      return n ? { ini: ini(n[0]), name: n[0], sub: n[1], avBg: '#2A2A30', avRing: '0 transparent' } : { ini: '', name: 'Open spot', sub: 'Name it now or let a player claim it', avBg: 'transparent', avRing: '1.5px #3A3A42' };
+    });
+    const hSlotsA = mkSlots(isBad ? [null, ['Kabir Rao', 'Added from search · will be notified']] : [null, ['Kabir Rao', 'Added from search']], true);
+    const hSlotsB = mkSlots(isBad ? [['Nikhil Shetty', 'Added from search'], ['Sameer', 'Guest name · claims with code']] : [['Nikhil Shetty', 'Added from search']], false);
+    if (!isBad && per > 3) { hSlotsA.push({ ini: '+' + (per - 3), name: `${per - 3} more open spots`, sub: 'Unnamed spots show as Player 4, Player 5…', avBg: '#1D1D21', avRing: '0 transparent' }); hSlotsB.push({ ini: '+' + (per - 3), name: `${per - 3} more open spots`, sub: 'Unnamed spots show as Player 4, Player 5…', avBg: '#1D1D21', avRing: '0 transparent' }); }
+    const fmt = isBad ? `${h.type === 'doubles' ? 'Doubles' : 'Singles'} · Best of ${h.bestOf} to ${h.points}` : `${h.ppt} a side · ${h.overs} overs · ${h.opb} per bowler`;
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const stp = (key, label, range, min, max) => ({ label, range, val: h[key], dec: () => this.setH({ [key]: clamp(h[key] - 1, min, max) }), inc: () => this.setH({ [key]: clamp(h[key] + 1, min, max) }) });
+    const openSpots = isBad ? 1 : (per * 2 - 3);
+
+    // Room
+    const gA = r.games.filter(g => g.a > g.b).length, gB = r.games.length - gA;
+    const rs = { waiting: ['Waiting for players', ACC], live: ['Live', '#F5F5F5'], done: ['Completed', '#92929A'], cancelled: ['Cancelled', '#6E6E76'] }[r.phase];
+    const roomSides = [
+      { name: 'Smash Bros', count: '2 of 2 claimed', slots: [
+        { ini: 'AM', name: 'Aarav Menon', sub: 'Host · you', avBg: '#2A2A30', avRing: '0 transparent', avFg: '#F5F5F5', nameColor: '#F5F5F5', removable: false },
+        { ini: 'KR', name: 'Kabir Rao', sub: 'Claimed', avBg: '#2A2A30', avRing: '0 transparent', avFg: '#F5F5F5', nameColor: '#F5F5F5', removable: false },
+      ] },
+      { name: 'Net Gains', count: r.removed ? '0 of 2 claimed' : '1 of 2 claimed', slots: [
+        r.removed
+          ? { ini: '', name: 'Nikhil Shetty', sub: 'Spot reopened · removed by you', avBg: 'transparent', avRing: '1.5px #3A3A42', avFg: '#F5F5F5', nameColor: '#92929A', removable: false }
+          : { ini: 'NS', name: 'Nikhil Shetty', sub: 'Claimed', avBg: '#2A2A30', avRing: '0 transparent', avFg: '#F5F5F5', nameColor: '#F5F5F5', removable: true, remove: () => this.setRoom({ removed: true }) },
+        { ini: 'S', name: 'Sameer', sub: 'Waiting to claim with the code', avBg: 'transparent', avRing: '1.5px dashed #3A3A42', avFg: '#6E6E76', nameColor: '#C6C6CC', removable: false },
+      ] },
+    ];
+
+    // Events
+    const teams = [
+      { name: 'Titans Sports Club', src: 'assets/team-titans.png', fit: 'contain' },
+      { name: 'Tigr', src: 'assets/team-tigr.png', fit: 'cover' },
+      { name: 'Sunrise Sports Club', src: 'assets/team-sunrise.png', fit: 'cover' },
+      { name: 'Rawnat United', src: 'assets/team-rawnat.png', fit: 'contain' },
+    ];
+    const FEAT = {
+      aro: { id: 'aro', img: 'assets/banner-arohance-badminton.png', pos: '50% 40%', date: '20 OCT', price: 'from ₹600', hasPrice: true, name: 'Arohance Badminton Tournament', where: 'Tiger Stadium, Bengaluru', detail: "Men's & Women's singles · by Arohance", cta: 'View categories', hasTeams: false },
+      hsr: { id: 'hsr', img: 'assets/banner-cricket.png', pos: '55% 35%', date: '26 OCT – 2 NOV', hasPrice: false, auction: true, name: 'HSR Corporate Cricket Cup', where: 'HSR Layout Grounds, Bengaluru', detail: 'T10 · 4 teams · auction closes before fixtures', cta: 'Follow the auction', hasTeams: true },
+    };
+    const EV = [
+      { g: 'Coming up', sport: 'table_tennis', mon: 'NOV', day: '15', name: 'Whitefield Table Tennis Open', venue: 'Whitefield Sports Arena · Bengaluru', status: 'Registration open · closes 5 Nov', c: ACC },
+      { id: 'hsr', g: 'Coming up', sport: 'cricket', mon: 'OCT', day: '26', name: 'HSR Corporate Cricket Cup', venue: 'HSR Layout Grounds · Bengaluru', status: 'Team auction in progress', c: '#C6C6CC', hasTeams: true, img: 'assets/banner-cricket.png', pos: '55% 35%' },
+      { id: 'aro', g: 'Coming up', sport: 'badminton', mon: 'OCT', day: '20', name: 'Arohance Badminton Tournament', venue: 'Tiger Stadium · Bengaluru', status: 'Registration open · closes 17 Oct', c: ACC, img: 'assets/banner-arohance-badminton.png', pos: '50% 40%' },
+      { g: 'Coming up', sport: 'badminton', mon: 'OCT', day: '20', name: 'Electronic City Shuttle Series', venue: 'Infosys Gate 1 Courts · Bengaluru', status: 'Registration closed', c: '#92929A' },
+      { g: 'Happening now', sport: 'badminton', mon: 'OCT', day: '12', name: 'Jayanagar Shuttle League', venue: 'Jayanagar Indoor Courts · Bengaluru', status: 'In progress · fixtures & results', c: '#F5F5F5', live: true },
+      { g: 'Past', sport: 'badminton', mon: 'SEP', day: '21', name: 'Indiranagar Smash Open', venue: 'Indiranagar Club · Bengaluru', status: 'Completed · you reached the QF', c: '#92929A' },
+      { g: 'Past', sport: 'cricket', mon: 'SEP', day: '07', name: 'Mysuru Monsoon Cup', venue: 'Gangotri Grounds · Mysuru', status: 'Cancelled by organiser', c: '#6E6E76' },
+    ];
+    const cityOf = e => e.venue.includes('Mysuru') ? 'Mysuru' : 'Bengaluru';
+    const stOk = e => S.evSt === 'any' || (S.evSt === 'open' && /Registration open/.test(e.status)) || (S.evSt === 'now' && e.g === 'Happening now') || (S.evSt === 'upcoming' && e.g === 'Coming up') || (S.evSt === 'past' && e.g === 'Past');
+    const evAll = EV.filter(e => (S.ev === 'all' || e.sport === S.ev) && stOk(e) && (S.evCity === 'any' || cityOf(e) === S.evCity));
+    const featE = evAll.find(e => e.id === 'aro') || evAll.find(e => e.id === 'hsr');
+    const feat = featE ? FEAT[featE.id] : FEAT.aro;
+    const showFeat = !!featE;
+    const evF = evAll.filter(e => e !== featE);
+    const SPORTS_ALL = [['all', 'All sports'], ['badminton', 'Badminton'], ['cricket', 'Cricket'], ['table_tennis', 'Table tennis'], ['football', 'Football'], ['tennis', 'Tennis'], ['kabaddi', 'Kabaddi'], ['bowling', 'Bowling']];
+    const STATUS_ALL = [['any', 'Any status'], ['open', 'Registration open'], ['now', 'Happening now'], ['upcoming', 'Coming up'], ['past', 'Past']];
+    const CITY_ALL = [['any', 'Any city'], ['Bengaluru', 'Bengaluru'], ['Mysuru', 'Mysuru']];
+    const cnt = (pred) => EV.filter(pred).length;
+    const lbl = (arr, k) => arr.find(x => x[0] === k)[1];
+    const fOn = on => on ? { bg: '#F5F5F5', fg: '#0B0B0D' } : { bg: '#1D1D21', fg: '#F5F5F5' };
+    const evFilters = [
+      { label: S.ev === 'all' ? 'Sport' : lbl(SPORTS_ALL, S.ev), ...fOn(S.ev !== 'all'), on: () => this.setState({ evSheet: 'sport' }) },
+      { label: S.evSt === 'any' ? 'Status' : lbl(STATUS_ALL, S.evSt), ...fOn(S.evSt !== 'any'), on: () => this.setState({ evSheet: 'status' }) },
+      { label: S.evCity === 'any' ? 'City' : S.evCity, ...fOn(S.evCity !== 'any'), on: () => this.setState({ evSheet: 'city' }) },
+    ];
+    const SHEETS = {
+      sport: ['Sport', 'Tournaments organisers are running on Kria', true, SPORTS_ALL.map(([k, l]) => { const n = k === 'all' ? EV.length : cnt(e => e.sport === k); return { label: l, sub: n ? n + ' events' : 'No events right now', weight: S.ev === k ? 700 : 500, check: S.ev === k ? 1 : 0, on: () => this.setState({ ev: k, evSheet: null }) }; })],
+      status: ['Status', 'Where the tournament is in its lifecycle', false, STATUS_ALL.map(([k, l]) => ({ label: l, sub: '', weight: S.evSt === k ? 700 : 500, check: S.evSt === k ? 1 : 0, on: () => this.setState({ evSt: k, evSheet: null }) }))],
+      city: ['City', 'Based on the venue', false, CITY_ALL.map(([k, l]) => ({ label: l, sub: k === 'any' ? '' : cnt(e => cityOf(e) === k) + ' events', weight: S.evCity === k ? 700 : 500, check: S.evCity === k ? 1 : 0, on: () => this.setState({ evCity: k, evSheet: null }) }))],
+    };
+    const sh = S.evSheet ? SHEETS[S.evSheet] : SHEETS.sport;
+    const SP = { badminton: ['sports_tennis', 'Badminton'], cricket: ['sports_cricket', 'Cricket'], table_tennis: ['table_restaurant', 'Table tennis'] };
+    const evCardGroups = ['Happening now', 'Coming up'].map(t => ({ title: t, items: evF.filter(e => e.g === t).map(e => ({ ...e, stColor: e.c, hasImg: !!e.img, noImg: !e.img, live: !!e.live, auction: e.id === 'hsr', price: e.id === 'aro' ? 'from ₹600' : '', hasPrice: e.id === 'aro' && !e.live, hasTeams: !!e.hasTeams, icon: SP[e.sport][0], sportLabel: SP[e.sport][1] })) })).filter(g => g.items.length);
+    const evPast = evF.filter(e => e.g === 'Past').map(e => ({ ...e, stColor: e.c }));
+    const evGroups = ['Coming up', 'Happening now', 'Past'].map(t => ({ title: t, items: evF.filter(e => e.g === t).map(e => ({ ...e, stColor: e.c, dayColor: e.g === 'Past' ? '#92929A' : '#F5F5F5' })) })).filter(g => g.items.length);
+    const evChips = [['all', 'All'], ['badminton', 'Badminton'], ['cricket', 'Cricket'], ['table_tennis', 'Table tennis']].map(([k, l]) => ({ label: l, ...sel(S.ev === k), on: () => this.setState({ ev: k }) }));
+
+    // Awards
+    const face = { gold: 'radial-gradient(circle at 50% 28%,#26241F,#141312 70%)', bronze: 'radial-gradient(circle at 50% 28%,#241F1B,#131110 70%)', silver: 'radial-gradient(circle at 50% 28%,#212326,#121315 70%)', locked: 'radial-gradient(circle at 50% 30%,#1A1A1D,#111113 70%)' };
+    const metal = { gold: [GOLD, '#E6CB8E', 'rgba(201,163,90,.45)'], bronze: [BRONZE, '#D39B73', 'rgba(168,113,74,.45)'], silver: [SILVER, '#D9DDE2', 'rgba(169,175,183,.4)'], locked: ['#2C2C32', '#55555D', '#232328'] };
+    const rimOf = (t, k) => `inset 0 0 0 ${k}px ${metal[t][0]}, inset 0 0 0 ${k * 3}px #131213, inset 0 0 0 ${k * 3 + 1}px ${metal[t][2]}`;
+    const AW = {
+      pom: { t: 'gold', glyph: 'POM', name: 'Player of the Match', ctx: 'Indiranagar Smash Open', tier: 'Organiser honour', desc: 'Singled out by the organiser for the defining performance of a match — your QF comeback from a game down.', criteria: 'Granted by a tournament organiser', statusK: 'Earned at', statusV: 'Indiranagar Smash Open' },
+      rk: { t: 'gold', glyph: 'RK', name: 'Rally King', ctx: 'Koramangala Doubles League', tier: 'Organiser honour', desc: 'For the player who owned the long exchanges at an event.', criteria: 'Granted by a tournament organiser', statusK: 'Earned at', statusV: 'Koramangala Doubles League' },
+      ko14: { t: 'bronze', glyph: 'KO', name: 'Knockout Winner', ctx: 'Sunday Smash #14', tier: 'Quick knockout', desc: 'Last one standing in a player-run knockout bracket.', criteria: 'Win the final of a quick knockout', statusK: 'Earned at', statusV: 'Sunday Smash #14' },
+      ko11: { t: 'bronze', glyph: 'KO', name: 'Knockout Winner', ctx: 'Sunday Smash #11', tier: 'Quick knockout', desc: 'Last one standing in a player-run knockout bracket.', criteria: 'Win the final of a quick knockout', statusK: 'Earned at', statusV: 'Sunday Smash #11' },
+      m50: { t: 'silver', glyph: '50', name: '50 matches', ctx: 'Earned', tier: 'Career milestone', desc: 'Fifty matches on your record, across every sport and format.', criteria: 'Play 50 matches', statusK: 'Progress', statusV: '85 played' },
+      w25: { t: 'silver', glyph: '25W', name: '25 wins', ctx: 'Earned', tier: 'Career milestone', desc: 'Twenty-five wins. Ties and no-results do not count.', criteria: 'Win 25 matches', statusK: 'Progress', statusV: '53 won' },
+      s2: { t: 'silver', glyph: '2×', name: 'Two sports', ctx: 'Earned', tier: 'Career milestone', desc: 'You compete in more than one sport. Registering alone does not count — you have to play.', criteria: 'Play 2 different sports', statusK: 'Progress', statusV: '3 sports played' },
+      m100: { t: 'locked', glyph: '100', name: '100 matches', ctx: '85 / 100', tier: 'Next milestone', desc: '15 more matches gets you there — quick matches count the same as tournament ones.', criteria: 'Play 100 matches', statusK: 'Progress', statusV: '85 of 100', locked: true, pct: '85%' },
+    };
+    const card = (id, k) => { const a = AW[id]; return { ...a, face: face[a.t], rim: rimOf(a.t, k), glyphColor: metal[a.t][1], gsize: a.glyph.length > 2 ? (k > 2 ? '24px' : '20px') : (k > 2 ? '28px' : '24px'), ctxColor: a.locked ? '#C6C6CC' : '#92929A', open: () => this.setState({ award: id }) }; };
+    const honours = ['pom', 'rk', 'ko14', 'ko11'].map(id => card(id, 2.5));
+    const milestones = ['m50', 'w25', 's2', 'm100'].map(id => card(id, 2));
+    const a = S.award ? AW[S.award] : AW.pom;
+    const aw = { ...a, face: face[a.t], rimLg: rimOf(a.t, 3.5), glyphColor: metal[a.t][1], gsizeLg: a.glyph.length > 2 ? '40px' : '48px', tierColor: a.locked ? '#92929A' : metal[a.t][0], locked: !!a.locked, pct: a.pct || '0%' };
+
+    // Profile
+    const PSD = {
+      badminton: { name: 'Badminton', played: 64, w: 42, l: 19, t: 0, nr: 3, rank: '#7', rankTitle: '#7 in badminton on Kria', rankNote: '1.4 pts behind #6 Rohit Kulkarni. Two more wins without a loss would put you level.', form: 'WWLWWWLWLW', recent: [['W', 'Smash Bros vs Shuttle Club', '21-17, 18-21, 21-15', 'Quick match · Sun'], ['W', 'Aarav Menon vs Farhan Shaikh', '21-12, 21-18', 'Sunday Smash #14 · Final'], ['L', 'Aarav Menon vs Vikram Hegde', '18-21, 21-19, 17-21', 'Indiranagar Smash Open · QF']] },
+      cricket: { name: 'Cricket', played: 18, w: 9, l: 7, t: 1, nr: 1, rank: '#23', rankTitle: '#23 in cricket on Kria', rankNote: '5.4 pts off the top 10. Ranked among players with 10+ decided matches.', form: 'LWWLWTLWLW', recent: [['L', 'Sunday XI vs Office Strikers', '112/6 (10.0) vs 118/4 (9.3)', 'Quick match · Sat'], ['W', 'Sunday XI vs Koramangala CC', '141/5 (12.0) vs 128/9 (12.0)', 'Quick match · 5 Oct']] },
+      table_tennis: { name: 'Table tennis', played: 3, w: 2, l: 1, t: 0, nr: 0, rank: '—', unranked: true, pct: '30%', rankTitle: 'Not ranked yet', rankNote: '3 of 10 decided matches. 7 more and you appear on the table tennis board.', form: 'WLW', recent: [['W', 'Aarav Menon vs Kunal Desai', '11-8, 9-11, 11-6', 'Whitefield TT League · Group'], ['L', 'Aarav Menon vs Rahul Menon', '7-11, 11-9, 8-11', 'Whitefield TT League · Group']] },
+    };
+    const p0 = PSD[S.ps] || PSD.badminton, pd = p0.w + p0.l + p0.t, ptot = pd + p0.nr;
+    const fw = p0.form.split('').filter(c => c === 'W').length;
+    const ps = {
+      name: p0.name, rate: (p0.w / pd * 100).toFixed(1) + '%', rank: p0.rank, rankColor: p0.unranked ? '#6E6E76' : ACC, played: p0.played, decided: pd,
+      bar: [['Won', p0.w, '#FF5A1F'], ['Lost', p0.l, '#F0525F'], ['Tied', p0.t, '#3B9EFF'], ['No result', p0.nr, '#4A4A52']].map(([label, v, color]) => ({ label, v, color, pct: (v / ptot * 100) + '%' })),
+      form: p0.form.split('').map(c => ({ ch: c, bg: c === 'W' ? 'rgba(255,90,31,.16)' : c === 'T' ? 'rgba(59,158,255,.16)' : c === 'L' ? 'rgba(240,68,82,.14)' : '#1D1D21', fg: c === 'W' ? '#FF7A45' : c === 'T' ? '#6BB6FF' : c === 'L' ? '#F26B76' : '#92929A' })),
+      formNote: `${fw} of last ${p0.form.length} won`, rankTitle: p0.rankTitle, rankNote: p0.rankNote, unranked: !!p0.unranked, pct: p0.pct || '0%',
+      recent: p0.recent.map(([res, title, score, ctx]) => ({ res, title, score, ctx, badgeBg: res === 'W' ? '#F5F5F5' : '#1D1D21', badgeFg: res === 'W' ? '#0B0B0D' : '#92929A' })),
+    };
+    const paChips = [['all', 'All sports', 85], ['badminton', 'Badminton', 64], ['cricket', 'Cricket', 18], ['table_tennis', 'Table tennis', 3]].map(([k, l, n]) => ({ label: l, n, ...sel(S.ps === k), on: () => this.setState({ ps: k }) }));
+    const sportRows = [
+      { key: 'badminton', name: 'Badminton', w: 42, l: 19, t: 0, played: 64, best: true },
+      { key: 'cricket', name: 'Cricket', w: 9, l: 7, t: 1, played: 18 },
+      { key: 'table_tennis', name: 'Table tennis', w: 2, l: 1, t: 0, played: 3, unranked: true },
+    ].map(s => { const d = s.w + s.l + s.t; return { ...s, on: () => this.setState({ ps: s.key }), rate: (s.w / d * 100).toFixed(1) + '%', rateColor: s.unranked ? '#6E6E76' : '#F5F5F5', wPct: (s.w / d * 100) + '%', lPct: (s.l / d * 100) + '%', tPct: (s.t / d * 100) + '%', rateShort: Math.round(s.w / d * 100) + '%', wl: `${s.w}–${s.l}${s.t ? '–' + s.t : ''}`, ring: (() => { const a = s.w / d * 360, b = a + s.l / d * 360; return `conic-gradient(#FF5A1F 0 ${a}deg, #F0525F ${a}deg ${b}deg, #3B9EFF ${b}deg 360deg)`; })(), sub: `${s.played} played · ${s.w}–${s.l}${s.t ? '–' + s.t : ''}` + (s.unranked ? ' · not ranked yet' : '') }; });
+    const tHistory = [
+      { name: 'HSR Shuttle Cup 2026', cat: "Men's Doubles · for Sunrise Sports Club", result: 'Winner', color: GOLD, logo: 'assets/team-sunrise.png', fit: 'cover', logoBg: '#F5F5F5' },
+      { name: 'Indiranagar Smash Open', cat: "Men's Singles · individual entry", result: 'Quarter-final', color: '#C6C6CC', logo: 'assets/kria-logo.png', fit: 'contain', logoBg: '#1D1D21' },
+      { name: 'Koramangala Doubles League', cat: "Men's Doubles · for Rawnat United", result: '3rd in group', color: '#C6C6CC', logo: 'assets/team-rawnat.png', fit: 'contain', logoBg: '#F5F5F5' },
+    ];
+
+    return {
+      showRationale: this.props.showRationale ?? true,
+      nav, recent,
+      lbTabs, lbRows, lbHas: lbRows.length > 0, lbEmpty: lbRows.length === 0, me: ME[S.lb],
+      code: S.code, setCode: e => this.setState({ code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) }),
+      joinBg: codeOk ? ACC : '#1D1D21', joinFg: codeOk ? '#0B0B0D' : '#5E5E66',
+      joinHint: !S.code ? 'Codes are 6 letters or numbers.' : !codeOk ? `${6 - S.code.length} more characters` : known ? 'Smash Bros vs Net Gains · 1 open spot · tap Join' : 'Tap Join to look this code up',
+      joinHintColor: codeOk && known ? '#F5F5F5' : '#92929A',
+      joinCode: () => {},
+      mfChips, mList, mNone: mList.length === 0,
+
+      h, h1: !h.done && h.step === 1, h2bad: !h.done && h.step === 2 && isBad, h2cri: !h.done && h.step === 2 && !isBad, h3: !h.done && h.step === 3, h4: !h.done && h.step === 4, hDone: h.done, hNotDone: !h.done,
+      hStepLabel: h.done ? '' : `${h.step} of 4`, hBackIcon: h.step === 1 || h.done ? 'close' : 'arrow_back',
+      hBack: () => h.done ? this.setH({ done: false, step: 1 }) : this.setH({ step: Math.max(1, h.step - 1) }),
+      hSegs: [1, 2, 3, 4].map(i => ({ c: h.done || i <= h.step ? ACC : '#232328' })),
+      hSports: [['badminton', 'Badminton', 'sports_tennis', 'Singles or doubles · scored point by point'], ['cricket', 'Cricket', 'sports_cricket', '2–11 a side · scored ball by ball']].map(([k, l, ic, sub]) => ({ label: l, icon: ic, sub, ring: h.sport === k ? '1.5px #FF5A1F' : '0 transparent', dot: h.sport === k ? '7px #FF5A1F' : '1.5px #3A3A42', on: () => this.setH({ sport: k }) })),
+      hTypeOpts: [['singles', 'Singles'], ['doubles', 'Doubles']].map(([k, l]) => ({ label: l, ...hsel(h.type === k), on: () => this.setH({ type: k }) })),
+      hBestOpts: [1, 3, 5].map(v => ({ label: String(v), ...hsel(h.bestOf === v), on: () => this.setH({ bestOf: v }) })),
+      hPtsOpts: [11, 15, 21].map(v => ({ label: String(v), ...hsel(h.points === v), on: () => this.setH({ points: v }) })),
+      hSteppers: [stp('ppt', 'Players per side', '2 to 11', 2, 11), stp('overs', 'Overs per innings', '1 to 50', 1, 50), stp('opb', 'Max overs per bowler', `1 to ${h.overs}`, 1, h.overs)],
+      setSideA: e => this.setH({ sideA: e.target.value }), setSideB: e => this.setH({ sideB: e.target.value }),
+      errA, errB, errARing: errA ? '1.5px #FF7A4D' : '0 transparent', errBRing: errB ? '1.5px #FF7A4D' : '0 transparent',
+      hSlotsA, hSlotsB,
+      hReview: [['Sport', isBad ? 'Badminton' : 'Cricket', 1], ['Format', fmt, 2], ['Sides', `${h.sideA} vs ${h.sideB}`, 3], ['Open spots', `${openSpots} to be claimed`, 3]].map(([k, v, st]) => ({ k, v, edit: () => this.setH({ step: st }) })),
+      toggleWait: () => this.setH({ wait: !h.wait }), waitTrack: h.wait ? ACC : '#2A2A30', waitKnob: h.wait ? '23px' : '3px',
+      hNextLabel: h.step === 4 ? 'Create match' : 'Continue', hNextBg: canNext ? ACC : '#1D1D21', hNextFg: canNext ? '#0B0B0D' : '#5E5E66',
+      hNext: () => { if (!canNext) return; h.step === 4 ? this.setH({ done: true }) : this.setH({ step: h.step + 1 }); },
+      hDoneNote: h.wait ? `You're all set. Share the code and you're on as soon as ${openSpots === 1 ? 'the last player joins' : `${openSpots} more players join`}.` : 'The match is live now. Players can still claim their spot with this code.',
+      hReset: () => {},
+
+      roomStLabel: rs[0], roomStColor: rs[1],
+      rWaiting: r.phase === 'waiting', rLive: r.phase === 'live', rDone: r.phase === 'done', rCancelled: r.phase === 'cancelled', rEnded: r.phase === 'done' || r.phase === 'cancelled',
+      roomSides, roomNote: r.removed ? "Nikhil's spot is open again — anyone with the code can claim it." : "You can start now. Sameer's spot plays as a guest and earns no career stats until claimed.",
+      startRoom: () => this.setRoom({ phase: 'live' }), cancelRoom: () => this.setRoom({ phase: 'cancelled' }),
+      resetRoom: () => this.setState({ room: { phase: 'waiting', games: [], a: 0, b: 0, prev: null, removed: false } }),
+      ptA: () => this.point('a'), ptB: () => this.point('b'), minusA: () => this.minus('a'), minusB: () => this.minus('b'),
+      swipeDownA: e => { this._sy = e.clientY; }, swipeDownB: e => { this._sy = e.clientY; }, swipeCancel: () => { this._sy = null; },
+      swipeUpA: e => this.swipe('a', e), swipeUpB: e => this.swipe('b', e),
+      flipA: React.createElement(FlipNum, { value: r.a }), flipB: React.createElement(FlipNum, { value: r.b }),
+      undoPt: () => { if (r.prev) this.setRoom({ ...r.prev, prev: null }); }, undoColor: r.prev ? '#F5F5F5' : '#5E5E66',
+      sA: r.a, sB: r.b, gA, gB, gameNo: r.games.length + 1,
+      gamesDone: r.games.map((g, i) => ({ n: i + 1, s: `${g.a}–${g.b}` })),
+      winnerLine: gA > gB ? `Smash Bros win ${gA}–${gB}` : `Net Gains win ${gB}–${gA}`,
+
+      evChips, evFilters, evAnyFilter: S.ev !== 'all' || S.evSt !== 'any' || S.evCity !== 'any', clearEv: () => this.setState({ ev: 'all', evSt: 'any', evCity: 'any' }),
+      evSheetOpen: !!S.evSheet, closeEvSheet: () => this.setState({ evSheet: null }), evSheetTitle: sh[0], evSheetSub: sh[1], evSheetSearch: sh[2], evSheetOpts: sh[3],
+      heroList, heroSheet: S.heroSheet, openHeroSheet: () => this.setState({ heroSheet: true }), closeHeroSheet: () => this.setState({ heroSheet: false }), heroCount: '3 sports played', msClip: this.state.msFill ? '15%' : '100%',
+      ps, paChips, paAll: S.ps === 'all', paOne: S.ps !== 'all',
+      evCardGroups, evPast, evHasPast: evPast.length > 0, evNone: !showFeat && evF.length === 0, heroTabs, hero: HERO[S.hs], homeEvents, evShowFeat: showFeat, feat, teams,
+
+      honours, milestones, aw, awardOpen: !!S.award, openFeatured: () => this.setState({ award: 'pom' }), closeAward: () => this.setState({ award: null }),
+
+      sportRows, tHistory,
+    };
+  }
+}
+</script>
+</body>
+</html>

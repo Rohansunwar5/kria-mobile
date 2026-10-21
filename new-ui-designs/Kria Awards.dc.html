@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&display=block" rel="stylesheet">
+<style>
+html,body{background:#141416}
+body{margin:0;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#F5F5F5;text-decoration:none}
+a:hover{color:#FF5A1F}
+*::-webkit-scrollbar{display:none}
+@keyframes kbShine{0%{background-position:130% 0}45%,100%{background-position:-30% 0}}
+</style>
+</helmet>
+
+<section id="t8" style="background:#141416;color:#F5F5F5;min-height:100vh;width:max-content;min-width:100%;box-sizing:border-box;padding:56px 56px 80px;display:flex;flex-direction:column;gap:64px">
+
+<header style="display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start;max-width:1600px">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px"><img src="assets/kria-logo.png" alt="Kria" style="width:46px;height:40px;object-fit:contain"><span style="font:600 11px 'JetBrains Mono',monospace;color:#FF5A1F;letter-spacing:.08em">KRIA · AWARDS</span></div>
+    <h1 style="margin:0;font-size:60px;font-stretch:62%;font-weight:800;line-height:.9;letter-spacing:-.01em">Awards worth showing off.</h1>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Shape says who gave it</div>
+    <p style="margin:0;text-wrap:pretty">Shield for a tournament title, rosette for an organiser's honour, hexagon for a quick-knockout win, coin for a milestone Kria counts. Still readable at 28px.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Metal says how rare</div>
+    <p style="margin:0;text-wrap:pretty">Bronze, silver, gold, platinum. Not earned yet is graphite with a progress ring. Every badge is one component with a few props and no image files, so it ships as code.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">To confirm with backend</div>
+    <p style="margin:0;text-wrap:pretty">The tiers at 10 / 250 matches and 10 / 50 / 100 wins are proposed. Today the API knows 50 and 100 matches, 25 wins and two sports. Runner-up needs the final's loser recorded as a title.</p>
+  </div>
+</header>
+
+<div id="8a" style="display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#8a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">8a</a><span style="font-size:13px;font-weight:600">Four families</span><span style="font-size:12px;color:#6E6E76">one shape per source</span></div>
+  <div style="display:grid;grid-template-columns:repeat(4,300px);gap:20px">
+    <sc-for list="{{ families }}" as="f" hint-placeholder-count="4">
+      <div style="height:470px;border-radius:28px;background:radial-gradient(90% 55% at 50% 24%,#1F1F24 0%,#111113 72%);box-shadow:inset 0 0 0 1px #222227;padding:28px 24px 22px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px">
+        <div style="height:220px;display:grid;place-items:center"><dc-import name="AwardBadge" shape="{{ f.b.shape }}" metal="{{ f.b.metal }}" icon="{{ f.b.icon }}" glyph="{{ f.b.glyph }}" sub="{{ f.b.sub }}" ribbon="{{ f.b.ribbon }}" laurel="{{ f.b.laurel }}" shine="{{ f.b.shine }}" progress="{{ f.b.progress }}" count="{{ f.b.count }}" size="210" hint-size="210px,210px"></dc-import></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.08em;color:#92929A">{{ f.code }}</span>
+          <span style="font-size:30px;font-stretch:62%;font-weight:800;line-height:.95">{{ f.name }}</span>
+          <span style="font-size:13px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">{{ f.who }}</span>
+        </div>
+        <span style="margin-top:auto;padding-top:14px;border-top:1px solid #222227;font-size:12px;color:#C6C6CC">{{ f.metals }}</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:56px 64px;align-items:flex-start">
+
+<div id="8b" style="display:flex;flex-direction:column;gap:18px;width:1000px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#8b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">8b</a><span style="font-size:13px;font-weight:600">Every badge</span><span style="font-size:12px;color:#6E6E76">earned and not-yet states</span></div>
+  <div style="display:flex;flex-direction:column">
+    <sc-for list="{{ rows }}" as="row" hint-placeholder-count="6">
+      <div style="display:grid;grid-template-columns:240px minmax(0,1fr);gap:40px;padding:28px 0;border-top:1px solid #222227;align-items:center">
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:17px;font-weight:650">{{ row.name }}</span><span style="font-size:13px;line-height:1.5;color:#92929A;text-wrap:pretty">{{ row.rule }}</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:28px 32px">
+          <sc-for list="{{ row.items }}" as="it" hint-placeholder-count="3">
+            <div style="width:140px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+              <dc-import name="AwardBadge" shape="{{ it.b.shape }}" metal="{{ it.b.metal }}" icon="{{ it.b.icon }}" glyph="{{ it.b.glyph }}" sub="{{ it.b.sub }}" ribbon="{{ it.b.ribbon }}" laurel="{{ it.b.laurel }}" shine="{{ it.b.shine }}" progress="{{ it.b.progress }}" count="{{ it.b.count }}" size="128" hint-size="128px,128px"></dc-import>
+              <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:13px;font-weight:600">{{ it.name }}</span><span style="font-size:11.5px;line-height:1.35;color:#92929A">{{ it.meta }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+<div id="8e" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#8e" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">8e</a><span style="font-size:13px;font-weight:600">Awards tab, re-minted</span><span style="font-size:12px;color:#6E6E76">tap any badge</span></div>
+  <div data-screen-label="8e Awards" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;bottom:0;padding-bottom:110px;box-sizing:border-box;overflow-y:auto;scrollbar-width:none">
+      <div style="padding:10px 20px 0;display:flex;justify-content:space-between;align-items:baseline">
+        <h2 style="margin:0;font-size:40px;font-stretch:62%;font-weight:800;line-height:1">Awards</h2>
+        <span style="font-size:13px;color:#92929A;font-variant-numeric:tabular-nums">8 earned</span>
+      </div>
+      <button onClick="{{ openTitle }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:calc(100% - 40px);margin:20px 20px 0;padding:26px 20px 24px;border-radius:28px;background:radial-gradient(80% 60% at 50% 32%,#221D13 0%,#121214 72%);display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+        <dc-import name="AwardBadge" shape="shield" metal="gold" icon="emoji_events" ribbon="CHAMPION" laurel="true" shine="true" size="176" hint-size="176px,176px"></dc-import>
+        <span style="display:flex;flex-direction:column;gap:6px;align-items:center">
+          <span style="font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.08em;color:#F0D592">LATEST TITLE</span>
+          <span style="font-size:30px;font-stretch:62%;font-weight:800;line-height:1">Champion · Men's Doubles</span>
+          <span style="font-size:13px;color:#92929A">HSR Shuttle Cup 2026</span>
+        </span>
+      </button>
+      <div style="padding:30px 20px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:17px;font-weight:650">Honours</span><span style="font-size:12px;color:#92929A">Given by organisers, or won in a quick knockout</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px 8px;padding:18px 20px 0">
+        <sc-for list="{{ honours }}" as="h" hint-placeholder-count="3">
+          <button onClick="{{ h.open }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+            <dc-import name="AwardBadge" shape="{{ h.b.shape }}" metal="{{ h.b.metal }}" icon="{{ h.b.icon }}" glyph="{{ h.b.glyph }}" sub="{{ h.b.sub }}" ribbon="{{ h.b.ribbon }}" laurel="{{ h.b.laurel }}" progress="{{ h.b.progress }}" count="{{ h.b.count }}" size="88" hint-size="88px,88px"></dc-import>
+            <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:600;line-height:1.2">{{ h.name }}</span><span style="font-size:11px;color:#92929A;line-height:1.3">{{ h.ctx }}</span></span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="padding:34px 20px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:17px;font-weight:650">Career milestones</span><span style="font-size:12px;color:#92929A">Counted from every match you play</span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px 6px;padding:18px 14px 0">
+        <sc-for list="{{ milestones }}" as="m" hint-placeholder-count="4">
+          <button onClick="{{ m.open }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+            <dc-import name="AwardBadge" shape="{{ m.b.shape }}" metal="{{ m.b.metal }}" icon="{{ m.b.icon }}" glyph="{{ m.b.glyph }}" sub="{{ m.b.sub }}" progress="{{ m.b.progress }}" size="72" hint-size="72px,72px"></dc-import>
+            <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:600;line-height:1.2">{{ m.name }}</span><span style="font-size:11px;color:{{ m.ctxColor }};font-variant-numeric:tabular-nums">{{ m.ctx }}</span></span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:106px;padding:16px 12px 0;box-sizing:border-box;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 34%);z-index:5">
+      <nav style="height:64px;border-radius:24px;background:#151518;box-shadow:0 0 0 1px #24242A;display:grid;grid-template-columns:repeat(5,1fr);align-items:center">
+        <a href="Kria Player App.dc.html#1a" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;color:#85858D"><span style="height:26px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:23px">home</span><span style="font-size:10.5px;font-weight:500">Home</span></a>
+        <a href="Kria Player App.dc.html#1b" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;color:#85858D"><span style="height:26px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:23px">leaderboard</span><span style="font-size:10.5px;font-weight:500">Compete</span></a>
+        <a href="Kria Player App.dc.html#1f" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;color:#85858D"><span style="height:26px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:23px">stadium</span><span style="font-size:10.5px;font-weight:500">Events</span></a>
+        <a href="#8e" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;background:#232328;color:#F5F5F5"><span style="height:26px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:23px;color:#FF5A1F;font-variation-settings:'FILL' 1">military_tech</span><span style="font-size:10.5px;font-weight:650">Awards</span></a>
+        <a href="Kria Player App.dc.html#1h" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;margin:0 3px;border-radius:18px;color:#85858D"><span style="height:26px;display:grid;place-items:center"><span style="width:24px;height:24px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:9px;font-weight:700;color:#F5F5F5">AM</span></span><span style="font-size:10.5px;font-weight:500">Profile</span></a>
+      </nav>
+      <div style="position:absolute;bottom:8px;left:50%;margin-left:-67px;width:134px;height:5px;border-radius:3px;background:#F5F5F5"></div>
+    </div>
+    <sc-if value="{{ awardOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end">
+        <button onClick="{{ closeAward }}" style="all:unset;cursor:pointer;position:absolute;inset:0;background:rgba(0,0,0,.62)"></button>
+        <div style="position:relative;background:#151518;border-radius:30px 30px 0 0;padding:10px 24px 40px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+          <span style="width:36px;height:5px;border-radius:3px;background:#3A3A42"></span>
+          <div style="margin-top:10px"><dc-import name="AwardBadge" shape="{{ aw.b.shape }}" metal="{{ aw.b.metal }}" icon="{{ aw.b.icon }}" glyph="{{ aw.b.glyph }}" sub="{{ aw.b.sub }}" ribbon="{{ aw.b.ribbon }}" laurel="{{ aw.b.laurel }}" progress="{{ aw.b.progress }}" count="{{ aw.b.count }}" shine="true" size="176" hint-size="176px,176px"></dc-import></div>
+          <span style="font-size:12px;font-weight:600;color:{{ aw.tierColor }}">{{ aw.tier }}</span>
+          <span style="font-size:32px;font-stretch:62%;font-weight:800;line-height:1">{{ aw.name }}</span>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#C6C6CC;max-width:300px;text-wrap:pretty">{{ aw.desc }}</p>
+          <div style="align-self:stretch;display:flex;flex-direction:column;text-align:left;margin-top:4px">
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid #222227;font-size:13px"><span style="color:#92929A">How it's earned</span><span style="font-weight:600;text-align:right;max-width:200px">{{ aw.criteria }}</span></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid #222227;font-size:13px"><span style="color:#92929A">{{ aw.statusK }}</span><span style="font-weight:600;text-align:right;font-variant-numeric:tabular-nums">{{ aw.statusV }}</span></div>
+          </div>
+          <button onClick="{{ closeAward }}" style="all:unset;cursor:pointer;align-self:stretch;height:52px;border-radius:16px;background:#1D1D21;display:grid;place-items:center;font-size:15px;font-weight:600;margin-top:4px">Done</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Shine is for the focal badge only.</span> The latest title and the open sheet get the light sweep; the grid stays still so the screen doesn't glitter. Two knockout wins are one hexagon with a ×2, not two identical tiles.</p>
+</div>
+
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:56px 64px;align-items:flex-start">
+
+<div id="8c" style="display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#8c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">8c</a><span style="font-size:13px;font-weight:600">Metals</span><span style="font-size:12px;color:#6E6E76">highlight · base · shadow</span></div>
+  <div style="display:grid;grid-template-columns:repeat(5,170px);gap:20px">
+    <sc-for list="{{ metals }}" as="mt" hint-placeholder-count="5">
+      <div style="display:flex;flex-direction:column;gap:14px;padding:22px 18px;border-radius:24px;box-shadow:inset 0 0 0 1px #222227">
+        <dc-import name="AwardBadge" shape="coin" metal="{{ mt.k }}" glyph="{{ mt.glyph }}" size="88" hint-size="88px,88px"></dc-import>
+        <span style="font-size:15px;font-weight:650">{{ mt.name }}</span>
+        <span style="display:flex;gap:4px"><span style="width:22px;height:22px;border-radius:6px;background:{{ mt.lt }}"></span><span style="width:22px;height:22px;border-radius:6px;background:{{ mt.md }}"></span><span style="width:22px;height:22px;border-radius:6px;background:{{ mt.dk }}"></span></span>
+        <span style="font:500 10.5px 'JetBrains Mono',monospace;color:#92929A;line-height:1.6">{{ mt.hex }}</span>
+        <span style="font-size:12px;line-height:1.45;color:#A3A3AB;text-wrap:pretty">{{ mt.use }}</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+<div id="8d" style="display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#8d" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">8d</a><span style="font-size:13px;font-weight:600">Sizes</span><span style="font-size:12px;color:#6E6E76">detail drops away below 64px</span></div>
+  <div style="display:flex;flex-direction:column;gap:22px;padding:24px 28px;border-radius:24px;box-shadow:inset 0 0 0 1px #222227">
+    <sc-for list="{{ sizeRows }}" as="sr" hint-placeholder-count="3">
+      <div style="display:flex;align-items:flex-end;gap:30px">
+        <sc-for list="{{ sr.items }}" as="si" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <dc-import name="AwardBadge" shape="{{ si.b.shape }}" metal="{{ si.b.metal }}" icon="{{ si.b.icon }}" glyph="{{ si.b.glyph }}" sub="{{ si.b.sub }}" ribbon="{{ si.b.ribbon }}" laurel="{{ si.b.laurel }}" size="{{ si.size }}" hint-size="{{ si.hint }}"></dc-import>
+            <span style="font:500 10.5px 'JetBrains Mono',monospace;color:#6E6E76">{{ si.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { award: null };
+
+  renderVals() {
+    const B = (shape, metal, o = {}) => ({ shape, metal, icon: o.icon || '', glyph: o.glyph || '', sub: o.sub || '', ribbon: o.ribbon || '', laurel: o.laurel ? 'true' : '', shine: o.shine ? 'true' : '', progress: o.progress != null ? String(o.progress) : '', count: o.count ? String(o.count) : '' });
+    const champ = o => B('shield', 'gold', { icon: 'emoji_events', ribbon: 'CHAMPION', laurel: true, ...o });
+
+    const families = [
+      { code: 'TITLES · SHIELD', name: 'Tournament titles', who: 'Won a category final at an organised tournament. Granted from the bracket result.', metals: 'Gold champion · Silver runner-up', b: champ({ shine: true }) },
+      { code: 'HONOURS · ROSETTE', name: 'Organiser honours', who: 'Named by the organiser: Player of the Match, Best Bowler, or one they make up.', metals: 'Gold, always', b: B('rosette', 'gold', { icon: 'star', shine: true }) },
+      { code: 'KNOCKOUTS · HEXAGON', name: 'Quick knockouts', who: 'Last one standing in a player-run knockout. Wins in the same sport stack on one badge.', metals: 'Bronze, with a win count', b: B('hex', 'bronze', { icon: 'sports_tennis', shine: true }) },
+      { code: 'MILESTONES · COIN', name: 'Career milestones', who: 'Counted by Kria from every match you play, quick or tournament.', metals: 'Bronze → platinum by tier', b: B('coin', 'silver', { glyph: '50', sub: 'MATCHES', shine: true }) },
+    ];
+
+    const rows = [
+      { name: 'Tournament titles', rule: 'Shield, laurel and a ribbon naming the finish.', items: [
+        { name: 'Champion', meta: 'Gold · won the final', b: champ() },
+        { name: 'Runner-up', meta: 'Silver · reached the final', b: B('shield', 'silver', { icon: 'emoji_events', ribbon: 'RUNNER-UP', laurel: true }) },
+      ] },
+      { name: 'Organiser honours', rule: 'Known honours get a fixed icon. A custom name falls back to its monogram.', items: [
+        { name: 'Player of the Match', meta: 'Gold · star', b: B('rosette', 'gold', { icon: 'star' }) },
+        { name: 'Best Bowler', meta: 'Gold · sport icon', b: B('rosette', 'gold', { icon: 'sports_cricket' }) },
+        { name: 'Rally King', meta: 'Gold · custom, monogram', b: B('rosette', 'gold', { glyph: 'RK' }) },
+      ] },
+      { name: 'Quick knockouts', rule: 'Sport icon in the centre. Repeat wins add a count instead of a duplicate.', items: [
+        { name: 'Badminton', meta: 'Bronze · won twice', b: B('hex', 'bronze', { icon: 'sports_tennis', count: 2 }) },
+        { name: 'Cricket', meta: 'Bronze · won once', b: B('hex', 'bronze', { icon: 'sports_cricket' }) },
+        { name: 'Table tennis', meta: 'Not won yet', b: B('hex', 'locked', { icon: 'table_restaurant' }) },
+      ] },
+      { name: 'Matches played', rule: 'Coin with the number struck in. The ring shows how close the next tier is.', items: [
+        { name: '10 matches', meta: 'Bronze', b: B('coin', 'bronze', { glyph: '10', sub: 'MATCHES' }) },
+        { name: '50 matches', meta: 'Silver', b: B('coin', 'silver', { glyph: '50', sub: 'MATCHES' }) },
+        { name: '100 matches', meta: '85 / 100 · gold next', b: B('coin', 'locked', { glyph: '100', sub: 'MATCHES', progress: 0.85 }) },
+        { name: '250 matches', meta: '85 / 250 · platinum', b: B('coin', 'locked', { glyph: '250', sub: 'MATCHES', progress: 0.34 }) },
+      ] },
+      { name: 'Wins', rule: 'Same coin, same ladder. Ties and no-results never count.', items: [
+        { name: '10 wins', meta: 'Bronze', b: B('coin', 'bronze', { glyph: '10', sub: 'WINS' }) },
+        { name: '25 wins', meta: 'Silver', b: B('coin', 'silver', { glyph: '25', sub: 'WINS' }) },
+        { name: '50 wins', meta: 'Gold', b: B('coin', 'gold', { glyph: '50', sub: 'WINS' }) },
+        { name: '100 wins', meta: 'Platinum', b: B('coin', 'platinum', { glyph: '100', sub: 'WINS' }) },
+      ] },
+      { name: 'Sports played', rule: 'You have to play a match in the sport. Registering alone does not count.', items: [
+        { name: 'Two sports', meta: 'Silver', b: B('coin', 'silver', { glyph: '2', sub: 'SPORTS' }) },
+        { name: 'Three sports', meta: 'Gold', b: B('coin', 'gold', { glyph: '3', sub: 'SPORTS' }) },
+      ] },
+    ];
+
+    const metals = [
+      { k: 'bronze', name: 'Bronze', glyph: '10', lt: '#E2A77D', md: '#A8714A', dk: '#6E4428', hex: '#E2A77D #A8714A #6E4428', use: 'First tier, quick-knockout wins' },
+      { k: 'silver', name: 'Silver', glyph: '50', lt: '#E3E7EC', md: '#A9AFB7', dk: '#676D76', hex: '#E3E7EC #A9AFB7 #676D76', use: 'Runner-up, second tier' },
+      { k: 'gold', name: 'Gold', glyph: '100', lt: '#F0D592', md: '#C9A35A', dk: '#8C6A2F', hex: '#F0D592 #C9A35A #8C6A2F', use: 'Champion, organiser honours, third tier' },
+      { k: 'platinum', name: 'Platinum', glyph: '250', lt: '#EEF2F8', md: '#C3CAD6', dk: '#7C8695', hex: '#EEF2F8 #C3CAD6 #7C8695', use: 'Top tier only. Faint iridescent sheen' },
+      { k: 'locked', name: 'Graphite', glyph: '—', lt: '#55555D', md: '#3A3A42', dk: '#2A2A30', hex: '#55555D #3A3A42 #2A2A30', use: 'Not earned yet. Never dimmed metal' },
+    ];
+
+    const sz = [[128, 'sheet'], [88, 'grid'], [48, 'list'], [28, 'inline']];
+    const sizeRows = [champ(), B('rosette', 'gold', { icon: 'star' }), B('hex', 'bronze', { icon: 'sports_tennis' }), B('coin', 'silver', { glyph: '50', sub: 'MATCHES' })]
+      .map(b => ({ items: sz.map(([s, l]) => ({ b, size: String(s), hint: `${s}px,${s}px`, label: `${s} · ${l}` })) }));
+
+    const AW = {
+      title: { b: champ(), tier: 'Tournament title', name: 'Champion', desc: "Won the Men's Doubles final at an organised tournament.", criteria: 'Win a category final', statusK: 'Earned at', statusV: 'HSR Shuttle Cup 2026', metal: 'gold' },
+      pom: { b: B('rosette', 'gold', { icon: 'star' }), tier: 'Organiser honour', name: 'Player of the Match', ctx: 'Indiranagar Smash Open', desc: 'Singled out by the organiser for the defining performance of a match: your QF comeback from a game down.', criteria: 'Granted by a tournament organiser', statusK: 'Earned at', statusV: 'Indiranagar Smash Open', metal: 'gold' },
+      rk: { b: B('rosette', 'gold', { glyph: 'RK' }), tier: 'Organiser honour', name: 'Rally King', ctx: 'Koramangala Doubles League', desc: 'For the player who owned the long exchanges at an event.', criteria: 'Granted by a tournament organiser', statusK: 'Earned at', statusV: 'Koramangala Doubles League', metal: 'gold' },
+      ko: { b: B('hex', 'bronze', { icon: 'sports_tennis', count: 2 }), tier: 'Quick knockout · ×2', name: 'Knockout Winner', ctx: 'Sunday Smash #11, #14', desc: 'Last one standing in a player-run badminton knockout. Twice.', criteria: 'Win the final of a quick knockout', statusK: 'Earned at', statusV: 'Sunday Smash #11, #14', metal: 'bronze' },
+      m50: { b: B('coin', 'silver', { glyph: '50', sub: 'MATCHES' }), tier: 'Career milestone', name: '50 matches', ctx: 'Earned', desc: 'Fifty matches on your record, across every sport and format.', criteria: 'Play 50 matches', statusK: 'Progress', statusV: '85 played', metal: 'silver' },
+      w25: { b: B('coin', 'silver', { glyph: '25', sub: 'WINS' }), tier: 'Career milestone', name: '25 wins', ctx: 'Earned', desc: 'Twenty-five wins. Ties and no-results do not count.', criteria: 'Win 25 matches', statusK: 'Progress', statusV: '53 won', metal: 'silver' },
+      s2: { b: B('coin', 'silver', { glyph: '2', sub: 'SPORTS' }), tier: 'Career milestone', name: 'Two sports', ctx: 'Earned', desc: 'You compete in more than one sport. Registering alone does not count; you have to play.', criteria: 'Play 2 different sports', statusK: 'Progress', statusV: '3 sports played', metal: 'silver' },
+      m100: { b: B('coin', 'locked', { glyph: '100', sub: 'MATCHES', progress: 0.85 }), tier: 'Next milestone · gold', name: '100 matches', ctx: '85 / 100', desc: '15 more matches gets you there. Quick matches count the same as tournament ones.', criteria: 'Play 100 matches', statusK: 'Progress', statusV: '85 of 100', metal: 'locked' },
+    };
+    const tierColor = { gold: '#F0D592', silver: '#E3E7EC', bronze: '#E2A77D', platinum: '#EEF2F8', locked: '#92929A' };
+    const item = id => ({ ...AW[id], ctxColor: AW[id].metal === 'locked' ? '#C6C6CC' : '#92929A', open: () => this.setState({ award: id }) });
+    const a = AW[this.state.award || 'title'];
+
+    return {
+      families, rows, metals, sizeRows,
+      honours: ['pom', 'rk', 'ko'].map(item),
+      milestones: ['m50', 'w25', 's2', 'm100'].map(item),
+      openTitle: () => this.setState({ award: 'title' }),
+      awardOpen: !!this.state.award, closeAward: () => this.setState({ award: null }),
+      aw: { ...a, tierColor: tierColor[a.metal] },
+    };
+  }
+}
+</script>
+</body>
+</html>

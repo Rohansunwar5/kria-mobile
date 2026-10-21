@@ -10,6 +10,12 @@ import { uploadPlayerProfileImage } from '@/store/slices/authSlice';
 /** Square now, 4px radius, with the camera affordance as a corner badge —
  *  this is the only place a player can change their photo. */
 export function AvatarPicker({ name, imageUrl, size = 76 }: { name?: string; imageUrl?: string; size?: number }) {
+  const { pick, busy } = usePhotoUpload();
+  return <AvatarFace name={name} imageUrl={imageUrl} size={size} pick={pick} busy={busy} />;
+}
+
+/** Pick a photo, shrink it to what the server takes, upload it. Shared by every place a player changes their photo. */
+export function usePhotoUpload() {
   const dispatch = useAppDispatch();
   const [busy, setBusy] = useState(false);
 
@@ -40,7 +46,10 @@ export function AvatarPicker({ name, imageUrl, size = 76 }: { name?: string; ima
       setBusy(false);
     }
   };
+  return { pick, busy };
+}
 
+function AvatarFace({ name, imageUrl, size, pick, busy }: { name?: string; imageUrl?: string; size: number; pick: () => void; busy: boolean }) {
   return (
     <Pressable
       accessibilityRole="button"

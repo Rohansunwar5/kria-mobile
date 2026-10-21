@@ -83,7 +83,7 @@ describe('a waiting match', () => {
     mockViewer = 'p2';
     render(<QuickMatchScreen />);
 
-    expect(screen.getByText('Waiting for Arjun Mehta to start')).toBeTruthy();
+    expect(screen.getByText('Waiting for Arjun Mehta to start the match.')).toBeTruthy();
     expect(screen.queryByText('Start match')).toBeNull();
   });
 });
@@ -112,7 +112,7 @@ describe('a knockout match', () => {
     mockViewer = 'h1';
     mockKnockoutId = 'k1';
     render(<QuickMatchScreen />);
-    expect(await screen.findByText('Cup · Final · ← Bracket')).toBeTruthy();
+    expect(await screen.findByText('Cup · Final · Bracket')).toBeTruthy();
   });
 
   describe('awards auto-open', () => {
@@ -120,7 +120,7 @@ describe('a knockout match', () => {
     async function finish(viewer: string, fetched: Record<string, unknown> = { status: 'completed' }) {
       mockViewer = viewer; mockKnockoutId = 'k1'; mockStatus = 'live'; mockFetched = fetched;
       const view = render(<QuickMatchScreen />);
-      await screen.findByText('Cup · Final · ← Bracket');
+      await screen.findByText('Cup · Final · Bracket');
       mockStatus = 'completed';
       view.rerender(<QuickMatchScreen />);
       return view;
@@ -141,7 +141,7 @@ describe('a knockout match', () => {
     it('does not open if the host left before the answer came', async () => {
       mockViewer = 'h1'; mockKnockoutId = 'k1'; mockStatus = 'live'; mockFetched = {};
       const view = render(<QuickMatchScreen />);
-      await screen.findByText('Cup · Final · ← Bracket');
+      await screen.findByText('Cup · Final · Bracket');
       let answer: (k: unknown) => void = () => undefined;
       (getQuickKnockout as jest.Mock).mockImplementationOnce(() => new Promise((r) => { answer = r; }));
       mockStatus = 'completed';
@@ -170,7 +170,7 @@ describe('a knockout match', () => {
     it('does not open when an already-finished final is opened later', async () => {
       mockViewer = 'h1'; mockKnockoutId = 'k1'; mockStatus = 'completed'; mockFetched = { status: 'completed' };
       render(<QuickMatchScreen />);
-      await screen.findByText('Cup · Final · ← Bracket');
+      await screen.findByText('Cup · Final · Bracket');
       expect(getQuickKnockout).toHaveBeenCalledTimes(1); // the bar title only
       expect(router.push).not.toHaveBeenCalled();
     });
@@ -241,17 +241,17 @@ describe('a live cricket match', () => {
   it('names both sides and the overs in the header', () => {
     mockViewer = 'h1';
     render(<QuickMatchScreen />);
-    // The header, and the score band (which names both sides until the scorecard arrives).
-    expect(screen.getAllByText('Arjun v Rahul')).toHaveLength(2);
+    // The room's title and line, and the score band (which names both sides until the scorecard arrives).
+    expect(screen.getByText('Arjun vs Rahul')).toBeTruthy();
     expect(within(scroll()).getAllByText('Arjun v Rahul')).toHaveLength(1);
-    expect(screen.getByText('5 overs a side')).toBeTruthy();
+    expect(screen.getByText('Cricket · 2 a side · 5 overs · Hosted by you')).toBeTruthy();
   });
 
-  it('says "1 over a side" for a one-over match', () => {
+  it('says "1 over" for a one-over match', () => {
     mockViewer = 'h1';
     mockMatchOver = { ...cricket, matchConfig: { maxOvers: 1 } };
     render(<QuickMatchScreen />);
-    expect(screen.getByText('1 over a side')).toBeTruthy();
+    expect(screen.getByText('Cricket · 2 a side · 1 over · Hosted by you')).toBeTruthy();
   });
 
   it('pins the pad outside the scroll for the host', () => {
