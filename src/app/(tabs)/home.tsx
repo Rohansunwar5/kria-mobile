@@ -8,6 +8,7 @@ import { getTopPlayers, type RankedPlayer } from '@/api/rankings';
 import { latestTournaments } from '@/api/tournaments';
 import { EventCard } from '@/components/EventCard';
 import { MatchCard } from '@/components/MatchCard';
+import { LiveNowRow } from '@/components/home/LiveNowRow';
 import { Milestone } from '@/components/home/Milestone';
 import { Checklist, RankTrack, StartHeadline } from '@/components/home/NewPlayer';
 import { RankHero } from '@/components/home/RankHero';
@@ -121,6 +122,8 @@ export default function Home() {
         ) : null}
 
         <View style={[s.actions, { paddingTop: isNew ? 24 : 20 }]}>{isNew ? [host, join] : [join, host]}</View>
+
+        <LiveNowRow />
 
         {next ? (
           <Section title="Up next">

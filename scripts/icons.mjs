@@ -13,7 +13,7 @@ const ICONS = {
   qr_code_2: 'o', person_check: 'o', trending_up: 'o',
   arrow_back: 'o', close: 'o', ios_share: 'o', content_copy: 'o', info: 'o', swipe_vertical: 'o',
   undo: 'o', block: 'o', edit: 'o', remove: 'o', error: 'o', search: 'o', more_horiz: 'o',
-  gavel: 'o', settings: 'o', photo_camera: 'o', logout: 'o', receipt_long: 'o', assignment: 'o', push_pin: 'o', forum: 'o', campaign: 'o', account_tree: 'o',
+  gavel: 'o', settings: 'o', photo_camera: 'o', logout: 'o', receipt_long: 'o', assignment: 'o', push_pin: 'o', forum: 'o', campaign: 'o', account_tree: 'o', sensors: 'o',
 };
 const VARIANT = { o: 'wght300', f: 'fill1', b: 'wght500' };
 const base = 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined';
