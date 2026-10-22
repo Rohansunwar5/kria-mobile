@@ -39,7 +39,7 @@ export function badmintonBoard(m: BadmintonMatch): BoardView {
   const c = rallyConfig(m);
   const full = sides(m);
   const isPlayer = !!(m.player1 || m.player2);
-  const short = full.map((s) => (isPlayer ? s.name.trim().split(/\s+/).pop() ?? '' : s.name));
+  const short = full.map((s) => (isPlayer && !/ [&/] /.test(s.name) ? s.name.trim().split(/\s+/).pop() ?? '' : s.name));
   const ids = sideIds(m);
   const over = m.status === 'completed';
   const all = m.gameScores ?? [];

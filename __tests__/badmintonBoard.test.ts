@@ -59,6 +59,10 @@ describe('badmintonBoard', () => {
     expect(v.games[1]).toMatchObject({ n: 2, live: true, winner: 'In play' });
     expect(v.games[0].winner).toBe('Rao');
   });
+  it('doubles pair keeps full name', () => {
+    const v = badmintonBoard(mk([g(1, 20, 19)], { player1: { registrationId: 'r1', name: 'Rohit Kulkarni & Arjun Patil' } }));
+    expect(v.chip).toBe('Game point · Rohit Kulkarni & Arjun Patil');
+  });
   it('scheduled', () => {
     const v = badmintonBoard(mk([], { status: 'scheduled' }));
     expect(v.top).toBe('Game 1 · Games 0–0');
