@@ -56,6 +56,9 @@
  * 2026-10-22: `src/components/quick/QuickCricketLive.tsx`, `CricketScorePanel.tsx` and `CricketSetupPanel.tsx`
  * removed because those files were deleted for the new design, not un-migrated: the quick cricket room now uses
  * `components/live/CricketBoard.tsx`, `CricketPad.tsx` and `TossCard.tsx` on `constants/theme.ts` (dark only).
+ *
+ * 2026-10-22: `src/components/live/LiveRow.tsx` removed because the file was deleted (replaced by the live-matches
+ * rebuild on `constants/theme.ts`), not un-migrated.
  */
 export const MIGRATED: string[] = [
   'src/components/profile/PlayedForCard.tsx',
@@ -63,7 +66,6 @@ export const MIGRATED: string[] = [
   'src/app/profile/settings.tsx',
   'src/components/settings/AppearanceSection.tsx',
   'src/components/settings/Section.tsx',
-  'src/components/live/LiveRow.tsx',
   'src/app/(tabs)/events.tsx',
   'src/app/quick/new.tsx',
   'src/components/knockout/TiePick.tsx',

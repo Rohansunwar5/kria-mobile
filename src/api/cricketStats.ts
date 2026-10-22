@@ -83,7 +83,3 @@ export async function getCricketPlayerStats(
   return unwrap(res);
 }
 
-export async function getInningsBalls(matchId: string, inningsNumber: 1 | 2): Promise<Ball[]> {
-  const res = await API.get(`/sports/cricket/stats/matches/${matchId}/innings/${inningsNumber}/balls`);
-  return unwrap(res)?.balls ?? [];
-}
