@@ -119,11 +119,11 @@ const SUB_STATUS: Record<string, string> = { completed: 'Final', in_progress: 'L
 export function tieView({ tie, subMatches, lineups }: TieDetail & { tie: Tie }) {
   const { team1Id, team2Id } = tie.teams;
   const done = subMatches.filter((m) => m.status === 'completed');
-  // The tie list's rule (server teamLeague.service): a side wins by its team id or its player's registration id.
+  // The tie list's rule (server teamLeague.service getTiesByGroup): team 1 wins a completed
+  // sub-match by its team id or player1's registration id; team 2 gets every other completed one.
   const winner = (m: SubMatch): 0 | 1 | 2 =>
-    !m.winnerId ? 0
-    : m.winnerId === team1Id || m.winnerId === m.player1?.registrationId ? 1
-    : m.winnerId === team2Id || m.winnerId === m.player2?.registrationId ? 2 : 0;
+    m.status !== 'completed' ? 0
+    : m.winnerId === team1Id || (!!m.winnerId && m.winnerId === m.player1?.registrationId) ? 1 : 2;
   const wins = (s: 1 | 2) => done.filter((m) => winner(m) === s).length;
   const played = `${done.length} of ${subMatches.length} played`;
   const players = (team: string, slot: number, fallback?: string) =>
@@ -137,7 +137,7 @@ export function tieView({ tie, subMatches, lineups }: TieDetail & { tie: Tie }) 
         return {
           name: players(team, m.subMatchSlotNumber, (s === 1 ? m.player1 : m.player2)?.name),
           won: winner(m) === s,
-          lost: !!m.winnerId && winner(m) !== s,
+          lost: winner(m) !== 0 && winner(m) !== s,
           games: (m.gameScores ?? []).map((g) => {
             const [a, b] = s === 1 ? [g.team1Score, g.team2Score] : [g.team2Score, g.team1Score];
             return { v: String(a), strong: a > b };

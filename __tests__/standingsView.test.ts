@@ -148,3 +148,21 @@ test('tieView counts a sub-win recorded by registration id', () => {
   expect(v.subs[1].sides.map((s) => [s.won, s.lost])).toEqual([[true, false], [false, true]]);
   expect(v.subs[2].sides.map((s) => [s.won, s.lost])).toEqual([[false, true], [true, false]]);
 });
+
+// The server's tie list gives team 2 every completed sub-match team 1 didn't win
+// (teamLeague.service getTiesByGroup: team2Wins = completed - team1Wins).
+test('tieView gives team 2 every completed sub-match team 1 did not win', () => {
+  const v = tieView({
+    tie: { _id: 't', teams: { team1Id: 'A', team1Name: 'A', team2Id: 'B', team2Name: 'B' }, status: 'completed' },
+    subMatches: [
+      { _id: 's1', subMatchSlotNumber: 1, status: 'completed', winnerId: 'A' },
+      // Doubles won by team 2's second partner: matches neither team id nor player2's registration id.
+      { _id: 's2', subMatchSlotNumber: 2, status: 'completed', winnerId: 'r5', player1: { name: 'C / D', teamId: 'A', registrationId: 'r1' }, player2: { name: 'E / F', teamId: 'B', registrationId: 'r4' } },
+      { _id: 's3', subMatchSlotNumber: 3, status: 'in_progress', player1: { name: 'G', teamId: 'A', registrationId: 'r6' }, player2: { name: 'H', teamId: 'B', registrationId: 'r7' } },
+    ],
+    lineups: [],
+  } as any);
+  expect(v.score).toBe('1–1');
+  expect(v.subs[1].sides.map((s) => [s.won, s.lost])).toEqual([[false, true], [true, false]]);
+  expect(v.subs[2].sides.map((s) => [s.won, s.lost])).toEqual([[false, false], [false, false]]);
+});
