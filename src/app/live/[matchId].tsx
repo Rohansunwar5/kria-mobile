@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { resolveMatchSport } from '@/api/cricketMatch';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorBlock, Skeleton } from '@/components/states';
 import { BadmintonLive } from '@/components/live/BadmintonLive';
-import { CricketView, Header } from '@/components/live/LegacyCricketView';
+import { CricketLive } from '@/components/live/CricketLive';
+import { TopBar } from '@/components/ui/Bars';
+import { goBack } from '@/lib/nav';
 
-/** Router: badminton gets the new board; cricket keeps today's view until Task 7. */
+const Header = ({ title }: { title: string }) => <TopBar title={title} onBack={() => goBack(router)} />;
+
+/** Router: badminton gets the new board; cricket gets the cricket board. */
 export default function LiveScreen() {
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const [sport, setSport] = useState<string | null>(null);
@@ -60,7 +64,7 @@ export default function LiveScreen() {
   }
 
   if (sport === 'badminton') return <BadmintonLive matchId={matchId} />;
-  if (sport === 'cricket') return <Screen><CricketView matchId={matchId} /></Screen>;
+  if (sport === 'cricket') return <CricketLive matchId={matchId} />;
 
   return (
     <Screen>

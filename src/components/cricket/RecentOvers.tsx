@@ -1,8 +1,6 @@
-import { View, Text, ScrollView, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ScrollView } from 'react-native';
 import { InningsScorecard } from '@/api/cricketMatch';
 import { recentBalls, BallKind } from '@/lib/cricketView';
-import { Icon } from '@/components/icons';
 
 // Same square vocabulary as the ball-by-ball screen, so the two read as one
 // system rather than two takes on the same data.
@@ -15,8 +13,7 @@ const SQUARE: Record<BallKind, { bg: string; fg: string; border?: string }> = {
   run: { bg: 'rgba(255,255,255,0.07)', fg: '#d4d4d4', border: 'rgba(255,255,255,0.12)' },
 };
 
-export function RecentOvers({ innings, matchId }: { innings: InningsScorecard | null; matchId?: string }) {
-  const router = useRouter();
+export function RecentOvers({ innings }: { innings: InningsScorecard | null }) {
   const balls = recentBalls(innings, 3);
   if (balls.length === 0) return null;
 
@@ -26,20 +23,6 @@ export function RecentOvers({ innings, matchId }: { innings: InningsScorecard | 
         <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
           Recent
         </Text>
-        {matchId ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Ball by ball"
-            onPress={() => router.push({ pathname: '/cricket/[matchId]/balls', params: { matchId } })}
-            hitSlop={8}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-          >
-            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#F97316' }}>
-              Ball by ball
-            </Text>
-            <Icon name="chevron-right" size={12} color="#F97316" strokeWidth={2.6} />
-          </Pressable>
-        ) : null}
       </View>
 
       <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, padding: 11 }}>

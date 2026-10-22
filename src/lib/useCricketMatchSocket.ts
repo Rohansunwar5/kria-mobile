@@ -19,6 +19,7 @@ export function useCricketMatchSocket(matchId?: string) {
     loading: true,
     error: false,
   });
+  const [connected, setConnected] = useState(true);
   const lastTally = useRef<string>('');
   const ready = useRef<boolean>(false);
 
@@ -62,7 +63,8 @@ export function useCricketMatchSocket(matchId?: string) {
       }
     };
     const join = () => socket.emit('join:match', { matchId });
-    const onReconnect = () => { join(); reload(); };
+    const onReconnect = () => { setConnected(true); join(); reload(); };
+    const onDisconnect = () => setConnected(false);
 
     reload();
     acquireSocket();
@@ -71,6 +73,7 @@ export function useCricketMatchSocket(matchId?: string) {
     // An undo can reopen a completed match, so reload the whole thing.
     socket.on('ball:undone', reload);
     socket.on('connect', onReconnect);
+    socket.on('disconnect', onDisconnect);
 
     return () => {
       active = false;
@@ -79,9 +82,10 @@ export function useCricketMatchSocket(matchId?: string) {
       socket.off('ball:recorded', onBall);
       socket.off('ball:undone', reload);
       socket.off('connect', onReconnect);
+      socket.off('disconnect', onDisconnect);
       releaseSocket();
     };
   }, [matchId, reload, loadScorecard]);
 
-  return { ...state, reload };
+  return { ...state, connected, reload };
 }
