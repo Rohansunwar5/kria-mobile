@@ -52,6 +52,10 @@
  * components (TournamentHero, CategoryCard, TeamsGrid, AboutSection, YourTeam, JumpBar) removed because those files were
  * deleted for the new design, not un-migrated; `src/app/tournament/[id].tsx` was rewritten on `constants/theme.ts`
  * (dark only), which this light-mode ratchet does not model.
+ *
+ * 2026-10-22: `src/components/quick/QuickCricketLive.tsx`, `CricketScorePanel.tsx` and `CricketSetupPanel.tsx`
+ * removed because those files were deleted for the new design, not un-migrated: the quick cricket room now uses
+ * `components/live/CricketBoard.tsx`, `CricketPad.tsx` and `TossCard.tsx` on `constants/theme.ts` (dark only).
  */
 export const MIGRATED: string[] = [
   'src/components/profile/PlayedForCard.tsx',
@@ -62,13 +66,10 @@ export const MIGRATED: string[] = [
   'src/components/live/LiveRow.tsx',
   'src/app/(tabs)/events.tsx',
   'src/app/quick/new.tsx',
-  'src/components/quick/QuickCricketLive.tsx',
   'src/components/knockout/TiePick.tsx',
   'src/app/knockout/index.tsx',
   'src/components/knockout/KnockoutRow.tsx',
   'src/app/matches/[playerId].tsx',
-  'src/components/quick/CricketScorePanel.tsx',
-  'src/components/quick/CricketSetupPanel.tsx',
   'src/components/profile/PlayerCard.tsx',
   'src/components/profile/SportCards.tsx',
   'src/components/profile/TrophyCabinet.tsx',

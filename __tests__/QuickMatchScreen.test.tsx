@@ -15,6 +15,7 @@ let mockKnockoutId: string | undefined;
 let mockProblem = '';
 let mockStatus = 'waiting';
 let mockFetched: Record<string, unknown> = {}; let mockMatchOver: Record<string, unknown> = {};
+let mockBusy = false;
 jest.mock('@/store/hooks', () => ({
   useAppSelector: (pick: (s: unknown) => unknown) => pick({ auth: { user: { _id: mockViewer } } }),
 }));
@@ -34,6 +35,9 @@ jest.mock('@/api/quickKnockout', () => ({
 }));
 
 const mockStart = jest.fn();
+const mockCancel = jest.fn();
+const mockToss = jest.fn();
+const mockBall = jest.fn();
 jest.mock('@/lib/useQuickMatch', () => ({
   useQuickMatch: () => ({
     match: {
@@ -49,14 +53,14 @@ jest.mock('@/lib/useQuickMatch', () => ({
       fixtureId: mockKnockoutId ? 'f1' : undefined,
       ...mockMatchOver,
     },
-    loading: false, error: false, busy: false, problem: mockProblem, reload: jest.fn(),
-    point: jest.fn(), undo: jest.fn(), start: mockStart, cancel: jest.fn(), removePlayer: jest.fn(),
-    toss: jest.fn(), lineup: jest.fn(), ball: jest.fn(), undoBall: jest.fn(),
+    loading: false, error: false, busy: mockBusy, problem: mockProblem, reload: jest.fn(),
+    point: jest.fn(), undo: jest.fn(), start: mockStart, cancel: mockCancel, removePlayer: jest.fn(),
+    toss: mockToss, lineup: jest.fn(), ball: mockBall, undoBall: jest.fn(),
   }),
 }));
 jest.mock('@/lib/useQuickScorecard', () => ({ useQuickScorecard: () => null }));
 
-beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; mockStatus = 'waiting'; mockFetched = {}; mockMatchOver = {}; });
+beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; mockStatus = 'waiting'; mockFetched = {}; mockMatchOver = {}; mockBusy = false; });
 
 describe('a waiting match', () => {
   it('opens in the waiting room, not on the scoreboard, and the host starts it', () => {
@@ -217,19 +221,25 @@ describe('a tied knockout match', () => {
     mockViewer = 'h1';
     mockMatchOver = { ...tied, tieWinnerSideId: 's2' };
     render(<QuickMatchScreen />);
-    expect(screen.getByText('Tied · Rahul went through')).toBeTruthy();
+    // The board's result line ("Match tied", spec 3c).
+    expect(screen.getByText('Match tied · Rahul went through')).toBeTruthy();
     expect(screen.queryByText('Tied — who goes through?')).toBeNull();
   });
 });
 
-describe('a live cricket match', () => {
+// Ported from QuickCricketLive, CricketHostTools and the room cases of
+// CricketScorePanel / CricketSetupPanel: the board for everyone, the toss and
+// the pad for the host only.
+describe('a quick cricket match', () => {
+  const setup = { toss: { recorded: true, winnerTeamId: 's1', decision: 'bat' }, lineupsSet: true, side1Lineup: [], side2Lineup: [] };
+  const noToss = { toss: { recorded: false }, lineupsSet: false, side1Lineup: [], side2Lineup: [] };
   const cricket = {
     sport: 'cricket', matchConfig: { maxOvers: 5 },
     sides: [
       { sideId: 's1', name: 'Arjun', slots: [{ slotId: 'a1', playerId: 'h1', displayName: 'Arjun Mehta' }, { slotId: 'a2', displayName: 'Open seat' }] },
       { sideId: 's2', name: 'Rahul', slots: [{ slotId: 'b1', playerId: 'p2', displayName: 'Rahul Singh' }] },
     ],
-    cricketSetup: { toss: { recorded: true, winnerTeamId: 's1', decision: 'bat' }, lineupsSet: true, side1Lineup: [], side2Lineup: [] },
+    cricketSetup: setup,
     liveState: {
       matchStatus: 'innings1', currentInnings: 1, runs: 12, wickets: 1, completedOvers: 2, ballsInCurrentOver: 3,
       battingTeamId: 's1', bowlingTeamId: 's2', strikerId: 'a1', nonStrikerId: 'a2', currentBowlerId: 'b1',
@@ -238,13 +248,16 @@ describe('a live cricket match', () => {
   beforeEach(() => { mockStatus = 'live'; mockMatchOver = cricket; });
   const scroll = () => screen.UNSAFE_getAllByType(ScrollView)[0];
 
-  it('names both sides and the overs in the header', () => {
+  it('shows the scoreboard under the room header', () => {
     mockViewer = 'h1';
     render(<QuickMatchScreen />);
-    // The room's title and line, and the score band (which names both sides until the scorecard arrives).
     expect(screen.getByText('Arjun vs Rahul')).toBeTruthy();
-    expect(within(scroll()).getAllByText('Arjun v Rahul')).toHaveLength(1);
     expect(screen.getByText('Cricket · 2 a side · 5 overs · Hosted by you')).toBeTruthy();
+    expect(within(scroll()).getByText('12/1')).toBeTruthy();
+    expect(within(scroll()).getByText('(2.3)')).toBeTruthy();
+    expect(within(scroll()).getByText('Rahul yet to bat')).toBeTruthy();
+    // Crests are for tournaments only.
+    expect(screen.queryByTestId('hero-crest')).toBeNull();
   });
 
   it('says "1 over" for a one-over match', () => {
@@ -257,15 +270,55 @@ describe('a live cricket match', () => {
   it('pins the pad outside the scroll for the host', () => {
     mockViewer = 'h1';
     render(<QuickMatchScreen />);
+    expect(screen.getByLabelText('1 run')).toBeTruthy();
     expect(screen.getByText('Extras')).toBeTruthy();
+    expect(within(scroll()).queryByLabelText('1 run')).toBeNull();
     expect(within(scroll()).queryByText('Extras')).toBeNull();
   });
 
-  it('gives a watcher the live view and no pad', () => {
-    mockViewer = 'p2';
+  // Review Focus 3.
+  it('records one ball for two fast taps', () => {
+    mockViewer = 'h1';
     render(<QuickMatchScreen />);
+    fireEvent.press(screen.getByLabelText('1 run'));
+    fireEvent.press(screen.getByLabelText('1 run'));
+    expect(mockBall).toHaveBeenCalledTimes(1);
+    expect(mockBall).toHaveBeenCalledWith({ batsmanOnStrikeId: 'a1', nonStrikerId: 'a2', bowlerId: 'b1', runs: 1 });
+  });
+
+  // Review Focus 4: a claimed player and an outsider alike.
+  it.each(['p2', 'x9'])('gives a spectator (%s) the board, but no pad, no host tools and no join code', (viewer) => {
+    mockViewer = viewer;
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('12/1')).toBeTruthy();
     expect(screen.getByText('Arjun won the toss and chose to bat')).toBeTruthy();
+    expect(screen.queryByLabelText('1 run')).toBeNull();
     expect(screen.queryByText('Extras')).toBeNull();
+    expect(screen.queryByText('Cancel match')).toBeNull();
+    expect(screen.queryByText('ABC234')).toBeNull();
+    expect(screen.queryByText('Join code')).toBeNull();
+    expect(screen.queryByLabelText('Share join code')).toBeNull();
+  });
+
+  it.each(['p2', 'x9'])('before the toss, gives a spectator (%s) the squads and no toss controls', (viewer) => {
+    mockViewer = viewer;
+    mockMatchOver = { ...cricket, cricketSetup: noToss, liveState: undefined };
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Waiting for the toss')).toBeTruthy();
+    expect(screen.getByText('Arjun Mehta · Open seat')).toBeTruthy();
+    expect(screen.queryByText('Who won the toss?')).toBeNull();
+    expect(screen.queryByText('ABC234')).toBeNull();
+  });
+
+  it('has the host record the toss before the first ball, with no pad yet', () => {
+    mockViewer = 'h1';
+    mockMatchOver = { ...cricket, cricketSetup: noToss, liveState: undefined };
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Who won the toss?')).toBeTruthy();
+    expect(screen.queryByLabelText('1 run')).toBeNull();
+    fireEvent.press(screen.getByText('Arjun'));
+    fireEvent.press(screen.getByText('Bat'));
+    expect(mockToss).toHaveBeenCalledWith({ winnerSideId: 's1', decision: 'bat' });
   });
 
   it('shows a refused delivery once, in the pad', () => {
@@ -276,11 +329,39 @@ describe('a live cricket match', () => {
     expect(within(scroll()).queryByText('That bowler has no overs left.')).toBeNull();
   });
 
-  it('keeps Cancel and the join code in the scroll for an ordinary match', () => {
+  it('keeps Cancel and the join code in the scroll while a slot is open', () => {
     mockViewer = 'h1';
-    render(<QuickMatchScreen />);
+    const view = render(<QuickMatchScreen />);
     expect(within(scroll()).getByText('Cancel match')).toBeTruthy();
-    expect(within(scroll()).getByTestId('join-code')).toBeTruthy();
+    expect(within(scroll()).getByText('ABC234')).toBeTruthy();
+    view.unmount();
+
+    const full = cricket.sides.map((side) => ({
+      ...side, slots: side.slots.map((slot, i) => ({ ...slot, playerId: `${side.sideId}-${i}` })),
+    }));
+    mockMatchOver = { ...cricket, sides: full };
+    render(<QuickMatchScreen />);
+    expect(screen.queryByText('ABC234')).toBeNull();
+    expect(within(scroll()).getByText('Cancel match')).toBeTruthy();
+  });
+
+  it('asks before cancelling, and not mid-request', () => {
+    mockViewer = 'h1';
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    const view = render(<QuickMatchScreen />);
+    fireEvent.press(screen.getByText('Cancel match'));
+    expect(alert).toHaveBeenCalledWith('Cancel this match?', expect.any(String), expect.any(Array));
+    expect(mockCancel).not.toHaveBeenCalled();
+    const buttons = alert.mock.calls[0][2]!;
+    buttons.find((b) => b.style === 'destructive')!.onPress!();
+    expect(mockCancel).toHaveBeenCalledTimes(1);
+    view.unmount();
+
+    alert.mockClear();
+    mockBusy = true;
+    render(<QuickMatchScreen />);
+    fireEvent.press(screen.getByText('Cancel match'));
+    expect(alert).not.toHaveBeenCalled();
   });
 
   it('a knockout match has neither', async () => {
@@ -289,6 +370,26 @@ describe('a live cricket match', () => {
     render(<QuickMatchScreen />);
     await screen.findByText(/Cup/);
     expect(screen.queryByText('Cancel match')).toBeNull();
-    expect(screen.queryByTestId('join-code')).toBeNull();
+    expect(screen.queryByText('ABC234')).toBeNull();
+  });
+
+  it('a finished match shows its result, and the host no pad', () => {
+    mockViewer = 'h1';
+    mockStatus = 'completed';
+    mockMatchOver = { ...cricket, outcome: 'side1' };
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Arjun won')).toBeTruthy();
+    expect(screen.queryByLabelText('1 run')).toBeNull();
+    expect(screen.queryByText('Cancel match')).toBeNull();
+  });
+
+  it('a match cancelled before the toss says so, not that it awaits the toss', () => {
+    mockViewer = 'h1';
+    mockStatus = 'cancelled';
+    mockMatchOver = { ...cricket, cricketSetup: noToss, liveState: undefined };
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Match cancelled')).toBeTruthy();
+    expect(screen.queryByText('Waiting for the toss')).toBeNull();
+    expect(screen.queryByText('Who won the toss?')).toBeNull();
   });
 });

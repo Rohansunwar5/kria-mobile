@@ -4,11 +4,11 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getQuickKnockout, settleKnockoutTie } from '@/api/quickKnockout';
 import { TiePick } from '@/components/knockout/TiePick';
-import { CricketSetupPanel } from '@/components/quick/CricketSetupPanel';
-import { CricketHostTools, CricketScorePanel } from '@/components/quick/CricketScorePanel';
-import { QuickCricketLive } from '@/components/quick/QuickCricketLive';
+import { CricketBoard } from '@/components/live/CricketBoard';
+import { CricketPad } from '@/components/live/CricketPad';
+import { TossCard } from '@/components/live/TossCard';
 import { Cancelled, RallyDone, RallyLive } from '@/components/room/RallyRoom';
-import { Roster } from '@/components/room/Roster';
+import { CodeCard, Roster } from '@/components/room/Roster';
 import { FooterBar, IconButton, TopBar } from '@/components/ui/Bars';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
@@ -16,10 +16,11 @@ import { InlineError } from '@/components/ui/InlineError';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, radius, space } from '@/constants/theme';
+import { cricketBoard, fromQuick } from '@/lib/cricketBoard';
 import { goBack } from '@/lib/nav';
 import { panelFor } from '@/lib/quickCricketView';
 import { isKnockoutHost } from '@/lib/quickKnockoutView';
-import { canUndo, isHost } from '@/lib/quickMatchView';
+import { canUndo, freeSlots, isHost } from '@/lib/quickMatchView';
 import { roomLine, STATUS } from '@/lib/roomView';
 import { useQuickMatch } from '@/lib/useQuickMatch';
 import { useQuickScorecard } from '@/lib/useQuickScorecard';
@@ -27,8 +28,8 @@ import { useAppSelector } from '@/store/hooks';
 
 /**
  * Match room (mock 1e): waiting → live → completed. Rally sports use the new
- * swipe scoring; a cricket match past its waiting room keeps its existing
- * scoring panels until the cricket designs arrive.
+ * swipe scoring; cricket past its waiting room shows the scoreboard (mock 3c)
+ * to everyone, and the host gets the toss, then the pinned pad.
  */
 export default function QuickMatchScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,6 +45,7 @@ export default function QuickMatchScreen() {
   const host = Boolean(match && isHost(match, meId));
   const cricket = match && match.sport === 'cricket' && match.status !== 'waiting' ? match : null;
   const padShown = Boolean(cricket && panelFor(cricket) === 'cricket-score' && cricket.status === 'live' && host);
+  const tossShown = Boolean(cricket && panelFor(cricket) === 'cricket-setup' && cricket.status === 'live' && host);
 
   // Knockout bar: "<knockout> · <round>". Keyed on the ids so a live score
   // update does not refetch; a failed fetch leaves just "Bracket".
@@ -105,7 +107,8 @@ export default function QuickMatchScreen() {
   };
 
   const title = match ? `${match.sides[0]?.name} vs ${match.sides[1]?.name}` : '';
-  const canShare = Boolean(match?.joinCode && (match.status === 'waiting' || match.status === 'live'));
+  // Past the waiting room a cricket code is the host's alone: nobody else in the room sees it.
+  const canShare = Boolean(match?.joinCode && (match.status === 'waiting' || (match.status === 'live' && (host || match.sport !== 'cricket'))));
   const share = () => match?.joinCode && Share.share({ message: `Join "${title}" on Kria with code ${match.joinCode}` }).catch(() => undefined);
   const confirmCancel = () =>
     Alert.alert('Cancel this match?', "Players who claimed a spot see it as cancelled. This can't be undone.", [
@@ -115,6 +118,15 @@ export default function QuickMatchScreen() {
   const rally = match && match.sport !== 'cricket';
   const waitingHost = match?.status === 'waiting' && host;
   const liveHost = rally && match?.status === 'live' && host;
+  // The join code while a slot is open, and Cancel. A knockout manages its own matches.
+  const hostTools = cricket && host && cricket.status === 'live' && !cricket.knockoutId ? (
+    <View style={s.tools}>
+      {cricket.joinCode && freeSlots(cricket).length > 0 ? <CodeCard code={cricket.joinCode} /> : null}
+      <Tap accessibilityLabel="Cancel match" disabled={busy} onPress={confirmCancel} style={s.cancel}>
+        <Text style={s.cancelText}>Cancel match</Text>
+      </Tap>
+    </View>
+  ) : null;
 
   return (
     <SafeAreaView edges={['top']} style={s.screen}>
@@ -168,15 +180,14 @@ export default function QuickMatchScreen() {
             {rally && match.status === 'completed' ? <RallyDone match={match} /> : null}
             {match.status === 'cancelled' ? <Cancelled /> : null}
 
-            {match.status === 'live' && panelFor(match) === 'cricket-setup' && host ? (
-              <View style={{ paddingTop: 24 }}>
-                <CricketSetupPanel match={match} playerId={meId} busy={busy} onToss={toss} onLineup={lineup} />
+            {cricket && tossShown ? (
+              <View style={s.toss}>
+                <TossCard match={cricket} busy={busy} onToss={toss} onLineup={lineup} />
+                {hostTools}
               </View>
-            ) : null}
-            {cricket && cricket.status !== 'cancelled' ? (
-              <View style={{ paddingTop: 24, marginHorizontal: -space.gutter }}>
-                <QuickCricketLive match={cricket} scorecard={scorecard} playerId={meId} />
-                <CricketHostTools match={cricket} playerId={meId} busy={busy} onCancel={cancel} />
+            ) : cricket && cricket.status !== 'cancelled' ? (
+              <View style={{ paddingTop: 16 }}>
+                <CricketBoard view={cricketBoard(fromQuick(cricket, scorecard))} crests={false} extra={hostTools} />
               </View>
             ) : null}
 
@@ -190,8 +201,8 @@ export default function QuickMatchScreen() {
         ) : null}
       </ScrollView>
 
-      {padShown && match ? (
-        <CricketScorePanel match={match} playerId={meId} busy={busy} problem={problem} onBall={ball} onUndo={undoBall} />
+      {padShown && cricket ? (
+        <CricketPad match={cricket} scorecard={scorecard} busy={busy} problem={problem} onBall={ball} onUndo={undoBall} />
       ) : null}
 
       {waitingHost ? (
@@ -232,6 +243,8 @@ const s = StyleSheet.create({
   statusText: { fontFamily: font.semibold, fontSize: 12 },
   line: { fontFamily: font.regular, fontSize: 13, color: colors.text3 },
   problem: { paddingTop: 12, fontFamily: font.regular, fontSize: 13, color: colors.error },
+  toss: { paddingTop: 36, gap: 32 },
+  tools: { paddingTop: 16, gap: 12 },
   cancel: { height: 56, paddingHorizontal: 18, borderRadius: radius.button, backgroundColor: colors.surface1, alignItems: 'center', justifyContent: 'center' },
   cancelText: { fontFamily: font.semibold, fontSize: 15, color: colors.error },
   undo: { flex: 1, height: 56, borderRadius: radius.button, backgroundColor: colors.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },

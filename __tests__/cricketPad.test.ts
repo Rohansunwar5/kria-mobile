@@ -294,6 +294,17 @@ describe('advance', () => {
     expect(done.ball).toBeUndefined();
   });
 
+  it('never builds a ball with a missing id: it asks for the player instead', () => {
+    // The old pad refused to post without all three ids; a key reached while a
+    // player is still needed must not post a blank one.
+    const r = advance(live({ ...midInnings, nextBowlerNeeded: true }), pad(), { type: 'runs', runs: 1 });
+    expect(r).toEqual({ pad: pad({ step: 'pick' }) });
+    expect(advance(live(firstBall), pad({ step: 'wicket' }), { type: 'wicket', wicket: 'bowled' }).ball).toBeUndefined();
+    const fielder = pad({ step: 'fielder', wicketType: 'caught' });
+    expect(advance(live({ ...midInnings, nextBatsmanNeeded: true, strikerId: undefined }), fielder, { type: 'pick', role: 'fielder', id: 'b1' }))
+      .toEqual({ pad: { ...fielder, step: 'pick' } });
+  });
+
   it('keeps picks when a sheet is closed', () => {
     const s = pad({ step: 'who', wicketType: 'run_out', picks: { bowler: 'b2' } });
     expect(advance(m, s, { type: 'close' }).pad).toEqual(pad({ picks: { bowler: 'b2' } }));

@@ -116,7 +116,7 @@ export function fromQuick(m: QuickMatch, scorecard: Scorecard | null): BoardInpu
 
 // ─── View model ───────────────────────────────────────────────────────────
 
-const chipOf = (b: { label: string; isWicket: boolean }): Chip => {
+export const chipOf = (b: { label: string; isWicket: boolean }): Chip => {
   if (b.label === 'W') return { label: b.label, kind: 'wicket' };
   const k = ballChipKind(b as Parameters<typeof ballChipKind>[0]);
   return { label: b.label, kind: k === 'six' || k === 'four' ? 'boundary' : k === 'dot' ? 'run' : k };

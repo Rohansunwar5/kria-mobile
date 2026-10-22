@@ -19,7 +19,7 @@ const SKIN: Record<Chip['kind'], { bg: string; fg: string }> = {
   run: { bg: colors.surface2, fg: colors.text },
 };
 
-function Chips({ chips, size = 34, empty = 0 }: { chips: Chip[]; size?: number; empty?: number }) {
+export function Chips({ chips, size = 34, empty = 0 }: { chips: Chip[]; size?: number; empty?: number }) {
   const small = size < 30;
   return (
     <View style={s.chips}>
@@ -29,7 +29,7 @@ function Chips({ chips, size = 34, empty = 0 }: { chips: Chip[]; size?: number; 
         </View>
       ))}
       {Array.from({ length: empty }, (_, i) => (
-        <View key={`e${i}`} style={[s.chip, { width: size, height: size, borderWidth: 1, borderColor: colors.lineStrong }]} />
+        <View key={`e${i}`} style={[s.chip, small && s.chipSm, { width: size, height: size, borderWidth: 1, borderColor: colors.lineStrong }]} />
       ))}
     </View>
   );
