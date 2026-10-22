@@ -84,6 +84,11 @@ describe('hero', () => {
     expect(v.hero.line).toEqual({ kind: 'text', text: 'Rawnat won by 7 wickets' });
     expect(v.defaultTab).toBe('card');
   });
+  it('completed with no live state reads the scorecard', () => {
+    const v = view({ live: null, completed: true, result: 'r' });
+    expect(v.hero.rows).toEqual([{ side: A, score: '87/3', big: true }, { side: B, score: '118/6', big: false }]);
+    expect(v.hero.overs).toEqual(['(6.2)', '(10.0)']);
+  });
   it('chase never goes negative', () => {
     expect(view({ live: { ...live2, runs: 120 } }).hero.line).toBeNull();
     expect(view({ live: { ...live2, runs: 120 }, result: 'x', completed: true }).hero.line).toEqual({ kind: 'text', text: 'x' });
@@ -141,26 +146,30 @@ describe('overs tab', () => {
   it('paired bars', () => {
     expect(o.max).toBe(10);
     expect(o.bars).toHaveLength(10);
+    expect(view({ maxOvers: 20 }).overs.max).toBe(10);
+    expect(view({ maxOvers: 20 }).overs.bars).toHaveLength(20);
     expect(o.bars[0]).toEqual({ n: 1, a: 4, b: 1, wicketB: false, current: false });
     expect(o.bars[1]).toMatchObject({ a: 6, b: 10, wicketB: true });
     expect(o.bars[2]).toMatchObject({ b: 6, current: true });
     expect(o.bars[5]).toMatchObject({ a: 0, b: null });
   });
   it('list newest first', () => {
-    expect(o.list.map((x) => x.n)).toEqual([3, 2, 1]);
+    expect(o.list.map((x) => `${x.innings}:${x.n}`)).toEqual(['2:3', '2:2', '2:1', '1:2', '1:1']);
     expect(o.list[0].runs).toBe(6);
+    expect(view({ live: { ...live2, currentInnings: 1 } }).overs.list[0].innings).toBe(1);
   });
 });
 
 describe('waiting', () => {
   it('no toss', () => {
     const v = view({ live: null, toss: null });
-    expect(v.waiting).toEqual({ line: 'Waiting for the toss', squads: [['a1'], ['b1']] });
+    expect(v.waiting).toEqual({ line: 'Waiting for the toss', toss: null, squads: [['a1'], ['b1']] });
     expect(v.pill).toBe('Not started');
     expect(v.live).toBeNull();
   });
   it('toss set', () => {
     expect(view({ live: { ...live2, matchStatus: 'awaiting_start' } }).waiting!.line).toBe('Waiting for the first ball');
+    expect(view({ live: { ...live2, matchStatus: 'awaiting_start' } }).waiting!.toss).toBe('Rawnat won the toss and chose to bowl');
   });
 });
 
@@ -196,7 +205,7 @@ describe('adapters', () => {
     expect(fromTournament({ ...tm, matchConfig: undefined }, null, null, {}).maxOvers).toBe(20);
     const done = { ...tm, status: 'completed', winnerId: 'tA', result: { marginOfVictory: 'by 7 wickets' } };
     expect(fromTournament(done, live2, sc, {}).result).toBe('Rawnat won by 7 wickets');
-    expect(fromTournament({ ...done, winnerId: undefined, result: { marginOfVictory: 'Match tied' } }, live2, sc, {}).result).toBe('Match tied');
+    expect(fromTournament({ ...done, winnerId: undefined, result: { marginOfVictory: 'match tied' } }, live2, sc, {}).result).toBe('Match tied');
   });
   it('quick', () => {
     const i = fromQuick(qm, sc);
@@ -204,6 +213,8 @@ describe('adapters', () => {
     expect(i.squads).toEqual([['a1'], ['b1']]);
     expect(i.result).toBeNull();
     expect(fromQuick({ ...qm, status: 'completed', outcome: 'side1' }, sc).result).toBe('Rawnat won');
+    expect(fromQuick({ ...qm, status: 'completed', outcome: 'tied' }, sc).result).toBe('Match tied');
+    expect(fromQuick({ ...qm, status: 'completed', outcome: 'tied', tieWinnerSideId: 'tB' }, sc).result).toBe('Match tied · Hegde XI went through');
   });
   it('both give the same view', () => {
     const a = cricketBoard(fromTournament(tm, live2, sc, {}));

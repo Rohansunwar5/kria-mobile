@@ -58,9 +58,9 @@ export interface CricketBoardView {
   overs: {
     bars: { n: number; a: number; b: number | null; wicketB: boolean; current: boolean }[];
     max: number;
-    list: { n: number; chips: Chip[]; runs: number }[];
+    list: { innings: 1 | 2; n: number; chips: Chip[]; runs: number }[];
   };
-  waiting: { line: string; squads: [string[], string[]] } | null;
+  waiting: { line: string; toss: string | null; squads: [string[], string[]] } | null;
 }
 
 // ─── Adapters ─────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ export function fromTournament(
   const completed = m.status === 'completed';
   const margin = m.result?.marginOfVictory;
   const winner = sides.find((s) => m.winnerId != null && s.id === String(m.winnerId));
-  const result = !completed ? null : winner ? `${winner.name} won${margin ? ` ${margin}` : ''}` : margin ?? null;
+  const result = !completed ? null : winner ? `${winner.name} won${margin ? ` ${margin}` : ''}` : margin ? 'Match tied' : null;
   const toss = m.cricketSetup?.toss;
   const names = (xi?: { name?: string }[]) => (xi ?? []).map((p) => p.name || 'Unnamed');
   return {
@@ -106,7 +106,7 @@ export function fromQuick(m: QuickMatch, scorecard: Scorecard | null): BoardInpu
     scorecard,
     maxOvers: m.matchConfig?.maxOvers ?? 20,
     completed,
-    result: completed ? cricketOutcomeLabel(m) : null,
+    result: completed ? cricketOutcomeLabel(m)?.replace(/^Tied/, 'Match tied') ?? null : null,
     toss: toss?.recorded ? { winnerId: toss.winnerTeamId, decision: toss.decision } : null,
     squads: [s1.slots.map((s) => s.displayName), s2.slots.map((s) => s.displayName)],
   };
@@ -157,7 +157,7 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
   const completed = i.completed || status === 'completed';
   const waiting = !completed && (!live || status === 'awaiting_start');
   const brk = !completed && status === 'innings_break';
-  const second = live?.currentInnings === 2;
+  const second = live ? live.currentInnings === 2 : !!scorecard?.innings2;
   const tossSide = sides.find((s) => s.id === i.toss?.winnerId);
   const tossText = tossSide && i.toss?.decision ? `${tossSide.name} won the toss and chose to ${i.toss.decision}` : null;
 
@@ -167,7 +167,15 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
   const oi = 1 - bi;
   const scores: ({ s: string; o: string } | null)[] = [null, null];
   let big = -1;
-  if (live && !waiting) {
+  if (!live && !waiting) {
+    // No live state (a finished match opened later): read each innings from the scorecard.
+    [scorecard?.innings1, scorecard?.innings2].forEach((inn, k) => {
+      const idx = inn ? sides.findIndex((s) => s.id === inn.battingTeamId) : -1;
+      if (!inn || idx < 0) return;
+      scores[idx] = { s: fmtScore(inn.totals), o: `(${inn.totals.overs})` };
+      if (k === 1 || big < 0) big = idx;
+    });
+  } else if (live && !waiting) {
     const first = live.innings1Summary;
     if (brk) {
       if (first) scores[oi] = { s: fmtScore(first), o: `(${fmtOvers(first)})` };
@@ -201,7 +209,7 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
   const pill = completed ? 'Completed' : waiting ? 'Not started' : brk ? 'Innings break' : second ? '2nd innings' : '1st innings';
 
   // Live tab
-  const cur = !live ? null : second ? scorecard?.innings2 ?? null : scorecard?.innings1 ?? null;
+  const cur = waiting ? null : second ? scorecard?.innings2 ?? null : scorecard?.innings1 ?? null;
   const timeline = cur?.oversTimeline ?? [];
   const lastEntry = timeline[timeline.length - 1];
   const prev = timeline[timeline.length - 2];
@@ -230,8 +238,10 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
       };
 
   // Overs tab
-  const bars1 = manhattanBars(scorecard?.innings1 ?? null, i.maxOvers).bars;
-  const bars2 = manhattanBars(scorecard?.innings2 ?? null, i.maxOvers).bars;
+  const m1 = manhattanBars(scorecard?.innings1 ?? null, i.maxOvers);
+  const m2 = manhattanBars(scorecard?.innings2 ?? null, i.maxOvers);
+  const bars1 = m1.bars;
+  const bars2 = m2.bars;
   const inProgress = !completed && (live?.ballsInCurrentOver ?? 0) > 0 ? lastEntry?.overNumber : undefined;
   const bars = Array.from({ length: i.maxOvers }, (_, k) => {
     const a = bars1[k];
@@ -244,7 +254,11 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
       current: inProgress === k + 1,
     };
   });
-  const overList = (second ? scorecard?.innings2 : scorecard?.innings1)?.oversTimeline ?? [];
+  const listOf = (n: 1 | 2) =>
+    [...((n === 1 ? scorecard?.innings1 : scorecard?.innings2)?.oversTimeline ?? [])]
+      .reverse()
+      .map((o) => ({ innings: n, n: o.overNumber, chips: o.balls.map(chipOf), runs: o.runs }));
+  const overList = second ? [...listOf(2), ...listOf(1)] : [...listOf(1), ...listOf(2)];
 
   return {
     pill,
@@ -259,11 +273,11 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
     innings: [scorecard?.innings1, scorecard?.innings2].flatMap((inn) => (inn ? [inningsView(inn, i)] : [])),
     overs: {
       bars,
-      max: i.maxOvers,
-      list: [...overList].reverse().map((o) => ({ n: o.overNumber, chips: o.balls.map(chipOf), runs: o.runs })),
+      max: Math.max(1, m1.peak, m2.peak),
+      list: overList,
     },
     waiting: waiting
-      ? { line: i.toss?.winnerId && i.toss.decision ? 'Waiting for the first ball' : 'Waiting for the toss', squads: i.squads }
+      ? { line: tossText ? 'Waiting for the first ball' : 'Waiting for the toss', toss: tossText, squads: i.squads }
       : null,
   };
 }
