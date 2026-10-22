@@ -45,6 +45,9 @@
  * model; their old components (waiting room, cricket teams, player line, bracket tree) are gone.
  * Same for the Profile tab (`app/(tabs)/profile.tsx`), whose menu rows (MenuRow) are gone too.
  *
+ * 2026-10-22: `src/app/live/index.tsx` (Live now) was rewritten on `constants/theme.ts` (dark only), which this
+ * light-mode ratchet does not model.
+ *
  * 2026-10-22: `src/components/explore/Browse.tsx`, `src/components/TournamentCard.tsx` and the old tournament
  * components (TournamentHero, CategoryCard, TeamsGrid, AboutSection, YourTeam, JumpBar) removed because those files were
  * deleted for the new design, not un-migrated; `src/app/tournament/[id].tsx` was rewritten on `constants/theme.ts`
@@ -56,7 +59,6 @@ export const MIGRATED: string[] = [
   'src/app/profile/settings.tsx',
   'src/components/settings/AppearanceSection.tsx',
   'src/components/settings/Section.tsx',
-  'src/app/live/index.tsx',
   'src/components/live/LiveRow.tsx',
   'src/app/(tabs)/events.tsx',
   'src/app/quick/new.tsx',
