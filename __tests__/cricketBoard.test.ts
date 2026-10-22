@@ -222,3 +222,14 @@ describe('adapters', () => {
     expect(b).toEqual(a);
   });
 });
+
+describe('legend', () => {
+  it('innings-1 batting side first', () => {
+    expect(view().legend).toEqual(['Hegde XI', 'Rawnat']);
+  });
+  it('falls back to the live batting side in innings 1, then side order', () => {
+    const l1 = { ...live2, currentInnings: 1 as const, matchStatus: 'innings1' as const, battingTeamId: 'tB' };
+    expect(view({ scorecard: null, live: l1 }).legend).toEqual(['Hegde XI', 'Rawnat']);
+    expect(view({ scorecard: null, live: null }).legend).toEqual(['Rawnat', 'Hegde XI']);
+  });
+});

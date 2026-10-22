@@ -44,25 +44,22 @@ function Head({ cols, widths }: { cols: string[]; widths: number[] }) {
   );
 }
 
-const teamOf = (label: string) => label.replace(/ \d+\/\d+$/, '');
-
 /** Mock 3c. Hero card plus Live / Scorecard / Overs; `extra` sits under the hero (host tools). */
-export function CricketBoard({ view, extra }: { view: CricketBoardView; extra?: React.ReactNode }) {
+export function CricketBoard({ view, extra, crests = true }: { view: CricketBoardView; extra?: React.ReactNode; crests?: boolean }) {
   const [tab, setTab] = useState<Tab>(view.defaultTab);
   const [inn, setInn] = useState<1 | 2 | null>(null);
   const { hero, live, waiting } = view;
   const line = hero.line;
   const curInn = view.innings.find((i) => i.key === inn) ?? view.innings[view.innings.length - 1];
-  const names = view.innings.map((i) => teamOf(i.label));
   const max = view.overs.max;
   const crowded = view.overs.bars.length > 12;
 
   return (
     <View>
       <View style={s.card}>
-        {hero.rows.map((r, i) => (
+        {hero.rows.map((r, i) => !r.score && hero.rows.some((x) => x.score) ? null : (
           <View key={r.side.id} style={s.heroRow}>
-            <Crest uri={r.side.crest} name={r.side.name} size={32} />
+            {crests ? <View testID="hero-crest"><Crest uri={r.side.crest} name={r.side.name} size={32} /></View> : null}
             <Text style={[r.big ? s.nameBig : s.name, s.flex]} numberOfLines={1}>{r.side.name}</Text>
             {r.score ? (
               <View style={s.score}>
@@ -229,7 +226,7 @@ export function CricketBoard({ view, extra }: { view: CricketBoardView; extra?: 
               <View style={s.between}>
                 <Text style={s.h2}>Runs per over</Text>
                 <View style={s.legend}>
-                  {names.map((n, i) => (
+                  {view.legend.map((n, i) => (
                     <View key={n} style={s.legendItem}>
                       <View style={[s.swatch, { backgroundColor: i === 0 ? colors.ring : colors.text }]} />
                       <Text style={s.small}>{n}</Text>

@@ -28,6 +28,8 @@ export interface Chip { label: string; kind: ChipKind }
 
 export interface CricketBoardView {
   pill: string;
+  /** Innings-1 batting side first (the Overs chart's first colour). */
+  legend: [string, string];
   pillLive: boolean;
   hero: {
     rows: { side: BoardSide; score: string | null; big: boolean }[];
@@ -260,8 +262,11 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
       .map((o) => ({ innings: n, n: o.overNumber, chips: o.balls.map(chipOf), runs: o.runs }));
   const overList = second ? [...listOf(2), ...listOf(1)] : [...listOf(1), ...listOf(2)];
 
+  const firstId = scorecard?.innings1?.battingTeamId ?? (live?.currentInnings === 1 ? live.battingTeamId : undefined);
+  const fi = Math.max(0, sides.findIndex((s) => s.id === firstId));
   return {
     pill,
+    legend: [sides[fi].name, sides[1 - fi].name],
     pillLive: !completed && !waiting,
     hero: {
       rows: sides.map((side, k) => ({ side, score: scores[k]?.s ?? null, big: big === k })),

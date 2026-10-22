@@ -74,6 +74,7 @@ it('live tab', async () => {
   expect(screen.getByText('League · Open')).toBeTruthy();
   expect(screen.getByText('Koramangala T10')).toBeTruthy();
   expect(screen.getByText('2nd innings')).toBeTruthy();
+  expect(screen.getByText('Need')).toBeTruthy();
   expect(screen.getByText('32')).toBeTruthy();
   expect(screen.getByText('off 22')).toBeTruthy();
   expect(screen.getByText('8.73')).toBeTruthy();
@@ -124,4 +125,26 @@ it('disconnected', async () => {
   set({ connected: false });
   await renderIt();
   expect(screen.getByText('Reconnecting. Showing the last update.')).toBeTruthy();
+});
+
+it('first innings shows the batting side only', async () => {
+  set({
+    live: { ...live2, currentInnings: 1, target: undefined, innings1Summary: undefined, matchStatus: 'innings1', battingTeamId: 'tB', runs: 40, wickets: 1 },
+    scorecard: { innings1: { ...inn1, totals: { ...inn1.totals, runs: 40, wickets: 1 } }, innings2: null },
+  });
+  await renderIt();
+  expect(screen.getByText('Rawnat yet to bat')).toBeTruthy();
+  expect(screen.getByText('Hegde XI')).toBeTruthy();
+  expect(screen.queryByText('Rawnat')).toBeNull();
+});
+
+it('crests can be turned off', async () => {
+  set();
+  const { CricketBoard } = require('@/components/live/CricketBoard');
+  const { cricketBoard, fromTournament } = require('@/lib/cricketBoard');
+  const v = cricketBoard(fromTournament(match, live2, sc, {}));
+  const r = render(<CricketBoard view={v} />);
+  expect(r.getAllByTestId('hero-crest')).toHaveLength(2);
+  r.rerender(<CricketBoard view={v} crests={false} />);
+  expect(r.queryAllByTestId('hero-crest')).toHaveLength(0);
 });
