@@ -1,163 +1,72 @@
-import { useEffect, useState, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { goBack } from '@/lib/nav';
-import { Screen } from '@/components/Screen';
-import { Icon } from '@/components/icons';
-import { Tag, type TagVariant } from '@/components/StatusPill';
-import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
-import { useAppSelector } from '@/store/hooks';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { listAnnouncements, type Announcement } from '@/api/profileApi';
-
-const SEVERITY: Record<Announcement['severity'], { label: string; variant: TagVariant; edge: string }> = {
-  info: { label: 'Notice', variant: 'up', edge: 'rgba(255,255,255,0.14)' },
-  important: { label: 'Important', variant: 'fail', edge: '#FF4438' },
-  schedule_change: { label: 'Schedule change', variant: 'live', edge: '#F97316' },
-};
-
-function when(iso: string) {
-  const d = new Date(iso);
-  const mins = Math.round((Date.now() - d.getTime()) / 60000);
-  if (mins < 1) return 'JUST NOW';
-  if (mins < 60) return `${mins}M AGO`;
-  if (mins < 60 * 24) return `${Math.round(mins / 60)}H AGO`;
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase();
-}
+import { AnnouncementCard } from '@/components/tournament/AnnouncementCard';
+import { TopBar } from '@/components/ui/Bars';
+import { Icon } from '@/components/ui/Icon';
+import { InlineError } from '@/components/ui/InlineError';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { colors, display, font, radius, space } from '@/constants/theme';
+import { goBack } from '@/lib/nav';
+import { useTournament } from '@/lib/useTournament';
 
 export default function Announcements() {
-  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { currentTournament } = useAppSelector((s) => s.tournament);
-
-  const [items, setItems] = useState<Announcement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { data } = useTournament(id);
+  const [items, setItems] = useState<Announcement[] | null>(null);
+  const [failed, setFailed] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    if (!id) return;
-    setLoading(true);
     try {
       setItems(await listAnnouncements(id));
-      setError(false);
+      setFailed(false);
     } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setFailed(true);
     }
   }, [id]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
-  const Header = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Go back"
-        onPress={() => goBack(router)}
-        hitSlop={8}
-        style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
-      >
-        <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
-      </Pressable>
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Announcements</Text>
-        {currentTournament?.name ? (
-          <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
-            {currentTournament.name}
-          </Text>
-        ) : null}
-      </View>
-    </View>
-  );
+  const refresh = async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  };
 
-  if (loading) {
-    return (
-      <Screen>
-        {Header}
-        <View style={{ padding: 16, gap: 10 }}>
-          <Skeleton h={96} />
-          <Skeleton h={96} />
-          <Skeleton h={96} />
-        </View>
-      </Screen>
-    );
-  }
-
-  const refresh = <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#F97316" />;
-
-  if (error) {
-    return (
-      <Screen>
-        {Header}
-        <ScrollView refreshControl={refresh} contentContainerStyle={{ padding: 16 }}>
-          <ErrorBlock label="Board unavailable" message="Announcements could not be loaded. Pull to retry." onRetry={load} />
-        </ScrollView>
-      </Screen>
-    );
-  }
-
+  const now = new Date();
   return (
-    <Screen>
-      {Header}
-      {items.length === 0 ? (
-        <ScrollView refreshControl={refresh} contentContainerStyle={{ flexGrow: 1 }}>
-          <EmptyState
-            icon="message"
-            title="Nothing announced"
-            message="Schedule changes and organiser notices for this tournament land here."
-          />
-        </ScrollView>
-      ) : (
-        <ScrollView refreshControl={refresh} contentContainerStyle={{ padding: 16, gap: 10 }}>
-          <Ghost text="NOTE" size={130} style={{ right: -30, top: 220 }} />
-          {items.map((a) => {
-            const s = SEVERITY[a.severity] ?? SEVERITY.info;
-            return (
-              <View
-                key={a._id}
-                style={{
-                  backgroundColor: '#151515',
-                  borderWidth: 1.5,
-                  borderColor: a.pinned ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.14)',
-                  borderLeftWidth: 4,
-                  borderLeftColor: s.edge,
-                  borderRadius: 6,
-                  overflow: 'hidden',
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 13, paddingTop: 11 }}>
-                  <Tag label={s.label} variant={s.variant} dot={a.severity === 'schedule_change'} />
-                  {a.pinned ? <Tag label="Pinned" variant="auction" /> : null}
-                  <View style={{ flex: 1 }} />
-                  <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#7d7d7d' }}>
-                    {when(a.createdAt)}
-                  </Text>
-                </View>
-
-                {a.title ? (
-                  <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: '#fff', paddingHorizontal: 13, paddingTop: 9 }}>
-                    {a.title}
-                  </Text>
-                ) : null}
-
-                <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', paddingHorizontal: 13, paddingTop: a.title ? 6 : 9, paddingBottom: 11 }}>
-                  {a.message}
-                </Text>
-
-                <View style={{ paddingHorizontal: 13, paddingBottom: 11 }}>
-                  <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d' }}>
-                    {a.authorName} · {a.authorRole}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
-        </ScrollView>
-      )}
-    </Screen>
+    <SafeAreaView style={s.root}>
+      <TopBar title="Updates" sub={data?.tournament.name} onBack={() => goBack(router)} />
+      {failed ? <InlineError what="Couldn't load the updates." onRetry={load} /> : null}
+      <ScrollView
+        contentContainerStyle={s.scroll}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.accent} />}
+      >
+        {items === null ? (
+          !failed && <Skeleton style={s.skel} />
+        ) : items.length === 0 ? (
+          <View style={s.empty}>
+            <Icon name="campaign" size={40} color={colors.text4} />
+            <Text style={s.emptyTitle}>No updates yet</Text>
+            <Text style={s.emptyLine}>The organiser's updates show here.</Text>
+          </View>
+        ) : (
+          items.map((a) => <AnnouncementCard key={a._id} a={a} now={now} />)
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const s = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.bg },
+  scroll: { flexGrow: 1, paddingHorizontal: space.gutter, paddingTop: 12, paddingBottom: 40, gap: 12 },
+  skel: { height: 110, borderRadius: radius.card },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 80 },
+  emptyTitle: { ...display(24) },
+  emptyLine: { fontFamily: font.regular, fontSize: 13, color: colors.text3 },
+});

@@ -1,343 +1,230 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { View, Text, Pressable, Share } from 'react-native';
-import Animated, {
-  runOnJS,
-  useAnimatedReaction,
-  useAnimatedRef,
-  useAnimatedScrollHandler,
-  useSharedValue,
-} from 'react-native-reanimated';
+import { useRef, useState } from 'react';
+import { Linking, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import type { TournamentCategory } from '@/api/tournaments';
+import { AnnouncementCard } from '@/components/tournament/AnnouncementCard';
+import { CategoryRows } from '@/components/tournament/CategoryRows';
+import { Crest } from '@/components/tournament/Crest';
+import { FactsGrid } from '@/components/tournament/FactsGrid';
+import { Results } from '@/components/tournament/Results';
+import { StatusDot } from '@/components/tournament/StatusDot';
+import { FooterBar, IconButton } from '@/components/ui/Bars';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
+import { InlineError } from '@/components/ui/InlineError';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Tap } from '@/components/ui/Tap';
+import { colors, display, font, space } from '@/constants/theme';
 import { goBack } from '@/lib/nav';
-import { Screen } from '@/components/Screen';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchTournament } from '@/store/slices/tournamentSlice';
-import { fetchTournamentCategories, fetchMyRegistrations, type Category } from '@/store/slices/registrationSlice';
-import { fetchTournamentTeams } from '@/store/slices/teamSlice';
-import { TournamentHero, FactStrip, EntryClock } from '@/components/tournament/TournamentHero';
-import { JumpBar, JUMP_BAR_HEIGHT } from '@/components/tournament/JumpBar';
-import { ChampionsBlock, type Champion } from '@/components/tournament/ChampionsBlock';
-import { CategoryCard } from '@/components/tournament/CategoryCard';
-import { TeamsGrid } from '@/components/tournament/TeamsGrid';
-import { AboutSection, AwardsList } from '@/components/tournament/AboutSection';
-import { YourTeam } from '@/components/tournament/YourTeam';
-import { LiveNowBanner } from '@/components/tournament/LiveNowBanner';
-import { GroupHeading } from '@/components/explore/Browse';
-import { Skeleton, ErrorBlock, EmptyState } from '@/components/states';
-import { Icon } from '@/components/icons';
-import { formatShortDate } from '@/lib/format';
-import { dayOfEvent } from '@/lib/eventsView';
-import { tournamentSports } from '@/lib/sports';
-import { detailPhase, entryFrom, feeLabel } from '@/lib/tournamentDetail';
-import { useCategoryExtras } from '@/lib/useCategoryExtras';
-import { useTheme } from '@/lib/theme';
+import { liveRound, myNextMatch, nextMatchLabel, type Me } from '@/lib/tournamentBracket';
+import {
+  deadlinePassed, directionsUrl, effectiveStage, facts, footerCta, liveAuctionCategory, overviewTabs, statusLine,
+  type CtaGo, type TabKey,
+} from '@/lib/tournamentView';
+import { useOverviewExtras, useTournament } from '@/lib/useTournament';
+import { useAppSelector } from '@/store/hooks';
 
-interface Section {
-  key: string;
-  /** The jump bar chip. */
-  label: string;
-  /** The section's own heading; omitted when the section draws its own. */
-  heading?: string;
-  count?: number;
-  node: ReactNode;
-}
+const TAB_LABEL: Record<TabKey, string> = { matches: 'Matches', auction: 'Auction', teams: 'Teams' };
 
-/**
- * One page instead of five tabs, ordered by the tournament's stage: the result
- * leads once it is over, entry while it is open, play (your team, the draw)
- * the rest of the time. A sticky jump bar scrolls to each section.
- */
-export default function TournamentDetail() {
+export default function TournamentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-  const theme = useTheme();
+  const nav = useRouter();
   const insets = useSafeAreaInsets();
-  const { currentTournament: tournament, isLoading, error } = useAppSelector((s) => s.tournament);
-  const { categories, myRegistrations, isLoading: isRegLoading } = useAppSelector((s) => s.registration);
-  const { teams } = useAppSelector((s) => s.team);
-  const { user } = useAppSelector((s) => s.auth);
-  const { finals, auctions } = useCategoryExtras(id, categories);
+  const { width } = useWindowDimensions();
+  const loggedIn = !!useAppSelector((s) => s.auth.user);
+  const { data, loading, error, reload } = useTournament(id);
+  const { teams, announcements, auctions, matches } = useOverviewExtras(id, data?.categories);
+  const scroll = useRef<ScrollView>(null);
+  const [categoriesY, setCategoriesY] = useState(0);
+  const bannerH = Math.round((width * 9) / 16);
 
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  const scrollY = useSharedValue(0);
-  // Each section's top within the scroll content, by section index.
-  // ponytail: a section that disappears can leave a stale trailing offset;
-  // the active index is clamped to the live section count where it is read.
-  const offsets = useSharedValue<number[]>([]);
-  const [active, setActive] = useState(0);
-  const onScroll = useAnimatedScrollHandler((e) => {
-    scrollY.value = e.contentOffset.y;
-  });
-  useAnimatedReaction(
-    () => {
-      const y = scrollY.value + JUMP_BAR_HEIGHT + 12;
-      let a = 0;
-      for (let i = 0; i < offsets.value.length; i++) {
-        const top = offsets.value[i];
-        if (top !== undefined && y >= top) a = i;
-      }
-      return a;
-    },
-    (a, prev) => {
-      if (prev !== null && a !== prev) runOnJS(setActive)(a);
-    },
+  const back = (
+    <View style={[s.back, { top: insets.top + 10 }]}>
+      <IconButton icon="arrow_back" label="Back" onPress={() => goBack(nav)} />
+    </View>
   );
 
-  const load = () => {
-    if (!id) return;
-    dispatch(fetchTournament(id));
-    dispatch(fetchTournamentCategories(id));
-    dispatch(fetchTournamentTeams(id));
+  if (!data) {
+    return (
+      <View style={s.root}>
+        {loading && !error ? (
+          <View style={{ gap: 14 }}>
+            <Skeleton style={{ height: bannerH, borderRadius: 0 }} />
+            <View style={{ padding: space.gutter, gap: 14 }}>
+              <Skeleton style={{ height: 14, width: 180 }} />
+              <Skeleton style={{ height: 38, width: '80%' }} />
+              <Skeleton style={{ height: 120 }} />
+            </View>
+          </View>
+        ) : (
+          <View style={{ paddingTop: insets.top + 60 }}>
+            <InlineError what="Couldn't load this tournament." onRetry={reload} />
+          </View>
+        )}
+        {back}
+      </View>
+    );
+  }
+
+  const { tournament: t, categories, mine } = data;
+  const now = new Date();
+  const allMatches = Object.values(matches).flat();
+  const liveCat = liveAuctionCategory(categories, auctions);
+  const stage = effectiveStage({
+    status: t.status, categories, auctions, liveMatch: allMatches.some((m) => m.status === 'in_progress'), registrationDeadline: t.registrationDeadline, now,
+  });
+  const status = statusLine(stage, t, {
+    auctionCategory: liveCat?.name, auctionPaused: !!liveCat && auctions[liveCat._id] === 'paused', liveRound: liveRound(allMatches),
+  });
+  const liveRounds = Object.fromEntries(categories.map((c) => [c._id, liveRound(matches[c._id] ?? [])]));
+
+  const auctionCat = liveCat ?? categories.find((c) => auctions[c._id] !== undefined);
+  const tabs = overviewTabs(stage, {
+    matches: allMatches.length > 0,
+    auction: !!auctionCat,
+    teams: (t.teamsCount ?? 0) > 0,
+  });
+
+  let next: { categoryId: string; label: string } | undefined;
+  for (const c of categories) {
+    const entries = mine.filter((e) => e.categoryId === c._id && e.status !== 'withdrawn');
+    const me: Me = { registrationIds: entries.map((e) => e._id), teamId: entries.find((e) => e.teamId)?.teamId };
+    const m = myNextMatch(matches[c._id] ?? [], me);
+    if (m) { next = { categoryId: c._id, label: nextMatchLabel(m) }; break; }
+  }
+  const cta = footerCta({ stage, categories, mine, loggedIn, auctions, next });
+
+  const openCategory = (categoryId: string) => nav.push({ pathname: '/category/[categoryId]', params: { categoryId, tournamentId: id } });
+  const openMatches = (category?: string) => nav.push({ pathname: '/tournament/[id]/matches', params: category ? { id, category } : { id } });
+  const openAuction = (categoryId: string) => nav.push({ pathname: '/auction/[tournamentId]/[categoryId]', params: { tournamentId: id, categoryId } });
+  const openTeams = (team?: string) => nav.push({ pathname: '/tournament/[id]/teams', params: team ? { id, team } : { id } });
+  const openTabs: Record<TabKey, () => void> = {
+    matches: () => openMatches(),
+    teams: () => openTeams(),
+    auction: () => auctionCat && openAuction(auctionCat._id),
   };
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, id]);
-
-  useEffect(() => {
-    if (user) dispatch(fetchMyRegistrations());
-  }, [dispatch, user]);
-
-  // First load with nothing cached. The hero geometry is held by skeletons so
-  // nothing jumps when the name arrives.
-  if (!tournament && isLoading) {
-    return (
-      <Screen>
-        <Skeleton h={196} style={{ borderRadius: 0, borderWidth: 0 }} />
-        <View style={{ padding: 16, gap: 10 }}>
-          <Skeleton h={34} w={220} line />
-          <Skeleton h={58} />
-          <Skeleton h={110} />
-        </View>
-      </Screen>
-    );
-  }
-
-  // No tournament at all — nothing to keep on screen, so this is the one place
-  // a full-screen failure is honest.
-  if (!tournament || !id) {
-    return (
-      <Screen>
-        <View style={{ padding: 16, paddingTop: 60 }}>
-          <ErrorBlock
-            label="Tournament unavailable"
-            message={error || 'This tournament could not be loaded. It may have been removed.'}
-            onRetry={load}
-          />
-        </View>
-      </Screen>
-    );
-  }
-
-  const phase = detailPhase(tournament.status);
-  const awards = tournament.awards ?? [];
-  const registeredIn = (categoryId: string) => myRegistrations.some((r) => r.categoryId === categoryId);
-  const entering = (cat: Category) => tournament.status === 'registration_open' && cat.status === 'registration';
-  const openCategory = (cat: Category) => {
-    if (!user) {
-      router.push('/(auth)/login');
-      return;
+  const go = (g: CtaGo) => {
+    switch (g.to) {
+      case 'login': return nav.push('/(auth)/login');
+      case 'category': return openCategory(g.categoryId);
+      case 'categories': return scroll.current?.scrollTo({ y: categoriesY, animated: true });
+      case 'auction': return openAuction(g.categoryId);
+      case 'matches': return openMatches(g.categoryId);
     }
-    router.push({ pathname: '/category/[categoryId]', params: { categoryId: cat._id, tournamentId: id } });
-  };
-  const openAnnouncements = () => router.push({ pathname: '/tournament/[id]/announcements', params: { id } });
-
-  const myAssignment = user
-    ? myRegistrations.find((r) => r.tournamentId === id && (r.status === 'auctioned' || r.status === 'assigned') && r.teamId)
-    : undefined;
-  const myTeam = myAssignment ? teams.find((t) => t._id === myAssignment.teamId) : undefined;
-
-  const champions: Champion[] = categories
-    .filter((c) => finals[c._id])
-    .map((c) => ({ categoryId: c._id, categoryName: c.name, result: finals[c._id] }));
-  const championIds = new Set(champions.filter((c) => c.result.competitorType === 'team').map((c) => c.result.winner.id));
-  // The sticky button offers the first category you can still enter.
-  const nextEntry = phase === 'entry' ? categories.find((c) => entering(c) && !registeredIn(c._id)) : undefined;
-
-  const stageCell =
-    phase === 'result'
-      ? { label: 'Awards', value: String(awards.length) }
-      : phase === 'entry'
-        ? { label: 'Entry', value: entryFrom(categories) ?? '—' }
-        : tournament.status === 'ongoing'
-          ? (() => {
-            const { day, total } = dayOfEvent(tournament);
-            return { label: 'Day', value: `${day}/${total}`, accent: true };
-          })()
-          : { label: 'Starts', value: formatShortDate(tournament.startDate) };
-
-  const sections: Section[] = [];
-  if (phase === 'result' && (champions.length > 0 || awards.length > 0)) {
-    sections.push({
-      key: 'result',
-      label: 'Result',
-      node: (
-        <>
-          {champions.length > 0 ? <GroupHeading label={champions.length > 1 ? 'Champions' : 'Champion'} /> : null}
-          <ChampionsBlock champions={champions} />
-          {awards.length > 0 ? <GroupHeading label="Awards" count={awards.length} /> : null}
-          {awards.length > 0 ? <AwardsList awards={awards} /> : null}
-        </>
-      ),
-    });
-  }
-  if (myTeam) {
-    sections.push({ key: 'you', label: 'You', heading: 'Your team', node: <YourTeam team={myTeam} assignment={myAssignment} /> });
-  }
-  sections.push({
-    key: 'categories',
-    label: phase === 'entry' ? 'Enter' : 'Categories',
-    heading: phase === 'entry' ? 'Pick a category' : 'Categories',
-    count: categories.length,
-    node:
-      isRegLoading && categories.length === 0 ? (
-        <View style={{ gap: 9 }}>
-          <Skeleton h={92} />
-          <Skeleton h={92} />
-        </View>
-      ) : categories.length === 0 ? (
-        <EmptyState
-          icon="tag"
-          title="No categories yet"
-          message="The organiser has not announced categories for this tournament. Entry opens once they do."
-        />
-      ) : (
-        <View>
-          {categories.map((cat) => (
-            <CategoryCard
-              key={cat._id}
-              category={cat}
-              tournamentId={id}
-              auction={auctions[cat._id]}
-              sport={tournament.sport}
-              entering={entering(cat)}
-              entered={registeredIn(cat._id)}
-              onOpen={() => openCategory(cat)}
-            />
-          ))}
-        </View>
-      ),
-  });
-  if (teams.length > 0) {
-    sections.push({
-      key: 'teams',
-      label: 'Teams',
-      heading: 'Teams',
-      count: teams.length,
-      node: <TeamsGrid teams={teams} myTeamId={myTeam?._id} championIds={championIds} />,
-    });
-  }
-  sections.push({
-    key: 'about',
-    label: 'About',
-    heading: 'About',
-    node: (
-      <>
-        <AboutSection tournament={tournament} onAnnouncements={openAnnouncements} />
-        {phase !== 'result' && awards.length > 0 ? (
-          <>
-            <GroupHeading label="Awards" count={awards.length} />
-            <AwardsList awards={awards} />
-          </>
-        ) : null}
-      </>
-    ),
-  });
-
-  const jump = (i: number) => {
-    setActive(i);
-    const top = offsets.value[i];
-    if (top !== undefined) scrollRef.current?.scrollTo({ y: Math.max(0, top - JUMP_BAR_HEIGHT), animated: true });
   };
 
-  const share = () =>
-    Share.share({ message: `${tournament.name} on Kria — ${tournament.venue?.city || ''}`.trim() });
+  const addr = [t.venue.name, t.venue.address, t.venue.city].filter(Boolean).join(', ');
+  const first = announcements[0];
 
   return (
-    <Screen>
-      <Animated.ScrollView
-        ref={scrollRef}
-        stickyHeaderIndices={[1]}
-        contentContainerStyle={{ paddingBottom: nextEntry ? 110 + insets.bottom : 32 }}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-      >
-        {/* Hero, stage strip and live banner are one child so the jump bar stays at index 1. */}
-        <View style={{ paddingBottom: 16 }}>
-          <TournamentHero
-            tournament={tournament}
-            scrollY={scrollY}
-            onBack={() => goBack(router)}
-            onShare={share}
-            onAnnouncements={openAnnouncements}
-          />
-          {phase === 'entry' ? <EntryClock tournament={tournament} /> : null}
-          <FactStrip
-            cells={[
-              { label: 'Teams', value: String(teams.length || tournament.teamsCount || 0) },
-              { label: 'Players', value: String(tournament.registeredPlayersCount ?? 0) },
-              { label: 'Categories', value: String(categories.length) },
-              stageCell,
-            ]}
-          />
-          <View style={{ marginTop: 6 }}>
-            <LiveNowBanner tournamentId={id} sports={tournamentSports(tournament)} />
+    <View style={s.root}>
+      <ScrollView ref={scroll} contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+        {t.bannerImage ? (
+          <Image source={{ uri: t.bannerImage }} resizeMode="cover" accessibilityIgnoresInvertColors style={{ width, height: bannerH }} />
+        ) : (
+          <View style={{ width, height: bannerH, backgroundColor: colors.surface1 }} />
+        )}
+        {error ? <InlineError what="Couldn't refresh this tournament." onRetry={reload} /> : null}
+
+        <View style={s.head}>
+          <StatusDot text={status.text} tone={status.tone} />
+          <Text style={display(38)}>{t.name}</Text>
+        </View>
+        <View style={s.facts}><FactsGrid items={facts(t, categories.length, now)} /></View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.tabsScroll} contentContainerStyle={s.tabs}>
+          <View accessible accessibilityRole="tab" accessibilityState={{ selected: true }} style={[s.tab, s.tabOn]}><Text style={s.tabText}>Overview</Text></View>
+          {tabs.map((k) => (
+            <Pressable key={k} accessibilityRole="tab" accessibilityState={{ selected: false }} onPress={openTabs[k]} style={s.tab}>
+              <Text style={[s.tabText, { color: colors.navIdle }]}>{TAB_LABEL[k]}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        {first ? (
+          <View style={s.block}>
+            <AnnouncementCard a={first} now={now} />
+            {announcements.length > 1 ? (
+              <Pressable accessibilityRole="link" hitSlop={12} onPress={() => nav.push({ pathname: '/tournament/[id]/announcements', params: { id } })}>
+                <Text style={s.link}>All updates</Text>
+              </Pressable>
+            ) : null}
           </View>
+        ) : null}
+
+        <View style={s.section} onLayout={(e) => setCategoriesY(e.nativeEvent.layout.y)}>
+          <View style={s.sectionHead}><SectionHeader title="Categories" meta={String(categories.length)} /></View>
+          <CategoryRows
+            categories={categories} auctions={auctions} liveRounds={liveRounds} pastDeadline={deadlinePassed(t.registrationDeadline, now)}
+            onOpen={(c: TournamentCategory) => openCategory(c._id)}
+          />
         </View>
 
-        <JumpBar sections={sections} active={Math.min(active, sections.length - 1)} onJump={jump} onBack={() => goBack(router)} scrollY={scrollY} />
-
-        {sections.map((s, i) => (
-          <View
-            key={s.key}
-            onLayout={(e) => {
-              const next = offsets.value.slice();
-              next[i] = e.nativeEvent.layout.y;
-              offsets.value = next;
-            }}
-            style={{ paddingHorizontal: 16 }}
-          >
-            {s.heading ? <GroupHeading label={s.heading} count={s.count} /> : null}
-            {s.node}
+        {teams.length ? (
+          <View style={s.section}>
+            <View style={s.sectionHeadGap}>
+              <SectionHeader title="Teams" link="Squads" onLink={() => openTeams()} />
+            </View>
+            <View style={s.crests}>
+              {teams.map((tm) => (
+                <Tap key={tm._id} accessibilityLabel={tm.name} scale={0.97} style={s.crest} onPress={() => openTeams(tm._id)}>
+                  <Crest uri={tm.logo} name={tm.name} size={56} />
+                  <Text style={s.crestName} numberOfLines={1}>{tm.name}</Text>
+                </Tap>
+              ))}
+            </View>
           </View>
-        ))}
-      </Animated.ScrollView>
+        ) : null}
 
-      {nextEntry ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: 16,
-            paddingTop: 10,
-            paddingBottom: 12 + insets.bottom,
-            backgroundColor: theme.bg,
-            borderTopWidth: 1.5,
-            borderTopColor: theme.lineSoft,
-          }}
-        >
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Enter ${nextEntry.name}, ${feeLabel(nextEntry)}`}
-            onPress={() => openCategory(nextEntry)}
-            style={{ minHeight: 52, borderRadius: 5, backgroundColor: theme.brand, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16 }}
-          >
-            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 18, lineHeight: 22, color: theme.onBrand }}>Enter</Text>
-            <Text
-              numberOfLines={1}
-              style={{ flex: 1, textAlign: 'right', fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.08 * 10, textTransform: 'uppercase', color: theme.onBrand }}
-            >
-              {`${nextEntry.name} · ${feeLabel(nextEntry)}`}
-            </Text>
-            <Icon name="arrow-right" size={16} color={theme.onBrand} strokeWidth={2.4} />
-          </Pressable>
+        {stage === 'completed' ? (
+          <Results categories={categories} matches={matches} awards={t.awards ?? []} onTable={(c) => openMatches(c._id)} />
+        ) : null}
+
+        <View style={[s.section, { gap: 18 }]}>
+          <SectionHeader title="About" />
+          {t.description ? <Text style={s.about}>{t.description}</Text> : null}
+          <View style={s.addr}>
+            <Icon name="location_on" size={18} color={colors.text2} />
+            <Text style={s.addrText}>{addr}</Text>
+            <Pressable accessibilityRole="link" hitSlop={12} onPress={() => Linking.openURL(directionsUrl(t.venue))}>
+              <Text style={s.directions}>Directions</Text>
+            </Pressable>
+          </View>
         </View>
+      </ScrollView>
+      {back}
+      {cta ? (
+        <FooterBar>
+          <Button label={cta.label} variant={cta.variant} icon={stage === 'completed' ? 'emoji_events' : undefined} onPress={() => go(cta.go)} style={{ flex: 1 }} />
+        </FooterBar>
       ) : null}
-    </Screen>
+    </View>
   );
 }
+
+const s = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.bg },
+  back: { position: 'absolute', left: 12, width: 40, height: 40, borderRadius: 20, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  head: { paddingTop: 24, paddingHorizontal: space.gutter, gap: 12 },
+  facts: { marginTop: 28, marginHorizontal: space.gutter, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.surface2 },
+  // The tabs grew to the 44px touch target (DESIGN §10) upward; the smaller margin keeps the labels where they were.
+  tabsScroll: { marginTop: 20, borderBottomWidth: 1, borderBottomColor: colors.line, flexGrow: 0 },
+  tabs: { paddingHorizontal: space.gutter, gap: 20 },
+  tab: { minHeight: 44, justifyContent: 'flex-end', paddingBottom: 12 },
+  tabOn: { borderBottomWidth: 2, borderBottomColor: colors.accent },
+  tabText: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
+  block: { paddingTop: 28, paddingHorizontal: space.gutter, gap: 12 },
+  link: { fontFamily: font.semibold, fontSize: 13, color: colors.text2, alignSelf: 'flex-end' },
+  section: { paddingTop: space.sectionGap, paddingHorizontal: space.gutter },
+  sectionHead: { paddingBottom: 12 },
+  sectionHeadGap: { paddingBottom: space.headerToContent },
+  crests: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  crest: { width: '23%', alignItems: 'center', gap: 8 },
+  crestName: { fontFamily: font.semibold, fontSize: 11, color: colors.text, textAlign: 'center' },
+  about: { fontFamily: font.regular, fontSize: 14, lineHeight: 22, color: colors.text2 },
+  addr: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 8 },
+  addrText: { flex: 1, fontFamily: font.regular, fontSize: 13, color: colors.text2 },
+  directions: { fontFamily: font.semibold, fontSize: 13, color: colors.accent },
+});

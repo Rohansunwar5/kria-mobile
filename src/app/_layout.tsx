@@ -96,7 +96,6 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="tournament/[id]" />
         <Stack.Screen name="profile" />
         <Stack.Screen name="auction/[tournamentId]/[categoryId]" />
-        <Stack.Screen name="bracket/[tournamentId]/[categoryId]" />
         <Stack.Screen name="live/index" />
         <Stack.Screen name="live/[matchId]" />
         <Stack.Screen name="quick/index" />
@@ -106,18 +105,17 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="knockout/[id]" />
         <Stack.Screen name="knockout/index" />
         <Stack.Screen name="knockout/awards/[id]" />
-        <Stack.Screen name="team-league/[tournamentId]/[categoryId]" />
-        <Stack.Screen name="checkout/[tournamentId]/[categoryId]" />
         <Stack.Screen name="category/[categoryId]" />
         <Stack.Screen name="payment/[orderId]" />
-        <Stack.Screen name="leaderboard/[categoryId]" />
         <Stack.Screen name="cricket/[matchId]/balls" />
         <Stack.Screen name="cricket/leaderboard/[categoryId]" />
         <Stack.Screen name="cricket/my-stats/[registrationId]" />
-        <Stack.Screen name="team/[teamId]" />
         <Stack.Screen name="player/[playerId]" />
         <Stack.Screen name="matches/[playerId]" />
         <Stack.Screen name="tournament/[id]/announcements" />
+        <Stack.Screen name="tournament/[id]/teams" />
+        <Stack.Screen name="tournament/[id]/matches" />
+        <Stack.Screen name="tournament/[id]/tie/[tieId]" />
       </Stack>
       {!introDone ? <BrandIntro onDone={() => setIntroDone(true)} /> : null}
     </View>

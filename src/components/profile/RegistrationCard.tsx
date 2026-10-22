@@ -65,8 +65,8 @@ export function RegistrationCard({ reg, onWithdraw }: { reg: Registration; onWit
             accessibilityLabel="Pay now"
             onPress={() =>
               router.push({
-                pathname: '/checkout/[tournamentId]/[categoryId]',
-                params: { tournamentId: reg.tournamentId, categoryId: reg.categoryId },
+                pathname: '/category/[categoryId]',
+                params: { categoryId: reg.categoryId, tournamentId: reg.tournamentId },
               })
             }
             style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44, backgroundColor: '#F97316' }}

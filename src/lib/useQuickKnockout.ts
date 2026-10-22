@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
+import { serverMessage } from '@/api/unwrap';
 import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
 import {
   addKnockoutPlayer, addKnockoutTeam, cancelQuickKnockout, drawQuickKnockout, getQuickKnockout, grantKnockoutAward,
   moveKnockoutPlayer, pairKnockoutPlayers, removeKnockoutPlayer, removeKnockoutTeam, renameKnockoutTeam, startQuickKnockout, unpairKnockoutPlayers, type QuickKnockout,
 } from '@/api/quickKnockout';
-
-const serverMessage = (err: unknown) =>
-  (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Something went wrong. Please try again.';
 
 /**
  * One quick knockout plus the host's actions, live. Same shape as

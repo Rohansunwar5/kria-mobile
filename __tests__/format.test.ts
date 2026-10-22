@@ -1,4 +1,4 @@
-import { computeAge, feeBreakdown, formatMoney, winPercent } from '@/lib/format';
+import { computeAge, feeBreakdown, formatMoney, rupees, winPercent } from '@/lib/format';
 
 describe('computeAge', () => {
   it('returns 0 when no dob', () => {
@@ -80,5 +80,14 @@ describe('formatMoney', () => {
 
   it('renders a non-integer amount under a thousand as-is, uncompacted', () => {
     expect(formatMoney(42.5)).toBe('₹42.5');
+  });
+});
+
+describe('rupees', () => {
+  it('drops decimals on whole amounts, else two places, Indian grouping', () => {
+    expect(rupees(628.32)).toBe('₹628.32');
+    expect(rupees(600)).toBe('₹600');
+    expect(rupees(14000)).toBe('₹14,000');
+    expect(rupees(4.3)).toBe('₹4.30');
   });
 });

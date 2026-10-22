@@ -18,3 +18,7 @@ export function unwrap<T = any>(res: unknown): T {
   const lvl3 = (lvl2 as { data?: unknown } | null)?.data;
   return (lvl3 ?? lvl2 ?? null) as T;
 }
+
+export function serverMessage(err: unknown): string {
+  return (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Something went wrong. Please try again.';
+}

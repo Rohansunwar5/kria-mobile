@@ -1,100 +1,172 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import MockAdapter from 'axios-mock-adapter';
-import API from '../src/api/axios';
-import authReducer from '../src/store/slices/authSlice';
-import tournamentReducer from '../src/store/slices/tournamentSlice';
-import registrationReducer from '../src/store/slices/registrationSlice';
-import teamReducer from '../src/store/slices/teamSlice';
+import authReducer from '@/store/slices/authSlice';
 import TournamentDetail from '../src/app/tournament/[id]';
 
+// 2a Tournament: the screen follows the effective stage (status line, tabs, footer CTA).
+
+const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ id: 't1' }),
-  useRouter: () => ({ push: jest.fn(), back: jest.fn(), canGoBack: () => true }),
-  router: { push: jest.fn() },
-  useIsFocused: () => true,
+  useRouter: () => ({ push: (...a: unknown[]) => mockPush(...a), back: jest.fn(), canGoBack: () => true }),
+  router: { push: (...a: unknown[]) => mockPush(...a) },
 }));
 
-const envelope = (payload: unknown) => ({ data: { data: payload } });
+let mockBase: Record<string, unknown> = {};
+let mockExtras: Record<string, unknown> = {};
+jest.mock('@/lib/useTournament', () => ({
+  useTournament: () => mockBase,
+  useOverviewExtras: () => mockExtras,
+}));
 
-const tournament = (status: string) => ({
-  _id: 't1',
-  name: 'JBN Cricket Cup',
-  sport: 'cricket',
-  status,
-  startDate: '2026-09-19T00:00:00.000Z',
-  endDate: '2026-09-20T00:00:00.000Z',
-  registrationDeadline: '2099-09-18T00:00:00.000Z',
-  venue: { name: 'Bangalore Cricket Stadium', city: 'Bangalore' },
-  registeredPlayersCount: 61,
-  awards: [{ _id: 'a1', title: 'Clutch player of the tournament', team: { name: 'Deccan Dynamos' } }],
+const tournament = (over: Record<string, unknown> = {}) => ({
+  _id: 't1', name: 'Arohance Open', sport: 'badminton', status: 'registration_open',
+  startDate: '2026-10-20T06:00:00.000Z', endDate: '2026-10-20T08:00:00.000Z', registrationDeadline: '2099-10-17T06:00:00.000Z',
+  venue: { name: 'Tiger Stadium', address: 'Koramangala', city: 'Bengaluru' }, description: 'A one-day event.', ...over,
 });
-
-const category = (status: string) => ({
-  _id: 'c1',
-  name: 'Gold Cup',
-  status,
-  bracketType: 'knockout',
-  isPaidRegistration: true,
-  registrationFee: 500,
-  isActive: true,
+const category = (over: Record<string, unknown> = {}) => ({
+  _id: 'c1', tournamentId: 't1', name: "Men's Singles", status: 'registration', matchType: 'singles', bracketType: 'knockout',
+  registrationFee: 600, isPaidRegistration: true, ...over,
 });
+const base = (t = tournament(), categories: unknown[] = [category()], mine: unknown[] = []) => ({
+  data: { tournament: t, categories, mine }, loading: false, error: false, reload: jest.fn(),
+});
+const extras = (over: Record<string, unknown> = {}) => ({ teams: [], announcements: [], auctions: {}, matches: {}, ...over });
 
-const final = {
-  competitorType: 'team',
-  rounds: {},
-  matches: [{
-    _id: 'f1', bracketRound: 'Final', matchNumber: 7, status: 'completed', winnerId: 'tm2', gameScores: [],
-    teams: { team1Id: 'tm1', team1Name: 'Coastal Chargers', team2Id: 'tm2', team2Name: 'Deccan Dynamos' },
-    result: { team1Summary: '138/9', team2Summary: '142/6' },
-  }],
-};
+const renderScreen = (user: Record<string, unknown> | null = { _id: 'u1' }) =>
+  render(
+    <Provider store={configureStore({ reducer: { auth: authReducer }, preloadedState: { auth: { ...authReducer(undefined, { type: '@@init' }), user } as never } })}>
+      <TournamentDetail />
+    </Provider>,
+  );
 
-let mock: MockAdapter;
-beforeEach(() => { mock = new MockAdapter(API); });
-afterEach(() => { mock.restore(); });
+beforeEach(() => { mockPush.mockClear(); mockBase = base(); mockExtras = extras(); });
 
-function renderAt(tStatus: string, cStatus: string) {
-  mock.onGet('/tournament/t1').reply(200, envelope(tournament(tStatus)));
-  mock.onGet('/tournaments/t1/categories').reply(200, envelope([category(cStatus)]));
-  mock.onGet('/tournaments/t1/teams').reply(200, envelope([
-    { _id: 'tm1', name: 'Coastal Chargers', primaryColor: '#3aa0c8' },
-    { _id: 'tm2', name: 'Deccan Dynamos', primaryColor: '#16C46A' },
-  ]));
-  mock.onGet('/matches/categories/c1').reply(200, envelope(final));
-  mock.onGet('/auction/t1/c1/status').reply(200, envelope({ auction: { status: 'completed' } }));
-  mock.onGet(/\/registrations\/teams\/.*\/roster/).reply(200, envelope({ players: [{}, {}] }));
-
-  const store = configureStore({
-    reducer: { auth: authReducer, tournament: tournamentReducer, registration: registrationReducer, team: teamReducer },
-  });
-  return render(<Provider store={store}><TournamentDetail /></Provider>);
-}
-
-describe('Tournament detail', () => {
-  // The five tabs used to hide the champion, awards and auction results
-  // behind separate taps. A finished tournament leads with its result and
-  // keeps every category destination on the card.
-  it('leads a finished tournament with its result, awards and every category link', async () => {
-    renderAt('completed', 'completed');
-
-    expect(await screen.findByText('Gold Cup champions')).toBeTruthy();
-    expect(screen.getByText('142/6 – 138/9')).toBeTruthy();
-    expect(screen.getByText('Clutch player of the tournament')).toBeTruthy();
-    expect(screen.getByLabelText('Jump to Result')).toBeTruthy();
-    expect(await screen.findByLabelText('Gold Cup auction')).toBeTruthy();
-    expect(screen.getByLabelText('Gold Cup bracket')).toBeTruthy();
-    expect(screen.getByLabelText('Deccan Dynamos, champions')).toBeTruthy();
-    expect(screen.queryByLabelText(/^Enter Gold Cup/)).toBeNull();
+describe('2a Tournament', () => {
+  it('registration stage shows the open status, facts, categories and Register', () => {
+    renderScreen(null);
+    expect(screen.getByText('Registration open · closes Sat 17 Oct')).toBeTruthy();
+    expect(screen.getByText('Tiger Stadium')).toBeTruthy();
+    expect(screen.getByText("Men's Singles")).toBeTruthy();
+    expect(screen.getByText('₹600')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Register · from ₹600'));
+    expect(mockPush).toHaveBeenCalledWith('/(auth)/login');
   });
 
-  it('offers entry while it is open, with a sticky button for the category', async () => {
-    renderAt('registration_open', 'registration');
+  it('logged in with one open category, Register opens the category', () => {
+    renderScreen();
+    fireEvent.press(screen.getByLabelText('Register · from ₹600'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/category/[categoryId]', params: { categoryId: 'c1', tournamentId: 't1' } });
+  });
 
-    expect(await screen.findByLabelText('Jump to Enter')).toBeTruthy();
-    expect(await screen.findAllByLabelText('Enter Gold Cup, ₹500')).toHaveLength(2);
-    expect(screen.getByText('Entries close in')).toBeTruthy();
-    expect(screen.queryByText('Gold Cup champions')).toBeNull();
+  it('a live category auction overrides a closed tournament', () => {
+    mockBase = base(tournament({ status: 'registration_closed' }), [category({ status: 'auction' })]);
+    mockExtras = extras({ auctions: { c1: 'in_progress' } });
+    renderScreen();
+    expect(screen.getByText("Team auction live · Men's Singles")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Watch the auction'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/auction/[tournamentId]/[categoryId]', params: { tournamentId: 't1', categoryId: 'c1' } });
+  });
+
+  // 2b's entryBlocker closes entries at the deadline; 2a must agree.
+  it('a past deadline reads closed, with no Register', () => {
+    mockBase = base(tournament({ registrationDeadline: '2020-10-17T06:00:00.000Z' }));
+    renderScreen();
+    expect(screen.getByText(/^Registration closed · starts /)).toBeTruthy();
+    expect(screen.getByText('Registration closed')).toBeTruthy();
+    expect(screen.queryByText('Registration open')).toBeNull();
+    expect(screen.queryByLabelText(/^Register/)).toBeNull();
+  });
+
+  it('a team auction with no category live says it starts soon', () => {
+    mockBase = base(tournament({ status: 'auction_in_progress' }), [category({ status: 'auction' })]);
+    mockExtras = extras({ auctions: { c1: 'not_started' } });
+    renderScreen();
+    expect(screen.getByText('Team auction · starts soon')).toBeTruthy();
+    expect(screen.queryByText(/Team auction live/)).toBeNull();
+  });
+
+  it('the tab row is tabs at least 44 tall, Overview selected', () => {
+    mockBase = base(tournament({ teamsCount: 4 }));
+    renderScreen();
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.map((t) => t.props.accessibilityState?.selected)).toEqual([true, false]);
+    expect(within(tabs[0]).getByText('Overview')).toBeTruthy();
+    expect(within(tabs[1]).getByText('Teams')).toBeTruthy();
+    for (const t of tabs) expect(StyleSheet.flatten(t.props.style).minHeight).toBeGreaterThanOrEqual(44);
+  });
+
+  it('the pinned update shows with All updates when there are more', () => {
+    const a = (id: string, over = {}) => ({ _id: id, title: 'Courts moved', message: 'Hall B', severity: 'important', pinned: true, authorName: 'Org', createdAt: new Date().toISOString(), ...over });
+    mockExtras = extras({ announcements: [a('a1'), a('a2', { title: 'Other' })] });
+    renderScreen();
+    expect(screen.getByText('Pinned · Important')).toBeTruthy();
+    expect(screen.getByText('Courts moved')).toBeTruthy();
+    fireEvent.press(screen.getByText('All updates'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/tournament/[id]/announcements', params: { id: 't1' } });
+  });
+
+  it('tabs show only with data', () => {
+    renderScreen();
+    expect(screen.getByText('Overview')).toBeTruthy();
+    expect(screen.queryByText('Teams')).toBeNull();
+    expect(screen.queryByText('Matches')).toBeNull();
+  });
+
+  it('a Teams tab appears with teams and opens the teams screen', () => {
+    mockBase = base(tournament({ teamsCount: 4 }));
+    renderScreen();
+    fireEvent.press(screen.getByText('Teams'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/tournament/[id]/teams', params: { id: 't1' } });
+  });
+
+  it('no mock-only elements', () => {
+    renderScreen();
+    expect(screen.queryByText(/Organised by/)).toBeNull();
+    expect(screen.queryByLabelText(/Bookmark|Share/)).toBeNull();
+  });
+
+  it('completed shows champions and awards (after preview)', () => {
+    const final = {
+      _id: 'm1', tournamentId: 't1', categoryId: 'c1', bracketRound: 'Final', matchNumber: 1, status: 'completed', winnerId: 'r1',
+      player1: { registrationId: 'r1', name: 'Asha Rao', teamName: 'Falcons' }, player2: { registrationId: 'r2', name: 'Bela Das' },
+      teams: {}, gameScores: [{ team1Score: 21, team2Score: 15 }, { team1Score: 21, team2Score: 18 }],
+    };
+    mockBase = base(
+      tournament({ status: 'completed', awards: [{ title: 'Player of the tournament', player: { firstName: 'Asha', lastName: 'Rao' } }] }),
+      [category({ status: 'completed' }), category({ _id: 'c2', name: 'Mixed League', status: 'completed', bracketType: 'league' })],
+    );
+    mockExtras = extras({ matches: { c1: [final] } });
+    renderScreen();
+    expect(screen.getByText('Champions')).toBeTruthy();
+    expect(screen.getAllByText('Asha Rao')).toHaveLength(2); // champion and award recipient
+    expect(screen.getByText('Falcons · won the final 21-15, 21-18')).toBeTruthy();
+    expect(screen.getByText('Final table')).toBeTruthy();
+    fireEvent.press(screen.getByText('Final table'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/tournament/[id]/matches', params: { id: 't1', category: 'c2' } });
+    expect(screen.getByText('Player of the tournament')).toBeTruthy();
+    expect(screen.getByLabelText('See results')).toBeTruthy();
+  });
+
+  it('completed without awards hides the Awards section', () => {
+    mockBase = base(tournament({ status: 'completed' }), [category({ status: 'completed', bracketType: 'league' })]);
+    renderScreen();
+    expect(screen.queryByText('Awards')).toBeNull();
+  });
+
+  it('logged out it renders without my entries', () => {
+    mockBase = { ...base(), data: { ...base().data, mine: [] } };
+    renderScreen(null);
+    expect(screen.getByText('Arohance Open')).toBeTruthy();
+  });
+
+  it('shows an error with Retry', () => {
+    const reload = jest.fn();
+    mockBase = { data: null, loading: false, error: true, reload };
+    renderScreen();
+    fireEvent.press(screen.getByText('Retry'));
+    expect(reload).toHaveBeenCalled();
   });
 });

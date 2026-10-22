@@ -44,6 +44,8 @@ export interface RosterPlayer {
   auctionData?: { soldPrice?: number };
   status: string;
   playerId?: string;
+  role?: 'normal' | 'captain' | 'icon';
+  categoryId: string;
 }
 
 export interface Announcement {

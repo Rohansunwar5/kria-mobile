@@ -9,11 +9,11 @@ const ICONS = {
   expand_more: 'o', chevron_right: 'o', location_on: 'o', refresh: 'o',
   // Filled variants are the award badge glyphs (AwardBadge: FILL 1).
   sports_tennis: 'of', sports_cricket: 'of', table_restaurant: 'of', sports_soccer: 'of',
-  sports_kabaddi: 'of', sports: 'of', emoji_events: 'of',
+  sports_kabaddi: 'of', sports: 'of', emoji_events: 'of', workspace_premium: 'o',
   qr_code_2: 'o', person_check: 'o', trending_up: 'o',
   arrow_back: 'o', close: 'o', ios_share: 'o', content_copy: 'o', info: 'o', swipe_vertical: 'o',
   undo: 'o', block: 'o', edit: 'o', remove: 'o', error: 'o', search: 'o', more_horiz: 'o',
-  settings: 'o', photo_camera: 'o', logout: 'o', receipt_long: 'o', assignment: 'o',
+  gavel: 'o', settings: 'o', photo_camera: 'o', logout: 'o', receipt_long: 'o', assignment: 'o', push_pin: 'o', forum: 'o', campaign: 'o', account_tree: 'o',
 };
 const VARIANT = { o: 'wght300', f: 'fill1', b: 'wght500' };
 const base = 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined';

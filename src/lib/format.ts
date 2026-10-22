@@ -65,3 +65,9 @@ export function winPercent(winRate: number | undefined, decided?: number): strin
 export function formatMoney(n: number): string {
   return n >= 1000 ? `₹${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k` : `₹${n}`;
 }
+
+/** Rupees for display: whole amounts without decimals, otherwise exactly two, Indian grouping. */
+export function rupees(n: number): string {
+  const frac = Number.isInteger(n) ? 0 : 2;
+  return `₹${n.toLocaleString('en-IN', { minimumFractionDigits: frac, maximumFractionDigits: frac })}`;
+}

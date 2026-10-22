@@ -35,7 +35,8 @@ export function InvoiceCard({ inv }: { inv: Invoice }) {
   const dim = inv.status === 'refunded';
 
   const retry = () =>
-    inv.tournamentId && inv.categoryId && router.push(`/checkout/${inv.tournamentId}/${inv.categoryId}`);
+    inv.tournamentId && inv.categoryId &&
+    router.push({ pathname: '/category/[categoryId]', params: { categoryId: inv.categoryId, tournamentId: inv.tournamentId } });
 
   return (
     <View

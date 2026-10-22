@@ -1,8 +1,9 @@
 import type { KnockoutFixture, KnockoutPlayer, QuickKnockout } from '@/api/quickKnockout';
 import type { QuickMatch } from '@/api/quickMatch';
 import { colors } from '@/constants/theme';
+import type { BracketColumn, BracketRow } from '@/lib/bracket';
 import { gamesWon } from '@/lib/quickMatchView';
-import { entrantName, isKnockoutHost, isPlayable } from '@/lib/quickKnockoutView';
+import { bracketColumns, entrantName, isKnockoutHost, isPlayable } from '@/lib/quickKnockoutView';
 import { SPORT_LABELS } from '@/lib/sports';
 
 /** Status = dot + word. A drawn knockout is still `waiting` on the server. */
@@ -95,6 +96,30 @@ export function fixtureScores(m: QuickMatch, f: KnockoutFixture): [string, strin
     return String(side === 0 ? won.side1 : won.side2);
   };
   return [of(f.entrantA), of(f.entrantB)];
+}
+
+/** The quick-knockout room's bracket as neutral columns: no header, one score per row, a "Live" badge on playable fixtures while live. */
+export function knockoutColumns(k: QuickKnockout, meId: string, scores: Record<string, [string, string]>): BracketColumn[] {
+  const mine = myEntrant(k, meId);
+  return bracketColumns(k).map((col) => ({
+    title: roundLabel(col.name),
+    cards: col.fixtures.map((f) => {
+      const row = (side: 'A' | 'B'): BracketRow => {
+        const id = side === 'A' ? f.entrantA : f.bye ? undefined : f.entrantB;
+        const slot = slotName(k, f, side);
+        const lost = !!f.winnerEntrantId && !!id && f.winnerEntrantId !== id;
+        const v = scores[f.fixtureId]?.[side === 'A' ? 0 : 1];
+        return { name: slot.name, scores: v ? [{ v, strong: !lost }] : [], won: !!f.winnerEntrantId && f.winnerEntrantId === id, lost, open: slot.open };
+      };
+      return {
+        id: f.fixtureId,
+        live: k.status === 'live' && isPlayable(f),
+        mine: !!mine && (f.entrantA === mine || f.entrantB === mine),
+        openId: f.quickMatchId,
+        rows: [row('A'), row('B')] as [BracketRow, BracketRow],
+      };
+    }),
+  }));
 }
 
 /** Cricket: what the move sheet says under each team. */

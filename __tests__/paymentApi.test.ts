@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { createPaymentOrder, verifyPayment } from '@/api/payment';
+import { createPaymentOrder, verifyPayment, type VerifyBody } from '@/api/payment';
 
 describe('payment api (checkout)', () => {
   let mock: MockAdapter;
@@ -28,13 +28,19 @@ describe('payment api (checkout)', () => {
     expect(result.orderId).toBe('ord_2');
   });
 
-  it('verifyPayment resolves (void) on 200', async () => {
+  const body: VerifyBody = {
+    razorpayOrderId: 'ord_1', razorpayPaymentId: 'pay_1', razorpaySignature: 'sig_1',
+    profile: { firstName: 'A', lastName: 'B', age: 20, gender: 'male', phone: '1', skillLevel: 'beginner' },
+  };
+
+  it('verifyPayment posts the Razorpay fields and the profile', async () => {
     mock.onPost('/payments/verify').reply(200, {});
-    await expect(verifyPayment('ord_1', 'pay_1', 'sig_1')).resolves.toBeUndefined();
+    await expect(verifyPayment(body)).resolves.toBeUndefined();
+    expect(JSON.parse(mock.history.post[0].data)).toEqual(body);
   });
 
-  it('verifyPayment throws on error status', async () => {
+  it('verifyPayment throws on 400', async () => {
     mock.onPost('/payments/verify').reply(400, { message: 'Invalid signature' });
-    await expect(verifyPayment('ord_1', 'pay_1', 'bad_sig')).rejects.toBeDefined();
+    await expect(verifyPayment(body)).rejects.toBeDefined();
   });
 });

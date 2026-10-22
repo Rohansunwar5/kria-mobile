@@ -3,9 +3,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, font } from '@/constants/theme';
 import { Icon, type IconName } from './Icon';
 
-/** Pushed-screen header (mocks 1d/1e): 44px icon button, centred title, right slot. */
-export function TopBar({ title, icon = 'arrow_back', onBack, right }: {
+/**
+ * Pushed-screen header (mocks 1d/1e): 44px icon button, centred title, right slot.
+ * With `sub`, title and sub-line sit left, under each other (mocks 2b/2c).
+ */
+export function TopBar({ title, sub, icon = 'arrow_back', onBack, right }: {
   title: string;
+  sub?: string;
   icon?: IconName;
   onBack: () => void;
   right?: React.ReactNode;
@@ -15,8 +19,15 @@ export function TopBar({ title, icon = 'arrow_back', onBack, right }: {
       <Pressable accessibilityRole="button" accessibilityLabel={icon === 'close' ? 'Close' : 'Back'} onPress={onBack} style={s.iconBtn}>
         <Icon name={icon} size={24} />
       </Pressable>
-      <Text style={s.title} numberOfLines={1}>{title}</Text>
-      <View style={s.iconBtn}>{right}</View>
+      {sub ? (
+        <View style={s.head}>
+          <Text style={[s.title, s.left]} numberOfLines={1}>{title}</Text>
+          <Text style={s.sub} numberOfLines={1}>{sub}</Text>
+        </View>
+      ) : (
+        <Text style={s.title} numberOfLines={1}>{title}</Text>
+      )}
+      <View style={s.right}>{right}</View>
     </View>
   );
 }
@@ -38,6 +49,11 @@ export function FooterBar({ children }: { children: React.ReactNode }) {
 const s = StyleSheet.create({
   top: { height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12 },
   iconBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  // Grows past 44 for wider content (2c's status pill); a 44px button or nothing looks as before.
+  right: { minWidth: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   title: { flex: 1, textAlign: 'center', fontFamily: font.semibold, fontSize: 15, color: colors.text },
+  head: { flex: 1, paddingLeft: 6 },
+  left: { flex: 0, textAlign: 'left' },
+  sub: { fontFamily: font.regular, fontSize: 11, color: colors.text3 },
   footer: { flexDirection: 'row', gap: 10, paddingTop: 12, paddingHorizontal: 20, backgroundColor: colors.bg },
 });

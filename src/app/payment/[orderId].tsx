@@ -8,7 +8,7 @@ import { Skeleton, ErrorBlock, Ghost } from '@/components/states';
 import { useAppSelector } from '@/store/hooks';
 import { getPaymentStatus, type PaymentRecord } from '@/api/payment';
 import { paymentVerdict, type VerdictKind } from '@/lib/paymentVerdict';
-import { formatINR } from '@/lib/checkoutView';
+import { rupees } from '@/lib/format';
 
 const POLL_MS = 4000;
 const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
@@ -138,7 +138,7 @@ export default function PaymentStatus() {
             <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} />
             <Row label="Category" value={(category?.name || '—').toUpperCase()} />
             <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} />
-            <Row label="Amount" value={formatINR(payment.amount)} />
+            <Row label="Amount" value={rupees(payment.amount)} />
             <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} />
             <Row
               label="Attempted"
@@ -160,8 +160,8 @@ export default function PaymentStatus() {
             accessibilityLabel="Try again"
             onPress={() =>
               router.replace({
-                pathname: '/checkout/[tournamentId]/[categoryId]',
-                params: { tournamentId: payment.tournamentId, categoryId: payment.categoryId },
+                pathname: '/category/[categoryId]',
+                params: { categoryId: payment.categoryId, tournamentId: payment.tournamentId },
               })
             }
             style={{ height: 54, borderRadius: 5, backgroundColor: '#F97316', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9 }}

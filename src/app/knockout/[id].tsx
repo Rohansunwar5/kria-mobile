@@ -6,7 +6,7 @@ import { getQuickMatch } from '@/api/quickMatch';
 import { AwardBadge } from '@/components/AwardBadge';
 import { MatchCard } from '@/components/MatchCard';
 import { SpotSheet } from '@/components/host/SpotSheet';
-import { Bracket } from '@/components/knockout/Bracket';
+import { Bracket } from '@/components/Bracket';
 import { CricketPeople, RallyPeople, SectionHead } from '@/components/knockout/People';
 import { CodeCard } from '@/components/room/Roster';
 import { FooterBar, IconButton, TopBar } from '@/components/ui/Bars';
@@ -17,7 +17,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, metals, radius, space } from '@/constants/theme';
 import { HONOUR_BADGES } from '@/lib/awardsView';
-import { fixtureScores, hostName, koLine, koRules, koStatus, myPlayableFixture, roundLabel, slotName } from '@/lib/knockoutRoom';
+import { fixtureScores, hostName, knockoutColumns, koLine, koRules, koStatus, myPlayableFixture, roundLabel, slotName } from '@/lib/knockoutRoom';
 import { initials } from '@/lib/matchCard';
 import { goBack } from '@/lib/nav';
 import { championName, drawBlocker, isKnockoutHost, startBlocker } from '@/lib/quickKnockoutView';
@@ -119,7 +119,7 @@ export default function KnockoutScreen() {
                 {drawn ? (
                   <View style={s.section}>
                     <SectionHead title="Draw" meta={host ? 'Nothing is played until you start' : 'Not started yet'} />
-                    <Bracket k={k} meId={meId} scores={{}} />
+                    <Bracket columns={knockoutColumns(k, meId, {})} />
                   </View>
                 ) : null}
                 {k.sport === 'cricket' ? (
@@ -188,7 +188,7 @@ export default function KnockoutScreen() {
             {k.status === 'live' || k.status === 'completed' ? (
               <View style={s.section}>
                 <SectionHead title={k.status === 'completed' ? 'Final bracket' : 'Bracket'} meta={k.status === 'live' ? 'Tap a match to open it' : undefined} />
-                <Bracket k={k} meId={meId} scores={scores} onOpen={openMatch} />
+                <Bracket columns={knockoutColumns(k, meId, scores)} onOpen={openMatch} />
               </View>
             ) : null}
 

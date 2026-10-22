@@ -28,21 +28,27 @@ export interface GroupStandings {
 
 export interface Tie {
   _id: string;
+  categoryId?: string;
   teams: { team1Id: string; team1Name: string; team2Id: string; team2Name: string };
   status: string;
   winnerId?: string;
   completedCount?: number;
   subMatchCount?: number;
+  team1SubWins?: number;
+  team2SubWins?: number;
+  /** Sent by the group ties list, not by tie details. */
+  subMatches?: SubMatch[];
 }
 
 export interface SubMatch {
   _id: string;
   subMatchSlotNumber: number;
   slotLabel?: string;
+  teams?: { team1Id: string; team2Id: string };
   status: string;
   winnerId?: string;
-  player1?: { name: string; teamId: string };
-  player2?: { name: string; teamId: string };
+  player1?: { name: string; teamId: string; registrationId?: string };
+  player2?: { name: string; teamId: string; registrationId?: string };
   gameScores?: { team1Score: number; team2Score: number }[];
 }
 

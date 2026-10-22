@@ -54,3 +54,60 @@ export async function latestTournaments(
   const payload = unwrap<{ tournaments: Tournament[] } | null>(await API.get('/tournament', { params }));
   return visibleTournaments(payload?.tournaments ?? []);
 }
+
+export type TournamentStatus = 'draft' | 'registration_open' | 'registration_closed' | 'auction_in_progress' | 'ongoing' | 'completed' | 'cancelled';
+export type CategoryStatus = 'setup' | 'registration' | 'auction' | 'groups_configured' | 'bracket_configured' | 'ongoing' | 'completed';
+export type BracketType = 'league' | 'knockout' | 'hybrid' | 'team_league';
+export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'professional';
+
+export interface TournamentAward { title: string; categoryId?: string; badge?: string; player?: { firstName?: string; lastName?: string } | null; team?: { name?: string } | null }
+
+export interface TournamentDetail {
+  _id: string; name: string; description?: string; sport: string; sports?: string[]; bannerImage?: string;
+  startDate: string; endDate: string; registrationDeadline: string; status: TournamentStatus; teamsCount?: number;
+  venue: { name: string; address?: string; city: string; coordinates?: { lat: number; lng: number } };
+  awards?: TournamentAward[];
+}
+
+export interface TournamentCategory {
+  _id: string; tournamentId: string; name: string; sport?: string; status: CategoryStatus;
+  gender?: 'male' | 'female' | 'mixed'; ageGroup?: { min?: number; max?: number; label?: string };
+  matchType?: 'singles' | 'doubles' | 'team'; bracketType?: BracketType;
+  matchFormat?: { bestOf?: number; pointsPerGame?: number; tieBreakPoints?: number };
+  cricketConfig?: { overs?: number; playersPerTeam?: number };
+  teamLeagueConfig?: { topNPerGroup?: number; pointsForWin?: number; pointsForLoss?: number; pointsForDraw?: number };
+  maxRegistrations?: number; registrationFee: number; isPaidRegistration: boolean;
+}
+
+export interface TournamentTeam { _id: string; name: string; logo?: string; owner?: { name?: string }; budget: number; initialBudget: number; whatsappGroupLink?: string }
+
+export interface MyEntry {
+  _id: string; tournamentId: string; categoryId: string; createdAt: string; teamId?: string;
+  status: 'pending' | 'approved' | 'rejected' | 'auctioned' | 'assigned' | 'withdrawn';
+  auctionData?: { basePrice?: number; soldPrice?: number };
+}
+
+export interface EntryProfile { firstName: string; lastName: string; age: number; gender: 'male' | 'female'; phone: string; photo?: string; skillLevel: SkillLevel }
+
+export async function getTournament(id: string): Promise<TournamentDetail> {
+  return unwrap<TournamentDetail>(await API.get(`/tournament/${id}`));
+}
+
+export async function getTournamentCategories(id: string): Promise<TournamentCategory[]> {
+  const list = unwrap<TournamentCategory[] | null>(await API.get(`/tournaments/${id}/categories`));
+  return Array.isArray(list) ? list : [];
+}
+
+export async function getTournamentTeams(id: string): Promise<TournamentTeam[]> {
+  const list = unwrap<TournamentTeam[] | null>(await API.get(`/tournaments/${id}/teams`));
+  return Array.isArray(list) ? list : [];
+}
+
+export async function getMyEntries(): Promise<MyEntry[]> {
+  const list = unwrap<MyEntry[] | null>(await API.get('/registrations/my-registrations'));
+  return Array.isArray(list) ? list : [];
+}
+
+export async function registerEntry(body: { tournamentId: string; categoryId: string; profile: EntryProfile }): Promise<void> {
+  await API.post('/registrations/register', body);
+}

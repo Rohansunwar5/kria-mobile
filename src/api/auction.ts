@@ -85,6 +85,7 @@ export interface AuctionStatusResponse {
   category?: { _id: string; name: string } | null;
   tournament?: { _id: string; name: string } | null;
   upcoming?: AuctionUpcoming[];
+  unsold?: { registrationId: string; playerName: string }[];
 }
 
 export interface SoldLogResponse {

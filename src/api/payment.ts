@@ -1,4 +1,5 @@
 import API from './axios';
+import type { EntryProfile } from './tournaments';
 
 export interface Invoice {
   _id: string;
@@ -36,12 +37,15 @@ export async function createPaymentOrder(tournamentId: string, categoryId: strin
   return res.data?.data?.data || res.data?.data;
 }
 
-export async function verifyPayment(
-  razorpayOrderId: string,
-  razorpayPaymentId: string,
-  razorpaySignature: string,
-): Promise<void> {
-  await API.post('/payments/verify', { razorpayOrderId, razorpayPaymentId, razorpaySignature });
+export interface VerifyBody {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+  profile: EntryProfile;
+}
+
+export async function verifyPayment(body: VerifyBody): Promise<void> {
+  await API.post('/payments/verify', body);
 }
 
 export interface PaymentRecord {
