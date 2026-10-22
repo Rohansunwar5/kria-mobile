@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { getMatch, getLiveState, getScorecard, getTournamentMatches, resolveMatchSport } from '@/api/cricketMatch';
+import { getMatch, getMatchLive, getLiveState, getScorecard, getTournamentMatches, resolveMatchSport } from '@/api/cricketMatch';
 
 describe('cricketMatch api', () => {
   let mock: MockAdapter;
@@ -26,6 +26,15 @@ describe('cricketMatch api', () => {
     mock.onGet('/sports/cricket/match/m1/live').reply(200, { data: { data: { liveState: null } } });
     const live = await getLiveState('m1');
     expect(live).toBeNull();
+  });
+
+  it('getMatchLive returns liveState and recentBalls', async () => {
+    mock.onGet('/sports/cricket/match/m1/live').reply(200, {
+      data: { data: { liveState: { runs: 7, wickets: 0 }, recentBalls: [] } },
+    });
+    const live = await getMatchLive('m1');
+    expect(live.liveState?.runs).toBe(7);
+    expect(live.recentBalls).toEqual([]);
   });
 
   it('getScorecard returns innings shape', async () => {

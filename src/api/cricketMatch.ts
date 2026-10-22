@@ -144,6 +144,10 @@ export interface CricketSetup {
 export interface CricketMatch {
   _id: string;
   tournamentId: string;
+  categoryId?: string;
+  positionInRound?: number;
+  nextMatchId?: string;
+  schedule?: { date?: string; time?: string; court?: string };
   bracketRound?: string;
   matchNumber?: number;
   teams: { team1Id: string; team2Id: string; team1Name: string; team2Name: string };
@@ -170,6 +174,12 @@ export async function getMatch(matchId: string): Promise<CricketMatch> {
 export async function getLiveState(matchId: string): Promise<LiveState | null> {
   const res = await API.get(`/sports/cricket/match/${matchId}/live`);
   return unwrap(res)?.liveState ?? null;
+}
+
+export async function getMatchLive(matchId: string): Promise<{ liveState: LiveState | null; recentBalls: unknown[] }> {
+  const res = await API.get(`/sports/cricket/match/${matchId}/live`);
+  const d = unwrap(res);
+  return { liveState: d?.liveState ?? null, recentBalls: d?.recentBalls ?? [] };
 }
 
 export async function getScorecard(matchId: string): Promise<Scorecard> {

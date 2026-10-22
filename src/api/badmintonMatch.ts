@@ -22,6 +22,11 @@ export interface BadmintonMatch {
   competitorType: 'player' | 'team';
   bracketRound: string;
   matchNumber: number;
+  positionInRound?: number;
+  nextMatchId?: string;
+  nextMatchSlot?: string;
+  subMatchSlotNumber?: number;
+  slotLabel?: string;
   player1?: Competitor;
   player2?: Competitor;
   teams?: { team1Id?: string; team2Id?: string; team1Name?: string; team2Name?: string };
