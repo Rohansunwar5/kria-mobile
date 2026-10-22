@@ -1,6 +1,10 @@
+import { StyleSheet } from 'react-native';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import LiveScreen from '../src/app/live/[matchId]';
 import type { BadmintonMatch } from '@/api/badmintonMatch';
+import { resolveMatchSport } from '@/api/cricketMatch';
+import { FlipScore } from '@/components/FlipScore';
+import { colors } from '@/constants/theme';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
@@ -95,6 +99,65 @@ describe('next match', () => {
     expect(screen.getByText('Tigers vs Lions · Singles 1')).toBeTruthy();
     expect(mockNext).not.toHaveBeenCalled();
     expect(screen.queryByText('Bracket')).toBeNull();
+  });
+});
+
+it('level points: both numbers at full strength; behind is dimmed', async () => {
+  set({ gameScores: [{ gameNumber: 1, team1Score: 18, team2Score: 21, winnerId: 'b' }, { gameNumber: 2, team1Score: 20, team2Score: 20 }] });
+  await renderIt();
+  const level = screen.getAllByText('20');
+  expect(level.length).toBeGreaterThan(0);
+  level.forEach((d) => expect(StyleSheet.flatten(d.props.style).color).toBe(colors.text));
+  screen.unmount();
+
+  set({});
+  await renderIt();
+  screen.getAllByText('19').forEach((d) => expect(StyleSheet.flatten(d.props.style).color).toBe(colors.text4));
+});
+
+it('the points flip on the card colour', async () => {
+  set({});
+  await renderIt();
+  const flips = screen.UNSAFE_getAllByType(FlipScore);
+  expect(flips).toHaveLength(2);
+  flips.forEach((f) => expect(f.props.bg).toBe(colors.surface1));
+});
+
+describe('FlipScore', () => {
+  const halves = () =>
+    screen.UNSAFE_root.findAll((n) => typeof n.type === 'string' && StyleSheet.flatten(n.props.style)?.overflow === 'hidden');
+  const bgs = () => halves().map((n) => StyleSheet.flatten(n.props.style).backgroundColor);
+
+  it('plain flaps are opaque in `bg`, so the old and new digits never show through each other', () => {
+    render(<FlipScore plain bg={colors.surface1} size={68} value={1} />);
+    screen.rerender(<FlipScore plain bg={colors.surface1} size={68} value={2} />);
+    // Two static halves plus the two flaps of the flip in progress.
+    expect(bgs()).toEqual([colors.surface1, colors.surface1, colors.surface1, colors.surface1]);
+  });
+
+  it('the split card keeps its own colours', () => {
+    render(<FlipScore value={1} />);
+    screen.rerender(<FlipScore value={2} />);
+    expect(bgs().sort()).toEqual([colors.flipTop, colors.flipTop, colors.surface2, colors.surface2].sort());
+  });
+});
+
+describe('router', () => {
+  it('a failed lookup says so and retries', async () => {
+    set({});
+    (resolveMatchSport as jest.Mock).mockRejectedValueOnce(new Error('offline'));
+    await renderIt();
+    expect(screen.getByText("Couldn't load this match.")).toBeTruthy();
+    fireEvent.press(screen.getByText('Retry'));
+    await act(async () => {});
+    expect(screen.getByText('Quarter-final 4')).toBeTruthy();
+  });
+
+  it('a sport with no live board', async () => {
+    (resolveMatchSport as jest.Mock).mockResolvedValueOnce('tennis');
+    await renderIt();
+    expect(screen.getByText('No live scoring')).toBeTruthy();
+    expect(screen.getByText('Live scoring is not available for tennis yet. Check the draw for results once the match is done.')).toBeTruthy();
   });
 });
 

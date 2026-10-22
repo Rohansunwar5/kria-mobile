@@ -2,14 +2,12 @@ import {
   battingSideId,
   bowlingSideId,
   canUndoBall,
-  chaseLine,
   cricketOutcomeLabel,
   isFirstBallOfInnings,
   lineupFromSlots,
   oversText,
   scoreLine,
   setupStage,
-  tossLine,
   whoIsNeeded,
 } from '@/lib/quickCricketView';
 import type { QuickMatch } from '@/api/quickMatch';
@@ -83,22 +81,6 @@ describe('scoreLine', () => {
   it('renders runs, wickets and overs', () => {
     expect(scoreLine(ready({ runs: 42, wickets: 3, completedOvers: 6, ballsInCurrentOver: 2 })))
       .toBe('42/3 (6.2)');
-  });
-});
-
-describe('chaseLine', () => {
-  it('is null during the first innings', () => {
-    expect(chaseLine(ready({ currentInnings: 1, runs: 10, target: undefined }))).toBeNull();
-  });
-
-  it('states runs still required in the second innings', () => {
-    expect(chaseLine(ready({ currentInnings: 2, runs: 40, target: 61 })))
-      .toBe('Needs 21 to win');
-  });
-
-  it('does not go negative once the target is passed', () => {
-    expect(chaseLine(ready({ currentInnings: 2, runs: 61, target: 61 })))
-      .toBe('Needs 0 to win');
   });
 });
 
@@ -272,20 +254,5 @@ describe('cricketOutcomeLabel', () => {
   it('reports a cancelled match', () => {
     const m = { ...ready(), status: 'cancelled' } as QuickMatch;
     expect(cricketOutcomeLabel(m)).toBe('Cancelled');
-  });
-});
-
-describe('tossLine', () => {
-  const m = (toss: Record<string, unknown>) => ({
-    sides: [{ sideId: 's1', name: 'Reds', slots: [] }, { sideId: 's2', name: 'Blues', slots: [] }],
-    cricketSetup: { toss, lineupsSet: false, side1Lineup: [], side2Lineup: [] },
-  }) as unknown as QuickMatch;
-
-  it('says who won the toss and what they chose', () => {
-    expect(tossLine(m({ recorded: true, winnerTeamId: 's2', decision: 'bowl' }))).toBe('Blues won the toss and chose to bowl');
-  });
-
-  it('is null until the toss is recorded', () => {
-    expect(tossLine(m({ recorded: false }))).toBeNull();
   });
 });

@@ -5,7 +5,7 @@ import { colors, font, motion } from '@/constants/theme';
 
 const W = 120;
 const H = 140;
-type Dims = { W: number; H: number; size: number; color?: string; plain?: boolean };
+type Dims = { W: number; H: number; size: number; color?: string; plain?: boolean; bg?: string };
 const OUT = Easing.bezier(0.5, 0, 1, 1);
 const IN = Easing.bezier(0, 0, 0.3, 1.4);
 
@@ -13,10 +13,17 @@ const IN = Easing.bezier(0, 0, 0.3, 1.4);
  * DESIGN §5.9 flip-calendar score. A split card: +1 folds the top half down,
  * −1 folds the bottom half up, 170ms per half. Reduced motion: instant swap.
  */
-export function FlipScore({ value, size = 104, color, plain }: { value: number; size?: number; color?: string; plain?: boolean }) {
+export function FlipScore({ value, size = 104, color, plain, bg }: {
+  value: number;
+  size?: number;
+  color?: string;
+  plain?: boolean;
+  /** Fill for the halves (default: the split card's own). Plain needs the colour behind it, or the flaps are see-through and both digits show mid-flip. */
+  bg?: string;
+}) {
   const d: Dims = plain
-    ? { W: Math.round(size * 1.12), H: Math.round(size * 1.1), size, color, plain }
-    : { W: Math.round((W * size) / 104), H: Math.round((H * size) / 104), size, color };
+    ? { W: Math.round(size * 1.12), H: Math.round(size * 1.1), size, color, plain, bg }
+    : { W: Math.round((W * size) / 104), H: Math.round((H * size) / 104), size, color, bg };
   const reduced = useReducedMotion();
   const [pair, setPair] = useState({ cur: value, prev: value });
   const last = useRef(value);
@@ -62,7 +69,7 @@ export function FlipScore({ value, size = 104, color, plain }: { value: number; 
 const halfBox = (d: Dims, top?: boolean) => [
   s.half, top ? s.top : s.bottom,
   { height: d.H / 2, ...(top ? null : { top: d.H / 2 }) },
-  d.plain ? s.plainHalf : null,
+  d.bg ? { backgroundColor: d.bg } : d.plain ? s.plainHalf : null,
 ];
 const digitBox = (d: Dims, top?: boolean) => [
   s.digit,

@@ -1,26 +1,6 @@
 import API from './axios';
 import { unwrap } from './unwrap';
 
-export interface Ball {
-  _id: string;
-  matchId: string;
-  inningsNumber: 1 | 2;
-  overNumber: number;
-  deliveryNumber: number;
-  batsmanOnStrikeId: string;
-  nonStrikerId: string;
-  bowlerId: string;
-  runs: number;
-  extrasType?: 'wide' | 'no_ball' | 'bye' | 'leg_bye';
-  extrasRuns: number;
-  totalRuns: number;
-  isLegalDelivery: boolean;
-  wicketType?: string;
-  dismissedPlayerId?: string;
-  fielderId?: string;
-  commentary?: string;
-}
-
 export interface CricketPlayerStats {
   registrationId: string;
   playerName?: string;
@@ -82,4 +62,3 @@ export async function getCricketPlayerStats(
   const res = await API.get(`/sports/cricket/stats/registrations/${registrationId}/stats`, { params: { tournamentId } });
   return unwrap(res);
 }
-

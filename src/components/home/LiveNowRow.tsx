@@ -7,14 +7,14 @@ import { useLiveNow } from '@/lib/useLiveNow';
 
 /** Home entry to 3a: only when something is live. */
 export function LiveNowRow() {
-  const { count } = useLiveNow();
+  const { count } = useLiveNow({ scores: false });
   if (!count) return null;
   return (
     <View style={s.wrap}>
       <Tap scale={0.99} accessibilityRole="link" onPress={() => router.push('/live')} style={s.row}>
         <Text style={s.title}>Live now</Text>
         <View style={s.right}>
-          <Text style={s.meta}>{`${count} matches`}</Text>
+          <Text style={s.meta}>{`${count} ${count === 1 ? 'match' : 'matches'}`}</Text>
           <Icon name="chevron_right" size={20} color={colors.text3} />
         </View>
       </Tap>

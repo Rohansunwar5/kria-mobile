@@ -25,16 +25,6 @@ export function scoreLine(match: QuickMatch): string | null {
   return `${s.runs}/${s.wickets ?? 0} (${oversText(s.completedOvers, s.ballsInCurrentOver)})`;
 }
 
-/** Runs still required, second innings only. */
-export function chaseLine(match: QuickMatch): string | null {
-  const s = match.liveState;
-  if (!s || s.currentInnings !== 2 || s.target === undefined) return null;
-  // Never negative: once the target is passed the match is over anyway, and a
-  // negative "needs" reads as a bug to the host.
-  const needed = Math.max(0, s.target - (s.runs ?? 0));
-  return `Needs ${needed} to win`;
-}
-
 /**
  * Who the engine is waiting for. Both can be true at once — the end of an over
  * that also took a wicket — and collecting only one would post the next ball
@@ -148,12 +138,4 @@ export function panelFor(match: QuickMatch): 'waiting' | 'badminton' | 'cricket-
   if (match.status === 'waiting') return 'waiting';
   if (match.sport !== 'cricket') return 'badminton';
   return setupStage(match) === 'ready' ? 'cricket-score' : 'cricket-setup';
-}
-
-/** "Reds won the toss and chose to bat", or null until the toss is recorded. */
-export function tossLine(match: QuickMatch): string | null {
-  const toss = match.cricketSetup?.toss;
-  const winner = match.sides.find((s) => s.sideId === toss?.winnerTeamId);
-  if (!toss?.recorded || !winner || !toss.decision) return null;
-  return `${winner.name} won the toss and chose to ${toss.decision}`;
 }

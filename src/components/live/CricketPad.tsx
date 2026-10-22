@@ -119,6 +119,14 @@ export function CricketPad({ match, scorecard, busy, problem, onBall, onUndo }: 
     return score;
   };
 
+  const undoKey = (beside = false) =>
+    canUndoBall(match) ? (
+      <Tap accessibilityLabel="Undo" disabled={busy} onPress={undo} style={[s.tool, beside && s.undoBeside]}>
+        <Icon name="undo" size={18} color={colors.text2} />
+        <Text style={[s.toolText, { color: colors.text2 }]}>Undo</Text>
+      </Tap>
+    ) : null;
+
   const head = (title: string, sub?: string, back = true) => (
     <View style={s.head}>
       {back ? (
@@ -227,8 +235,11 @@ export function CricketPad({ match, scorecard, busy, problem, onBall, onUndo }: 
       ) : null}
 
       {asking ? (
-        // No ball can be recorded without this player.
-        <Button label={pickLabel(need)} onPress={() => setShut(false)} />
+        // No ball can be recorded without this player; Undo stays, so a mistaken wicket needs no pick first.
+        <View style={s.keyRow}>
+          <Button label={pickLabel(need)} onPress={() => setShut(false)} style={s.flex} />
+          {undoKey(true)}
+        </View>
       ) : (
         <View style={[s.gap8, busy && s.dim]}>
           <View style={s.keyRow}>
@@ -261,12 +272,7 @@ export function CricketPad({ match, scorecard, busy, problem, onBall, onUndo }: 
             <Tap accessibilityLabel="Wicket" disabled={busy} onPress={() => tap({ type: 'open', step: 'wicket' })} style={s.tool}>
               <Text style={[s.toolText, s.wicketKey]}>Wicket</Text>
             </Tap>
-            {canUndoBall(match) ? (
-              <Tap accessibilityLabel="Undo" disabled={busy} onPress={undo} style={s.tool}>
-                <Icon name="undo" size={18} color={colors.text2} />
-                <Text style={[s.toolText, { color: colors.text2 }]}>Undo</Text>
-              </Tap>
-            ) : null}
+            {undoKey()}
           </View>
         </View>
       )}
@@ -293,11 +299,13 @@ const s = StyleSheet.create({
   tool: { flex: 1, height: 48, borderRadius: 14, borderWidth: 1, borderColor: colors.surface3, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   toolText: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
   wicketKey: { fontFamily: font.bold, color: colors.accentInk },
+  // Beside the 56-tall "Pick the…" button: its own width, the button's height.
+  undoBeside: { flex: 0, height: 56, paddingHorizontal: 18 },
 
   sheet: { gap: 18 },
   pick: { gap: 14 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  back: { width: 36, height: 36, marginLeft: -8, alignItems: 'center', justifyContent: 'center' },
+  back: { width: 44, height: 44, marginLeft: -12, alignItems: 'center', justifyContent: 'center' },
   headText: { flex: 1, gap: 2 },
   title: { fontFamily: font.semibold, fontSize: 17, color: colors.text },
   sub: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },

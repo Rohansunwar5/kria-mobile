@@ -54,9 +54,15 @@ export function useCricketMatchSocket(matchId?: string) {
 
     const onBall = (payload: any) => {
       const live = payload?.liveState;
-      if (!live || !active) return;
+      // The socket is shared by every mounted board, so only this match's balls count.
+      if (!live || !active || String(payload.ball?.matchId) !== matchId) return;
       const key = tallyKey(live);
       setState((s) => ({ ...s, live }));
+      // The result (winnerId, margin) lives on the match, which this payload does not carry.
+      if (payload.matchEnded) {
+        reload();
+        return;
+      }
       if (ready.current && key !== lastTally.current) {
         lastTally.current = key;
         loadScorecard(matchId);
@@ -74,6 +80,7 @@ export function useCricketMatchSocket(matchId?: string) {
     socket.on('ball:undone', reload);
     socket.on('connect', onReconnect);
     socket.on('disconnect', onDisconnect);
+    socket.on('connect_error', onDisconnect);
 
     return () => {
       active = false;
@@ -83,6 +90,7 @@ export function useCricketMatchSocket(matchId?: string) {
       socket.off('ball:undone', reload);
       socket.off('connect', onReconnect);
       socket.off('disconnect', onDisconnect);
+      socket.off('connect_error', onDisconnect);
       releaseSocket();
     };
   }, [matchId, reload, loadScorecard]);

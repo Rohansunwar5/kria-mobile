@@ -155,7 +155,7 @@ export function CricketBoard({ view, extra, crests = true }: { view: CricketBoar
                 <View style={s.gap10}>
                   <View style={s.between}>
                     <Text style={s.h2}>This over</Text>
-                    <Text style={s.small}>{`${live.thisOver.runs} runs`}</Text>
+                    <Text style={s.small}>{`${live.thisOver.runs} run${live.thisOver.runs === 1 ? '' : 's'}`}</Text>
                   </View>
                   <Chips chips={live.thisOver.chips} empty={live.thisOver.empty} />
                 </View>
@@ -299,8 +299,9 @@ const s = StyleSheet.create({
   waitLine: { fontFamily: font.semibold, fontSize: 17, color: colors.text },
   h: { fontFamily: font.semibold, fontSize: 15, color: colors.text },
   h2: { fontFamily: font.semibold, fontSize: 13, color: colors.text },
-  tabs: { flexDirection: 'row', gap: 20, marginTop: 32, borderBottomWidth: 1, borderBottomColor: colors.line },
-  tab: { paddingBottom: 12, borderBottomWidth: 2, borderBottomColor: 'transparent' },
+  // The tab grows up to a 44 target; the label stays where it sat (32 above a 32-tall tab before).
+  tabs: { flexDirection: 'row', gap: 20, marginTop: 20, borderBottomWidth: 1, borderBottomColor: colors.line },
+  tab: { minHeight: 44, justifyContent: 'flex-end', paddingBottom: 12, borderBottomWidth: 2, borderBottomColor: 'transparent' },
   tabOn: { borderBottomColor: colors.accent },
   tabText: { fontFamily: font.semibold, fontSize: 14 },
   panel: { paddingTop: 28, gap: 32 },

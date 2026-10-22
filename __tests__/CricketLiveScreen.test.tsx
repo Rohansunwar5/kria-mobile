@@ -121,6 +121,12 @@ it('completed opens on the scorecard with the result', async () => {
   expect(screen.getByText('Fall of wickets')).toBeTruthy();
 });
 
+it('a one-run over reads "1 run"', async () => {
+  set({ scorecard: { innings1: inn1, innings2: { ...inn2, oversTimeline: [over(7, [ball('1', 1), ball('0')])] } } });
+  await renderIt();
+  expect(screen.getByText('1 run')).toBeTruthy();
+});
+
 it('disconnected', async () => {
   set({ connected: false });
   await renderIt();

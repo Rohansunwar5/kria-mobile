@@ -240,13 +240,14 @@ export const dark: Palette = {
  * This previously said "there is exactly one call site today" — wrong by 7x.
  * The same full-bleed brand bar with near-black ink also appears in at least
  * `src/app/cricket/leaderboard/[categoryId].tsx`,
- * `src/app/cricket/my-stats/[registrationId].tsx`,
- * `src/app/profile/invoices.tsx` and `src/app/cricket/[matchId]/balls.tsx` —
- * 8 sites total, measured by grep, not estimated (5 since the old checkout,
- * team and leaderboard screens were deleted on 2026-10-22). That also means the
+ * `src/app/cricket/my-stats/[registrationId].tsx` and
+ * `src/app/profile/invoices.tsx` — 8 sites total, measured by grep, not
+ * estimated (3 now: `FeaturedTournament.tsx` went on 2026-10-21, and the old
+ * checkout, team and leaderboard screens and `cricket/[matchId]/balls.tsx` on
+ * 2026-10-22). That also means the
  * decision now spans two future batches, not one: the tournament-screens
  * batch (checkout, leaderboard, team, invoices, FeaturedTournament) and the
- * cricket-scoring batch (the three `cricket/...` screens). Whichever batch
+ * cricket-scoring batch (the two `cricket/...` screens). Whichever batch
  * lands first should add `slab`/`onSlab` once, not each batch guessing
  * whether the other already did.
  */

@@ -41,6 +41,7 @@ it('shows sections, count and routes rows', () => {
 it('logged-out quick row goes to login', () => {
   set({ quick: [q], count: 1 });
   renderIt(null);
+  expect(screen.getByText('1 match')).toBeTruthy();
   fireEvent.press(screen.getByText('Sunday XI vs Office'));
   expect(mockPush).toHaveBeenCalledWith('/(auth)/login');
 });

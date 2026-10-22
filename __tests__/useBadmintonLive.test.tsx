@@ -19,7 +19,8 @@ jest.mock('@/lib/socket', () => {
     },
   };
 });
-const server = socket as unknown as { emit: jest.Mock; __emit: (e: string, p?: unknown) => void; __count: (e: string) => number };
+const server = socket as unknown as { connected: boolean; emit: jest.Mock; __emit: (e: string, p?: unknown) => void; __count: (e: string) => number };
+const EVENTS = ['score:update', 'connect', 'disconnect', 'connect_error'];
 const get = getBadmintonMatch as jest.Mock;
 
 beforeEach(() => {
@@ -32,11 +33,11 @@ it('acquires, joins, then leaves and releases on unmount', async () => {
   await waitFor(() => expect(result.current.match?._id).toBe('m1'));
   expect(acquireSocket).toHaveBeenCalledTimes(1);
   expect(server.emit).toHaveBeenCalledWith('join:match', { matchId: 'm1' });
-  expect(['score:update', 'connect', 'disconnect'].map(server.__count)).toEqual([1, 1, 1]);
+  expect(EVENTS.map(server.__count)).toEqual([1, 1, 1, 1]);
   unmount();
   expect(server.emit).toHaveBeenCalledWith('leave:match', { matchId: 'm1' });
   expect(releaseSocket).toHaveBeenCalledTimes(1);
-  expect(['score:update', 'connect', 'disconnect'].map(server.__count)).toEqual([0, 0, 0]);
+  expect(EVENTS.map(server.__count)).toEqual([0, 0, 0, 0]);
 });
 
 it('score:update replaces the match', async () => {
@@ -44,6 +45,25 @@ it('score:update replaces the match', async () => {
   await waitFor(() => expect(result.current.loading).toBe(false));
   act(() => server.__emit('score:update', { match: { _id: 'm1', status: 'completed' } }));
   expect(result.current.match?.status).toBe('completed');
+});
+
+it("ignores another match's score:update (a board stacked over this one shares the socket)", async () => {
+  const { result } = renderHook(() => useBadmintonLive('m1'));
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  act(() => server.__emit('score:update', { match: { _id: 'm2', status: 'completed' } }));
+  expect(result.current.match).toMatchObject({ _id: 'm1', status: 'in_progress' });
+});
+
+it('starts connected before the socket has, and a failed connect turns it off', async () => {
+  server.connected = false;
+  const { result } = renderHook(() => useBadmintonLive('m1'));
+  server.connected = true;
+  expect(result.current.connected).toBe(true);
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  act(() => server.__emit('connect_error'));
+  expect(result.current.connected).toBe(false);
+  await act(async () => server.__emit('connect'));
+  expect(result.current.connected).toBe(true);
 });
 
 it('disconnect then connect: connected flips, re-joins and reloads', async () => {

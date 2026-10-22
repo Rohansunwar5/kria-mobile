@@ -314,6 +314,25 @@ describe('picks', () => {
     expect(onBall).toHaveBeenCalledWith({ batsmanOnStrikeId: 'a3', nonStrikerId: 'a2', bowlerId: 'b2', runs: 4 });
   });
 
+  it('offers Undo beside "Pick the…", so a mistaken wicket is undone without picking first', () => {
+    const { onUndo } = pad(live({ ...midInnings, nextBatsmanNeeded: true, nextBowlerNeeded: true, strikerId: undefined, dismissedIds: ['a1'] }));
+    fireEvent.press(sheet().getByText('Gill')); // the batter; the bowler is still to come
+    expect(sheet().getByText("Over 7 · who's bowling?")).toBeTruthy();
+    press('Close');
+    expect(screen.getByText('Pick the bowler')).toBeTruthy();
+    press('Undo');
+    expect(onUndo).toHaveBeenCalledTimes(1);
+    // Undo still resets the pad: the batter picked above is dropped.
+    expect(sheet().getByText('Next batter')).toBeTruthy();
+  });
+
+  it('no Undo beside "Pick the…" before the first ball', () => {
+    pad(live(firstBall));
+    press('Close');
+    expect(screen.getByText('Pick the opening batters')).toBeTruthy();
+    expect(screen.queryByLabelText('Undo')).toBeNull();
+  });
+
   it('after a run out of the non-striker, fills the end the server emptied', () => {
     const v = pad(live(midInnings));
     press('Wicket');

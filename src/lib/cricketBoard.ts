@@ -18,6 +18,8 @@ export interface BoardInput {
   scorecard: Scorecard | null;
   maxOvers: number;
   completed: boolean;
+  /** The match status says a ball has been bowled, so a missing live state is a failed read, not "not started". */
+  started?: boolean;
   result: string | null;
   toss: { winnerId?: string; decision?: 'bat' | 'bowl' } | null;
   squads: [string[], string[]];
@@ -83,7 +85,12 @@ export function fromTournament(
   const completed = m.status === 'completed';
   const margin = m.result?.marginOfVictory;
   const winner = sides.find((s) => m.winnerId != null && s.id === String(m.winnerId));
-  const result = !completed ? null : winner ? `${winner.name} won${margin ? ` ${margin}` : ''}` : margin ? 'Match tied' : null;
+  // A resolved knockout tie has a winner too, but its margin ("match tied · X advanced") is the whole line.
+  const result = !completed
+    ? null
+    : margin?.startsWith('match tied')
+      ? margin[0].toUpperCase() + margin.slice(1)
+      : winner ? `${winner.name} won${margin ? ` ${margin}` : ''}` : margin ? 'Match tied' : null;
   const toss = m.cricketSetup?.toss;
   const names = (xi?: { name?: string }[]) => (xi ?? []).map((p) => p.name || 'Unnamed');
   return {
@@ -92,6 +99,7 @@ export function fromTournament(
     scorecard,
     maxOvers: m.matchConfig?.maxOvers ?? fallbackOvers ?? 20,
     completed,
+    started: m.status === 'in_progress',
     result,
     toss: toss?.recorded ? { winnerId: toss.winnerTeamId, decision: toss.decision } : null,
     squads: [names(m.cricketSetup?.team1Lineup?.startingXI), names(m.cricketSetup?.team2Lineup?.startingXI)],
@@ -157,20 +165,22 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
   const { live, scorecard, sides } = i;
   const status = live?.matchStatus;
   const completed = i.completed || status === 'completed';
-  const waiting = !completed && (!live || status === 'awaiting_start');
+  // No live state is "not started" only when nothing says otherwise: a failed /live read mid-match keeps the scorecard.
+  const waiting = !completed && (live ? status === 'awaiting_start' : !i.started && !scorecard?.innings1);
   const brk = !completed && status === 'innings_break';
   const second = live ? live.currentInnings === 2 : !!scorecard?.innings2;
   const tossSide = sides.find((s) => s.id === i.toss?.winnerId);
   const tossText = tossSide && i.toss?.decision ? `${tossSide.name} won the toss and chose to ${i.toss.decision}` : null;
 
   // Hero
-  const found = sides.findIndex((s) => s.id === live?.battingTeamId);
+  const batting = live ? live.battingTeamId : (scorecard?.innings2 ?? scorecard?.innings1)?.battingTeamId;
+  const found = sides.findIndex((s) => s.id === batting);
   const bi = found < 0 ? 0 : found;
   const oi = 1 - bi;
   const scores: ({ s: string; o: string } | null)[] = [null, null];
   let big = -1;
   if (!live && !waiting) {
-    // No live state (a finished match opened later): read each innings from the scorecard.
+    // No live state (a finished match opened later, or a failed /live read): read each innings from the scorecard.
     [scorecard?.innings1, scorecard?.innings2].forEach((inn, k) => {
       const idx = inn ? sides.findIndex((s) => s.id === inn.battingTeamId) : -1;
       if (!inn || idx < 0) return;
@@ -194,7 +204,7 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
   else if (waiting) line = null;
   else if (brk) line = { kind: 'text', text: `Innings break · Target ${live!.target ?? (live!.innings1Summary?.runs ?? 0) + 1}` };
   else if (!second) line = { kind: 'text', text: `${sides[oi].name} yet to bat` };
-  else if (live!.target != null) {
+  else if (live?.target != null) {
     const need = Math.max(0, live!.target - live!.runs);
     const balls = ballsRemaining(live, i.maxOvers) ?? 0;
     if (need > 0 && balls > 0) {
@@ -235,7 +245,7 @@ export function cricketBoard(i: BoardInput): CricketBoardView {
         thisOver: lastEntry
           ? { chips: lastEntry.balls.map(chipOf), empty: Math.max(0, 6 - lastEntry.balls.length), runs: lastEntry.runs }
           : null,
-        lastOver: prev ? `${prev.balls.map((b) => b.label).join(' ')} · ${prev.runs} runs` : null,
+        lastOver: prev ? `${prev.balls.map((b) => b.label).join(' ')} · ${prev.runs} run${prev.runs === 1 ? '' : 's'}` : null,
         toss: tossText,
       };
 

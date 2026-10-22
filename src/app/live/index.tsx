@@ -33,7 +33,7 @@ export default function LiveNow() {
       >
         <View style={s.head}>
           <Text style={display(40)}>Live now</Text>
-          {count ? <Text style={s.count}>{`${count} matches`}</Text> : null}
+          {count ? <Text style={s.count}>{`${count} ${count === 1 ? 'match' : 'matches'}`}</Text> : null}
         </View>
 
         {error ? <InlineError what="Couldn't load live matches." onRetry={refresh} /> : null}

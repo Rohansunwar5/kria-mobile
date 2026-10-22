@@ -7,7 +7,8 @@ export function useBadmintonLive(matchId: string) {
   const [match, setMatch] = useState<BadmintonMatch | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [connected, setConnected] = useState(socket.connected);
+  // Assume connected until told otherwise: a fresh open would flash "Reconnecting" before the first connect.
+  const [connected, setConnected] = useState(true);
 
   const reload = useCallback(async () => {
     try {
@@ -24,8 +25,9 @@ export function useBadmintonLive(matchId: string) {
 
   useEffect(() => {
     const join = () => socket.emit('join:match', { matchId });
+    // One socket serves every mounted board (Bracket → another match stacks a second), so check whose score it is.
     const onScore = (p: { match?: BadmintonMatch }) => {
-      if (p?.match) setMatch(p.match);
+      if (p?.match && String(p.match._id) === matchId) setMatch(p.match);
     };
     const onConnect = () => {
       setConnected(true);
@@ -39,11 +41,13 @@ export function useBadmintonLive(matchId: string) {
     socket.on('score:update', onScore);
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
+    socket.on('connect_error', onDisconnect);
     return () => {
       socket.emit('leave:match', { matchId });
       socket.off('score:update', onScore);
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
+      socket.off('connect_error', onDisconnect);
       releaseSocket();
     };
   }, [matchId, reload]);

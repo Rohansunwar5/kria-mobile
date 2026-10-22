@@ -6,7 +6,8 @@ import { feedRows, type CricketEnrich } from '@/lib/liveFeedView';
 
 const EVERY = 30_000;
 
-export function useLiveNow() {
+/** `scores: false` skips the per-row cricket reads (two each) for callers that only show the count. */
+export function useLiveNow({ scores = true }: { scores?: boolean } = {}) {
   const [items, setItems] = useState<LiveItem[]>([]);
   const [cricket, setCricket] = useState<CricketEnrich>({});
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,8 @@ export function useLiveNow() {
     try {
       const feed = await fetchLiveFeed();
       const enrich: CricketEnrich = {};
-      await Promise.all(feed.items.filter((i) => i.kind === 'tournament' && i.sport === 'cricket').map(async (i) => {
+      const wanted = scores ? feed.items.filter((i) => i.kind === 'tournament' && i.sport === 'cricket') : [];
+      await Promise.all(wanted.map(async (i) => {
         const [live, match] = await Promise.all([
           getMatchLive(i.matchId).then((r) => r.liveState, () => null),
           getMatch(i.matchId).catch(() => null),
@@ -34,7 +36,7 @@ export function useLiveNow() {
     } finally {
       if (alive.current) setLoading(false);
     }
-  }, []);
+  }, [scores]);
 
   useFocusEffect(useCallback(() => {
     refresh();

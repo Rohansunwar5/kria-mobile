@@ -120,7 +120,8 @@ export function BadmintonLive({ matchId }: { matchId: string }) {
                 </View>
                 <View style={s.pts}>
                   {r.points != null ? (
-                    <FlipScore plain size={68} value={r.points} color={r.leading ? colors.text : colors.text4} />
+                    // Dimmed only while behind: level points (deuce included) are both at full strength.
+                    <FlipScore plain bg={colors.surface1} size={68} value={r.points} color={v.rows[1 - i].leading ? colors.text4 : colors.text} />
                   ) : null}
                 </View>
               </View>
@@ -160,6 +161,7 @@ export function BadmintonLive({ matchId }: { matchId: string }) {
             <Tap
               accessibilityLabel="Bracket"
               onPress={() => router.push({ pathname: '/tournament/[id]/matches', params: { id: tournamentId, category: categoryId } })}
+              style={s.bracketTap}
             >
               <Text style={s.bracket}>Bracket</Text>
             </Tap>
@@ -200,5 +202,6 @@ const s = StyleSheet.create({
   next: { marginTop: space.sectionGap, flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 18, borderWidth: 1, borderColor: colors.cardLine },
   nextText: { flex: 1, gap: 2 },
   nextTitle: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
+  bracketTap: { minHeight: 44, justifyContent: 'center' },
   bracket: { fontFamily: font.regular, fontSize: 13, color: colors.text3 },
 });
