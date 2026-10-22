@@ -5,6 +5,7 @@ import { colors, font, motion } from '@/constants/theme';
 
 const W = 120;
 const H = 140;
+type Dims = { W: number; H: number; size: number; color?: string; plain?: boolean };
 const OUT = Easing.bezier(0.5, 0, 1, 1);
 const IN = Easing.bezier(0, 0, 0.3, 1.4);
 
@@ -12,7 +13,10 @@ const IN = Easing.bezier(0, 0, 0.3, 1.4);
  * DESIGN §5.9 flip-calendar score. A split card: +1 folds the top half down,
  * −1 folds the bottom half up, 170ms per half. Reduced motion: instant swap.
  */
-export function FlipScore({ value }: { value: number }) {
+export function FlipScore({ value, size = 104, color, plain }: { value: number; size?: number; color?: string; plain?: boolean }) {
+  const d: Dims = plain
+    ? { W: Math.round(size * 1.12), H: Math.round(size * 1.1), size, color, plain }
+    : { W: Math.round((W * size) / 104), H: Math.round((H * size) / 104), size, color };
   const reduced = useReducedMotion();
   const [pair, setPair] = useState({ cur: value, prev: value });
   const last = useRef(value);
@@ -40,37 +44,48 @@ export function FlipScore({ value }: { value: number }) {
   const flipping = cur !== prev;
   const up = cur >= prev;
   return (
-    <View style={s.card} accessible accessibilityLabel={String(cur)}>
-      <Half n={up ? cur : prev} top />
-      <Half n={up ? prev : cur} />
+    <View style={[s.card, { width: d.W, height: d.H }, plain ? s.plainCard : null]} accessible accessibilityLabel={String(cur)}>
+      <Half d={d} n={up ? cur : prev} top />
+      <Half d={d} n={up ? prev : cur} />
       {flipping ? (
         <>
           {/* Up: the old top folds away, then the new bottom unfolds. Down: the mirror. */}
-          <Flap n={prev} top={up} progress={first} folding />
-          <Flap n={cur} top={!up} progress={second} />
+          <Flap d={d} n={prev} top={up} progress={first} folding />
+          <Flap d={d} n={cur} top={!up} progress={second} />
         </>
       ) : null}
-      <View style={s.seam} />
+      {plain ? null : <View style={[s.seam, { top: d.H / 2 - 1 }]} />}
     </View>
   );
 }
 
-function Half({ n, top }: { n: number; top?: boolean }) {
+const halfBox = (d: Dims, top?: boolean) => [
+  s.half, top ? s.top : s.bottom,
+  { height: d.H / 2, ...(top ? null : { top: d.H / 2 }) },
+  d.plain ? s.plainHalf : null,
+];
+const digitBox = (d: Dims, top?: boolean) => [
+  s.digit,
+  { top: top ? 0 : -d.H / 2, height: d.H, lineHeight: d.H, fontSize: d.size },
+  d.color ? { color: d.color } : null,
+];
+
+function Half({ d, n, top }: { d: Dims; n: number; top?: boolean }) {
   return (
-    <View style={[s.half, top ? s.top : s.bottom]}>
-      <Text style={[s.digit, { top: top ? 0 : -H / 2 }]}>{n}</Text>
+    <View style={halfBox(d, top)}>
+      <Text style={digitBox(d, top)}>{n}</Text>
     </View>
   );
 }
 
-function Flap({ n, top, progress, folding }: { n: number; top: boolean; progress: SharedValue<number>; folding?: boolean }) {
+function Flap({ d, n, top, progress, folding }: { d: Dims; n: number; top: boolean; progress: SharedValue<number>; folding?: boolean }) {
   const sign = top ? -1 : 1;
   const style = useAnimatedStyle(() => ({
     transform: [{ perspective: 420 }, { rotateX: `${sign * 90 * (folding ? progress.value : 1 - progress.value)}deg` }],
   }));
   return (
-    <Animated.View style={[s.half, top ? s.top : s.bottom, s.flap, { transformOrigin: top ? '50% 100%' : '50% 0%' }, style]}>
-      <Text style={[s.digit, { top: top ? 0 : -H / 2 }]}>{n}</Text>
+    <Animated.View style={[...halfBox(d, top), s.flap, { transformOrigin: top ? '50% 100%' : '50% 0%' }, style]}>
+      <Text style={digitBox(d, top)}>{n}</Text>
     </Animated.View>
   );
 }
@@ -84,6 +99,8 @@ const s = StyleSheet.create({
   top: { top: 0, backgroundColor: colors.flipTop, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
   bottom: { top: H / 2, backgroundColor: colors.surface2, borderBottomLeftRadius: 16, borderBottomRightRadius: 16 },
   flap: { zIndex: 2 },
+  plainCard: { shadowOpacity: 0, elevation: 0 },
+  plainHalf: { backgroundColor: 'transparent' },
   digit: {
     position: 'absolute', left: 0, right: 0, height: H, lineHeight: H, textAlign: 'center', textAlignVertical: 'center',
     fontFamily: font.display, fontSize: 104, includeFontPadding: false, fontVariant: ['tabular-nums'], color: colors.text,
