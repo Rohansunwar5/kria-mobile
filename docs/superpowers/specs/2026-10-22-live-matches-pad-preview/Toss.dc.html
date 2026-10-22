@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Toss</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;font-feature-settings:'liga'}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#0B0B0D;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif">
+  <div style="height:56px;margin-top:40px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+    <button aria-label="Back" style="all:unset;width:44px;height:44px;display:grid;place-items:center;cursor:pointer"><span class="ms" style="font-size:24px">arrow_back</span></button>
+    <span style="font-size:15px;font-weight:600">Quick match</span>
+    <span style="width:44px"></span>
+  </div>
+  <div style="padding:8px 20px 0;display:flex;flex-direction:column;gap:6px">
+    <span style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#FF5A1F"><span style="width:7px;height:7px;border-radius:50%;background:#FF5A1F"></span>Live · before the first ball</span>
+    <span style="font-size:34px;font-stretch:62%;font-weight:800;line-height:.95">Sunday XI vs Office Strikers</span>
+    <span style="font-size:13px;color:#92929A">10 overs · 6 a side</span>
+  </div>
+  <div style="padding:36px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <span style="font-size:17px;font-weight:650">Who won the toss?</span>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+      <button style="all:unset;cursor:pointer;padding:16px;border-radius:18px;background:#F5F5F5;color:#0B0B0D;display:flex;flex-direction:column;gap:4px"><span style="font-size:20px;font-stretch:62%;font-weight:800;line-height:1.05">Sunday XI</span><span style="font-size:12px;color:#3A3A42">6 players</span></button>
+      <button style="all:unset;cursor:pointer;padding:16px;border-radius:18px;background:#1D1D21;display:flex;flex-direction:column;gap:4px"><span style="font-size:20px;font-stretch:62%;font-weight:800;line-height:1.05">Office Strikers</span><span style="font-size:12px;color:#92929A">6 players</span></button>
+    </div>
+  </div>
+  <div style="padding:32px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <span style="font-size:17px;font-weight:650">Sunday XI chose to</span>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+      <button style="all:unset;cursor:pointer;height:56px;border-radius:16px;background:#1D1D21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:700"><span class="ms" style="font-size:20px">sports_cricket</span>Bat</button>
+      <button style="all:unset;cursor:pointer;height:56px;border-radius:16px;background:#1D1D21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:700"><span class="ms" style="font-size:20px">sports_baseball</span>Bowl</button>
+    </div>
+    <span style="font-size:12px;color:#6E6E76;line-height:1.45">Picking Bat or Bowl records the toss. Next you choose the opening batters and the first bowler, then the pad opens. Everyone else sees "Waiting for the toss".</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

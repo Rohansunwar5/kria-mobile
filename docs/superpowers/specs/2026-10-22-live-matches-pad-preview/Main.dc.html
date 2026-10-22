@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Scoring a ball</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;font-feature-settings:'liga'}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#0B0B0D;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif">
+  <div style="height:56px;margin-top:40px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+    <button aria-label="Back" style="all:unset;width:44px;height:44px;display:grid;place-items:center;cursor:pointer"><span class="ms" style="font-size:24px">arrow_back</span></button>
+    <span style="font-size:15px;font-weight:600">Quick match</span>
+    <button aria-label="Share" style="all:unset;width:44px;height:44px;display:grid;place-items:center;cursor:pointer"><span class="ms" style="font-size:22px">ios_share</span></button>
+  </div>
+  <div style="padding:4px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="border-radius:26px;background:#151518;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 10px;align-items:center;font-variant-numeric:tabular-nums">
+        <span style="font-size:15px;font-weight:600;color:#C6C6CC">Sunday XI</span><span style="font-size:15px;color:#C6C6CC">82/5 <span style="color:#6E6E76">(8.0)</span></span>
+        <span style="font-size:17px;font-weight:650">Office Strikers</span><span style="font-size:40px;font-stretch:62%;font-weight:800;line-height:.9">64/3 <span style="font-size:14px;font-stretch:100%;font-weight:400;color:#92929A">(5.2)</span></span>
+      </div>
+      <div style="height:1px;background:#222227"></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between">
+        <span style="font-size:24px;font-stretch:62%;font-weight:800;line-height:1">Need <span style="color:#FF5A1F">19</span> off 16</span>
+        <span style="display:flex;gap:14px;font-variant-numeric:tabular-nums"><span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="font-size:11px;color:#92929A">Req. rate</span><span style="font-size:15px;font-weight:700">7.13</span></span><span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="font-size:11px;color:#92929A">Current</span><span style="font-size:15px;font-weight:700">12.00</span></span></span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 30px 28px;gap:6px;padding:10px 0;border-bottom:1px solid #18181B;font-size:14px;font-variant-numeric:tabular-nums"><span style="font-weight:600">Player F<span style="color:#FF5A1F">*</span></span><span style="text-align:right;font-size:18px;font-stretch:62%;font-weight:800">24</span><span style="text-align:right;color:#92929A">11</span></div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 30px 28px;gap:6px;padding:10px 0;border-bottom:1px solid #18181B;font-size:14px;font-variant-numeric:tabular-nums"><span style="font-weight:600">Player G</span><span style="text-align:right;font-size:18px;font-stretch:62%;font-weight:800">9</span><span style="text-align:right;color:#92929A">6</span></div>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 16px 30px;border-radius:30px 30px 0 0;background:#151518;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px">
+      <span style="font-size:13px;color:#C6C6CC"><span style="font-weight:600;color:#F5F5F5">Player K</span> to <span style="font-weight:600;color:#F5F5F5">Player F</span></span>
+      <span style="display:flex;gap:4px"><span style="min-width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:700;background:#F5F5F5;color:#0B0B0D">4</span><span style="min-width:24px;height:24px;padding:0 4px;box-sizing:border-box;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:700;background:#26262B;color:#C6C6CC">wd</span><span style="min-width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:700;background:#1D1D21">1</span><span style="width:24px;height:24px;border-radius:7px;box-shadow:inset 0 0 0 1px #26262B"></span><span style="width:24px;height:24px;border-radius:7px;box-shadow:inset 0 0 0 1px #26262B"></span><span style="width:24px;height:24px;border-radius:7px;box-shadow:inset 0 0 0 1px #26262B"></span></span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+      <sc-for list="{{runs}}" as="r" hint-placeholder-count="4"><button aria-label="{{r.aria}}" style="all:unset;cursor:pointer;height:60px;border-radius:16px;background:#1D1D21;display:grid;place-items:center;font-size:30px;font-stretch:62%;font-weight:800">{{r.n}}</button></sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+      <button aria-label="Four" style="all:unset;cursor:pointer;height:60px;border-radius:16px;background:#F5F5F5;color:#0B0B0D;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:30px;font-stretch:62%;font-weight:800">4</span><span style="font-size:12px;font-weight:600">Four</span></button>
+      <button aria-label="Six" style="all:unset;cursor:pointer;height:60px;border-radius:16px;background:#F5F5F5;color:#0B0B0D;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:30px;font-stretch:62%;font-weight:800">6</span><span style="font-size:12px;font-weight:600">Six</span></button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      <button style="all:unset;cursor:pointer;height:48px;border-radius:14px;box-shadow:inset 0 0 0 1px #2A2A30;display:grid;place-items:center;font-size:14px;font-weight:600">Extras</button>
+      <button style="all:unset;cursor:pointer;height:48px;border-radius:14px;box-shadow:inset 0 0 0 1px #2A2A30;display:grid;place-items:center;font-size:14px;font-weight:700;color:#FF7A45">Wicket</button>
+      <button style="all:unset;cursor:pointer;height:48px;border-radius:14px;box-shadow:inset 0 0 0 1px #2A2A30;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:600;color:#C6C6CC"><span class="ms" style="font-size:18px">undo</span>Undo</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { runs: [0, 1, 2, 3].map((n) => ({ n, aria: n + (n === 1 ? ' run' : ' runs') })) };
+  }
+}
+</script>
+</body>
+</html>
