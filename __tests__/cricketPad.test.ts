@@ -300,9 +300,19 @@ describe('advance', () => {
     const r = advance(live({ ...midInnings, nextBowlerNeeded: true }), pad(), { type: 'runs', runs: 1 });
     expect(r).toEqual({ pad: pad({ step: 'pick' }) });
     expect(advance(live(firstBall), pad({ step: 'wicket' }), { type: 'wicket', wicket: 'bowled' }).ball).toBeUndefined();
-    const fielder = pad({ step: 'fielder', wicketType: 'caught' });
-    expect(advance(live({ ...midInnings, nextBatsmanNeeded: true, strikerId: undefined }), fielder, { type: 'pick', role: 'fielder', id: 'b1' }))
-      .toEqual({ pad: { ...fielder, step: 'pick' } });
+    // The half-built entry is dropped, picks kept: a stale armed extra or
+    // dismissed batter must not ride on the ball recorded after the pick.
+    const fielder = pad({
+      step: 'fielder', wicketType: 'run_out', dismissed: 'a2', alsoWicket: true,
+      extras: { type: 'wide', runs: 2 }, picks: { bowler: 'b2' },
+    });
+    const needBatter = live({ ...midInnings, nextBatsmanNeeded: true, strikerId: undefined });
+    const asked = advance(needBatter, fielder, { type: 'pick', role: 'fielder', id: 'b1' });
+    expect(asked).toEqual({ pad: pad({ step: 'pick', picks: { bowler: 'b2' } }) });
+    // After the pick, a plain run key posts a plain ball.
+    const picked = advance(needBatter, asked.pad, { type: 'pick', role: 'batter', id: 'a3' });
+    expect(advance(needBatter, picked.pad, { type: 'runs', runs: 1 }).ball)
+      .toEqual({ batsmanOnStrikeId: 'a3', nonStrikerId: 'a2', bowlerId: 'b2', runs: 1 });
   });
 
   it('keeps picks when a sheet is closed', () => {

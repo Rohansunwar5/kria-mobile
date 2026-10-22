@@ -338,4 +338,12 @@ describe('errors', () => {
     expect(screen.getByLabelText('1 run')).toBeTruthy();
     expect(screen.getByText('Extras')).toBeTruthy();
   });
+
+  it('shows the message inside the pick sheet when the refused ball needed a pick', () => {
+    // Recording cleared the picks, so the sheet reopens over the pad: the reason goes with it.
+    pad(live({ ...midInnings, nextBowlerNeeded: true }), { problem: 'That bowler has no overs left.' });
+    expect(sheetOpen()).toBe(true);
+    expect(sheet().getByText("Over 7 · who's bowling?")).toBeTruthy();
+    expect(sheet().getByText('That bowler has no overs left.')).toBeTruthy();
+  });
 });

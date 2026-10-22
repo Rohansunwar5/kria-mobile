@@ -203,6 +203,8 @@ export function CricketPad({ match, scorecard, busy, problem, onBall, onUndo }: 
     sheet = (
       <View style={s.pick}>
         {head(pickTitle(match, need), pickSub(need) || undefined, false)}
+        {/* A refused ball that needed a pick reopens this sheet over the pad's own line. */}
+        {problem ? <Text style={s.sheetProblem}>{problem}</Text> : null}
         <People
           people={pickOptions(match, pad, need, scorecard).map((p) => ({ id: p.id, name: p.name, right: p.figures }))}
           busy={busy}
@@ -299,6 +301,7 @@ const s = StyleSheet.create({
   headText: { flex: 1, gap: 2 },
   title: { fontFamily: font.semibold, fontSize: 17, color: colors.text },
   sub: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
+  sheetProblem: { fontFamily: font.regular, fontSize: 13, color: colors.error },
   label: { fontFamily: font.semibold, fontSize: 13, color: colors.text2 },
   extraKey: { flex: 1, height: 56, borderRadius: 16, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
   toggle: { paddingVertical: 12, paddingHorizontal: 14, borderRadius: 14, backgroundColor: colors.bg },

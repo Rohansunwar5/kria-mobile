@@ -172,9 +172,10 @@ export type PadAction =
 export function advance(m: QuickMatch, s: PadState, a: PadAction): { pad: PadState; ball?: BallEntry } {
   // A recorded ball starts the next one afresh: picks too, since liveState
   // carries the ids from here, and an armed extra must not ride on the next wicket.
-  // Never a ball with a missing id (the old pad refused to post one): ask for the player.
+  // Never a ball with a missing id (the old pad refused to post one): ask for the
+  // player, dropping the half-built entry so no stale extra or dismissal rides on a later ball.
   const record = (extra: Partial<BallEntry>): { pad: PadState; ball?: BallEntry } =>
-    nextPick(m, s) ? { pad: { ...s, step: 'pick' } } : { pad: initialPad, ball: ballFor(m, s, extra) };
+    nextPick(m, s) ? { pad: { ...initialPad, picks: s.picks, step: 'pick' } } : { pad: initialPad, ball: ballFor(m, s, extra) };
   const to = (patch: Partial<PadState>) => ({ pad: { ...s, ...patch } });
   const close = { pad: { ...initialPad, picks: s.picks } };
   const striker = crease(m, s).striker;
