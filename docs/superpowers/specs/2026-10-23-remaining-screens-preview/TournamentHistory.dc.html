@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tournaments</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=JetBrains+Mono:wght@600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;font-feature-settings:'liga'}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#0B0B0D;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif">
+  <div style="height:56px;margin-top:44px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+    <button aria-label="Back" style="all:unset;width:44px;height:44px;display:grid;place-items:center;cursor:pointer"><span class="ms" style="font-size:24px">arrow_back</span></button>
+    <span style="font-size:15px;font-weight:600">Tournaments</span>
+    <span style="width:44px"></span>
+  </div>
+
+  <div style="margin:12px 20px 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #1D1D21;border-bottom:1px solid #1D1D21">
+    <span style="padding:16px 0;display:flex;flex-direction:column;gap:3px"><span style="font-size:32px;font-stretch:62%;font-weight:800;line-height:.9">6</span><span style="font-size:12px;color:#92929A">Entered</span></span>
+    <span style="padding:16px 0 16px 16px;border-left:1px solid #1D1D21;display:flex;flex-direction:column;gap:3px"><span style="font-size:32px;font-stretch:62%;font-weight:800;line-height:.9">17</span><span style="font-size:12px;color:#92929A">Matches</span></span>
+    <span style="padding:16px 0 16px 16px;border-left:1px solid #1D1D21;display:flex;flex-direction:column;gap:3px"><span style="font-size:32px;font-stretch:62%;font-weight:800;line-height:.9">11</span><span style="font-size:12px;color:#92929A">Won</span></span>
+  </div>
+
+  <div style="display:flex;gap:8px;padding:18px 20px 0">
+    <button aria-pressed="true" style="all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;background:#F5F5F5;color:#0B0B0D;font-size:13px;font-weight:600">All</button>
+    <button aria-pressed="false" style="all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;background:#151518;color:#C6C6CC;font-size:13px;font-weight:600">Badminton</button>
+    <button aria-pressed="false" style="all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;background:#151518;color:#C6C6CC;font-size:13px;font-weight:600">Cricket</button>
+  </div>
+
+  <sc-for list="{{years}}" as="y" hint-placeholder-count="2">
+    <div style="padding:26px 20px 0;display:flex;justify-content:space-between;align-items:baseline">
+      <span style="font-size:13px;font-weight:600;color:#92929A;font-variant-numeric:tabular-nums">{{y.year}}</span>
+    </div>
+    <div style="padding:4px 20px 0;display:flex;flex-direction:column">
+      <sc-for list="{{y.rows}}" as="r" hint-placeholder-count="3">
+        <a href="#" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #18181B">
+          <span style="width:36px;height:36px;border-radius:50%;background:{{r.crestBg}};display:grid;place-items:center;flex:none;font-size:11px;font-weight:700;color:{{r.crestFg}}">{{r.crest}}<span class="ms" style="font-size:20px;color:#92929A">{{r.icon}}</span></span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{r.name}}</span>
+            <span style="font-size:12px;color:#92929A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{r.sub}}</span>
+            <span style="font-size:12px;color:#6E6E76;font-variant-numeric:tabular-nums">{{r.record}}</span>
+          </span>
+          <span style="font-size:13px;font-weight:600;color:{{r.resultColor}}">{{r.result}}</span>
+        </a>
+      </sc-for>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const team = (crest, bg) => ({ crest, icon: '', crestBg: bg, crestFg: '#0B0B0D' });
+    const solo = { crest: '', icon: 'sports_tennis', crestBg: '#1D1D21', crestFg: '#92929A' };
+    const years = [
+      { year: '2026', rows: [
+        { ...solo, name: 'Koramangala Smash Open', sub: "Women's Singles · individual entry", record: 'Not played yet', result: 'Awaiting approval', resultColor: '#92929A' },
+        { ...team('TX', '#F5F5F5'), name: 'Whitefield Premier Cup', sub: 'Open · for Thunder XI', record: '5 played · 3 won', result: 'In progress', resultColor: '#C6C6CC' },
+        { ...solo, name: 'HSR Shuttle Cup', sub: "Women's Doubles · individual entry", record: '4 played · 4 won', result: 'Winner', resultColor: '#C9A35A' },
+      ] },
+      { year: '2025', rows: [
+        { ...team('RS', '#F5F5F5'), name: 'Bellandur Night League', sub: 'Open · for Royal Strikers', record: '6 played · 3 won', result: 'Sold ₹12,000', resultColor: '#C6C6CC' },
+        { ...solo, name: 'Jayanagar Masters', sub: "Women's Singles · individual entry", record: '2 played · 1 won', result: 'Completed', resultColor: '#92929A' },
+      ] },
+    ];
+    return { years };
+  }
+}
+</script>
+</body>
+</html>

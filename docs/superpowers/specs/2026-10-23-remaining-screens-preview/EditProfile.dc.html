@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Edit profile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=JetBrains+Mono:wght@600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;font-feature-settings:'liga'}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#0B0B0D;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif">
+  <div style="height:56px;margin-top:44px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+    <button aria-label="Back" style="all:unset;width:44px;height:44px;display:grid;place-items:center;cursor:pointer"><span class="ms" style="font-size:24px">arrow_back</span></button>
+    <span style="font-size:15px;font-weight:600">Edit profile</span>
+    <span style="width:44px"></span>
+  </div>
+
+  <div style="position:absolute;top:100px;left:0;right:0;bottom:104px;overflow:hidden;padding:8px 20px 0;display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:center;gap:16px">
+      <button aria-label="Change profile photo" style="all:unset;cursor:pointer;position:relative;width:80px;height:80px;border-radius:50%;background:#1D1D21;display:grid;place-items:center;font-size:24px;font-weight:700;flex:none">PN<span style="position:absolute;right:-2px;bottom:0;width:28px;height:28px;border-radius:50%;background:#F5F5F5;box-shadow:0 0 0 3px #0B0B0D;display:grid;place-items:center"><span class="ms" style="font-size:16px;color:#0B0B0D">photo_camera</span></span></button>
+      <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">Profile photo</span><span style="font-size:12px;line-height:1.4;color:#92929A">Optional. Organisers and teammates see it.</span></span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+      <div style="display:flex;flex-direction:column;gap:8px"><label for="fn" style="font-size:13px;font-weight:600;color:#C6C6CC">First name</label><input id="fn" value="Priya" style="box-sizing:border-box;width:100%;height:52px;padding:0 16px;border-radius:14px;background:#151518;border:1px solid #2A2A30;color:#F5F5F5;font:400 15px 'Archivo',system-ui,sans-serif;outline:none"></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><label for="ln" style="font-size:13px;font-weight:600;color:#C6C6CC">Last name</label><input id="ln" value="Nair" style="box-sizing:border-box;width:100%;height:52px;padding:0 16px;border-radius:14px;background:#151518;border:1px solid #2A2A30;color:#F5F5F5;font:400 15px 'Archivo',system-ui,sans-serif;outline:none"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px"><label for="ph" style="font-size:13px;font-weight:600;color:#C6C6CC">Phone</label><input id="ph" type="tel" value="98450 12345" style="box-sizing:border-box;width:100%;height:52px;padding:0 16px;border-radius:14px;background:#151518;border:1px solid #2A2A30;color:#F5F5F5;font:400 15px 'Archivo',system-ui,sans-serif;outline:none"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <label for="em" style="font-size:13px;font-weight:600;color:#C6C6CC">Email</label>
+      <div style="height:52px;padding:0 16px;border-radius:14px;border:1px solid #1D1D21;display:flex;align-items:center;gap:10px"><span id="em" style="flex:1;font-size:15px;color:#92929A">priya.n@gmail.com</span><span class="ms" style="font-size:18px;color:#6E6E76">lock</span></div>
+      <span style="font-size:12px;color:#6E6E76">You sign in with this. Only you see it.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:13px;font-weight:600;color:#C6C6CC">Gender</span>
+      <div role="radiogroup" aria-label="Gender" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:3px;border-radius:14px;background:#151518">
+        <button role="radio" aria-checked="false" style="all:unset;cursor:pointer;height:40px;border-radius:11px;display:grid;place-items:center;font-size:13px;font-weight:600;color:#85858D">Male</button>
+        <button role="radio" aria-checked="true" style="all:unset;cursor:pointer;height:40px;border-radius:11px;display:grid;place-items:center;font-size:13px;font-weight:600;background:#2A2A30">Female</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+      <div style="display:flex;flex-direction:column;gap:8px"><label for="dob" style="font-size:13px;font-weight:600;color:#C6C6CC">Date of birth</label><button id="dob" style="all:unset;cursor:pointer;box-sizing:border-box;height:52px;padding:0 14px;border-radius:14px;background:#151518;border:1px solid #2A2A30;display:flex;align-items:center;justify-content:space-between;font-size:15px;color:#6E6E76">Add date<span class="ms" style="font-size:18px;color:#92929A">calendar_today</span></button></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><label for="city" style="font-size:13px;font-weight:600;color:#C6C6CC">City</label><input id="city" value="Bengaluru" style="box-sizing:border-box;width:100%;height:52px;padding:0 16px;border-radius:14px;background:#151518;border:1px solid #2A2A30;color:#F5F5F5;font:400 15px 'Archivo',system-ui,sans-serif;outline:none"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:13px;font-weight:600;color:#C6C6CC">Main sport</span>
+      <div style="display:flex;gap:8px">
+        <button aria-pressed="true" style="all:unset;cursor:pointer;height:40px;padding:0 16px;border-radius:999px;background:#F5F5F5;color:#0B0B0D;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600"><span class="ms" style="font-size:18px">sports_tennis</span>Badminton</button>
+        <button aria-pressed="false" style="all:unset;cursor:pointer;height:40px;padding:0 16px;border-radius:999px;background:#1D1D21;color:#C6C6CC;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600"><span class="ms" style="font-size:18px">sports_cricket</span>Cricket</button>
+      </div>
+      <span style="font-size:12px;color:#6E6E76">Events and Home open on this sport.</span>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:10px 20px 34px;background:#0B0B0D;display:flex;flex-direction:column;gap:10px">
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:#92929A"><span class="ms" style="font-size:16px">info</span>Add your date of birth to enter tournaments.</span>
+    <button style="all:unset;box-sizing:border-box;width:100%;height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:grid;place-items:center;font-size:15px;font-weight:700;cursor:pointer">Save</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

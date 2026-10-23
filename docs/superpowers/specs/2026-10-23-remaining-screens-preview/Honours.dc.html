@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Honour icons</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=JetBrains+Mono:wght@600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+</style>
+</helmet>
+<div style="width:1310px;height:640px;box-sizing:border-box;padding:48px;background:#0B0B0D;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif;display:flex;flex-direction:column;gap:28px">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <span style="font-size:17px;font-weight:650">Honours</span>
+    <span style="font-size:12px;color:#92929A">Given by organisers, or won in a quick knockout</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:32px 24px">
+    <sc-for list="{{items}}" as="h" hint-placeholder-count="14">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+        <dc-import name="AwardBadge" shape="{{h.shape}}" metal="{{h.metal}}" icon="{{h.icon}}" glyph="{{h.glyph}}" count="{{h.count}}" size="88" hint-size="88px,88px"></dc-import>
+        <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:600;line-height:1.2">{{h.name}}</span><span style="font-size:11px;color:#92929A">{{h.ctx}}</span></span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1310,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const r = (name, icon, glyph) => ({ shape: 'rosette', metal: 'gold', icon: icon || '', glyph: glyph || '', count: '', name, ctx: 'Organiser honour' });
+    const items = [
+      r('Player of the Match', 'star'),
+      r('Season MVP', 'workspace_premium'),
+      r('Hat-Trick', 'counter_3'),
+      r('Undefeated Run', 'local_fire_department'),
+      r('Auction Steal', 'gavel'),
+      r('Centurion', '', '100'),
+      r('Clean Sweep', 'cleaning_services'),
+      r('Rally King', 'crown'),
+      r('Ace Serve', 'bolt'),
+      r('Fair Play', 'handshake'),
+      r('Iron Player', 'fitness_center'),
+      r('First Cap', 'counter_1'),
+      { shape: 'hex', metal: 'bronze', icon: 'sports_tennis', glyph: '', count: '2', name: 'Knockout winner', ctx: 'Badminton · 2 wins' },
+    ];
+    return { items };
+  }
+}
+</script>
+</body>
+</html>

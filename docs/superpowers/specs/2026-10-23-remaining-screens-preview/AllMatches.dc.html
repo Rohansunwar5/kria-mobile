@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>All matches</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=JetBrains+Mono:wght@600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;font-feature-settings:'liga'}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#0B0B0D;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif">
+  <div style="height:56px;margin-top:44px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+    <button aria-label="Back" style="all:unset;width:44px;height:44px;display:grid;place-items:center;cursor:pointer"><span class="ms" style="font-size:24px">arrow_back</span></button>
+    <span style="flex:1;padding-left:6px;display:flex;flex-direction:column;gap:1px"><span style="font-size:15px;font-weight:600">All matches</span><span style="font-size:11px;color:#92929A">Rohan Kulkarni</span></span>
+    <span style="width:44px"></span>
+  </div>
+
+  <div style="display:flex;gap:8px;padding:12px 20px 0">
+    <button aria-pressed="true" style="all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;background:#F5F5F5;color:#0B0B0D;font-size:13px;font-weight:600">All</button>
+    <button aria-pressed="false" style="all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;background:#151518;color:#C6C6CC;font-size:13px;font-weight:600">Badminton</button>
+    <button aria-pressed="false" style="all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;background:#151518;color:#C6C6CC;font-size:13px;font-weight:600">Table Tennis</button>
+    <button aria-pressed="false" style="all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;background:#151518;color:#C6C6CC;font-size:13px;font-weight:600">Cricket</button>
+  </div>
+
+  <sc-for list="{{months}}" as="m" hint-placeholder-count="2">
+    <div style="padding:24px 20px 0"><span style="font-size:13px;font-weight:600;color:#92929A">{{m.month}}</span></div>
+    <div style="padding:2px 20px 0;display:flex;flex-direction:column">
+      <sc-for list="{{m.rows}}" as="r" hint-placeholder-count="3">
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #18181B">
+          <span style="width:26px;height:26px;border-radius:7px;background:{{r.bg}};color:{{r.fg}};display:grid;place-items:center;font-size:13px;font-weight:700;flex:none">{{r.res}}</span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+            <span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{r.title}}</span>
+            <span style="font-size:13px;color:#C6C6CC;font-variant-numeric:tabular-nums">{{r.score}}</span>
+            <span style="font-size:12px;color:#92929A">{{r.ctx}}</span>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const R = {
+      W: { bg: 'rgba(255,90,31,0.16)', fg: '#FF7A45' },
+      L: { bg: 'rgba(240,68,82,0.14)', fg: '#F26B76' },
+      T: { bg: 'rgba(59,158,255,0.16)', fg: '#6BB6FF' },
+    };
+    const row = (res, title, score, ctx) => ({ res, title, score, ctx, ...R[res] });
+    const months = [
+      { month: 'October 2026', rows: [
+        row('W', 'Smash Bros vs Net Gains', '21–17, 19–21, 21–15', 'Quick match · Sat 18 Oct'),
+        row('L', 'Sunday Smash · Final', '18–21, 21–23', 'Sunday Smash · Final · Sun 12 Oct'),
+        row('W', 'Thunder XI vs Royal Strikers', '142/6 (20) · 128/9 (20)', 'Tournament · Thu 9 Oct'),
+      ] },
+      { month: 'September 2026', rows: [
+        row('T', 'Office XI vs Sunday XI', '96/7 (10) · 96/8 (10)', 'Quick match · Sun 28 Sep'),
+        row('W', 'Topspin vs Backhand', '11–8, 11–6, 9–11, 11–7', 'Quick match · Sat 20 Sep'),
+      ] },
+    ];
+    return { months };
+  }
+}
+</script>
+</body>
+</html>
