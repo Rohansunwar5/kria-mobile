@@ -139,7 +139,7 @@ export default function Matches() {
       <>
         {view === 'knockout' ? knockout(ms) : view === 'teamLeague' ? teamLeague(sel) : table(sel, ms, view!)}
         {sel.sport === 'cricket' ? (
-          <Tap accessibilityRole="link" scale={0.99} onPress={() => router.push({ pathname: '/cricket/leaderboard/[categoryId]', params: { categoryId: sel._id } })} style={s.link}>
+          <Tap accessibilityRole="link" scale={0.99} onPress={() => router.push({ pathname: '/cricket/leaderboard/[categoryId]', params: { categoryId: sel._id, tournamentName: data?.tournament.name ?? '', categoryName: sel.name } })} style={s.link}>
             <Text style={s.linkText}>Player stats</Text>
             <Icon name="chevron_right" size={20} color={colors.disabled} />
           </Tap>

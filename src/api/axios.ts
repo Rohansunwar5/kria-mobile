@@ -21,7 +21,8 @@ API.interceptors.request.use(async (req) => {
 API.interceptors.response.use(
   (res) => res,
   async (error) => {
-    if (error.response?.status === 401) {
+    // A wrong current password is a 401 too; it must not sign the player out.
+    if (error.response?.status === 401 && !error.config?.url?.includes('/player/auth/change-password')) {
       await clearAuth();
       onUnauthorized?.();
     }

@@ -7,11 +7,13 @@ import { colors, ease, font, motion } from '@/constants/theme';
  * DESIGN §5.10 + Motion "Segment slide": surface3 thumb slides in 220ms on a surface1 track.
  * `light` is the cricket pad's look (on a surface1 sheet): equal segments, a light thumb on a bg track.
  */
-export function Segmented<T extends string>({ options, value, onChange, light }: {
+export function Segmented<T extends string>({ options, value, onChange, light, fill }: {
   options: { key: T; label: string }[];
   value: T;
   onChange: (key: T) => void;
   light?: boolean;
+  /** Equal-width segments across the full width, on the default track. */
+  fill?: boolean;
 }) {
   const reduced = useReducedMotion();
   const [boxes, setBoxes] = useState<Partial<Record<T, { x: number; width: number }>>>({});
@@ -41,7 +43,7 @@ export function Segmented<T extends string>({ options, value, onChange, light }:
             setBoxes((b) => ({ ...b, [o.key]: { x: bx, width } }));
           }}
           onPress={() => onChange(o.key)}
-          style={[s.segment, light && s.lightSegment]}
+          style={[s.segment, light && s.lightSegment, fill && s.fillSegment]}
         >
           <Text style={[s.label, { color: o.key === value ? (light ? colors.bg : colors.text) : light ? colors.navIdle : colors.text3 }]}>{o.label}</Text>
         </Pressable>
@@ -55,6 +57,7 @@ const s = StyleSheet.create({
   thumb: { position: 'absolute', top: 3, bottom: 3, left: 0, borderRadius: 9, backgroundColor: colors.surface3 },
   segment: { paddingVertical: 8, paddingHorizontal: 14, minHeight: 36, justifyContent: 'center' },
   label: { fontFamily: font.semibold, fontSize: 13 },
+  fillSegment: { flex: 1, alignItems: 'center' },
   lightTrack: { borderRadius: 14, backgroundColor: colors.bg },
   lightThumb: { borderRadius: 11, backgroundColor: colors.text },
   lightSegment: { flex: 1, minHeight: 40, paddingHorizontal: 4, alignItems: 'center' },

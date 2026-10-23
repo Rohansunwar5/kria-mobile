@@ -15,6 +15,9 @@ const SKILLS: { key: SkillLevel; label: string }[] = [
   { key: 'professional', label: 'Professional' },
 ];
 
+/** Fee-row labels in order: entry fee, gateway, platform, GST, total. Payments reuses them. */
+export const FEE_LABELS = ['Entry fee', 'Payment gateway (2%)', 'Platform fee (2%)', 'GST (18% on fees)', 'Total'] as const;
+
 /** Mock 2b form: facts, how it works, your entry, skill level, payment. `user` null hides your entry; no `onSkill` hides the skill choice. */
 export function EntryForm({ category: c, teamsCount, user, now, skill, onSkill, onEditProfile }: {
   category: TournamentCategory;
@@ -27,7 +30,7 @@ export function EntryForm({ category: c, teamsCount, user, now, skill, onSkill, 
 }) {
   const fee = feeBreakdown(c.registrationFee);
   const rows = [
-    ['Entry fee', fee.base], ['Payment gateway (2%)', fee.razorpayFee], ['Platform fee (2%)', fee.platformFee], ['GST (18% on fees)', fee.gst], ['Total', fee.total],
+    [FEE_LABELS[0], fee.base], [FEE_LABELS[1], fee.razorpayFee], [FEE_LABELS[2], fee.platformFee], [FEE_LABELS[3], fee.gst], [FEE_LABELS[4], fee.total],
   ] as const;
   const name = user ? `${user.firstName} ${user.lastName}` : '';
 

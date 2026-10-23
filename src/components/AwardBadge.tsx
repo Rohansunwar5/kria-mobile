@@ -179,7 +179,7 @@ export function AwardBadge({ shape, metal, size, icon, glyph, sub, ribbon, laure
         <SvgText x={gx} y={top + main} fill={`url(#${id}ink)`} fontFamily={font.display} fontSize={textSize} textAnchor="middle">{glyph}</SvgText>
       ) : icon ? (
         <G transform={`translate(${gx - iconSize / 2} ${top + iconSize}) scale(${iconSize / 960})`}>
-          <Path d={(ICON_PATHS[icon] as Record<string, string>).f ?? ICON_PATHS[icon].o} fill={`url(#${id}ink)`} />
+          <Path d={(ICON_PATHS[icon] as Record<string, string>).f ?? (ICON_PATHS[icon] as Record<string, string>).o} fill={`url(#${id}ink)`} />
         </G>
       ) : null}
       {subText ? (

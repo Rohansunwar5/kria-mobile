@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { Platform, Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Icon } from '@/components/icons';
+import { colors, font, radius } from '@/constants/theme';
+import { Icon } from '@/components/ui/Icon';
 
 // Local calendar day, not toISOString(): that converts to UTC, which in IST
 // turns a picked local midnight into the previous day.
 const toISODate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
+const parseLocal = (v: string) => {
+  const [y, m, d] = v.split('-').map(Number);
+  return new Date(y, m - 1, d);
+};
+
 // Emits an ISO YYYY-MM-DD string; `value` is that same string or ''.
 export function DobField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [show, setShow] = useState(false);
-  const parseLocal = (v: string) => {
-    const [y, m, d] = v.split('-').map(Number);
-    return new Date(y, m - 1, d);
-  };
   const date = value ? parseLocal(value) : new Date(2000, 0, 1);
 
   const pick = (_e: unknown, picked: Date) => {
@@ -24,28 +26,11 @@ export function DobField({ value, onChange }: { value: string; onChange: (v: str
 
   return (
     <View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Date of birth"
-        onPress={() => setShow(true)}
-        style={{
-          height: 52,
-          borderRadius: 5,
-          backgroundColor: 'rgba(255,255,255,0.06)',
-          borderWidth: 1.5,
-          borderColor: 'rgba(255,255,255,0.14)',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 9,
-          paddingHorizontal: 13,
-        }}
-      >
-        <Icon name="calendar" size={15} color="#7d7d7d" strokeWidth={2} />
-        <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 14, color: value ? '#fff' : '#7d7d7d' }}>
-          {value
-            ? parseLocal(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
-            : 'SELECT'}
+      <Pressable accessibilityRole="button" accessibilityLabel="Date of birth" onPress={() => setShow(true)} style={s.field}>
+        <Text style={[s.text, { color: value ? colors.text : colors.text4 }]}>
+          {value ? parseLocal(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Add date'}
         </Text>
+        <Icon name="calendar_today" size={18} color={colors.text3} />
       </Pressable>
       {/* The picker library has no web build (it renders null), so on web an
           invisible native date input sits over the field and takes the tap. */}
@@ -61,15 +46,14 @@ export function DobField({ value, onChange }: { value: string; onChange: (v: str
         />
       ) : (
         show && (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            maximumDate={new Date()}
-            onValueChange={pick}
-            onDismiss={() => setShow(false)}
-          />
+          <DateTimePicker value={date} mode="date" maximumDate={new Date()} onValueChange={pick} onDismiss={() => setShow(false)} />
         )
       )}
     </View>
   );
 }
+
+const s = StyleSheet.create({
+  field: { height: 52, paddingHorizontal: 14, borderRadius: radius.input, backgroundColor: colors.surface1, borderWidth: 1, borderColor: colors.surface3, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  text: { fontFamily: font.regular, fontSize: 15 },
+});

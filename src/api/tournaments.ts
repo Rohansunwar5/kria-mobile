@@ -111,3 +111,11 @@ export async function getMyEntries(): Promise<MyEntry[]> {
 export async function registerEntry(body: { tournamentId: string; categoryId: string; profile: EntryProfile }): Promise<void> {
   await API.post('/registrations/register', body);
 }
+
+export async function withdrawEntry(id: string): Promise<void> {
+  try {
+    await API.post(`/registrations/${id}/withdraw`);
+  } catch (e) {
+    throw new Error((e as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Could not withdraw this entry.');
+  }
+}

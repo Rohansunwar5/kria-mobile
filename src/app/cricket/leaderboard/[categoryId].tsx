@@ -1,232 +1,168 @@
-import { useEffect, useState, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { goBack } from '@/lib/nav';
-import { Screen } from '@/components/Screen';
-import { Icon } from '@/components/icons';
-import { Chip } from '@/components/canvas';
-import { InitialsAvatar } from '@/components/InitialsAvatar';
-import { Skeleton, ErrorBlock, EmptyState, Ghost } from '@/components/states';
-import { useAppSelector } from '@/store/hooks';
 import { getCricketLeaderboard, SORTS, SORT_LABELS, type CricketPlayerStats, type LeaderboardSort } from '@/api/cricketStats';
-import { sortMetric, sortColumns } from '@/lib/cricketSort';
+import { getMyEntries } from '@/api/tournaments';
+import { Button } from '@/components/ui/Button';
+import { TopBar } from '@/components/ui/Bars';
+import { BottomSheet } from '@/components/ui/BottomSheet';
+import { Icon } from '@/components/ui/Icon';
+import { InlineError } from '@/components/ui/InlineError';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Tap } from '@/components/ui/Tap';
+import { colors, display, font, radius, space } from '@/constants/theme';
+import { goBack } from '@/lib/nav';
+import { sortColumns, sortMetric, statsSheet } from '@/lib/cricketSort';
 
-const LBL = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase' as const, color: '#7d7d7d' };
-
-function initials(name?: string) {
-  return (name || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-}
+const RANK = [colors.gold, colors.silver, colors.bronze];
 
 export default function CricketLeaderboard() {
-  const { categoryId } = useLocalSearchParams<{ categoryId: string }>();
   const router = useRouter();
-  const { currentTournament } = useAppSelector((s) => s.tournament);
-  const { categories, myRegistrations } = useAppSelector((s) => s.registration);
-
+  const { categoryId, tournamentName, categoryName } = useLocalSearchParams<{ categoryId: string; tournamentName?: string; categoryName?: string }>();
   const [sort, setSort] = useState<LeaderboardSort>('runs');
-  const [rows, setRows] = useState<CricketPlayerStats[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [rows, setRows] = useState<CricketPlayerStats[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [mine, setMine] = useState<Set<string>>(new Set());
+  const [sel, setSel] = useState<CricketPlayerStats | null>(null);
+  const alive = useRef(true);
+  const latest = useRef(0);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
 
-  const load = useCallback(async () => {
-    if (!categoryId) return;
-    setLoading(true);
+  const load = useCallback(async (by: LeaderboardSort) => {
+    const n = ++latest.current;
+    setFailed(false);
+    setRows(null);
     try {
-      setRows(await getCricketLeaderboard(categoryId, sort));
-      setError(false);
+      const r = await getCricketLeaderboard(categoryId, by);
+      if (alive.current && n === latest.current) setRows(r);
     } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (alive.current && n === latest.current) setFailed(true);
     }
-  }, [categoryId, sort]);
+  }, [categoryId]);
+  useEffect(() => { load(sort); }, [load, sort]);
 
+  // Marking your own rows is a nicety: a failed lookup just leaves none marked.
   useEffect(() => {
-    load();
-  }, [load]);
+    getMyEntries().then((e) => { if (alive.current) setMine(new Set(e.map((x) => x._id))); }, () => undefined);
+  }, []);
 
-  const category = categories.find((c) => c._id === categoryId);
-  const myIds = new Set(myRegistrations.map((r) => r._id));
   const columns = sortColumns(sort);
-  const [leader, ...rest] = rows;
-
-  const Header = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Go back"
-        onPress={() => goBack(router)}
-        hitSlop={8}
-        style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}
-      >
-        <Icon name="chevron-left" size={19} color="#fff" strokeWidth={2.3} />
-      </Pressable>
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, lineHeight: 21, color: '#fff' }}>Category charts</Text>
-        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 4 }}>
-          {[currentTournament?.name, category?.name].filter(Boolean).join(' · ')}
-        </Text>
-      </View>
-    </View>
-  );
-
-  // One chip per sort key the API accepts — no more, no fewer.
-  const Sorts = (
-    <View style={{ paddingVertical: 11, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 16 }}>
-        {SORTS.map((s) => (
-          <Chip key={s} label={SORT_LABELS[s]} selected={sort === s} onPress={() => setSort(s)} />
-        ))}
-      </View>
-    </View>
-  );
-
-  if (loading) {
-    return (
-      <Screen>
-        {Header}
-        {Sorts}
-        <Skeleton h={74} style={{ borderRadius: 0, borderWidth: 0 }} />
-        <View style={{ padding: 16, gap: 10 }}>
-          <Skeleton h={180} />
-        </View>
-      </Screen>
-    );
-  }
-
-  const refresh = <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#F97316" />;
-
-  if (error) {
-    return (
-      <Screen>
-        {Header}
-        {Sorts}
-        <ScrollView refreshControl={refresh} contentContainerStyle={{ padding: 16 }}>
-          <ErrorBlock label="Charts unavailable" message="These charts could not be loaded. Pull to retry." onRetry={load} />
-        </ScrollView>
-      </Screen>
-    );
-  }
-
-  if (rows.length === 0) {
-    return (
-      <Screen>
-        {Header}
-        {Sorts}
-        <ScrollView refreshControl={refresh} contentContainerStyle={{ flexGrow: 1 }}>
-          <EmptyState
-            icon="chart"
-            title="Nothing charted yet"
-            message="Charts fill in as matches are scored. Try another sort once play has started."
-          />
-        </ScrollView>
-      </Screen>
-    );
-  }
-
-  const top = sortMetric(sort, leader);
+  const leader = rows?.[0];
+  const top = leader && sortMetric(sort, leader);
+  const sheet = sel && statsSheet(sel);
+  const sub = [tournamentName, categoryName].filter(Boolean).join(' · ');
 
   return (
-    <Screen>
-      {Header}
-      {Sorts}
-
-      <View style={{ overflow: 'hidden' }}>
-        <Ghost text={top.value} size={140} style={{ right: -12, top: -28 }} />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#F97316' }}>
-          <View style={{ width: 46, height: 46, borderRadius: 4, backgroundColor: '#0B0B0B', alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontFamily: 'Anton_400Regular', fontSize: 17, color: '#F97316' }}>{initials(leader.playerName)}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.16 * 8, color: 'rgba(11,11,11,0.7)' }}>
-              {top.headline.toUpperCase()}
-            </Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 24, lineHeight: 29, color: '#0B0B0B', marginTop: 3 }}>
-              {leader.playerName}
-            </Text>
-            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: 'rgba(11,11,11,0.72)', marginTop: 4 }}>
-              {[leader.teamName, leader.batting?.highest ? `HS ${leader.batting.highest}` : null].filter(Boolean).join(' · ')}
-            </Text>
-          </View>
-          <View style={{ alignItems: 'flex-end' }}>
-            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 30, lineHeight: 32, color: '#0B0B0B' }}>{top.value}</Text>
-            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 8, letterSpacing: 0.14 * 8, color: 'rgba(11,11,11,0.7)' }}>{top.unit}</Text>
-          </View>
-        </View>
-      </View>
-
-      <ScrollView refreshControl={refresh} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 24 }}>
-        <View style={{ flexDirection: 'row', paddingHorizontal: 12, paddingBottom: 7 }}>
-          <Text style={{ ...LBL, width: 20 }}>#</Text>
-          <Text style={{ ...LBL, flex: 1, letterSpacing: 0.12 * 9 }}>Player</Text>
-          {columns.map((c) => (
-            <Text key={c.label} style={{ ...LBL, width: 44, textAlign: 'right' }}>
-              {c.label}
-            </Text>
-          ))}
-        </View>
-
-        <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, overflow: 'hidden' }}>
-          {rest.map((r, i) => {
-            const mine = myIds.has(r.registrationId);
+    <SafeAreaView style={s.screen}>
+      <TopBar title="Player stats" sub={sub || undefined} onBack={() => goBack(router)} />
+      <ScrollView contentContainerStyle={s.body}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.chips}>
+          {SORTS.map((k) => {
+            const on = k === sort;
             return (
-              <View key={r.registrationId}>
-                {i > 0 ? <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.06)' }} /> : null}
-                <Pressable
-                  disabled={!mine || !currentTournament?._id}
-                  accessibilityRole={mine ? 'button' : undefined}
-                  accessibilityLabel={mine ? 'My tournament stats' : undefined}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/cricket/my-stats/[registrationId]',
-                      params: { registrationId: r.registrationId, tournamentId: currentTournament?._id ?? '' },
-                    })
-                  }
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingHorizontal: 12,
-                    paddingVertical: 10,
-                    backgroundColor: mine ? 'rgba(250,76,147,0.10)' : 'transparent',
-                    ...(mine ? { borderLeftWidth: 4, borderLeftColor: '#FA4C93' } : null),
-                  }}
-                >
-                  <Text style={{ width: mine ? 16 : 20, fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#a3a3a3' }}>{i + 2}</Text>
-                  <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 9 }}>
-                    <InitialsAvatar name={r.playerName} size={22} neutral={!mine} color="#FA4C93" />
-                    <View style={{ flex: 1 }}>
-                      <Text numberOfLines={1} style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, color: '#fff' }}>
-                        {r.playerName}
-                      </Text>
-                      {r.teamName ? (
-                        <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: '#7d7d7d', marginTop: 2 }}>
-                          {r.teamName}
-                        </Text>
-                      ) : null}
-                    </View>
-                  </View>
-                  {columns.map((c, ci) => (
-                    <Text
-                      key={c.label}
-                      style={{
-                        width: 44,
-                        textAlign: 'right',
-                        fontFamily: ci === 1 ? 'JetBrainsMono_700Bold' : 'JetBrainsMono_400Regular',
-                        fontSize: 12,
-                        color: ci === 1 ? '#fff' : '#a3a3a3',
-                      }}
-                    >
-                      {c.value(r)}
-                    </Text>
-                  ))}
-                </Pressable>
-              </View>
+              <Pressable key={k} accessibilityRole="button" accessibilityLabel={SORT_LABELS[k]} accessibilityState={{ selected: on }} onPress={() => setSort(k)} style={[s.chip, { backgroundColor: on ? colors.text : colors.surface1 }]}>
+                <Text style={[s.chipText, { color: on ? colors.bg : colors.text2 }]}>{SORT_LABELS[k]}</Text>
+              </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
+        {failed ? <InlineError what="Couldn't load player stats." onRetry={() => load(sort)} /> : null}
+        {!rows && !failed ? (
+          <View style={s.pad}><Skeleton style={{ height: 150, borderRadius: radius.cardLg }} /><Skeleton style={{ height: 56 }} /><Skeleton style={{ height: 56 }} /></View>
+        ) : null}
+        {rows && !rows.length ? (
+          <View style={s.empty}>
+            <View style={s.emptyIcon}><Icon name="leaderboard" size={30} color={colors.text4} /></View>
+            <Text style={[display(26), { textAlign: 'center' }]}>Nothing recorded yet</Text>
+            <Text style={s.emptyLine}>Stats fill in as matches are scored.</Text>
+          </View>
+        ) : null}
+        {rows && leader && top ? (
+          <View style={s.pad}>
+            <Tap accessibilityLabel={`${leader.playerName ?? 'Player'}, ${top.headline}`} onPress={() => setSel(leader)} style={s.card}>
+              <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
+                <Text style={s.headline}>{top.headline}</Text>
+                <Text numberOfLines={2} style={display(28)}>{leader.playerName}</Text>
+                <Text numberOfLines={1} style={s.sub}>{[leader.teamName, leader.batting?.highest ? `HS ${leader.batting.highest}` : undefined].filter(Boolean).join(' · ')}</Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={display(56)}>{top.value}</Text>
+                <Text style={s.sub}>{top.unit}</Text>
+              </View>
+            </Tap>
+            <View style={s.headRow}>
+              <Text style={[s.th, { width: 28 }]}>#</Text>
+              <Text style={[s.th, { flex: 1 }]}>Player</Text>
+              {columns.map((c) => <Text key={c.label} style={[s.th, s.col]}>{c.label}</Text>)}
+            </View>
+            {rows.map((r, i) => {
+              const you = mine.has(r.registrationId);
+              const ink = you ? colors.accentInk : colors.text;
+              return (
+                <Tap key={r.registrationId} accessibilityLabel={`${i + 1}. ${r.playerName ?? 'Player'}${you ? ' (you)' : ''}`} onPress={() => setSel(r)} style={[s.row, you && { backgroundColor: colors.accentTint }]}>
+                  <Text style={[s.rank, { color: you ? colors.accentInk : RANK[i] ?? colors.text3 }]}>{i + 1}</Text>
+                  <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+                    <Text numberOfLines={1} style={[s.name, { color: ink }]}>{r.playerName}</Text>
+                    {r.teamName ? <Text numberOfLines={1} style={s.sub}>{r.teamName}</Text> : null}
+                  </View>
+                  {columns.map((c, ci) => <Text key={c.label} style={[s.col, s.cell, { color: ci === 1 ? ink : you ? colors.accentInk : colors.text2 }]}>{c.value(r)}</Text>)}
+                </Tap>
+              );
+            })}
+          </View>
+        ) : null}
       </ScrollView>
-    </Screen>
+      <BottomSheet open={!!sel} onClose={() => setSel(null)}>
+        {sheet ? (
+          <View style={{ gap: 18 }}>
+            <View style={{ gap: 6 }}>
+              <Text style={display(30)}>{sheet.title}</Text>
+              <Text style={s.sub}>{sheet.sub}</Text>
+            </View>
+            {sheet.groups.map((g) => (
+              <View key={g.title} style={{ gap: 10 }}>
+                <Text style={s.group}>{g.title}</Text>
+                <View style={s.grid}>
+                  {g.cells.map((c) => (
+                    <View key={c.k} style={s.gridCell}>
+                      <Text style={[s.gridV, c.v === '—' && { color: colors.text4 }]}>{c.v}</Text>
+                      <Text style={s.sub}>{c.k}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ))}
+            <Button label="Done" onPress={() => setSel(null)} />
+          </View>
+        ) : null}
+      </BottomSheet>
+    </SafeAreaView>
   );
 }
+
+const s = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.bg },
+  body: { paddingBottom: 32 },
+  chips: { flexDirection: 'row', gap: 8, paddingTop: 18, paddingHorizontal: space.gutter },
+  chip: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: radius.pill },
+  chipText: { fontFamily: font.semibold, fontSize: 13 },
+  pad: { paddingHorizontal: space.gutter, paddingTop: space.headerToContent, gap: 12 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20, borderRadius: radius.cardLg, backgroundColor: colors.surface1 },
+  headline: { fontFamily: font.semibold, fontSize: 12, color: colors.accentInk },
+  sub: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
+  headRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+  th: { fontFamily: font.semibold, fontSize: 12, color: colors.text3 },
+  col: { width: 52, textAlign: 'right' },
+  row: { flexDirection: 'row', alignItems: 'center', minHeight: 56, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.line },
+  rank: { width: 28, fontFamily: font.bold, fontSize: 14, fontVariant: ['tabular-nums'] },
+  name: { fontFamily: font.semibold, fontSize: 14 },
+  cell: { fontFamily: font.semibold, fontSize: 14, fontVariant: ['tabular-nums'] },
+  empty: { paddingTop: 48, paddingHorizontal: 12, alignItems: 'center', gap: 14 },
+  emptyIcon: { width: 72, height: 72, borderRadius: 36, borderWidth: 1.5, borderColor: colors.lineStrong, alignItems: 'center', justifyContent: 'center' },
+  emptyLine: { fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: colors.text3, textAlign: 'center' },
+  group: { fontFamily: font.semibold, fontSize: 17, color: colors.text },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 14 },
+  gridCell: { width: '25%', gap: 2 },
+  gridV: { fontFamily: font.semibold, fontSize: 18, color: colors.text, fontVariant: ['tabular-nums'] },
+});

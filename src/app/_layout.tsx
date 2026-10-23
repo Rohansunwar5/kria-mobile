@@ -17,7 +17,7 @@ import { store } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { bootstrapAuth, logout } from '@/store/slices/authSlice';
 import { setUnauthorizedHandler } from '@/api/axios';
-import { colors, ThemeProvider } from '@/lib/theme';
+import { colors } from '@/lib/theme';
 import { getOnboardingComplete } from '@/lib/onboardingStorage';
 import { BrandIntro } from '@/components/BrandIntro';
 
@@ -98,17 +98,13 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="auction/[tournamentId]/[categoryId]" />
         <Stack.Screen name="live/index" />
         <Stack.Screen name="live/[matchId]" />
-        <Stack.Screen name="quick/index" />
         <Stack.Screen name="quick/new" />
         <Stack.Screen name="quick/join" />
         <Stack.Screen name="quick/[id]" />
         <Stack.Screen name="knockout/[id]" />
-        <Stack.Screen name="knockout/index" />
         <Stack.Screen name="knockout/awards/[id]" />
         <Stack.Screen name="category/[categoryId]" />
-        <Stack.Screen name="payment/[orderId]" />
         <Stack.Screen name="cricket/leaderboard/[categoryId]" />
-        <Stack.Screen name="cricket/my-stats/[registrationId]" />
         <Stack.Screen name="player/[playerId]" />
         <Stack.Screen name="matches/[playerId]" />
         <Stack.Screen name="tournament/[id]/announcements" />
@@ -140,9 +136,7 @@ export default function RootLayout() {
   });
   return (
     <Provider store={store}>
-      <ThemeProvider>
-        <AuthGate fontsLoaded={fontsLoaded} />
-      </ThemeProvider>
+      <AuthGate fontsLoaded={fontsLoaded} />
     </Provider>
   );
 }

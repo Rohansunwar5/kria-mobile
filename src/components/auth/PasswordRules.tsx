@@ -2,25 +2,10 @@ import { View, Text } from 'react-native';
 import { Lbl } from '@/components/canvas';
 import { Icon } from '@/components/icons';
 
-// ChangePassword.dc.html's strength meter and rule list. set-password is the
-// same screen minus the current-password field, so both share this.
+import { passwordRules, passwordScore, type Rule } from '@/lib/password';
 
-export interface Rule { label: string; met: boolean }
-
-export function passwordRules(pw: string): Rule[] {
-  return [
-    { label: 'At least 8 characters', met: pw.length >= 8 },
-    { label: 'One number', met: /\d/.test(pw) },
-    { label: 'One symbol', met: /[^A-Za-z0-9]/.test(pw) },
-  ];
-}
-
-/** 0–4. The fourth block is length ≥ 12 — the artboard draws four blocks and
- *  only fills three for a password that clears every rule. */
-export function passwordScore(pw: string): number {
-  if (!pw) return 0;
-  return passwordRules(pw).filter((r) => r.met).length + (pw.length >= 12 ? 1 : 0);
-}
+export { passwordRules, passwordScore };
+export type { Rule };
 
 const BANDS = [
   { fg: '#FF4438', label: 'Too weak' },

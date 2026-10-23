@@ -1,140 +1,177 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, View, Text } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { goBack } from '@/lib/nav';
-import { Screen } from '@/components/Screen';
-import { InvoiceCard } from '@/components/profile/InvoiceCard';
-import { Chip, Hairlines, ScreenHeader } from '@/components/canvas';
-import { EmptyState, ErrorBlock, Ghost, Skeleton } from '@/components/states';
-import { useAppSelector } from '@/store/hooks';
+import * as Clipboard from 'expo-clipboard';
 import { getMyPayments, type Invoice } from '@/api/payment';
+import { Button } from '@/components/ui/Button';
+import { TopBar } from '@/components/ui/Bars';
+import { BottomSheet } from '@/components/ui/BottomSheet';
+import { Icon } from '@/components/ui/Icon';
+import { InlineError } from '@/components/ui/InlineError';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Tap } from '@/components/ui/Tap';
+import { colors, display, font, space } from '@/constants/theme';
+import { goBack } from '@/lib/nav';
+import { sportName } from '@/lib/homeView';
+import { formatShortDate, rupees } from '@/lib/format';
+import { feeLines, paidAt, paymentsSummary, sortPayments } from '@/lib/paymentsView';
 
-// Payments.dc.html. The artboard has an export button in the header; there is
-// no export endpoint, so it is dropped rather than faked — the footer note
-// says where receipts actually come from.
+const joinDot = (...p: (string | undefined)[]) => p.filter(Boolean).join(' · ');
+const paidStamp = (inv: Invoice) =>
+  new Date(paidAt(inv)).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
 
-const FILTERS: { key: string; label: string; match: (s: string) => boolean }[] = [
-  { key: 'all', label: 'All', match: () => true },
-  { key: 'paid', label: 'Paid', match: (s) => s === 'paid' },
-  { key: 'failed', label: 'Failed', match: (s) => s === 'failed' || s === 'created' },
-  { key: 'refunded', label: 'Refunds', match: (s) => s === 'refunded' },
-];
-
-function rupees(n: number) {
-  return `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-export default function Invoices() {
-  const router = useRouter();
-  const email = useAppSelector((s) => s.auth.user?.email);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [filter, setFilter] = useState('all');
-
-  const load = () => {
-    setLoading(true);
-    setError('');
-    getMyPayments()
-      .then(setInvoices)
-      .catch((e) => setError(e.message || 'Could not load your payments.'))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(load, []);
-
-  const totals = useMemo(() => {
-    const by = (s: string) => invoices.filter((i) => i.status === s).length;
-    return {
-      paid: rupees(invoices.filter((i) => i.status === 'paid').reduce((s, i) => s + (i.amount || 0), 0)),
-      counts: [
-        `${by('paid')} PAID`,
-        by('failed') ? `${by('failed')} FAILED` : null,
-        by('refunded') ? `${by('refunded')} REFUNDED` : null,
-      ]
-        .filter(Boolean)
-        .join(' · '),
-    };
-  }, [invoices]);
-
-  // Failed first — it is the only row with something to act on — then newest.
-  const shown = useMemo(() => {
-    const rule = FILTERS.find((f) => f.key === filter) ?? FILTERS[0];
-    return invoices
-      .filter((i) => rule.match(i.status))
-      .sort((a, b) => {
-        const rank = (s: string) => (s === 'failed' ? 0 : s === 'created' ? 1 : 2);
-        return rank(a.status) - rank(b.status) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      });
-  }, [invoices, filter]);
-
+function IdRow({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(t);
+  }, [copied]);
   return (
-    <Screen>
-      <ScreenHeader title="Payments" onBack={() => goBack(router)} />
-
-      {/* Total paid is a slab, not a footer. */}
-      <View style={{ backgroundColor: '#F97316', overflow: 'hidden' }}>
-        <Hairlines />
-        <Ghost text="₹" size={120} color="rgba(11,11,11,0.10)" style={{ right: -8, top: -22 }} />
-        <View style={{ paddingHorizontal: 16, paddingVertical: 14 }}>
-          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.18 * 9, color: 'rgba(11,11,11,0.72)' }}>
-            TOTAL PAID · ALL TIME
-          </Text>
-          {loading ? (
-            <View style={{ marginTop: 8, marginBottom: 6 }}>
-              <Skeleton h={30} w="62%" line />
-            </View>
-          ) : (
-            <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 38, lineHeight: 41, color: '#0B0B0B', marginTop: 6 }}>
-              {totals.paid}
-            </Text>
-          )}
-          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: 'rgba(11,11,11,0.72)', marginTop: 6 }}>
-            {totals.counts || 'NOTHING PAID YET'}
-          </Text>
-        </View>
+    <View style={s.idRow}>
+      <Text style={s.idLabel}>{label}</Text>
+      <View style={s.idValue}>
+        <Text selectable style={s.mono}>{value}</Text>
+        <Tap accessibilityLabel={copied ? 'Copied' : `Copy ${label.toLowerCase()} id`} onPress={() => Clipboard.setStringAsync(value).then(() => setCopied(true), () => undefined)} style={s.copy}>
+          <Icon name={copied ? 'check' : 'content_copy'} size={18} color={colors.text3} />
+        </Tap>
       </View>
-
-      <View style={{ flexDirection: 'row', gap: 6, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 11, borderBottomWidth: 1.5, borderBottomColor: 'rgba(255,255,255,0.12)' }}>
-        {FILTERS.map((f) => (
-          <Chip key={f.key} label={f.label} selected={filter === f.key} onPress={() => setFilter(f.key)} />
-        ))}
-      </View>
-
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 28 }}>
-        {loading ? (
-          <View style={{ gap: 10 }}>
-            <Skeleton h={128} />
-            <Skeleton h={128} />
-          </View>
-        ) : error ? (
-          <ErrorBlock label="Payments" message={error} onRetry={load} />
-        ) : shown.length === 0 ? (
-          <EmptyState
-            ghost="0"
-            icon="receipt"
-            title={filter === 'all' ? 'No payments yet' : 'Nothing here'}
-            message={
-              filter === 'all'
-                ? 'Entry fees you pay show up here with their status and fee breakdown.'
-                : 'No payments match this filter.'
-            }
-            cta={filter === 'all' ? 'Browse events' : undefined}
-            onCta={filter === 'all' ? () => router.push('/(tabs)/home') : undefined}
-          />
-        ) : (
-          <>
-            <View style={{ gap: 10 }}>
-              {shown.map((inv) => (
-                <InvoiceCard key={inv._id} inv={inv} />
-              ))}
-            </View>
-            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, letterSpacing: 0.12 * 8, lineHeight: 15, color: '#7d7d7d', textAlign: 'center', paddingTop: 12 }}>
-              {`RECEIPTS ARE GENERATED BY THE GATEWAY\nAND EMAILED TO ${(email || 'YOUR EMAIL').toUpperCase()}`}
-            </Text>
-          </>
-        )}
-      </ScrollView>
-    </Screen>
+    </View>
   );
 }
+
+export default function Payments() {
+  const router = useRouter();
+  const [list, setList] = useState<Invoice[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [sel, setSel] = useState<Invoice | null>(null);
+  const alive = useRef(true);
+  const latest = useRef(0);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+
+  const load = useCallback(async () => {
+    const mine = ++latest.current;
+    setFailed(false);
+    try {
+      const rows = await getMyPayments();
+      if (alive.current && mine === latest.current) setList(sortPayments(rows));
+    } catch {
+      if (alive.current && mine === latest.current) setFailed(true);
+    }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const sum = useMemo(() => paymentsSummary(list ?? []), [list]);
+
+  return (
+    <SafeAreaView style={s.screen}>
+      <TopBar title="Payments" onBack={() => goBack(router, '/(tabs)/profile')} />
+      <ScrollView contentContainerStyle={s.body}>
+        {failed ? <InlineError what="Couldn't load your payments." onRetry={load} /> : null}
+        {!list && !failed ? (
+          <View style={{ gap: 14 }}>
+            <Skeleton style={{ height: 60 }} />
+            <Skeleton style={{ height: 60 }} />
+          </View>
+        ) : null}
+        {list && list.length === 0 ? (
+          <View style={s.empty}>
+            <View style={s.emptyIcon}><Icon name="receipt_long" size={30} color={colors.text4} /></View>
+            <Text style={[display(26), { textAlign: 'center' }]}>No payments yet</Text>
+            <Text style={s.emptyLine}>Entry fees you pay show up here.</Text>
+            <Button variant="secondary" label="Find an event" onPress={() => router.push('/(tabs)/events')} style={{ marginTop: 8, height: 48, paddingHorizontal: 20 }} />
+          </View>
+        ) : null}
+        {list && list.length ? (
+          <>
+            <View style={{ gap: 6 }}>
+              <Text style={s.cap}>Total paid</Text>
+              <Text style={display(56)}>{rupees(sum.total)}</Text>
+              <Text style={s.sub}>{`${sum.count} ${sum.count === 1 ? 'entry fee' : 'entry fees'}`}</Text>
+            </View>
+            <View>
+              <SectionHeader title="Paid entries" />
+              <View style={{ marginTop: 6 }}>
+                {list.map((inv) => (
+                  <Tap key={inv._id} accessibilityLabel={inv.tournament?.name ?? 'Tournament'} onPress={() => setSel(inv)} style={s.row}>
+                    <View style={s.circle}><Icon name="receipt_long" size={20} color={colors.text3} /></View>
+                    <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
+                      <Text numberOfLines={1} style={s.name}>{inv.tournament?.name ?? 'Tournament'}</Text>
+                      <Text style={s.sub}>{joinDot(inv.category?.name, formatShortDate(paidAt(inv)))}</Text>
+                    </View>
+                    <Text style={s.amount}>{rupees(inv.amount)}</Text>
+                    <Icon name="chevron_right" size={20} color={colors.text4} />
+                  </Tap>
+                ))}
+              </View>
+            </View>
+          </>
+        ) : null}
+      </ScrollView>
+      <BottomSheet open={!!sel} onClose={() => setSel(null)}>
+        {sel ? (
+          <View style={{ gap: 16 }}>
+            <View style={{ gap: 6 }}>
+              <View style={s.paidRow}>
+                <Icon name="check_circle" variant="f" size={16} color={colors.accent} />
+                <Text style={s.paid}>{`Paid · ${paidStamp(sel)}`}</Text>
+              </View>
+              <Text style={display(30)}>{sel.tournament?.name ?? 'Tournament'}</Text>
+              <Text style={s.sub}>{joinDot(sel.category?.name, sportName(sel.tournament?.sport ?? ''))}</Text>
+            </View>
+            <View>
+              {feeLines(sel).map((l) => (
+                <View key={l.label} style={[s.fee, l.total && s.feeTotal]}>
+                  <Text style={[s.feeLabel, l.total && s.feeTotalText]}>{l.label}</Text>
+                  <Text style={[s.feeValue, l.total && s.feeTotalText]}>{l.value}</Text>
+                </View>
+              ))}
+            </View>
+            <View>
+              {sel.razorpayOrderId ? <IdRow label="Order" value={sel.razorpayOrderId} /> : null}
+              {sel.razorpayPaymentId ? <IdRow label="Payment" value={sel.razorpayPaymentId} /> : null}
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <Button
+                variant="secondary"
+                icon="mail"
+                label="Get help"
+                style={{ flex: 1 }}
+                onPress={() => { Linking.openURL(`mailto:support@kria.club?subject=${encodeURIComponent(`Payment ${sel.razorpayOrderId ?? sel._id}`)}`).catch(() => undefined); }}
+              />
+              <Button label="Done" style={{ flex: 1 }} onPress={() => setSel(null)} />
+            </View>
+          </View>
+        ) : null}
+      </BottomSheet>
+    </SafeAreaView>
+  );
+}
+
+const s = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.bg },
+  body: { paddingHorizontal: space.gutter, paddingTop: 16, paddingBottom: 32, gap: space.sectionGap },
+  cap: { fontFamily: font.semibold, fontSize: 12, color: colors.text3 },
+  sub: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line },
+  circle: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
+  name: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
+  amount: { fontFamily: font.semibold, fontSize: 14, color: colors.text, fontVariant: ['tabular-nums'] },
+  empty: { paddingTop: 48, paddingHorizontal: 12, alignItems: 'center', gap: 14 },
+  emptyIcon: { width: 72, height: 72, borderRadius: 36, borderWidth: 1.5, borderColor: colors.lineStrong, alignItems: 'center', justifyContent: 'center' },
+  emptyLine: { fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: colors.text3, textAlign: 'center' },
+  paidRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  paid: { fontFamily: font.semibold, fontSize: 12, color: colors.text2 },
+  fee: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 11, borderTopWidth: 1, borderTopColor: colors.line },
+  feeTotal: { paddingVertical: 12 },
+  feeLabel: { fontFamily: font.regular, fontSize: 13, color: colors.text3 },
+  feeValue: { fontFamily: font.regular, fontSize: 13, color: colors.text, fontVariant: ['tabular-nums'] },
+  feeTotalText: { fontFamily: font.bold, fontSize: 15, color: colors.text },
+  idRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingVertical: 6, borderTopWidth: 1, borderTopColor: colors.line },
+  idLabel: { fontFamily: font.regular, fontSize: 13, color: colors.text3 },
+  idValue: { flexDirection: 'row', alignItems: 'center', gap: 2, flexShrink: 1 },
+  mono: { fontFamily: font.mono, fontSize: 12, color: colors.text, flexShrink: 1 },
+  copy: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+});

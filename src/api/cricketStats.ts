@@ -5,8 +5,9 @@ export interface CricketPlayerStats {
   registrationId: string;
   playerName?: string;
   teamName?: string;
-  matches?: number;
   batting: {
+    matches: number;
+    innings: number;
     runs: number;
     balls: number;
     fours: number;
@@ -15,10 +16,11 @@ export interface CricketPlayerStats {
     highest?: number;
   };
   bowling: {
+    matches: number;
+    innings: number;
     legalBalls: number;
     runsConceded: number;
     wickets: number;
-    maidens?: number;
     bestFigureWickets?: number;
     bestFigureRuns?: number;
   };

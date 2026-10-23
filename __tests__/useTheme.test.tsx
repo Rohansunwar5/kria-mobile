@@ -1,38 +1,27 @@
 import { Text } from 'react-native';
 import { render } from '@testing-library/react-native';
-import { ThemeProvider, useTheme } from '../src/lib/theme/ThemeProvider';
+import { useTheme } from '../src/lib/theme';
 import { dark } from '../src/lib/theme/palette';
 
 function Probe() {
-  const t = useTheme();
-  return <Text>{t.bg}</Text>;
+  return <Text>{useTheme().bg}</Text>;
 }
 
 describe('useTheme', () => {
-  it('gives a consumer the dark palette under the provider', () => {
-    const { getByText } = render(
-      <ThemeProvider><Probe /></ThemeProvider>
-    );
-    expect(getByText(dark.bg)).toBeTruthy();
-  });
-
-  // Falling back rather than throwing is deliberate: the provider mounts once
-  // at the root, and every one of the 70-odd existing test files renders
-  // components without it. Throwing would mean re-wrapping all of them to buy
-  // nothing — dark IS the app's only palette today.
-  it('falls back to dark with no provider at all', () => {
+  it('returns the dark palette with no provider', () => {
     const { getByText } = render(<Probe />);
     expect(getByText(dark.bg)).toBeTruthy();
   });
 
-  it('returns the same object identity across renders, so styles can be memoised', () => {
+  it('returns the same object across renders', () => {
     const seen: unknown[] = [];
     function Capture() {
       seen.push(useTheme());
       return null;
     }
-    const { rerender } = render(<ThemeProvider><Capture /></ThemeProvider>);
-    rerender(<ThemeProvider><Capture /></ThemeProvider>);
+    const { rerender } = render(<Capture />);
+    rerender(<Capture />);
     expect(seen[0]).toBe(seen[1]);
+    expect(seen[0]).toBe(dark);
   });
 });

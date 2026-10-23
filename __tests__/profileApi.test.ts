@@ -1,7 +1,8 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
 import { getPublicPlayer, getTeam, getTeamRoster, listAnnouncements } from '@/api/profileApi';
-import { changePassword, sendContactMessage, registerFcmToken, unregisterFcmToken } from '@/api/settings';
+import { withdrawEntry } from '@/api/tournaments';
+import { changePassword, sendContactMessage } from '@/api/settings';
 
 describe('public profile and team api', () => {
   let mock: MockAdapter;
@@ -76,21 +77,39 @@ describe('settings api', () => {
     await expect(changePassword('bad', 'new1')).rejects.toThrow('Current password is incorrect.');
   });
 
-  it('sendContactMessage posts the lead', async () => {
+  it('sendContactMessage posts the fixed payload', async () => {
     let body: any;
     mock.onPost('/contact').reply((cfg) => {
       body = JSON.parse(cfg.data);
       return [200, { data: {} }];
     });
-    await sendContactMessage({ name: 'R', email: 'r@k.club', message: 'help' });
-    expect(body.message).toBe('help');
+    await sendContactMessage({ fullName: 'Priya Nair', email: 'p@x.in', message: 'The app froze on…', phone: '98' });
+    expect(body).toEqual({
+      fullName: 'Priya Nair',
+      email: 'p@x.in',
+      subject: 'Help from the player app',
+      message: 'The app froze on…',
+      iss: 'Kria player app',
+      phoneNumber: '98',
+    });
+    await sendContactMessage({ fullName: 'P', email: 'p@x.in', message: 'm' });
+    expect(body).not.toHaveProperty('phoneNumber');
   });
 
-  it('registers and unregisters a push token', async () => {
-    mock.onPost('/player/auth/fcm-token').reply(200, { data: {} });
-    mock.onDelete('/player/auth/fcm-token').reply(200, { data: {} });
-    await expect(registerFcmToken('tok')).resolves.toBeUndefined();
-    await expect(unregisterFcmToken('tok')).resolves.toBeUndefined();
+  it('changePassword maps 401 to the wrong-password message', async () => {
+    mock.onPost('/player/auth/change-password').reply(401, { message: 'Unauthorized' });
+    await expect(changePassword('bad', 'new1')).rejects.toThrow('Current password is incorrect.');
+  });
+
+  it('changePassword surfaces other server messages', async () => {
+    mock.onPost('/player/auth/change-password').reply(422, { message: 'x' });
+    await expect(changePassword('a', 'b')).rejects.toThrow('x');
+  });
+
+  it('withdrawEntry posts to the withdraw route', async () => {
+    mock.onPost('/registrations/r1/withdraw').reply(200, { data: {} });
+    await expect(withdrawEntry('r1')).resolves.toBeUndefined();
+    expect(mock.history.post[0].url).toBe('/registrations/r1/withdraw');
   });
 });
 

@@ -6,7 +6,7 @@ import { join, relative } from 'path';
 // `style={({ pressed }) => ...}` is silently dropped on a phone — no layout, no
 // fill, and a button whose ink matches the page simply vanishes. Web passes it
 // straight through, so it looks right in a browser and nowhere else. Press
-// feedback goes through `usePress()` in src/lib/motion.ts instead.
+// feedback goes through `Tap` (src/components/ui/Tap.tsx) instead.
 const SRC = join(__dirname, '..', 'src');
 
 function tsxFiles(dir: string): string[] {

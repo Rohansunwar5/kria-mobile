@@ -9,12 +9,16 @@ const ICONS = {
   expand_more: 'o', chevron_right: 'o', location_on: 'o', refresh: 'o',
   // Filled variants are the award badge glyphs (AwardBadge: FILL 1).
   sports_tennis: 'of', sports_cricket: 'of', table_restaurant: 'of', sports_soccer: 'of',
-  sports_kabaddi: 'of', sports: 'of', emoji_events: 'of', workspace_premium: 'o',
+  sports_kabaddi: 'of', sports: 'of', emoji_events: 'of', workspace_premium: 'of',
   qr_code_2: 'o', person_check: 'o', trending_up: 'o',
   arrow_back: 'o', close: 'o', ios_share: 'o', content_copy: 'o', info: 'o', swipe_vertical: 'o',
   undo: 'o', block: 'o', edit: 'o', remove: 'o', error: 'o', search: 'o', more_horiz: 'o',
-  gavel: 'o', settings: 'o', photo_camera: 'o', logout: 'o', receipt_long: 'o', assignment: 'o', push_pin: 'o', forum: 'o', campaign: 'o', account_tree: 'o', sensors: 'o',
+  gavel: 'of', settings: 'o', photo_camera: 'o', logout: 'o', receipt_long: 'o', assignment: 'o', push_pin: 'o', forum: 'o', campaign: 'o', account_tree: 'o', sensors: 'o',
   sports_baseball: 'o',
+  mail: 'o', lock: 'o', visibility: 'o', visibility_off: 'o', radio_button_unchecked: 'o', calendar_today: 'o',
+  check_circle: 'of',
+  // Award glyphs (filled).
+  star: 'f', counter_3: 'f', local_fire_department: 'f', cleaning_services: 'f', crown: 'f', bolt: 'f', handshake: 'f', fitness_center: 'f', counter_1: 'f',
 };
 const VARIANT = { o: 'wght300', f: 'fill1', b: 'wght500' };
 const base = 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined';

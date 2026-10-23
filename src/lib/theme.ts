@@ -20,7 +20,10 @@ export const fonts = {
   dataBold: 'JetBrainsMono_700Bold',
 };
 
-// Single import path for the token layer, alongside the legacy `colors` and
-// `fonts` above (left untouched — 8 files import those).
-export { useTheme, useThemeMode, ThemeProvider, THEME_MODE_KEY, type ThemeMode } from './theme/ThemeProvider';
-export { dark, light, type Palette, type ThemeName } from './theme/palette';
+// Single import path for the token layer. The app is dark-only (DESIGN.md v1.1).
+import { dark, type Palette } from './theme/palette';
+
+export { dark, type Palette };
+export function useTheme(): Palette {
+  return dark;
+}

@@ -7,7 +7,9 @@ export interface Invoice {
   /** created | paid | failed | refunded */
   status: string;
   razorpayOrderId?: string;
+  razorpayPaymentId?: string;
   createdAt: string;
+  updatedAt?: string;
   tournamentId?: string;
   categoryId?: string;
   baseAmount?: number;

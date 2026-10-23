@@ -1,214 +1,101 @@
-import { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Switch, KeyboardAvoidingView, Platform } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { goBack } from '@/lib/nav';
-import { Screen } from '@/components/Screen';
-import { Icon, type IconName } from '@/components/icons';
-import { AuthInput } from '@/components/auth/AuthInput';
-import { ErrorBlock } from '@/components/states';
+import { colors, font, radius, space } from '@/constants/theme';
+import { Button } from '@/components/ui/Button';
+import { FooterBar, TopBar } from '@/components/ui/Bars';
+import { Icon } from '@/components/ui/Icon';
+import { Tap } from '@/components/ui/Tap';
 import { useAppSelector } from '@/store/hooks';
-import { sendContactMessage, registerFcmToken, unregisterFcmToken } from '@/api/settings';
-import { getPushToken } from '@/lib/pushToken';
-import { useTheme } from '@/lib/theme';
-import { Section, LBL } from '@/components/settings/Section';
-import AppearanceSection from '@/components/settings/AppearanceSection';
-
-function Row({
-  icon,
-  title,
-  detail,
-  onPress,
-}: {
-  icon: IconName;
-  title: string;
-  detail?: string;
-  onPress: () => void;
-}) {
-  const theme = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      onPress={onPress}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 13, paddingVertical: 11, minHeight: 52 }}
-    >
-      <Icon name={icon} size={17} color={theme.brandInk} strokeWidth={1.9} />
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 14, lineHeight: 17, color: theme.text }}>{title}</Text>
-        {detail ? (
-          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 8, letterSpacing: 0.1 * 8, textTransform: 'uppercase', color: theme.textFaint, marginTop: 4 }}>
-            {detail}
-          </Text>
-        ) : null}
-      </View>
-      <Icon name="chevron-right" size={15} color={theme.textFaint} strokeWidth={2.6} />
-    </Pressable>
-  );
-}
-
-function Button({ label, onPress, busy, disabled }: { label: string; onPress: () => void; busy?: boolean; disabled?: boolean }) {
-  const theme = useTheme();
-  const off = busy || disabled;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ disabled: !!off }}
-      disabled={off}
-      onPress={onPress}
-      style={{
-        height: 46,
-        borderRadius: 5,
-        backgroundColor: off ? theme.lineFaint : theme.brand,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 15, letterSpacing: 0.04 * 15, color: off ? theme.textFaint : theme.onBrand }}>
-        {busy ? 'Working…' : label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function Note({ text, tone }: { text: string; tone: 'ok' | 'bad' }) {
-  const theme = useTheme();
-  return (
-    <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: tone === 'ok' ? theme.openInk : theme.failInk, marginTop: 8 }}>
-      {text}
-    </Text>
-  );
-}
+import { sendContactMessage } from '@/api/settings';
 
 export default function Settings() {
-  const theme = useTheme();
   const router = useRouter();
   const user = useAppSelector((s) => s.auth.user);
-
-  const [push, setPush] = useState(true);
-  const [pushNote, setPushNote] = useState<string | null>(null);
-
   const [message, setMessage] = useState('');
-  const [msgBusy, setMsgBusy] = useState(false);
-  const [msgNote, setMsgNote] = useState<{ text: string; tone: 'ok' | 'bad' } | null>(null);
+  const [focus, setFocus] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<{ text: string; ok: boolean } | null>(null);
+  const inFlight = useRef(false);
+  const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
 
-  const togglePush = async (on: boolean) => {
-    setPush(on);
-    setPushNote(null);
-    const token = await getPushToken();
-    if (!token) {
-      // No token means no permission or no device — say so instead of
-      // pretending the switch did something.
-      setPush(false);
-      setPushNote('Allow notifications for this app in your device settings first.');
-      return;
-    }
+  const submit = async () => {
+    if (inFlight.current) return;
+    setNote(null);
+    const text = message.trim();
+    if (text.length < 10) return setNote({ text: 'Tell us a little more so we can help.', ok: false });
+    inFlight.current = true;
+    setBusy(true);
     try {
-      if (on) await registerFcmToken(token);
-      else await unregisterFcmToken(token);
-    } catch {
-      setPush(!on);
-      setPushNote('Could not reach the server. Try again in a moment.');
-    }
-  };
-
-  const submitMessage = async () => {
-    setMsgNote(null);
-    if (message.trim().length < 10) {
-      setMsgNote({ text: 'Tell us a little more so we can help.', tone: 'bad' });
-      return;
-    }
-    setMsgBusy(true);
-    try {
-      await sendContactMessage({
-        name: user ? `${user.firstName} ${user.lastName}`.trim() : 'Player',
-        email: user?.email || '',
-        phone: user?.phone,
-        message: message.trim(),
-      });
+      await sendContactMessage({ fullName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(), email: user?.email ?? '', message: text, phone: user?.phone });
+      if (!alive.current) return;
       setMessage('');
-      setMsgNote({ text: 'Sent. We will reply by email.', tone: 'ok' });
-    } catch (e: any) {
-      setMsgNote({ text: e.message, tone: 'bad' });
+      setNote({ text: "Sent. We'll reply by email.", ok: true });
+    } catch (e) {
+      if (alive.current) setNote({ text: (e as Error).message, ok: false });
     } finally {
-      setMsgBusy(false);
+      inFlight.current = false;
+      if (alive.current) setBusy(false);
     }
   };
 
   return (
-    <Screen>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, borderBottomWidth: 1.5, borderBottomColor: theme.lineSoft }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          onPress={() => goBack(router)}
-          hitSlop={8}
-          style={{ width: 38, height: 38, borderRadius: 4, backgroundColor: theme.fill, borderWidth: 1.5, borderColor: theme.lineSoft, alignItems: 'center', justifyContent: 'center' }}
-        >
-          <Icon name="chevron-left" size={19} color={theme.text} strokeWidth={2.3} />
-        </Pressable>
-        <Text style={{ flex: 1, fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 17, color: theme.text }}>Settings</Text>
-      </View>
-
+    <SafeAreaView style={s.screen}>
+      <TopBar title="Settings" onBack={() => goBack(router, '/(tabs)/profile')} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={{ paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
-          <Section title="Notifications">
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 13, paddingVertical: 12, minHeight: 52 }}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 14, color: theme.text }}>Match and auction alerts</Text>
-                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, textTransform: 'uppercase', color: theme.textFaint, marginTop: 4 }}>
-                  Draw published · auction starting · your match
-                </Text>
+        <ScrollView contentContainerStyle={s.body} keyboardShouldPersistTaps="handled">
+          <Text style={s.h}>Account</Text>
+          <View style={{ marginTop: 12 }}>
+            <View style={s.row}>
+              <Icon name="mail" size={22} color={colors.text3} />
+              <View style={s.col}>
+                <Text style={s.small}>Signed in as</Text>
+                <Text style={s.strong}>{user?.email}</Text>
               </View>
-              <Switch
-                value={push}
-                onValueChange={togglePush}
-                trackColor={{ false: theme.line, true: theme.brand }}
-                thumbColor={theme.onDark}
-              />
             </View>
-            {pushNote ? (
-              <View style={{ paddingHorizontal: 13, paddingBottom: 12 }}>
-                <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, color: theme.failInk }}>{pushNote}</Text>
-              </View>
-            ) : null}
-          </Section>
+            <Tap scale={0.99} accessibilityLabel="Change password" onPress={() => router.push('/profile/change-password')} style={s.row}>
+              <Icon name="lock" size={22} color={colors.text3} />
+              <Text style={[s.strong, { flex: 1 }]}>Change password</Text>
+              <Icon name="chevron_right" size={20} color={colors.disabled} />
+            </Tap>
+          </View>
 
-          {/* Security lives on its own screen — ChangePassword.dc.html has a
-              strength meter and rule list that will not fit in a settings row. */}
-          <Section title="Security">
-            <Row
-              icon="lock"
-              title="Change password"
-              detail="Other devices are signed out"
-              onPress={() => router.push('/profile/change-password')}
-            />
-          </Section>
-
-          <AppearanceSection />
-
-          <Section title="Get help">
-            <View style={{ padding: 13 }}>
-              <AuthInput
-                label="What do you need?"
-                value={message}
-                onChangeText={setMessage}
-                multiline
-                numberOfLines={4}
-                placeholder="Tell us what went wrong"
-              />
-              <Button label="Send message" onPress={submitMessage} busy={msgBusy} disabled={!message.trim()} />
-              {msgNote ? <Note text={msgNote.text} tone={msgNote.tone} /> : null}
-            </View>
-          </Section>
-
-          {!user ? (
-            <View style={{ padding: 16 }}>
-              <ErrorBlock label="Not signed in" message="Sign in to change your password or contact support." />
-            </View>
-          ) : null}
+          <Text style={[s.h, { marginTop: space.sectionGap }]}>Get help</Text>
+          <Text style={[s.small, { marginTop: 4 }]}>Tell us what went wrong. We reply to {user?.email}.</Text>
+          <Text style={s.label}>Message</Text>
+          <TextInput
+            accessibilityLabel="Message"
+            multiline
+            value={message}
+            onChangeText={setMessage}
+            onFocus={() => setFocus(true)}
+            onBlur={() => setFocus(false)}
+            placeholder="What happened, and where in the app?"
+            placeholderTextColor={colors.text4}
+            style={[s.field, focus && { borderColor: colors.accent }]}
+          />
+          <Text style={[s.small, { color: colors.text4 }]}>At least 10 characters</Text>
+          {note ? <Text style={[s.small, { color: note.ok ? colors.text2 : colors.error, fontSize: 13 }]}>{note.text}</Text> : null}
         </ScrollView>
+        <FooterBar>
+          <Button variant="secondary" label="Send message" busyLabel="Sending" busy={busy} disabled={!message.trim()} onPress={submit} style={{ flex: 1 }} />
+        </FooterBar>
       </KeyboardAvoidingView>
-    </Screen>
+    </SafeAreaView>
   );
 }
+
+const s = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.bg },
+  body: { paddingHorizontal: space.gutter, paddingTop: 20, paddingBottom: 24, gap: 0 },
+  h: { fontFamily: font.semibold, fontSize: 17, color: colors.text },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, borderBottomWidth: 1, borderBottomColor: colors.line },
+  col: { flex: 1, gap: 2 },
+  small: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
+  strong: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
+  label: { fontFamily: font.semibold, fontSize: 13, color: colors.text2, marginTop: space.headerToContent, marginBottom: 8 },
+  field: { height: 132, textAlignVertical: 'top', paddingHorizontal: 16, paddingVertical: 14, marginBottom: 8, borderRadius: radius.input, backgroundColor: colors.surface1, borderWidth: 1, borderColor: colors.surface3, color: colors.text, fontFamily: font.regular, fontSize: 15 },
+});

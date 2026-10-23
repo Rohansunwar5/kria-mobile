@@ -19,7 +19,16 @@ export interface PublicHistoryEntry {
   profile?: { skillLevel?: string };
   stats?: { matchesPlayed?: number; matchesWon?: number; pointsContributed?: number };
   createdAt: string;
-  tournament?: { _id: string; name: string; sport?: string };
+  tournament?: {
+    _id: string;
+    name: string;
+    sport?: string;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+    venue?: { name?: string; city?: string };
+    bannerImage?: string;
+  };
   category?: { _id: string; name: string; gender?: string } | null;
   team?: { _id: string; name: string; primaryColor?: string } | null;
 }

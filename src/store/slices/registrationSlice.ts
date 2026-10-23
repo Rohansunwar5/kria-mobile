@@ -96,22 +96,8 @@ export interface TournamentHistoryEntry {
     createdAt: string;
 }
 
-interface RegisterPayload {
-    tournamentId: string;
-    categoryId: string;
-    profile: {
-        firstName: string;
-        lastName: string;
-        age: number;
-        gender: string;
-        phone: string;
-        skillLevel?: string;
-    };
-}
-
 interface RegistrationState {
     categories: Category[];
-    myRegistrations: Registration[];
     categoryRegistrations: Registration[];
     tournamentHistory: TournamentHistoryEntry[];
     historyLoading: boolean;
@@ -121,7 +107,6 @@ interface RegistrationState {
 
 const initialState: RegistrationState = {
     categories: [],
-    myRegistrations: [],
     categoryRegistrations: [],
     tournamentHistory: [],
     historyLoading: false,
@@ -145,47 +130,6 @@ export const fetchTournamentCategories = createAsyncThunk(
             // Assuming standard API response wrapper { success, data: { data: [...] } }
             const data = response.data?.data?.data || response.data?.data || [];
             return Array.isArray(data) ? data : [];
-        } catch (error) {
-            return rejectWithValue(extractError(error));
-        }
-    }
-);
-
-// Register a player for a category (Player Only)
-export const registerForCategory = createAsyncThunk(
-    'registration/register',
-    async (registrationData: RegisterPayload, { rejectWithValue }) => {
-        try {
-            const response = await API.post('/registrations/register', registrationData);
-            const data = response.data?.data?.data || response.data?.data;
-            return data;
-        } catch (error) {
-            return rejectWithValue(extractError(error));
-        }
-    }
-);
-
-// Fetch a player's own registrations (Player Only)
-export const fetchMyRegistrations = createAsyncThunk(
-    'registration/fetchMyRegistrations',
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await API.get('/registrations/my-registrations');
-            const data = response.data?.data?.data || response.data?.data || [];
-            return Array.isArray(data) ? data : [];
-        } catch (error) {
-            return rejectWithValue(extractError(error));
-        }
-    }
-);
-
-// Withdraw a registration (Player Only)
-export const withdrawRegistration = createAsyncThunk(
-    'registration/withdraw',
-    async (registrationId: string, { rejectWithValue }) => {
-        try {
-            await API.post(`/registrations/${registrationId}/withdraw`);
-            return registrationId;
         } catch (error) {
             return rejectWithValue(extractError(error));
         }
@@ -244,54 +188,6 @@ const registrationSlice = createSlice({
             state.categories = action.payload;
         });
         builder.addCase(fetchTournamentCategories.rejected, (state, action) => {
-            state.isLoading = false;
-            state.error = action.payload as string;
-        });
-
-        // REGISTER
-        builder.addCase(registerForCategory.pending, (state) => {
-            state.isLoading = true;
-            state.error = null;
-        });
-        builder.addCase(registerForCategory.fulfilled, (state, action) => {
-            state.isLoading = false;
-            if (action.payload) {
-                state.myRegistrations.unshift(action.payload);
-            }
-        });
-        builder.addCase(registerForCategory.rejected, (state, action) => {
-            state.isLoading = false;
-            state.error = action.payload as string;
-        });
-
-        // FETCH MY REGISTRATIONS
-        builder.addCase(fetchMyRegistrations.pending, (state) => {
-            state.isLoading = true;
-            state.error = null;
-        });
-        builder.addCase(fetchMyRegistrations.fulfilled, (state, action) => {
-            state.isLoading = false;
-            state.myRegistrations = action.payload;
-        });
-        builder.addCase(fetchMyRegistrations.rejected, (state, action) => {
-            state.isLoading = false;
-            state.error = action.payload as string;
-        });
-
-        // WITHDRAW REGISTRATION
-        builder.addCase(withdrawRegistration.pending, (state) => {
-            state.isLoading = true;
-            state.error = null;
-        });
-        builder.addCase(withdrawRegistration.fulfilled, (state, action) => {
-            state.isLoading = false;
-            const updatedId = action.payload;
-            // Optimistically update status to withdrawn
-            state.myRegistrations = state.myRegistrations.map(reg =>
-                reg._id === updatedId ? { ...reg, status: 'withdrawn' } : reg
-            );
-        });
-        builder.addCase(withdrawRegistration.rejected, (state, action) => {
             state.isLoading = false;
             state.error = action.payload as string;
         });

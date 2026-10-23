@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { getTournament, getTournamentCategories, getTournamentTeams, getMyEntries, registerEntry, type EntryProfile } from '@/api/tournaments';
+import { getTournament, getTournamentCategories, getTournamentTeams, getMyEntries, registerEntry, withdrawEntry, type EntryProfile } from '@/api/tournaments';
 
 describe('tournament api (details screen)', () => {
   let mock: MockAdapter;
@@ -34,5 +34,15 @@ describe('tournament api (details screen)', () => {
     const body = JSON.parse(mock.history.post[0].data);
     expect(body).toEqual({ tournamentId: 't1', categoryId: 'c1', profile });
     expect(body).not.toHaveProperty('basePrice');
+  });
+
+  it('withdrawEntry throws the server message on a 400', async () => {
+    mock.onPost('/registrations/r1/withdraw').reply(400, { message: 'Cannot withdraw after being assigned to a team.' });
+    await expect(withdrawEntry('r1')).rejects.toThrow('Cannot withdraw after being assigned to a team.');
+  });
+
+  it('withdrawEntry falls back when the server sends no message', async () => {
+    mock.onPost('/registrations/r1/withdraw').networkError();
+    await expect(withdrawEntry('r1')).rejects.toThrow('Could not withdraw this entry.');
   });
 });

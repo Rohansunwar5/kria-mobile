@@ -1,281 +1,237 @@
-import { useEffect, useState } from 'react';
-import { ScrollView, View, Text, TextInput, Pressable } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Screen } from '@/components/Screen';
-import { claimQuickMatchSlot, type QuickMatch } from '@/api/quickMatch';
-import { claimKnockoutGuest, joinQuickKnockout, resolveQuickCode, type QuickKnockout } from '@/api/quickKnockout';
-import { useAppSelector } from '@/store/hooks';
-import { freeSlots } from '@/lib/quickMatchView';
+import { claimQuickMatchSlot } from '@/api/quickMatch';
+import { claimKnockoutGuest, joinQuickKnockout, resolveQuickCode, type QuickCode } from '@/api/quickKnockout';
+import { FooterBar, TopBar } from '@/components/ui/Bars';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Tap } from '@/components/ui/Tap';
+import { colors, display, font, space } from '@/constants/theme';
+import { joinView } from '@/lib/joinView';
 import { goBack } from '@/lib/nav';
-import { formatLabel, teamPlayers } from '@/lib/quickKnockoutView';
+import { useAppSelector } from '@/store/hooks';
 
-/** The server's code alphabet — no 0, O, 1 or I, because codes get read aloud
- *  and retyped. Anything else a keyboard offers is dropped on entry. */
-const CODE_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-const CODE_LENGTH = 6;
+const FALLBACK = '/(tabs)/compete?seg=matches';
 
-const LBL = {
-  fontFamily: 'JetBrainsMono_700Bold' as const,
-  fontSize: 9,
-  letterSpacing: 0.1 * 9,
-  textTransform: 'uppercase' as const,
-  color: '#7d7d7d',
-};
+const serverMessage = (err: unknown, fallback: string) =>
+  (err as { response?: { data?: { message?: string } } })?.response?.data?.message || fallback;
 
-const normalise = (input: string) =>
-  input
-    .toUpperCase()
-    .split('')
-    .filter((ch) => CODE_ALPHABET.includes(ch))
-    .join('')
-    .slice(0, CODE_LENGTH);
-
-const KNOCKOUT_CLOSED: Record<Exclude<QuickKnockout['status'], 'waiting'>, string> = {
-  live: 'This knockout has already started.',
-  completed: 'This knockout has finished.',
-  cancelled: 'This knockout was cancelled.',
-};
-
-const serverMessage = (err: unknown, fallback: string) => {
-  const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-  return message ? message : fallback;
-};
-
-export default function JoinQuickMatchScreen() {
-  // Compete › Matches hands over a complete code; look it up straight away.
-  const params = useLocalSearchParams<{ code?: string }>();
-  const [code, setCode] = useState(normalise(params.code ?? ''));
-  const [match, setMatch] = useState<QuickMatch | null>(null);
+export default function JoinScreen() {
+  const { code = '' } = useLocalSearchParams<{ code?: string }>();
+  const user = useAppSelector((s) => s.auth.user);
+  const [found, setFound] = useState<QuickCode | null>(null);
+  const [slotId, setSlotId] = useState<string | null>(null);
+  const [teamId, setTeamId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
+  const inFlight = useRef(false);
+  const alive = useRef(true);
+  const latest = useRef(0);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
 
-  const { user } = useAppSelector((s) => s.auth);
-  const [knockout, setKnockout] = useState<QuickKnockout | null>(null);
-  const [teamId, setTeamId] = useState<string | null>(null);
-
-  const lookup = async () => {
-    if (code.length < CODE_LENGTH) return;
-    setBusy(true);
-    setProblem('');
-    setTeamId(null);
+  const lookup = useCallback(async () => {
+    const mine = ++latest.current;
     try {
-      const found = await resolveQuickCode(code);
-      setMatch(found.kind === 'match' ? found.data : null);
-      setKnockout(found.kind === 'knockout' ? found.data : null);
+      const res = await resolveQuickCode(code);
+      if (alive.current && mine === latest.current) setFound(res);
     } catch (err) {
-      setMatch(null);
-      setKnockout(null);
-      setProblem(serverMessage(err, 'No match or knockout found for that code.'));
-    } finally {
-      setBusy(false);
+      if (alive.current && mine === latest.current) setProblem(serverMessage(err, 'No match or knockout found for that code.'));
     }
-  };
+  }, [code]);
 
   useEffect(() => {
-    if (params.code) lookup();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!code) router.replace(FALLBACK as never);
+    else lookup();
+  }, [code, lookup]);
 
-  const enterKnockout = async (action: () => Promise<QuickKnockout>) => {
+  /** One request at a time. `onFail` runs after a rejection, before the message shows. */
+  const run = async (
+    action: () => Promise<{ _id: string }>,
+    path: '/quick/[id]' | '/knockout/[id]',
+    failMsg: string,
+    onFail?: () => Promise<void>,
+  ) => {
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     setProblem('');
     try {
-      const joined = await action();
-      router.replace({ pathname: '/knockout/[id]', params: { id: joined._id } });
+      const res = await action();
+      if (alive.current) router.replace({ pathname: path, params: { id: res._id } });
     } catch (err) {
-      setProblem(serverMessage(err, 'Could not join that knockout.'));
+      const message = serverMessage(err, failMsg);
+      await onFail?.();
+      if (alive.current) setProblem(message);
     } finally {
-      setBusy(false);
+      inFlight.current = false;
+      if (alive.current) setBusy(false);
     }
   };
 
-  const claim = async (slotId: string) => {
-    setBusy(true);
-    setProblem('');
-    try {
-      const joined = await claimQuickMatchSlot(code, slotId);
-      router.replace({ pathname: '/quick/[id]', params: { id: joined._id } });
-    } catch (err) {
-      // Every one of these is reachable: the match may have completed, the
-      // player may already be in it, or another joiner may have taken the slot
-      // between the lookup and the tap.
-      const message = serverMessage(err, 'Could not claim that slot.');
+  const view = found && joinView(found, user?._id ?? '');
+  const openId = found?.data._id ?? '';
+  const openRoute = () =>
+    router.replace({ pathname: view?.kind === 'match' ? '/quick/[id]' : '/knockout/[id]', params: { id: openId } });
+
+  // The spot may be gone by now: clear the pick and re-read, so it shows Taken.
+  const take = () =>
+    slotId &&
+    run(() => claimQuickMatchSlot(code, slotId), '/quick/[id]', 'Could not claim that slot.', async () => {
+      if (alive.current) setSlotId(null);
       await lookup();
-      setProblem(message);
-    } finally {
-      setBusy(false);
-    }
-  };
+    });
+  const join = () =>
+    run(() => (teamId ? joinQuickKnockout(code, teamId) : joinQuickKnockout(code)), '/knockout/[id]', 'Could not join that knockout.');
+  const claimGuest = (key: string) => run(() => claimKnockoutGuest(code, key), '/knockout/[id]', 'Could not join that knockout.');
 
-  const open = match ? freeSlots(match) : [];
+  let footer: React.ReactNode = null;
+  if (view?.mine) footer = <Button label="Open" onPress={openRoute} />;
+  else if (view?.kind === 'match' && !view.full) {
+    footer = <Button label="Take this spot" busyLabel="Taking this spot" busy={busy} disabled={!slotId} onPress={take} />;
+  } else if (view?.kind === 'knockout' && !view.closed) {
+    footer = <Button label={`Join as ${user ? `${user.firstName} ${user.lastName}` : 'yourself'}`} busy={busy} onPress={join} />;
+  }
 
   return (
-    <Screen>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 48 }}>
-        <Pressable onPress={() => goBack(router, '/quick')} hitSlop={12}>
-          <Text style={{ ...LBL, letterSpacing: 0.22 * 9 }}>Back</Text>
-        </Pressable>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 28, color: '#fff', marginTop: 10 }}>
-          Join a match
-        </Text>
+    <SafeAreaView style={s.screen}>
+      <TopBar title="Join" onBack={() => goBack(router, FALLBACK)} />
+      <ScrollView contentContainerStyle={s.body}>
+        {!view && !problem ? <Skeleton style={{ height: 120 }} /> : null}
+        {!view && problem ? <Text style={s.error}>{problem}</Text> : null}
+        {view ? (
+          <>
+            <View style={{ gap: 8 }}>
+              <Text style={s.kicker}>{view.kicker}</Text>
+              <Text style={display(34)}>{view.title}</Text>
+              <View style={s.formatRow}>
+                <Text style={s.format}>{view.kind === 'match' ? view.format : `${view.format} · hosted by ${view.host}`}</Text>
+                {view.kind === 'match' ? <Text style={s.chip}>{view.code}</Text> : null}
+              </View>
+              {view.kind === 'knockout' ? (
+                <Text style={s.format}>{`${view.count} ${view.count === 1 ? 'player' : 'players'} in so far`}</Text>
+              ) : null}
+            </View>
 
-        <Text style={{ ...LBL, marginTop: 18 }}>Six-character code</Text>
-        <TextInput
-          value={code}
-          onChangeText={(text) => setCode(normalise(text))}
-          placeholder="ABC234"
-          placeholderTextColor="#5a5a5a"
-          autoCapitalize="characters"
-          autoCorrect={false}
-          style={{
-            fontFamily: 'JetBrainsMono_700Bold',
-            fontSize: 26,
-            letterSpacing: 0.2 * 26,
-            color: '#fff',
-            borderWidth: 1.5,
-            borderColor: 'rgba(255,255,255,0.14)',
-            borderRadius: 4,
-            paddingHorizontal: 12,
-            paddingVertical: 12,
-            marginTop: 6,
-          }}
-        />
-
-        <Pressable
-          onPress={lookup}
-          disabled={busy || code.length < CODE_LENGTH}
-          style={{
-            marginTop: 14,
-            backgroundColor: '#F97316',
-            opacity: busy || code.length < CODE_LENGTH ? 0.5 : 1,
-            borderRadius: 4,
-            paddingVertical: 14,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
-            Find
-          </Text>
-        </Pressable>
-
-        {problem ? (
-          <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: '#FF4438', marginTop: 16 }}>
-            {problem}
-          </Text>
-        ) : null}
-
-        {match ? (
-          <View style={{ marginTop: 26 }}>
-            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 20, color: '#fff' }}>
-              {`${match.sides[0].name} v ${match.sides[1].name}`}
-            </Text>
-
-            {open.length === 0 ? (
-              <Text style={{ ...LBL, marginTop: 10 }}>Every slot in this match is taken.</Text>
-            ) : (
+            {view.mine ? (
+              <Text style={s.note}>{view.kind === 'match' ? "You're in this match" : "You're in"}</Text>
+            ) : view.kind === 'match' ? (
               <>
-                <Text style={{ ...LBL, marginTop: 12 }}>Pick a slot</Text>
-                {match.sides.map((side) => (
-                  <View key={side.sideId} style={{ marginTop: 12 }}>
-                    <Text style={LBL}>{side.name}</Text>
-                    {side.slots.map((slot) => {
-                      const taken = Boolean(slot.playerId);
+                <View style={{ gap: 4 }}>
+                  <Text style={s.section}>Pick your spot</Text>
+                  <Text style={s.sub}>Take the spot the host made for you, or any open one.</Text>
+                </View>
+                {view.full ? <Text style={s.note}>Every spot is taken. Ask the host to add you.</Text> : null}
+              </>
+            ) : view.closed ? (
+              <Text style={s.note}>{view.closed}</Text>
+            ) : null}
+
+            {view.kind === 'match'
+              ? view.sides.map((side) => (
+                  <View key={side.name} style={{ gap: 8 }}>
+                    <Text style={s.side}>{side.name}</Text>
+                    {side.slots.map((sl) => {
+                      const on = slotId === sl.slotId;
+                      const pickable = !sl.taken && !view.mine;
                       return (
-                        <Pressable
-                          key={slot.slotId}
-                          onPress={() => claim(slot.slotId)}
-                          disabled={taken || busy}
-                          style={{
-                            marginTop: 8,
-                            borderWidth: 1.5,
-                            borderColor: taken ? 'rgba(255,255,255,0.12)' : '#F97316',
-                            borderRadius: 4,
-                            paddingVertical: 12,
-                            paddingHorizontal: 12,
-                            opacity: taken ? 0.45 : 1,
-                          }}
+                        <Tap
+                          key={sl.slotId}
+                          disabled={!pickable || busy}
+                          accessibilityState={{ selected: on, disabled: !pickable }}
+                          onPress={() => setSlotId(sl.slotId)}
+                          style={[s.slot, on && s.ring]}
                         >
-                          <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: '#fff' }}>
-                            {taken ? `${slot.displayName} · taken` : slot.displayName}
-                          </Text>
-                        </Pressable>
+                          <View style={[s.avatar, sl.taken ? s.avTaken : on ? s.avOn : s.avOpen]}>
+                            {sl.taken ? (
+                              <Text style={s.ini}>{sl.ini}</Text>
+                            ) : (
+                              <Icon name={on ? 'check' : 'add'} size={18} color={on ? colors.onAccent : colors.text2} />
+                            )}
+                          </View>
+                          <Text style={[s.slotName, sl.taken && { color: colors.text3 }]}>{sl.name}</Text>
+                          <Text style={[s.state, { color: sl.taken ? colors.text4 : colors.accentInk }]}>{sl.taken ? 'Taken' : 'Open'}</Text>
+                        </Tap>
                       );
                     })}
                   </View>
-                ))}
-              </>
-            )}
-          </View>
-        ) : null}
+                ))
+              : null}
 
-        {knockout ? (
-          <View style={{ marginTop: 26, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, padding: 14 }}>
-            <Text style={{ ...LBL, color: '#16C46A' }}>{`Knockout · ${formatLabel(knockout)}`}</Text>
-            <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 22, lineHeight: 27, color: '#fff', marginTop: 6 }}>{knockout.name}</Text>
-            <Text style={{ ...LBL, marginTop: 4 }}>
-              {`Hosted by ${knockout.players.find((p) => p.playerId === knockout.hostId)?.displayName ?? 'the host'} · ${knockout.players.length} in so far`}
-            </Text>
-            {/* Someone already in can always open it; only a newcomer cares whether it has begun. */}
-            {user?._id && knockout.players.some((p) => p.playerId === user._id) ? (
-              <Pressable onPress={() => router.replace({ pathname: '/knockout/[id]', params: { id: knockout._id } })} style={{ marginTop: 14, backgroundColor: '#F97316', borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>You are in · Open</Text>
-              </Pressable>
-            ) : knockout.status !== 'waiting' ? (
-              <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 13, color: '#d4d4d4', marginTop: 12 }}>{KNOCKOUT_CLOSED[knockout.status]}</Text>
-            ) : (
+            {view.kind === 'knockout' && !view.mine && !view.closed ? (
               <>
-                {knockout.sport === 'cricket' ? (
-                  <>
-                    <Text style={{ ...LBL, marginTop: 14 }}>Pick your team</Text>
-                    {(knockout.teams ?? []).map((team) => {
-                      const count = teamPlayers(knockout, team.teamId).length;
-                      const full = count >= (knockout.matchConfig.playersPerTeam ?? 0);
-                      const on = teamId === team.teamId;
-                      return (
-                        <Pressable
-                          key={team.teamId}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected: on, disabled: full }}
-                          disabled={full || busy}
-                          onPress={() => setTeamId(team.teamId)}
-                          style={{ marginTop: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1.5, borderColor: on ? '#F97316' : 'rgba(255,255,255,0.14)', borderRadius: 4, paddingVertical: 12, paddingHorizontal: 12, opacity: full ? 0.45 : 1 }}
-                        >
-                          <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: '#fff' }}>{team.name}</Text>
-                          <Text style={LBL}>{full ? 'Full' : `${count}/${knockout.matchConfig.playersPerTeam}`}</Text>
-                        </Pressable>
-                      );
-                    })}
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: teamId === null }}
-                      disabled={busy}
-                      onPress={() => setTeamId(null)}
-                      style={{ marginTop: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1.5, borderColor: teamId === null ? '#F97316' : 'rgba(255,255,255,0.14)', borderRadius: 4, paddingVertical: 12, paddingHorizontal: 12 }}
-                    >
-                      <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: '#fff' }}>Any team</Text>
-                      <Text style={LBL}>The draw places you</Text>
-                    </Pressable>
-                  </>
+                {view.teams ? (
+                  <View style={{ gap: 8 }}>
+                    <View style={{ gap: 4, marginBottom: 10 }}>
+                      <Text style={s.section}>Pick your team</Text>
+                      <Text style={s.sub}>Or leave it to the draw.</Text>
+                    </View>
+                    {view.teams.map((t) => (
+                      <Tap
+                        key={t.teamId}
+                        disabled={t.full || busy}
+                        accessibilityState={{ selected: teamId === t.teamId, disabled: t.full }}
+                        onPress={() => setTeamId(t.teamId)}
+                        style={[s.slot, teamId === t.teamId && s.ring, t.full && { opacity: 0.45 }]}
+                      >
+                        <Text style={s.slotName}>{t.name}</Text>
+                        <Text style={s.state}>{t.count}</Text>
+                      </Tap>
+                    ))}
+                    <Tap disabled={busy} accessibilityState={{ selected: teamId === null }} onPress={() => setTeamId(null)} style={[s.slot, teamId === null && s.ring]}>
+                      <Text style={s.slotName}>Any team</Text>
+                      <Text style={s.state}>The draw places you</Text>
+                    </Tap>
+                  </View>
                 ) : null}
-                <Pressable disabled={busy} onPress={() => enterKnockout(() => (teamId ? joinQuickKnockout(code, teamId) : joinQuickKnockout(code)))} style={{ marginTop: 14, backgroundColor: '#F97316', opacity: busy ? 0.5 : 1, borderRadius: 4, paddingVertical: 14, alignItems: 'center' }}>
-                  <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: '#0B0B0B' }}>
-                    {`Join as ${user ? `${user.firstName} ${user.lastName}` : 'yourself'}`}
-                  </Text>
-                </Pressable>
-                {knockout.players.some((p) => !p.playerId) ? (
-                  <Text style={{ ...LBL, marginTop: 16 }}>Already added by the host? Tap your name</Text>
+                {view.guests.length ? (
+                  <View style={{ gap: 4 }}>
+                    <Text style={s.section}>Already added by the host?</Text>
+                    <Text style={s.sub}>Tap your name to take that place.</Text>
+                    <View style={s.chips}>
+                      {view.guests.map((g) => (
+                        <Tap key={g.playerKey} disabled={busy} onPress={() => claimGuest(g.playerKey)} style={s.guest}>
+                          <Text style={s.guestText}>{g.name}</Text>
+                        </Tap>
+                      ))}
+                    </View>
+                  </View>
                 ) : null}
-                {knockout.players.filter((p) => !p.playerId).map((p) => (
-                  <Pressable key={p.playerKey} disabled={busy} onPress={() => enterKnockout(() => claimKnockoutGuest(code, p.playerKey))}
-                    style={{ marginTop: 8, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 4, paddingVertical: 12, paddingHorizontal: 12 }}>
-                    <Text style={{ fontFamily: 'Barlow_500Medium', fontSize: 14, color: '#fff' }}>{p.displayName}</Text>
-                  </Pressable>
-                ))}
               </>
-            )}
-          </View>
+            ) : null}
+          </>
         ) : null}
       </ScrollView>
-    </Screen>
+      {view && problem ? <Text style={[s.error, { paddingHorizontal: space.gutter, paddingBottom: 8 }]}>{problem}</Text> : null}
+      {footer ? <FooterBar>{footer}</FooterBar> : null}
+    </SafeAreaView>
   );
 }
+
+const s = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.bg },
+  body: { paddingHorizontal: space.gutter, paddingTop: 8, paddingBottom: 32, gap: space.sectionGap },
+  kicker: { fontFamily: font.semibold, fontSize: 12, color: colors.text3 },
+  formatRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  format: { fontFamily: font.regular, fontSize: 13, color: colors.text3 },
+  chip: { fontFamily: font.mono, fontSize: 12, letterSpacing: 1.4, paddingVertical: 3, paddingHorizontal: 7, borderRadius: 7, backgroundColor: colors.surface1, color: colors.text2, overflow: 'hidden' },
+  section: { fontFamily: font.semibold, fontSize: 17, color: colors.text },
+  sub: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
+  side: { fontFamily: font.semibold, fontSize: 13, color: colors.text2 },
+  note: { fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: colors.text2 },
+  error: { fontFamily: font.regular, fontSize: 13, color: colors.error },
+  slot: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, paddingHorizontal: 14, borderRadius: 16, backgroundColor: colors.surface1, borderWidth: 1.5, borderColor: 'transparent' },
+  ring: { borderColor: colors.accent },
+  avatar: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  avTaken: { backgroundColor: colors.surface2 },
+  avOpen: { backgroundColor: colors.surface3 },
+  avOn: { backgroundColor: colors.accent },
+  ini: { fontFamily: font.semibold, fontSize: 11, color: colors.text2 },
+  slotName: { flex: 1, fontFamily: font.semibold, fontSize: 15, color: colors.text },
+  state: { fontFamily: font.semibold, fontSize: 12, color: colors.text3 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
+  guest: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 999, backgroundColor: colors.surface1 },
+  guestText: { fontFamily: font.semibold, fontSize: 13, color: colors.text2 },
+});

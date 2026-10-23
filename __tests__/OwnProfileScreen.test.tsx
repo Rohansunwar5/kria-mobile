@@ -18,7 +18,7 @@ jest.mock('expo-router', () => ({
   },
   useScrollToTop: () => undefined,
 }));
-jest.mock('@/components/profile/AvatarPicker', () => ({ usePhotoUpload: () => ({ pick: jest.fn(), busy: false }) }));
+jest.mock('@/components/profile/usePhotoUpload', () => ({ usePhotoUpload: () => ({ pick: jest.fn(), busy: false }) }));
 jest.mock('@/api/quickKnockout', () => ({ listMyQuickKnockouts: jest.fn(async () => []) }));
 let mockRecord = { titles: [] as string[], honors: [] as { title: string; badge: string }[] };
 jest.mock('@/api/profileApi', () => ({ getPublicPlayer: jest.fn(async () => ({ player: mockRecord, history: [] })) }));

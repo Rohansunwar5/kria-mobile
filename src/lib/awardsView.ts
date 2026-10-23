@@ -5,25 +5,27 @@ import type { IconName } from '@/components/ui/iconPaths';
 import type { Metal } from '@/constants/theme';
 import { sportIcon } from '@/components/ui/Icon';
 import { sportName } from '@/lib/homeView';
+import type { Honor } from '@/lib/badges';
+import { initials } from '@/lib/matchCard';
 
 /**
  * Names and monograms for the server's BADGE_KEYS (server/src/models/player.model.ts).
  * Names match the organiser portal's catalogue; the monogram is DESIGN §5.11's
  * "2-letter monogram" for an honour.
  */
-export const HONOUR_BADGES: Record<string, { name: string; glyph: string }> = {
-  'player-of-the-match': { name: 'Player of the Match', glyph: 'POM' },
-  'season-mvp': { name: 'Season MVP', glyph: 'MVP' },
-  'hat-trick': { name: 'Hat-Trick', glyph: 'HT' },
-  'undefeated-run': { name: 'Undefeated Run', glyph: 'UR' },
-  'auction-steal': { name: 'Auction Steal', glyph: 'AS' },
+export const HONOUR_BADGES: Record<string, { name: string; icon?: IconName; glyph?: string }> = {
+  'player-of-the-match': { name: 'Player of the Match', icon: 'star' },
+  'season-mvp': { name: 'Season MVP', icon: 'workspace_premium' },
+  'hat-trick': { name: 'Hat-Trick', icon: 'counter_3' },
+  'undefeated-run': { name: 'Undefeated Run', icon: 'local_fire_department' },
+  'auction-steal': { name: 'Auction Steal', icon: 'gavel' },
   centurion: { name: 'Centurion', glyph: '100' },
-  'clean-sweep': { name: 'Clean Sweep', glyph: 'CS' },
-  'rally-king': { name: 'Rally King', glyph: 'RK' },
-  'ace-serve': { name: 'Ace Serve', glyph: 'ACE' },
-  'fair-play': { name: 'Fair Play', glyph: 'FP' },
-  'iron-player': { name: 'Iron Player', glyph: 'IP' },
-  'first-cap': { name: 'First Cap', glyph: '1C' },
+  'clean-sweep': { name: 'Clean Sweep', icon: 'cleaning_services' },
+  'rally-king': { name: 'Rally King', icon: 'crown' },
+  'ace-serve': { name: 'Ace Serve', icon: 'bolt' },
+  'fair-play': { name: 'Fair Play', icon: 'handshake' },
+  'iron-player': { name: 'Iron Player', icon: 'fitness_center' },
+  'first-cap': { name: 'First Cap', icon: 'counter_1' },
 };
 export const KNOCKOUT_BADGE = 'knockout-winner';
 
@@ -47,14 +49,16 @@ export interface Award {
   earned: boolean;
 }
 
+export interface MilestoneTotals { played: number; won: number; sports: number }
+
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`;
 
 /** "Winner of Men's Doubles at HSR Shuttle Cup" — the only shape the server writes. */
 export function titleAward(title: string, i: number): Award {
-  const m = /^(Winner of .+?) at (.+)$/.exec(title);
+  const m = /^Winner of (.+?) at (.+)$/.exec(title);
   return {
     key: `title-${i}`, family: 'title', shape: 'shield', metal: 'gold', icon: 'emoji_events',
-    name: m ? m[1] : title, context: m ? m[2] : '', tier: 'Tournament title',
+    name: m ? `Champion · ${m[1]}` : title, context: m ? m[2] : '', tier: 'Tournament title',
     description: m ? `Won at ${m[2]}.` : title,
     criteria: 'Win a tournament category',
     status: m ? { label: 'Won at', value: m[2] } : undefined,
@@ -62,11 +66,11 @@ export function titleAward(title: string, i: number): Award {
   };
 }
 
-export function honourAward(h: { title: string; badge: string; ref?: string }, i: number, knockouts: QuickKnockout[]): Award {
+export function honourAward(h: Honor, i: number, knockouts: QuickKnockout[]): Award {
   const def = HONOUR_BADGES[h.badge];
   const k = h.ref ? knockouts.find((x) => x._id === h.ref) : undefined;
   return {
-    key: `honour-${i}`, family: 'honour', shape: 'rosette', metal: 'gold', glyph: def?.glyph ?? 'H',
+    key: `honour-${i}`, family: 'honour', shape: 'rosette', metal: 'gold', icon: def?.icon, glyph: def ? def.glyph : initials(h.title) || 'H',
     name: h.title || def?.name || 'Honour',
     context: h.ref ? (k ? k.name : 'Quick knockout') : 'Given by an organiser',
     tier: h.ref ? 'Knockout honour' : 'Organiser honour',
@@ -93,15 +97,18 @@ export function knockoutAwards(wins: { title: string; ref?: string }[], knockout
     key: `ko-${sport || 'any'}`, family: 'knockout', shape: 'hex', metal: 'bronze',
     icon: sport ? sportIcon(sport) : 'emoji_events', count: names.length,
     name: 'Knockout winner', context: sport ? `${sportName(sport)} · ${plural(names.length, 'win')}` : plural(names.length, 'win'),
-    tier: 'Quick knockout', description: 'Last one standing in a player-run knockout.',
+    tier: names.length > 1 ? `Quick knockout · ×${names.length}` : 'Quick knockout', description: 'Last one standing in a player-run knockout.',
     criteria: 'Win the final of a quick knockout',
-    status: { label: 'Won', value: names.join(', ') },
+    status: { label: 'Earned at', value: names.join(', ') },
     earned: true,
   }));
 }
 
 /** Career milestones from the server's achievements: earned first, then locked by how close they are. */
-export function milestoneAwards(achievements: Achievement[]): Award[] {
+export function milestoneAwards(achievements: Achievement[], totals: MilestoneTotals): Award[] {
+  // The server clamps an earned milestone's progress to its target, so show the real count.
+  const real = (kind: string): string | null =>
+    kind === 'matches' ? `${totals.played} played` : kind === 'wins' ? `${totals.won} won` : kind === 'sports' ? `${plural(totals.sports, 'sport')} played` : null;
   return achievements
     .map((a): Award => {
       const kind = a.id.split('-')[0];
@@ -113,7 +120,7 @@ export function milestoneAwards(achievements: Achievement[]): Award[] {
         tier: a.earned ? 'Career milestone' : 'Next milestone',
         description: a.earned ? 'Counted from every match you play.' : `${a.target - a.progress} to go. Quick matches count the same as tournament ones.`,
         criteria: a.label,
-        status: { label: 'Progress', value: `${a.progress} of ${a.target}` },
+        status: { label: 'Progress', value: (a.earned && real(kind)) || `${a.progress} of ${a.target}` },
         earned: a.earned,
       };
     })
@@ -124,7 +131,7 @@ export function milestoneAwards(achievements: Achievement[]): Award[] {
 export function lockedHonours(): Award[] {
   return [
     ...Object.entries(HONOUR_BADGES).map(([badge, def]): Award => ({
-      key: `locked-${badge}`, family: 'honour', shape: 'rosette', metal: 'locked', glyph: def.glyph,
+      key: `locked-${badge}`, family: 'honour', shape: 'rosette', metal: 'locked', icon: def.icon, glyph: def.glyph,
       name: def.name, context: 'Organiser', tier: 'Organiser honour', description: 'Organisers give these at tournaments.',
       criteria: 'Chosen by the organiser', earned: false,
     })),
@@ -142,23 +149,21 @@ export function lockedHonours(): Award[] {
  */
 export function buildAwards(input: {
   titles: string[];
-  honors: { title: string; badge: string; ref?: string }[];
+  honors: Honor[];
   achievements: Achievement[];
   knockouts: QuickKnockout[];
+  totals: MilestoneTotals;
 }) {
   const titles = input.titles.map(titleAward);
   const honours = input.honors.filter((h) => h.badge !== KNOCKOUT_BADGE).map((h, i) => honourAward(h, i, input.knockouts));
   const knockouts = knockoutAwards(input.honors.filter((h) => h.badge === KNOCKOUT_BADGE), input.knockouts);
-  const milestones = milestoneAwards(input.achievements);
+  const milestones = milestoneAwards(input.achievements, input.totals);
   const earned = titles.length + honours.length + knockouts.reduce((n, k) => n + (k.count ?? 1), 0) + milestones.filter((m) => m.earned).length;
-  const latest = honours[honours.length - 1] ?? knockouts[knockouts.length - 1] ?? titles[titles.length - 1] ?? null;
-  const closest = milestones.filter((m) => !m.earned)[0] ?? null;
-  return {
-    titles, honours, knockouts, milestones, earned,
-    featured: latest
-      ? { award: latest, label: latest.family === 'title' ? 'Latest title' : 'Signature honour' }
-      : closest
-        ? { award: closest, label: earned ? 'Next milestone' : 'Closest first award' }
-        : null,
-  };
+  const closest = milestones.find((m) => !m.earned) ?? null;
+  const pick = (award: Award, label: 'Latest title' | 'Latest honour' | 'Knockout winner' | 'Next milestone' | 'Closest first award') => ({ award, label });
+  const featured = titles.length ? pick(titles[titles.length - 1], 'Latest title')
+    : honours.length ? pick(honours[honours.length - 1], 'Latest honour')
+      : knockouts.length ? pick(knockouts[knockouts.length - 1], 'Knockout winner')
+        : closest ? pick(closest, earned ? 'Next milestone' : 'Closest first award') : null;
+  return { titles, honours, knockouts, milestones, earned, featured };
 }

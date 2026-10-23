@@ -43,13 +43,16 @@ export function formFor(recent: RecentMatch[], sport: string) {
   return { rows, note: rows.length ? `${won} of last ${rows.length} won` : '' };
 }
 
-/** The ranking card under the form (mock 1h): title, one line, and the track while unranked. */
-export function rankNote(s: SportSummary, board: RankedPlayer[] | null | undefined, meId: string) {
+/**
+ * The ranking card under the form (mock 1h): title, one line, and the track while unranked.
+ * `who` is "they" on another player's profile; only the not-ranked-yet line names its subject.
+ */
+export function rankNote(s: SportSummary, board: RankedPlayer[] | null | undefined, meId: string, who: 'you' | 'they' = 'you') {
   const name = sportName(s.sport).toLowerCase();
   if (!RANKED_SPORTS.includes(s.sport)) return { title: 'Not ranked', line: `Kria doesn't rank ${name} yet.`, progress: null };
   if (s.decided < RANK_MIN) {
     const left = RANK_MIN - s.decided;
-    return { title: 'Not ranked yet', line: `${s.decided} of ${RANK_MIN} decided matches. ${left} more and you appear on the ${name} board.`, progress: s.decided / RANK_MIN };
+    return { title: 'Not ranked yet', line: `${s.decided} of ${RANK_MIN} decided matches. ${left} more and ${who} appear on the ${name} board.`, progress: s.decided / RANK_MIN };
   }
   if (board === undefined) return { title: 'Ranking', line: 'Loading the board…', progress: null };
   const h = heroFor(s, board, meId);
@@ -66,11 +69,21 @@ export function bestRank(sports: SportSummary[], boards: Record<string, RankedPl
   return best;
 }
 
+/** What a tournament row reads: your own history entry, or another player's public one. */
+export interface RowEntry {
+  _id: string;
+  status: string;
+  tournament?: { _id: string; name: string; sport?: string; status?: string };
+  category?: { name: string } | null;
+  team?: { name: string; logo?: string } | null;
+  auctionData?: { soldPrice?: number };
+}
+
 /**
  * Tournament rows (mock 1h). The only placement the server records is a
  * winner's title (SERVER-GAPS.md #9/#10), so other rows say where the entry stands.
  */
-export function tournamentRow(e: TournamentHistoryEntry, titles: string[]) {
+export function tournamentRow(e: RowEntry, titles: string[]) {
   const t = e.tournament;
   const won = !!t && !!e.category && titles.includes(`Winner of ${e.category.name} at ${t.name}`);
   const result = won ? { text: 'Winner', color: colors.gold }
@@ -82,4 +95,47 @@ export function tournamentRow(e: TournamentHistoryEntry, titles: string[]) {
               : { text: 'Entered', color: colors.text2 };
   const sub = [e.category?.name, e.team ? `for ${e.team.name}` : 'individual entry'].filter(Boolean).join(' · ');
   return { key: e._id, tournamentId: t?._id, name: t?.name ?? 'Tournament', sub, sport: t?.sport, crest: e.team?.logo, team: e.team?.name, result };
+}
+
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+/** Tournaments (all) strip: entries, matches played and won, missing stats as 0. */
+export function historyStrip(list: TournamentHistoryEntry[]) {
+  const sum = (k: 'matchesPlayed' | 'matchesWon') => list.reduce((n, e) => n + (e.stats?.[k] ?? 0), 0);
+  return { entered: list.length, matches: sum('matchesPlayed'), won: sum('matchesWon') };
+}
+
+const distinct = (xs: (string | undefined)[]) => [...new Set(xs.filter(Boolean) as string[])];
+
+export const historySports = (list: TournamentHistoryEntry[]) => distinct(list.map((e) => e.tournament?.sport));
+export const matchSports = (list: RecentMatch[]) => distinct(list.map((m) => m.sport));
+
+/** Newest first by tournament start (else entry creation), grouped by year. */
+export function groupByYear<T extends { createdAt: string; tournament?: { startDate?: string } }>(list: T[]) {
+  const at = (e: T) => new Date(e.tournament?.startDate || e.createdAt);
+  const out: { year: string; items: T[] }[] = [];
+  for (const e of [...list].sort((a, b) => at(b).getTime() - at(a).getTime())) {
+    const year = String(at(e).getFullYear());
+    const g = out.find((x) => x.year === year);
+    if (g) g.items.push(e); else out.push({ year, items: [e] });
+  }
+  return out;
+}
+
+/** "N played · M won", or "Not played yet". */
+export function recordLine(e: { stats?: { matchesPlayed?: number; matchesWon?: number } }) {
+  const p = e.stats?.matchesPlayed ?? 0;
+  return p > 0 ? `${p} played · ${e.stats?.matchesWon ?? 0} won` : 'Not played yet';
+}
+
+/** "October 2026" groups, newest first by playedAt. */
+export function groupByMonth(list: RecentMatch[]) {
+  const out: { month: string; items: RecentMatch[] }[] = [];
+  for (const m of [...list].sort((a, b) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime())) {
+    const d = new Date(m.playedAt);
+    const month = `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+    const g = out.find((x) => x.month === month);
+    if (g) g.items.push(m); else out.push({ month, items: [m] });
+  }
+  return out;
 }

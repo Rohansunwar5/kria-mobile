@@ -119,7 +119,7 @@ describe('Matches screen', () => {
     expect(screen.getByLabelText('2. Bears (you), played 1, won 0, lost 1, drawn 0')).toBeTruthy();
     expect(screen.getByLabelText('3. Tigers, played 1, won 0, lost 1, drawn 0')).toBeTruthy();
     fireEvent.press(screen.getByText('Player stats'));
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/cricket/leaderboard/[categoryId]', params: { categoryId: 'c1' } });
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/cricket/leaderboard/[categoryId]', params: { categoryId: 'c1', tournamentName: 'Arohance Open', categoryName: 'Open T20' } });
   });
 
   // Live cricket completes a tie with no winnerId and winReason 'by_score'.

@@ -14,7 +14,7 @@ export const colors = {
   gold: '#C9A35A', silver: '#A9AFB7', bronze: '#A8714A', platinum: '#C3CAD6',
 
   cardLine: '#222227', navRing: '#24242A', navIdle: '#85858D', ring: '#3A3A42',
-  scrim: 'rgba(0,0,0,0.62)', coverIn: '#232328', coverOut: '#141416',
+  scrim: 'rgba(0,0,0,0.62)', coverIn: '#232328', coverOut: '#141416', glowOut: '#121214',
   skeleton: '#17171A', skeletonHi: '#232328', bgClear: 'rgba(11,11,13,0)', shadow: '#000000', flipTop: '#222227', onAccentTrack: 'rgba(11,11,13,0.25)', bracketLine: '#34343B',
 };
 

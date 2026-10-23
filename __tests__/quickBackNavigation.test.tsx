@@ -27,9 +27,9 @@ it('the match screen falls back to Compete when there is no history', () => {
   expect(router.replace).toHaveBeenCalledWith('/(tabs)/compete');
 });
 
-it('the join screen falls back to the quick match list when there is no history', () => {
+it('the join screen falls back to Compete matches when there is no history', () => {
   render(<JoinQuickMatchScreen />);
-  fireEvent.press(screen.getByText('Back'));
+  fireEvent.press(screen.getByLabelText('Back'));
   expect(router.back).not.toHaveBeenCalled();
-  expect(router.replace).toHaveBeenCalledWith('/quick');
+  expect(router.replace).toHaveBeenCalledWith('/(tabs)/compete?seg=matches');
 });
