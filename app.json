@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Kria",
-    "slug": "mobile",
+    "slug": "kria",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "kria",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
@@ -45,10 +45,7 @@
     },
     "extra": {
       "apiBaseUrl": "https://api.kria.club",
-      "router": {},
-      "eas": {
-        "projectId": "b93ea6a5-b412-4065-97a9-515ffb4fd088"
-      }
+      "router": {}
     }
   }
 }
