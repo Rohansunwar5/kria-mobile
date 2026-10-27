@@ -24,6 +24,13 @@ describe('401 handling', () => {
     expect(onUnauth).not.toHaveBeenCalled();
   });
 
+  it('leaves the session alone when login answers 401', async () => {
+    mock.onPost('/player/auth/login').reply(401);
+    await expect(API.post('/player/auth/login', {})).rejects.toBeTruthy();
+    expect(clearAuth).not.toHaveBeenCalled();
+    expect(onUnauth).not.toHaveBeenCalled();
+  });
+
   it('signs out on a 401 from any other route', async () => {
     mock.onGet('/player/auth/profile').reply(401);
     await expect(API.get('/player/auth/profile')).rejects.toBeTruthy();

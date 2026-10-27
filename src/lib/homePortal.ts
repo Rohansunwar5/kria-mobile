@@ -1,8 +1,7 @@
 import type { QuickKnockout } from '@/api/quickKnockout';
 import type { QuickMatch } from '@/api/quickMatch';
 import { formatShortDate } from '@/lib/format';
-import { STATUS_TAG } from '@/lib/tournamentConstants';
-import type { TagVariant } from '@/components/StatusPill';
+import { STATUS_TAG, type TagVariant } from '@/lib/tournamentConstants';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 
 /**

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
 import { getTopPlayers, type RankedPlayer } from '@/api/rankings';
 import { latestTournaments } from '@/api/tournaments';
+import { KriaMark } from '@/components/KriaMark';
 import { EventCard } from '@/components/EventCard';
 import { MatchCard } from '@/components/MatchCard';
 import { LiveNowRow } from '@/components/home/LiveNowRow';
@@ -27,8 +28,6 @@ import { RANKED_SPORTS } from '@/lib/sports';
 import { useCareer } from '@/lib/useCareer';
 import { useAppSelector } from '@/store/hooks';
 import type { Tournament } from '@/store/slices/tournamentSlice';
-
-const logo = require('../../../assets/images/logo.png');
 
 /** Mocks 1a (established) and 4a (new player). DESIGN §6 Home. */
 export default function Home() {
@@ -100,7 +99,7 @@ export default function Home() {
     <SafeAreaView edges={['top']} style={s.screen}>
       <ScrollView ref={scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}>
         <View style={s.header}>
-          <Image source={logo} resizeMode="contain" style={s.logo} accessibilityLabel="Kria" />
+          <KriaMark width={40} />
           <View style={{ gap: 1 }}>
             <Text style={s.date}>{todayLabel(now)}</Text>
             <Text style={s.hello}>{greeting(now, user?.firstName ?? 'there', isNew)}</Text>
@@ -201,7 +200,6 @@ function Section({ title, link, onLink, children }: {
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 10, paddingHorizontal: space.gutter },
-  logo: { width: 40, height: 35 },
   date: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
   hello: { fontFamily: font.semibold, fontSize: 16, color: colors.text },
   heroSkeleton: { paddingTop: 22, paddingHorizontal: space.gutter, gap: 12 },

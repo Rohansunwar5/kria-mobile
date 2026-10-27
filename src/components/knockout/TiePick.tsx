@@ -1,6 +1,6 @@
 import { Alert, View, Text, Pressable } from 'react-native';
 import type { QuickMatch } from '@/api/quickMatch';
-import { useTheme } from '@/lib/theme';
+import { colors, font, radius } from '@/constants/theme';
 
 /**
  * A tied knockout match still needs a team to go through. The teams settle it
@@ -13,9 +13,8 @@ export function TiePick({ match, isHost, busy, onPick }: {
   busy: boolean;
   onPick: (sideId: string) => void;
 }) {
-  const t = useTheme();
-  const label = { fontFamily: 'JetBrainsMono_700Bold' as const, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: t.brandInk };
-  const body = { fontFamily: 'Barlow_400Regular' as const, fontSize: 13, lineHeight: 19, color: t.textMeta };
+  const label = { fontFamily: font.mono, fontSize: 9, letterSpacing: 0.18 * 9, textTransform: 'uppercase' as const, color: colors.accentInk };
+  const body = { fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: colors.text3 };
 
   if (!isHost) {
     return (
@@ -43,9 +42,9 @@ export function TiePick({ match, isHost, busy, onPick }: {
             accessibilityLabel={`${side.name} goes through`}
             disabled={busy}
             onPress={() => confirm(side)}
-            style={{ flex: 1, minHeight: 48, borderRadius: 5, borderWidth: 1.5, borderColor: t.brand, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8, opacity: busy ? 0.5 : 1 }}
+            style={{ flex: 1, minHeight: 48, borderRadius: radius.button, borderWidth: 1.5, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8, opacity: busy ? 0.5 : 1 }}
           >
-            <Text numberOfLines={1} style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: t.text }}>{side.name}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: font.mono, fontSize: 12, letterSpacing: 0.14 * 12, textTransform: 'uppercase', color: colors.text }}>{side.name}</Text>
           </Pressable>
         ))}
       </View>

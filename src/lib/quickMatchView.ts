@@ -1,5 +1,5 @@
 import type { QuickGameScore, QuickMatch, QuickMatchSlot } from '@/api/quickMatch';
-import type { TagVariant } from '@/components/StatusPill';
+import type { TagVariant } from '@/lib/tournamentConstants';
 import { SPORT_LABELS } from '@/lib/sports';
 
 export function isHost(match: QuickMatch, playerId?: string): boolean {

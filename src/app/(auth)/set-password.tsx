@@ -1,87 +1,71 @@
-import { useState } from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { goBack } from '@/lib/nav';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, font } from '@/constants/theme';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setPassword, clearError } from '@/store/slices/authSlice';
-import { AuthInput } from '@/components/auth/AuthInput';
-import { PasswordRuleList, PasswordStrength, passwordRules } from '@/components/auth/PasswordRules';
-import { Btn, ScreenHeader } from '@/components/canvas';
-import { Ghost } from '@/components/states';
-import { Icon } from '@/components/icons';
+import { beginOnboardingHandoff, endOnboardingHandoff, setPassword } from '@/store/slices/authSlice';
+import { passwordOk, passwordRules } from '@/lib/password';
+import { AuthScreen, Title } from '@/components/signin/AuthScreen';
+import { PasswordField, RuleList } from '@/components/signin/PasswordField';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
 
-// Not drawn on the canvas on purpose: this is ChangePassword minus the
-// current-password field.
 export default function SetPassword() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isLoading, error, registrationEmail } = useAppSelector((s) => s.auth);
-  const [pwd, setPwd] = useState('');
-  const [confirm, setConfirm] = useState('');
+  // Snapshot: a successful setPassword clears the store's email while the AuthGate is navigating away.
+  const [email] = useState(useAppSelector((s) => s.auth.registrationEmail));
+  const [pw, setPw] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const alive = useRef(true);
+  const inFlight = useRef(false);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  useEffect(() => { if (!email) router.replace('/(auth)/register'); }, [email, router]);
+  if (!email) return null;
 
-  const rulesOk = passwordRules(pwd).every((r) => r.met);
-  const mismatch = confirm.length > 0 && confirm !== pwd;
-  const ready = rulesOk && !!confirm && !mismatch;
-
-  const submit = () => dispatch(setPassword({ data: { email: registrationEmail as string, password: pwd } }));
+  const submit = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    // The AuthGate reacts the moment the user is set, so the handoff flag must already be up.
+    dispatch(beginOnboardingHandoff());
+    const res = await dispatch(setPassword({ data: { email, password: pw } }));
+    inFlight.current = false;
+    if (setPassword.fulfilled.match(res)) return;
+    dispatch(endOnboardingHandoff());
+    if (!alive.current) return;
+    setBusy(false);
+    setError((res.payload as string) || 'Something went wrong');
+  };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
-      <ScreenHeader title="Set a password" onBack={() => goBack(router)} />
-
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
-          <Ghost text="Key" size={170} style={{ left: -20, bottom: 40 }} />
-
-          <View style={{ paddingTop: 20 }}>
-            <View style={{ width: 52, height: 52, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="lock" size={24} color="#F97316" strokeWidth={2} />
-            </View>
-            <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 13, maxWidth: 300 }}>
-              Your email is verified. Pick a password and you are in — this is the last step.
-            </Text>
-          </View>
-
-          <View style={{ paddingTop: 20 }}>
-            <AuthInput
-              label="Password"
-              icon="lock"
-              secureToggle
-              autoCapitalize="none"
-              value={pwd}
-              onChangeText={(t) => { setPwd(t); dispatch(clearError()); }}
-            />
-            <PasswordStrength password={pwd} />
-            <PasswordRuleList password={pwd} />
-
-            <View style={{ marginTop: 16 }}>
-              <AuthInput
-                label="Confirm password"
-                icon="lock"
-                secureToggle
-                autoCapitalize="none"
-                value={confirm}
-                onChangeText={setConfirm}
-                error={mismatch ? 'Passwords do not match' : undefined}
-              />
-            </View>
-
-            {error ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-                <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
-                  {error}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      <View style={{ borderTopWidth: 1.5, borderTopColor: 'rgba(255,255,255,0.12)', backgroundColor: '#101010', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 20 }}>
-        <Btn label="Finish" busy={isLoading} disabled={!ready} onPress={submit} />
+    <AuthScreen
+      onBack={() => router.back()}
+      right="3 of 3"
+      step={3}
+      footer={
+        <View style={{ gap: 12 }}>
+          {error ? <Text style={s.err}>{error}</Text> : null}
+          <Button label="Create my account" busy={busy} disabled={!passwordOk(pw)} onPress={submit} />
+        </View>
+      }
+    >
+      <View style={{ gap: 12 }}>
+        <View style={s.verified}>
+          <Icon name="verified" variant="f" size={18} color={colors.accent} />
+          <Text style={s.verifiedText}>Email verified</Text>
+        </View>
+        <Title>Lock it in</Title>
       </View>
-    </SafeAreaView>
+      <PasswordField label="Password" value={pw} onChangeText={(t) => { setPw(t); setError(null); }} isNew />
+      <RuleList rules={passwordRules(pw)} />
+    </AuthScreen>
   );
 }
+
+const s = StyleSheet.create({
+  verified: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  verifiedText: { fontFamily: font.semibold, fontSize: 13, color: colors.text2 },
+  err: { fontFamily: font.regular, fontSize: 13, color: colors.error },
+});

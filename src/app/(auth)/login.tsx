@@ -1,152 +1,137 @@
-import { useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { loginUser, requestLoginOtp, verifyLoginOtp, clearError } from '@/store/slices/authSlice';
-import { AuthInput } from '@/components/auth/AuthInput';
-import { Btn, Hairlines, Lbl } from '@/components/canvas';
-import { Ghost } from '@/components/states';
-import { Icon } from '@/components/icons';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { colors, font, radius } from '@/constants/theme';
+import { useAppDispatch } from '@/store/hooks';
+import { loginUser, requestLoginOtp } from '@/store/slices/authSlice';
+import { emailOk, loginErrorMessage } from '@/lib/authForms';
+import { AuthScreen, Title } from '@/components/signin/AuthScreen';
+import { Field } from '@/components/signin/Field';
+import { PasswordField } from '@/components/signin/PasswordField';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
+import { Segmented } from '@/components/ui/Segmented';
 
-type Mode = 'password' | 'otp';
-
-// The artboard's atmosphere is a radial glow at 78% 6%; RN has no radial
-// gradient, so this is the nearest diagonal linear fade. Everything else —
-// hairlines, the ghost K, the method switch — is drawn as designed.
-function Method({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: on }}
-      onPress={onPress}
-      style={{ flex: 1, paddingVertical: 12, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? '#F97316' : 'transparent' }}
-    >
-      <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 13, color: on ? '#0B0B0B' : '#7d7d7d' }}>{label}</Text>
-    </Pressable>
-  );
-}
+type Mode = 'password' | 'code';
+const MODES: { key: Mode; label: string }[] = [
+  { key: 'password', label: 'Password' },
+  { key: 'code', label: 'Email me a code' },
+];
 
 export default function Login() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isLoading, error } = useAppSelector((s) => s.auth);
+  const params = useLocalSearchParams<{ email?: string; reset?: string }>();
+  // Snapshot: the params belong to the arrival, not to later edits.
+  const [afterReset, setAfterReset] = useState(params.reset === '1');
   const [mode, setMode] = useState<Mode>('password');
-  const [email, setEmail] = useState('');
+  const [emailRaw, setEmail] = useState(params.email ?? '');
   const [password, setPassword] = useState('');
-  const [otp, setOtp] = useState('');
-  const [otpRequested, setOtpRequested] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const alive = useRef(true);
+  const inFlight = useRef(false);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  // Reset password dismisses back to this screen with new params; it stays mounted, so arrive again.
+  useEffect(() => {
+    if (params.reset !== '1') return;
+    setAfterReset(true); setMode('password'); setPassword(''); setError(null);
+    if (params.email) setEmail(params.email);
+  }, [params.reset, params.email]);
 
-  const submitPassword = () => dispatch(loginUser({ data: { email, password } }));
-  const requestOtp = async () => {
-    const res = await dispatch(requestLoginOtp({ data: { email } }));
-    if (requestLoginOtp.fulfilled.match(res)) setOtpRequested(true);
+  const email = emailRaw.trim();
+  const ready = emailOk(email) && (mode === 'code' || !!password);
+
+  const submit = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    if (mode === 'password') {
+      // Success sets the user; the AuthGate takes the player out of (auth).
+      const res = await dispatch(loginUser({ data: { email, password } }));
+      inFlight.current = false;
+      if (!alive.current) return;
+      setBusy(false);
+      if (!loginUser.fulfilled.match(res)) {
+        setError(loginErrorMessage(res.meta.status, res.payload));
+      }
+    } else {
+      const res = await dispatch(requestLoginOtp({ data: { email } }));
+      inFlight.current = false;
+      if (!alive.current) return;
+      setBusy(false);
+      if (requestLoginOtp.fulfilled.match(res)) router.push({ pathname: '/(auth)/login-code', params: { email } });
+      else setError((res.payload as string) || 'Something went wrong');
+    }
   };
-  const submitOtp = () => dispatch(verifyLoginOtp({ data: { email, otp } }));
 
-  const ctaLabel = mode === 'password' ? 'Sign in' : otpRequested ? 'Verify code' : 'Send me a code';
-  const onCta = mode === 'password' ? submitPassword : otpRequested ? submitOtp : requestOtp;
-  const canSubmit = mode === 'password' ? !!email && !!password : otpRequested ? otp.length === 6 : !!email;
-
-  const switchMode = (next: Mode) => {
-    setMode(next);
-    setOtpRequested(false);
-    dispatch(clearError());
-  };
+  const switchTo = (m: Mode) => { setMode(m); setError(null); };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
-      <LinearGradient
-        colors={['rgba(249,115,22,0.16)', 'rgba(11,11,11,0)']}
-        start={{ x: 0.9, y: 0 }}
-        end={{ x: 0.25, y: 0.55 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+    <AuthScreen
+      onBack={() => router.back()}
+      footer={
+        <View style={{ gap: 12 }}>
+          {error ? (
+            <View style={s.errRow}>
+              <Text style={s.err}>{error}</Text>
+              {mode === 'password' && /password not set/i.test(error) ? (
+                <Pressable accessibilityRole="link" accessibilityLabel="Email me a code" hitSlop={10} onPress={() => switchTo('code')}>
+                  <Text style={s.link}>Email me a code</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
+          <Button label={mode === 'password' ? 'Log in' : 'Email me a code'} busy={busy} disabled={!ready} onPress={submit} />
+          <Pressable accessibilityRole="link" accessibilityLabel="Create account" onPress={() => router.push('/(auth)/intro')} style={s.create}>
+            <Text style={s.createText}>New to Kria? <Text style={s.createBold}>Create account</Text></Text>
+          </Pressable>
+        </View>
+      }
+    >
+      <Title>Welcome back</Title>
+      {afterReset ? (
+        <View accessibilityRole="alert" style={s.card}>
+          <Icon name="check_circle" variant="f" size={20} color={colors.accent} />
+          <Text style={s.cardText}>Password changed. Log in with your new one.</Text>
+        </View>
+      ) : null}
+      <Segmented fill options={MODES} value={mode} onChange={switchTo} />
+      <Field
+        label="Email" value={emailRaw} onChangeText={(t) => { setEmail(t); setError(null); }}
+        autoCapitalize="none" autoCorrect={false} keyboardType="email-address" autoComplete="email" textContentType="emailAddress"
+        placeholder="you@example.com"
       />
-      <Hairlines />
-      <Ghost text="K" size={270} style={{ left: -44, top: 150 }} />
-
-      <View style={{ paddingHorizontal: 20, paddingTop: 16 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 32, color: '#fff' }}>Kria</Text>
-        <Lbl style={{ color: '#F97316', letterSpacing: 0.3 * 9, marginTop: 4 }}>Player</Lbl>
-      </View>
-
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 44, lineHeight: 53, color: '#fff' }}>
-            Welcome{'\n'}back.
-          </Text>
-
-          <View style={{ flexDirection: 'row', marginTop: 26, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 5, overflow: 'hidden' }}>
-            <Method label="Password" on={mode === 'password'} onPress={() => switchMode('password')} />
-            <View style={{ width: 1.5, backgroundColor: 'rgba(255,255,255,0.14)' }} />
-            <Method label="Email code" on={mode === 'otp'} onPress={() => switchMode('otp')} />
-          </View>
-
-          <View style={{ paddingTop: 20 }}>
-            <AuthInput
-              label="Email"
-              icon="mail"
-              placeholder="you@email.com"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
-            />
-
-            {mode === 'password' ? (
-              <AuthInput
-                label="Password"
-                icon="lock"
-                secureToggle
-                autoCapitalize="none"
-                value={password}
-                onChangeText={(t) => { setPassword(t); dispatch(clearError()); }}
-                labelRight={
-                  <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/forgot-password')} hitSlop={12}>
-                    <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.1 * 9, color: '#F97316' }}>FORGOT?</Text>
-                  </Pressable>
-                }
-              />
-            ) : null}
-
-            {mode === 'otp' && otpRequested ? (
-              <AuthInput
-                label="Code"
-                icon="lock"
-                placeholder="6-digit code"
-                keyboardType="number-pad"
-                maxLength={6}
-                value={otp}
-                onChangeText={(t) => { setOtp(t); dispatch(clearError()); }}
-              />
-            ) : null}
-
-            {/* Failure stays scoped to the form, in the design's mono red. */}
-            {error ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 11 }}>
-                <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-                <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
-                  {error}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 26 }}>
-        <Btn label={ctaLabel} arrow busy={isLoading} disabled={!canSubmit} onPress={onCta} style={{ marginBottom: 16 }} />
-        <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/register')} hitSlop={10} style={{ alignItems: 'center' }}>
-          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
-            NEW HERE? <Text style={{ color: '#F97316' }}>CREATE AN ACCOUNT</Text>
-          </Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+      {mode === 'password' ? (
+        <View>
+          <PasswordField
+            label="Password" value={password} onChangeText={(t) => { setPassword(t); setError(null); }}
+            placeholder={afterReset ? 'Your new password' : undefined}
+          />
+          <Pressable
+            accessibilityRole="link" accessibilityLabel="Forgot password" hitSlop={10} style={s.forgot}
+            onPress={() => router.push({ pathname: '/(auth)/forgot-password', params: { email } })}
+          >
+            <Text style={s.forgotText}>Forgot?</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Text style={s.note}>We'll email a one-time code to this address. No password needed.</Text>
+      )}
+    </AuthScreen>
   );
 }
+
+const s = StyleSheet.create({
+  card: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 14, paddingHorizontal: 16, borderRadius: radius.input, backgroundColor: colors.surface1 },
+  cardText: { flex: 1, fontFamily: font.regular, fontSize: 14, color: colors.text2 },
+  note: { fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: colors.text3 },
+  forgot: { position: 'absolute', top: 0, right: 0 }, // sits on the Password label row
+  forgotText: { fontFamily: font.medium, fontSize: 13, color: colors.text3 },
+  errRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  err: { fontFamily: font.regular, fontSize: 13, color: colors.error },
+  link: { fontFamily: font.semibold, fontSize: 13, color: colors.accent },
+  create: { height: 44, alignItems: 'center', justifyContent: 'center' },
+  createText: { fontFamily: font.regular, fontSize: 14, color: colors.text2 },
+  createBold: { fontFamily: font.semibold, color: colors.text },
+});

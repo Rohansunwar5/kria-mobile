@@ -23,6 +23,12 @@ it('disables Update until ready', () => {
   expect(update().props.accessibilityState.disabled).toBe(false);
 });
 
+it('enables Update for 8 letters with no number or symbol', () => {
+  render(<ChangePassword />);
+  fill('old', 'abcdefgh', 'abcdefgh');
+  expect(update().props.accessibilityState.disabled).toBe(false);
+});
+
 it('toggles each field visibility', () => {
   render(<ChangePassword />);
   const btns = screen.getAllByLabelText('Show password');

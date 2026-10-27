@@ -100,7 +100,7 @@ export const fetchProfile = createAsyncThunk(
   }
 );
 
-export const loginUser = createAsyncThunk(
+export const loginUser = createAsyncThunk<{ role: Role; responseData: any }, { data: any }, { rejectValue: string; rejectedMeta: { status?: number } }>(
   'auth/login',
   async ({ data }: { data: any }, { rejectWithValue }) => {
     try {
@@ -109,8 +109,9 @@ export const loginUser = createAsyncThunk(
       const responseData = response.data?.data?.data || response.data?.data;
       if (responseData?.accessToken) await storage.setAuth(responseData.accessToken, role);
       return { role, responseData };
-    } catch (error) {
-      return rejectWithValue(extractError(error));
+    } catch (error: any) {
+      // The payload stays the message; the HTTP status rides in action.meta so Log in can map a bare 401.
+      return rejectWithValue(extractError(error), { status: error.response?.status as number | undefined });
     }
   }
 );
@@ -353,6 +354,7 @@ export const authSlice = createSlice({
       state.user = null;
       state.role = null;
       state.accessToken = null;
+      state.pendingOnboarding = false;
     });
   },
 });

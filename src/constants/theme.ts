@@ -4,6 +4,7 @@ import { Easing } from 'react-native-reanimated';
 // DESIGN.md §4. Dark only. The second block is mock values DESIGN.md has no
 // token for yet (flagged there per its precedence rule: the mock wins).
 export const colors = {
+  mark: '#FF5404', markSeam: '#3E403D',
   bg: '#0B0B0D', surface1: '#151518', surface2: '#1D1D21', surface3: '#2A2A30',
   line: '#18181B', lineStrong: '#26262B',
   text: '#F5F5F5', text2: '#C6C6CC', text3: '#92929A', text4: '#6E6E76', disabled: '#5E5E66',

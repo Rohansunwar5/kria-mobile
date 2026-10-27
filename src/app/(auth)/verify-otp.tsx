@@ -1,180 +1,95 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { goBack } from '@/lib/nav';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, font } from '@/constants/theme';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { verifyOtp, clearError } from '@/store/slices/authSlice';
-import { Btn, Chip, Hazard, IconBtn, Lbl } from '@/components/canvas';
-import { Ghost } from '@/components/states';
-import { Icon } from '@/components/icons';
+import { verifyOtp } from '@/store/slices/authSlice';
 import { resendOtp } from '@/api/auth';
-
-const LEN = 6;
-
-/** Six hard cells with one invisible input behind them — the OS keyboard and
- *  SMS autofill both need a single field, and per-cell inputs fight both. */
-function OtpCells({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const input = useRef<TextInput>(null);
-  const [focused, setFocused] = useState(false);
-  const digits = value.split('');
-
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Enter the 6-digit code" onPress={() => input.current?.focus()}>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        {Array.from({ length: LEN }, (_, i) => {
-          const active = focused && i === Math.min(value.length, LEN - 1);
-          return (
-            <View
-              key={i}
-              style={{
-                flex: 1,
-                height: 58,
-                borderRadius: 5,
-                borderWidth: 1.5,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: active ? 'rgba(249,115,22,0.10)' : 'rgba(255,255,255,0.06)',
-                borderColor: active ? '#F97316' : 'rgba(255,255,255,0.14)',
-              }}
-            >
-              {digits[i] ? (
-                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 24, color: '#fff' }}>{digits[i]}</Text>
-              ) : active ? (
-                <View style={{ width: 1.5, height: 26, backgroundColor: '#F97316' }} />
-              ) : null}
-            </View>
-          );
-        })}
-      </View>
-      <TextInput
-        ref={input}
-        value={value}
-        onChangeText={(t) => onChange(t.replace(/\D/g, '').slice(0, LEN))}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        keyboardType="number-pad"
-        textContentType="oneTimeCode"
-        autoComplete="sms-otp"
-        maxLength={LEN}
-        // Off-screen rather than opacity:0 — Android still shows a caret at 0.
-        style={{ position: 'absolute', top: 0, left: -9999, width: 1, height: 1 }}
-      />
-    </Pressable>
-  );
-}
+import { otpDigits } from '@/lib/authForms';
+import { AuthScreen, Title } from '@/components/signin/AuthScreen';
+import { CodeBoxes } from '@/components/signin/CodeBoxes';
+import { useResend } from '@/components/signin/useResend';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
 
 export default function VerifyOtp() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isLoading, error, registrationStep, registrationEmail } = useAppSelector((s) => s.auth);
-  const [otp, setOtp] = useState('');
-  const [left, setLeft] = useState(30);
-  const [resending, setResending] = useState(false);
-  const [resent, setResent] = useState(false);
+  // Snapshot: Set password clears the store's email on success, which must not bounce this screen.
+  const [email] = useState(useAppSelector((s) => s.auth.registrationEmail));
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const alive = useRef(true);
+  const inFlight = useRef(false);
+  const { left, canResend, restart } = useResend(30);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  useEffect(() => { if (!email) router.replace('/(auth)/register'); }, [email, router]);
+  if (!email) return null;
 
-  useEffect(() => {
-    if (registrationStep === 3) router.replace('/(auth)/set-password');
-  }, [registrationStep, router]);
-
-  useEffect(() => {
-    if (left <= 0) return;
-    const t = setTimeout(() => setLeft((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [left]);
-
-  const submit = () => dispatch(verifyOtp({ data: { email: registrationEmail as string, otp } }));
+  const submit = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    const res = await dispatch(verifyOtp({ data: { email, otp: code } }));
+    inFlight.current = false;
+    if (!alive.current) return;
+    setBusy(false);
+    if (verifyOtp.fulfilled.match(res)) router.push('/(auth)/set-password');
+    else { setError((res.payload as string) || 'Something went wrong'); setCode(''); }
+  };
 
   const resend = async () => {
-    setResending(true);
+    if (inFlight.current) return;
+    inFlight.current = true;
     try {
-      await resendOtp(registrationEmail as string);
-      setResent(true);
-      setOtp('');
-      setLeft(30);
+      await resendOtp(email);
+      if (alive.current) { setCode(''); setError(null); restart(); }
     } catch {
-      // Leave the countdown expired so the button stays available.
+      if (alive.current) setError("Couldn't resend the code. Try again.");
     } finally {
-      setResending(false);
+      inFlight.current = false;
     }
   };
 
+  const more = 6 - code.length;
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>
-        <IconBtn icon="chevron-left" label="Go back" onPress={() => goBack(router)} />
+    <AuthScreen
+      onBack={() => router.back()}
+      right="2 of 3"
+      step={2}
+      footer={
+        <View style={{ gap: 12 }}>
+          {error ? <Text style={s.err}>{error}</Text> : null}
+          <Button label="Verify" busy={busy} disabled={code.length !== 6} onPress={submit} />
+        </View>
+      }
+    >
+      <Title sub={<>We sent a 6-digit code to <Text style={s.email}>{email}</Text></>}>Check your inbox</Title>
+      <CodeBoxes value={code} onChange={(d) => { setCode(otpDigits(d)); setError(null); }} autoFocus />
+      <View style={s.status}>
+        <Icon name={more > 0 ? 'mail' : 'check_circle'} size={18} color={colors.text3} variant={more > 0 ? 'o' : 'f'} />
+        <Text style={s.statusText}>{more > 0 ? `${more} more digit${more === 1 ? '' : 's'}` : 'Code looks complete. Tap Verify.'}</Text>
       </View>
-
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <Ghost text="6" size={230} style={{ right: -30, bottom: 170 }} />
-
-          <View style={{ height: 5, width: 56, marginBottom: 16, overflow: 'hidden' }}>
-            <Hazard />
-          </View>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 42, lineHeight: 51, color: '#fff' }}>
-            Check your{'\n'}inbox
-          </Text>
-          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
-            We sent a 6-digit code to{' '}
-            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 12, color: '#fff' }}>{registrationEmail}</Text>. It
-            expires in 10 minutes.
-          </Text>
-
-          <View style={{ paddingTop: 28 }}>
-            <OtpCells value={otp} onChange={(v) => { setOtp(v); dispatch(clearError()); }} />
-          </View>
-
-          {/* A real countdown, gating the real POST /resend-otp. */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 20, minHeight: 44 }}>
-            <Icon name="clock" size={15} color="#7d7d7d" strokeWidth={2} />
-            {left > 0 ? (
-              <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 0.1 * 10, color: '#a3a3a3' }}>
-                RESEND AVAILABLE IN <Text style={{ color: '#F97316' }}>{`0:${String(left).padStart(2, '0')}`}</Text>
-              </Text>
-            ) : (
-              <Pressable accessibilityRole="button" accessibilityLabel="Resend code" disabled={resending} onPress={resend} hitSlop={10} style={{ flex: 1 }}>
-                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 10, letterSpacing: 0.1 * 10, color: '#F97316' }}>
-                  {resending ? 'SENDING…' : 'RESEND CODE'}
-                </Text>
-              </Pressable>
-            )}
-          </View>
-          {resent ? (
-            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, color: '#16C46A', marginTop: 8 }}>
-              NEW CODE SENT
-            </Text>
-          ) : null}
-
-          {error ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 }}>
-              <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-              <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
-                {error}
-              </Text>
-            </View>
-          ) : null}
-
-          <View style={{ backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, padding: 13, marginTop: 24 }}>
-            <Lbl style={{ marginBottom: 9 }}>Not arriving?</Lbl>
-            <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4' }}>
-              Check spam, and confirm the address above is right. You can go back and change it — nothing is created until
-              the code is verified.
-            </Text>
-            <View style={{ alignSelf: 'flex-start', marginTop: 11 }}>
-              <Chip label="Change email" onPress={() => goBack(router)} />
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 26 }}>
-        <Btn label="Verify" busy={isLoading} disabled={otp.length !== LEN} onPress={submit} />
+      <View style={s.resend}>
+        <Text style={s.statusText}>Didn't get it? Check spam.</Text>
+        {canResend ? (
+          <Pressable accessibilityRole="button" accessibilityLabel="Resend code" hitSlop={10} onPress={resend}>
+            <Text style={s.link}>Resend code</Text>
+          </Pressable>
+        ) : (
+          <Text style={s.statusText}>{`Resend in 0:${String(left).padStart(2, '0')}`}</Text>
+        )}
       </View>
-    </SafeAreaView>
+    </AuthScreen>
   );
 }
+
+const s = StyleSheet.create({
+  email: { fontFamily: font.semibold, color: colors.text },
+  status: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  statusText: { fontFamily: font.regular, fontSize: 13, color: colors.text3 },
+  resend: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  link: { fontFamily: font.semibold, fontSize: 13, color: colors.accent },
+  err: { fontFamily: font.regular, fontSize: 13, color: colors.error },
+});

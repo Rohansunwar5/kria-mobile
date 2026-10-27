@@ -1,148 +1,101 @@
-import { useEffect, useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { goBack } from '@/lib/nav';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { registerUser, clearError } from '@/store/slices/authSlice';
-import { AuthInput } from '@/components/auth/AuthInput';
-import { Btn, Hazard, IconBtn } from '@/components/canvas';
-import { Ghost } from '@/components/states';
-import { Icon } from '@/components/icons';
+import { colors, font } from '@/constants/theme';
+import { useAppDispatch } from '@/store/hooks';
+import { registerUser } from '@/store/slices/authSlice';
+import { emailOk, phoneDigits, phoneOk } from '@/lib/authForms';
+import { AuthScreen, Title } from '@/components/signin/AuthScreen';
+import { Field } from '@/components/signin/Field';
+import { Button } from '@/components/ui/Button';
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+type Key = 'first' | 'last' | 'email' | 'phone';
 
 export default function Register() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isLoading, error, registrationStep } = useAppSelector((s) => s.auth);
-  // The server requires both names, so they are two fields — one "Full name"
-  // box hid that, and a one-word name left the button dead with no reason
-  // given. Onboarding captures the name on its own screen and the store keeps
-  // one `fullName`, split back here exactly as (onboarding)/auth.tsx does;
-  // arriving straight from login it is blank.
-  const onboardingName = useAppSelector((s) => s.onboarding.fullName);
-  const [firstIn, ...restIn] = (onboardingName || '').trim().split(/\s+/);
-  const [firstName, setFirstName] = useState(firstIn || '');
-  const [lastName, setLastName] = useState(restIn.join(' '));
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [agreed, setAgreed] = useState(false);
+  const [v, setV] = useState({ first: '', last: '', email: '', phone: '' });
+  const [touched, setTouched] = useState<Partial<Record<Key, boolean>>>({});
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const alive = useRef(true);
+  const inFlight = useRef(false);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
 
-  useEffect(() => {
-    if (registrationStep === 2) router.replace('/(auth)/verify-otp');
-  }, [registrationStep, router]);
+  const set = (k: Key) => (t: string) => { setV((p) => ({ ...p, [k]: k === 'phone' ? phoneDigits(t) : t })); setError(null); };
+  const touch = (k: Key) => () => setTouched((p) => ({ ...p, [k]: true }));
+  const show = (k: Key) => !!touched[k] || (k === 'phone' && !!v.phone);
 
-  const emailOk = EMAIL.test(email);
-  const ready = !!firstName.trim() && !!lastName.trim() && emailOk && phone.replace(/\D/g, '').length >= 10 && agreed;
+  const email = v.email.trim();
+  const left = 10 - v.phone.length;
+  const err = {
+    first: show('first') && !v.first.trim() ? 'Required' : undefined,
+    last: show('last') && !v.last.trim() ? 'Required' : undefined,
+    email: !show('email') ? undefined : !email ? 'Required' : !emailOk(email) ? 'Enter a valid email, like name@example.com' : undefined,
+    phone: !show('phone') ? undefined : !v.phone ? 'Required' : left > 0 ? `${left} more digit${left === 1 ? '' : 's'}` : undefined,
+  };
+  const ready = !!v.first.trim() && !!v.last.trim() && emailOk(email) && phoneOk(v.phone);
 
-  const submit = () =>
-    dispatch(registerUser({
-      data: { firstName: firstName.trim(), lastName: lastName.trim(), email, phone: phone.replace(/\s/g, '') },
+  const submit = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    const res = await dispatch(registerUser({
+      data: { firstName: v.first.trim(), lastName: v.last.trim(), email, phone: v.phone },
     }));
+    inFlight.current = false;
+    if (!alive.current) return;
+    setBusy(false);
+    if (registerUser.fulfilled.match(res)) router.push('/(auth)/verify-otp');
+    else setError((res.payload as string) || 'Something went wrong');
+  };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>
-        <IconBtn icon="chevron-left" label="Go back" onPress={() => goBack(router)} />
-        <View style={{ flex: 1 }} />
-        <Pressable accessibilityRole="button" onPress={() => router.replace('/(auth)/login')} hitSlop={10}>
-          <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.14 * 9, color: '#7d7d7d' }}>
-            HAVE AN ACCOUNT? <Text style={{ color: '#F97316' }}>SIGN IN</Text>
-          </Text>
-        </Pressable>
+    <AuthScreen
+      onBack={() => router.back()}
+      right="1 of 3"
+      step={1}
+      footer={
+        <View style={{ gap: 12 }}>
+          {error ? (
+            <View style={s.errRow}>
+              <Text style={s.err}>{error}</Text>
+              {/already registered/i.test(error) ? (
+                <Pressable accessibilityRole="link" accessibilityLabel="Log in" hitSlop={10} onPress={() => router.push('/(auth)/login')}>
+                  <Text style={s.link}>Log in</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
+          <Button label="Send code to my email" busy={busy} disabled={!ready} onPress={submit} />
+        </View>
+      }
+    >
+      <Title>Who's playing?</Title>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={{ flex: 1 }}>
+          <Field label="First name" value={v.first} onChangeText={set('first')} onBlur={touch('first')} error={err.first} autoComplete="given-name" textContentType="givenName" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Field label="Last name" value={v.last} onChangeText={set('last')} onBlur={touch('last')} error={err.last} autoComplete="family-name" textContentType="familyName" />
+        </View>
       </View>
-
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <Ghost text="Join" size={210} style={{ right: -42, bottom: 130 }} />
-
-          <View style={{ height: 5, width: 56, marginBottom: 16, overflow: 'hidden' }}>
-            <Hazard />
-          </View>
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 42, lineHeight: 51, color: '#fff' }}>
-            Create your{'\n'}account
-          </Text>
-          <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 13, lineHeight: 19, color: '#d4d4d4', marginTop: 12, maxWidth: 300 }}>
-            We send a 6-digit code to verify it. No password yet — you set that next.
-          </Text>
-
-          <View style={{ paddingTop: 26 }}>
-            <AuthInput label="First name" icon="person" placeholder="First name" autoComplete="given-name" value={firstName} onChangeText={setFirstName} />
-            <AuthInput label="Last name" icon="person" placeholder="Last name" autoComplete="family-name" value={lastName} onChangeText={setLastName} />
-
-            <AuthInput
-              label="Email"
-              icon="mail"
-              placeholder="you@email.com"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={(t) => { setEmail(t); dispatch(clearError()); }}
-              right={emailOk ? <Icon name="check" size={16} color="#16C46A" strokeWidth={2.8} /> : undefined}
-            />
-            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.08 * 9, color: '#7d7d7d', marginTop: -10, marginBottom: 14 }}>
-              THIS IS WHERE RECEIPTS AND MATCH ALERTS GO
-            </Text>
-
-            <AuthInput
-              label="Phone"
-              placeholder="98450 12345"
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={setPhone}
-              icon="phone"
-            />
-
-            {/* Consent, not a pre-ticked trap. */}
-            <Pressable
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: agreed }}
-              accessibilityLabel="Agree to the terms and privacy policy"
-              onPress={() => setAgreed((a) => !a)}
-              hitSlop={8}
-              style={{ flexDirection: 'row', gap: 11, alignItems: 'flex-start', minHeight: 44 }}
-            >
-              <View
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: 3,
-                  marginTop: 1,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: agreed ? '#F97316' : 'transparent',
-                  ...(agreed ? null : { borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.22)' }),
-                }}
-              >
-                {agreed ? <Icon name="check" size={13} color="#0B0B0B" strokeWidth={3.4} /> : null}
-              </View>
-              <Text style={{ flex: 1, fontFamily: 'Barlow_400Regular', fontSize: 11, lineHeight: 16, color: '#737373' }}>
-                I agree to the <Text style={{ color: '#F97316' }}>terms</Text> and{' '}
-                <Text style={{ color: '#F97316' }}>privacy policy</Text>. Organizers of tournaments you enter can see your
-                name, city and record.
-              </Text>
-            </Pressable>
-
-            {error ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 }}>
-                <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-                <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
-                  {error}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 26 }}>
-        <Btn label="Send me a code" arrow busy={isLoading} disabled={!ready} onPress={submit} />
-      </View>
-    </SafeAreaView>
+      <Field
+        label="Email" helper="We'll send your code here." error={err.email}
+        value={v.email} onChangeText={set('email')} onBlur={touch('email')}
+        autoCapitalize="none" autoCorrect={false} keyboardType="email-address" autoComplete="email" textContentType="emailAddress"
+      />
+      <Field
+        label="Mobile number" helper="Organisers use this to reach you on match day." error={err.phone} prefix="+91"
+        value={v.phone} onChangeText={set('phone')} onBlur={touch('phone')}
+        keyboardType="number-pad" autoComplete="tel" textContentType="telephoneNumber"
+      />
+    </AuthScreen>
   );
 }
+
+const s = StyleSheet.create({
+  errRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  err: { fontFamily: font.regular, fontSize: 13, color: colors.error },
+  link: { fontFamily: font.semibold, fontSize: 13, color: colors.accent },
+});

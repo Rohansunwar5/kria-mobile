@@ -3,31 +3,29 @@ import { useEffect, useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { isRunningInExpoGo } from 'expo';
 import { Provider } from 'react-redux';
 import { useFonts } from 'expo-font';
-import { Anton_400Regular } from '@expo-google-fonts/anton';
-import {
-  Barlow_400Regular,
-  Barlow_500Medium,
-    Barlow_600SemiBold,
-  Barlow_700Bold,
-} from '@expo-google-fonts/barlow';
-import { JetBrainsMono_400Regular, JetBrainsMono_600SemiBold, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
+import { JetBrainsMono_600SemiBold } from '@expo-google-fonts/jetbrains-mono';
 import { store } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { bootstrapAuth, logout } from '@/store/slices/authSlice';
 import { setUnauthorizedHandler } from '@/api/axios';
-import { colors } from '@/lib/theme';
-import { getOnboardingComplete } from '@/lib/onboardingStorage';
-import { BrandIntro } from '@/components/BrandIntro';
+import { colors } from '@/constants/theme';
+import { routeFor } from '@/lib/authRoute';
+import { LaunchAnimation } from '@/components/LaunchAnimation';
 
 SplashScreen.preventAutoHideAsync();
+// No native fade: the overlay underneath is the same #0B0B0D, and a fade would veil
+// the sprint's first frames. `fade` is read on iOS only; Android always fades, over
+// `duration` (400ms by default). Expo Go ignores both and warns, so skip it there.
+if (!isRunningInExpoGo()) SplashScreen.setOptions({ fade: false, duration: 0 });
 
 setUnauthorizedHandler(() => {
   store.dispatch(logout());
 });
 
-const PUBLIC_ROOTS = ['(auth)', '(onboarding)', 'auction', 'bracket', 'live'];
+const PUBLIC_ROOTS = ['(auth)', 'auction', 'bracket', 'live'];
 
 function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
   const dispatch = useAppDispatch();
@@ -35,60 +33,29 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
   const segments = useSegments();
   const { bootstrapped, user } = useAppSelector((s) => s.auth);
   const pendingOnboarding = useAppSelector((s) => s.auth.pendingOnboarding);
-  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
   const [introDone, setIntroDone] = useState(false);
-
-  useEffect(() => {
-    getOnboardingComplete().then(setOnboardingDone);
-  }, []);
+  const endIntro = useCallback(() => setIntroDone(true), []);
 
   useEffect(() => {
     dispatch(bootstrapAuth());
   }, [dispatch]);
 
-  const ready = fontsLoaded && bootstrapped && onboardingDone !== null;
+  const ready = fontsLoaded && bootstrapped;
 
+  const target = ready ? routeFor({ signedIn: !!user, pendingOnboarding, root: String(segments[0]), publicRoots: PUBLIC_ROOTS }) : null;
   useEffect(() => {
-    if (!ready) return;
-    const root = String(segments[0]);
-    const isPublic = root !== 'undefined' && PUBLIC_ROOTS.includes(root);
+    if (target) router.replace(target);
+  }, [target, segments, router]); // segments: re-check after every navigation
+  // The first route is chosen once the gate has nothing left to replace.
+  const routed = ready && !target;
 
-    if (user) {
-      if (pendingOnboarding) {
-        // Just signed up via onboarding: move from (auth) into the creating screen,
-        // and stay within (onboarding) until creating/welcome-done clear the flag.
-        if (root === '(onboarding)') return;
-        router.replace('/(onboarding)/creating');
-        return;
-      }
-      // A returning user who just authenticated: send them through the branded
-      // "entering" transition, which then lands on home. The transition screen
-      // and home itself must not be redirected.
-      if (root === '(auth)') {
-        const screen = String(segments[1]);
-        if (screen !== 'entering') {
-          router.replace('/(auth)/entering');
-        }
-        return;
-      }
-      // Fresh launch with a valid session and no route yet → straight to home.
-      if (root === 'undefined') {
-        router.replace('/(tabs)/home');
-      }
-    } else if (!isPublic) {
-      router.replace(onboardingDone ? '/(auth)/login' : '/(onboarding)/welcome');
-    }
-  }, [ready, user, segments, router, pendingOnboarding, onboardingDone]);
-
-  const onLayout = useCallback(async () => {
-    if (ready) await SplashScreen.hideAsync();
-  }, [ready]);
-
-  if (!ready) return null;
+  // The native splash and the launch overlay are both #0B0B0D: the splash holds
+  // until fonts load, then hides once the overlay is laid out over the app.
+  if (!fontsLoaded) return null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.ink }} onLayout={onLayout}>
-      <Stack screenOptions={{ headerShown: false }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }} onLayout={() => SplashScreen.hideAsync()}>
+      {ready ? <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(onboarding)" />
@@ -111,22 +78,15 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="tournament/[id]/teams" />
         <Stack.Screen name="tournament/[id]/matches" />
         <Stack.Screen name="tournament/[id]/tie/[tieId]" />
-      </Stack>
-      {!introDone ? <BrandIntro onDone={() => setIntroDone(true)} /> : null}
+      </Stack> : null}
+      {!introDone ? <LaunchAnimation ready={routed} onDone={endIntro} /> : null}
     </View>
   );
 }
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Anton_400Regular,
-    Barlow_400Regular,
-    Barlow_500Medium,
-  Barlow_600SemiBold,
-    Barlow_700Bold,
-    JetBrainsMono_400Regular,
-    JetBrainsMono_700Bold,
-    // New design (DESIGN.md §4.2). Names match `font` in constants/theme.ts.
+    // DESIGN.md §4.2. Names match `font` in constants/theme.ts.
     JetBrainsMono_600SemiBold,
     'Archivo-400': require('../../assets/fonts/Archivo-400.ttf'),
     'Archivo-500': require('../../assets/fonts/Archivo-500.ttf'),

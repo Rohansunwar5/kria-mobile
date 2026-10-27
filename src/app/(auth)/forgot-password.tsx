@@ -1,118 +1,80 @@
-import { useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { goBack } from '@/lib/nav';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { AuthInput } from '@/components/auth/AuthInput';
-import { Btn, Hairlines, IconBtn, Lbl } from '@/components/canvas';
-import { Ghost } from '@/components/states';
-import { Icon } from '@/components/icons';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { colors, font } from '@/constants/theme';
 import { requestPasswordReset } from '@/api/auth';
+import { emailOk } from '@/lib/authForms';
+import { AuthScreen, Title } from '@/components/signin/AuthScreen';
+import { Field } from '@/components/signin/Field';
+import { Button } from '@/components/ui/Button';
 
-// Not drawn on the canvas on purpose: this is Login with only the email field.
 export default function ForgotPassword() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState('');
+  const params = useLocalSearchParams<{ email?: string }>();
+  const [emailRaw, setEmail] = useState(params.email ?? '');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const alive = useRef(true);
+  const inFlight = useRef(false);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+
+  const email = emailRaw.trim();
 
   const submit = async () => {
-    setLoading(true);
-    setError('');
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
     try {
       await requestPasswordReset(email);
-      setSent(true);
+      if (alive.current) router.push({ pathname: '/(auth)/reset-password', params: { email } });
     } catch (e: any) {
-      setError(e.response?.data?.message || e.message || 'Something went wrong');
+      if (alive.current) setError(e?.response?.data?.message || e?.response?.data?.error || 'Something went wrong');
     } finally {
-      setLoading(false);
+      inFlight.current = false;
+      if (alive.current) setBusy(false);
     }
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
-      <LinearGradient
-        colors={['rgba(249,115,22,0.16)', 'rgba(11,11,11,0)']}
-        start={{ x: 0.9, y: 0 }}
-        end={{ x: 0.25, y: 0.55 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <Hairlines />
-      <Ghost text="K" size={270} style={{ left: -44, top: 150 }} />
-
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>
-        <IconBtn icon="chevron-left" label="Go back" onPress={() => goBack(router)} />
-      </View>
-
-      <View style={{ paddingHorizontal: 20 }}>
-        <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 26, lineHeight: 32, color: '#fff' }}>Kria</Text>
-        <Lbl style={{ color: '#F97316', letterSpacing: 0.3 * 9, marginTop: 4 }}>Player</Lbl>
-      </View>
-
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <Text style={{ fontFamily: 'Anton_400Regular', textTransform: 'uppercase', fontSize: 44, lineHeight: 53, color: '#fff' }}>
-            Reset your{'\n'}password.
-          </Text>
-
-          {sent ? (
-            <View style={{ marginTop: 24, backgroundColor: '#151515', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.14)', borderRadius: 6, padding: 13 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 9 }}>
-                <Icon name="check" size={14} color="#16C46A" strokeWidth={2.8} />
-                <Text style={{ fontFamily: 'JetBrainsMono_700Bold', fontSize: 9, letterSpacing: 0.16 * 9, textTransform: 'uppercase', color: '#16C46A' }}>
-                  Check your inbox
-                </Text>
-              </View>
-              <Text style={{ fontFamily: 'Barlow_400Regular', fontSize: 12, lineHeight: 18, color: '#d4d4d4' }}>
-                If an account exists for{' '}
-                <Text style={{ fontFamily: 'JetBrainsMono_400Regular', color: '#fff' }}>{email}</Text>, reset instructions are on
-                their way. Check spam if nothing lands in a minute.
-              </Text>
-            </View>
-          ) : (
-            <View style={{ paddingTop: 26 }}>
-              <AuthInput
-                label="Email"
-                icon="mail"
-                placeholder="you@email.com"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={email}
-                onChangeText={(t) => { setEmail(t); setError(''); }}
-              />
-              {error ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Icon name="alert" size={13} color="#FF4438" strokeWidth={2.4} />
-                  <Text style={{ flex: 1, fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.1 * 9, textTransform: 'uppercase', color: '#FF4438' }}>
-                    {error}
-                  </Text>
-                </View>
+    <AuthScreen
+      onBack={() => router.back()}
+      footer={
+        <View style={{ gap: 12 }}>
+          {error ? (
+            <View style={s.errRow}>
+              <Text style={s.err}>{error}</Text>
+              {/not verified/i.test(error) ? (
+                <Pressable accessibilityRole="link" accessibilityLabel="Create account" hitSlop={10} onPress={() => router.push('/(auth)/intro')}>
+                  <Text style={s.link}>Create account</Text>
+                </Pressable>
               ) : null}
             </View>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 26 }}>
-        {sent ? (
-          <Btn label="Back to sign in" onPress={() => router.replace('/(auth)/login')} />
-        ) : (
-          <Btn label="Send reset link" arrow busy={loading} disabled={!email} onPress={submit} style={{ marginBottom: 16 }} />
-        )}
-        {!sent ? (
-          <Pressable accessibilityRole="button" onPress={() => router.replace('/(auth)/login')} hitSlop={10} style={{ alignItems: 'center' }}>
-            <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 9, letterSpacing: 0.12 * 9, color: '#7d7d7d' }}>
-              BACK TO <Text style={{ color: '#F97316' }}>SIGN IN</Text>
-            </Text>
+          ) : null}
+          <Button label="Email me a code" busy={busy} disabled={!emailOk(email)} onPress={submit} />
+          <Pressable
+            accessibilityRole="link" accessibilityLabel="Log in" style={s.remember}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace({ pathname: '/(auth)/login', params: { email } }))}
+          >
+            <Text style={s.rememberText}>Remembered it? <Text style={s.rememberBold}>Log in</Text></Text>
           </Pressable>
-        ) : null}
-      </View>
-    </SafeAreaView>
+        </View>
+      }
+    >
+      <Title sub="We'll email you a 6-digit code to set a new one.">Forgot your password?</Title>
+      <Field
+        label="Email" value={emailRaw} onChangeText={(t) => { setEmail(t); setError(null); }}
+        autoCapitalize="none" autoCorrect={false} keyboardType="email-address" autoComplete="email" textContentType="emailAddress"
+        placeholder="you@example.com"
+      />
+    </AuthScreen>
   );
 }
+
+const s = StyleSheet.create({
+  errRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  err: { fontFamily: font.regular, fontSize: 13, color: colors.error },
+  link: { fontFamily: font.semibold, fontSize: 13, color: colors.accent },
+  remember: { height: 44, alignItems: 'center', justifyContent: 'center' },
+  rememberText: { fontFamily: font.regular, fontSize: 14, color: colors.text2 },
+  rememberBold: { fontFamily: font.semibold, color: colors.text },
+});

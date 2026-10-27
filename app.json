@@ -29,11 +29,8 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
+          "backgroundColor": "#0B0B0D",
+          "image": "./assets/images/splash-transparent.png"
         }
       ],
       "expo-secure-store",
@@ -44,7 +41,11 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiBaseUrl": "https://api.kria.club"
+      "apiBaseUrl": "https://api.kria.club",
+      "router": {},
+      "eas": {
+        "projectId": "b93ea6a5-b412-4065-97a9-515ffb4fd088"
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-import type { TagVariant } from '@/components/StatusPill';
+export type TagVariant = 'live' | 'open' | 'auction' | 'up' | 'end' | 'fail' | 'outline';
 
 export const CITIES = ['All', 'Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Pune', 'Hyderabad', 'Kolkata'];
 export const SPORTS = ['All', 'badminton', 'cricket'];

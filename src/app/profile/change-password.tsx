@@ -91,7 +91,7 @@ export default function ChangePassword() {
               {passwordRules(next).map((r) => (
                 <View key={r.label} style={s.rule}>
                   <Icon name={r.met ? 'check_circle' : 'radio_button_unchecked'} variant={r.met ? 'f' : 'o'} size={18} color={r.met ? colors.accent : colors.text4} />
-                  <Text style={{ fontFamily: font.regular, fontSize: 13, color: r.met ? colors.text2 : colors.text3 }}>{r.label}</Text>
+                  <Text style={{ fontFamily: font.regular, fontSize: 13, color: r.met ? colors.text2 : r.required ? colors.text3 : colors.text4 }}>{r.label}</Text>
                 </View>
               ))}
             </View>

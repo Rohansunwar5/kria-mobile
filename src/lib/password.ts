@@ -1,22 +1,27 @@
-export interface Rule { label: string; met: boolean }
+export interface Rule { label: string; met: boolean; required: boolean }
+
+const mixed = (pw: string) => /[^A-Za-z]/.test(pw);
+
+export const passwordOk = (pw: string) => pw.length >= 8;
 
 export function passwordRules(pw: string): Rule[] {
   return [
-    { label: 'At least 8 characters', met: pw.length >= 8 },
-    { label: 'One number', met: /\d/.test(pw) },
-    { label: 'One symbol', met: /[^A-Za-z0-9]/.test(pw) },
+    { label: 'At least 8 characters', met: passwordOk(pw), required: true },
+    { label: 'Add a number or symbol (recommended)', met: mixed(pw), required: false },
   ];
 }
 
-/** 0–4. The fourth block is length ≥ 12. */
-export function passwordScore(pw: string): number {
+/** 0 empty, 1 under 8, 2 is 8+, 3 is 8+ with a number or symbol, 4 is 12+ with a number or symbol. */
+export function passwordScore(pw: string): 0 | 1 | 2 | 3 | 4 {
   if (!pw) return 0;
-  return passwordRules(pw).filter((r) => r.met).length + (pw.length >= 12 ? 1 : 0);
+  if (!passwordOk(pw)) return 1;
+  if (!mixed(pw)) return 2;
+  return pw.length >= 12 ? 4 : 3;
 }
 
-export const strengthLabel = (score: number) => (score <= 1 ? 'Too weak' : score === 2 ? 'Fair' : score === 3 ? 'Strong' : 'Very strong');
+export const strengthLabel = (score: number) => ['', 'Too weak', 'Fair', 'Strong', 'Very strong'][score] ?? '';
 
 export const mismatch = (next: string, confirm: string) => confirm.length > 0 && confirm !== next;
 
 export const passwordFormReady = (f: { current: string; next: string; confirm: string }) =>
-  !!f.current && passwordRules(f.next).every((r) => r.met) && !!f.confirm && !mismatch(f.next, f.confirm);
+  !!f.current && passwordOk(f.next) && !!f.confirm && !mismatch(f.next, f.confirm);

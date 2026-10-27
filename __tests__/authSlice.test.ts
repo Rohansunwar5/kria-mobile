@@ -42,6 +42,11 @@ describe('authSlice reducers', () => {
     expect(next.user?._id).toBe('1');
   });
 
+  it('logout.fulfilled also drops a pending onboarding handoff', () => {
+    const next = reducer({ ...initial, pendingOnboarding: true }, { type: 'auth/logout/fulfilled' });
+    expect(next.pendingOnboarding).toBe(false);
+  });
+
   it('register.fulfilled advances to step 2 with email', () => {
     const action = { type: 'auth/register/fulfilled', payload: { email: 'a@b.c' } };
     const next = reducer(initial, action);
