@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View, type TextInputInstance } from 'react-native';
 import { colors, display, radius } from '@/constants/theme';
 
 /** Six boxes over one invisible input, so autofill and paste deliver the whole code at once. */
 export function CodeBoxes({ value, onChange, autoFocus }: { value: string; onChange: (digits: string) => void; autoFocus?: boolean }) {
-  const ref = useRef<TextInput>(null);
+  const ref = useRef<TextInputInstance>(null);
   const [focus, setFocus] = useState(!!autoFocus);
   return (
     <Pressable accessible={false} onPress={() => ref.current?.focus()} style={s.row}>

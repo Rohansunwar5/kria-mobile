@@ -75,7 +75,7 @@ describe('Teams screen', () => {
   });
 
   it('WhatsApp only on my own team', async () => {
-    const spy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const spy = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
     const a = setup();
     fireEvent.press(await screen.findByText('Join'));
     expect(spy).toHaveBeenCalledWith('https://chat.whatsapp.com/abc');

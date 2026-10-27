@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
 import { useFocusEffect, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getPublicPlayer } from '@/api/profileApi';
@@ -28,7 +28,7 @@ export default function Awards() {
   const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
   const [failed, setFailed] = useState(false);
   const [open, setOpen] = useState<Award | null>(null);
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   useScrollToTop(scroll);
 
   const seen = useRef(false);

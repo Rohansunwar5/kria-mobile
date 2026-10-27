@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getTeamBrands } from '@/api/cricketMatch';
@@ -31,7 +31,7 @@ export default function Events() {
   const [failed, setFailed] = useState(false);
   const [cities, setCities] = useState<string[]>([]);
   const [crests, setCrests] = useState<Record<string, Crest[]>>({});
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   const latest = useRef(0);
   useScrollToTop(scroll);
 

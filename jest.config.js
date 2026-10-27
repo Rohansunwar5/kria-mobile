@@ -17,10 +17,9 @@ const widenedPattern = basePattern.replace(/\)\)$/, `|${extraPkgs.join('|')}))`)
 
 module.exports = {
   ...expoPreset,
-  // Reanimated 4.5 / worklets 0.10 resolve NativeWorklets.native.ts under jest and
-  // then fail loading the native module. The resolver worklets ships strips the
-  // `.native` extension inside its own package so the JS variant is used instead.
-  resolver: require.resolve('react-native-worklets/jest/resolver'),
+  // Reanimated ships a jest resolver that swaps its native-only internals for the
+  // web variants, so no native module load is attempted under jest.
+  resolver: require.resolve('react-native-reanimated/jest/resolver'),
   setupFilesAfterEnv: [
     ...(expoPreset.setupFilesAfterEnv || []),
     '<rootDir>/jest.setup.ts',

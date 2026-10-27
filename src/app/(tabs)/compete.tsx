@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useScrollToTop } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,7 +24,7 @@ export default function Compete() {
   const params = useLocalSearchParams<{ seg?: string; sport?: string }>();
   const [seg, setSeg] = useState<Seg>('rankings');
   const [picked, setPicked] = useState<string>();
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   useScrollToTop(scroll);
 
   // Home links here with ?seg= or ?sport=; take them once, then clear them so

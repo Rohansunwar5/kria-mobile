@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
 import { router, useFocusEffect, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getRecentMatches, type RecentMatch } from '@/api/career';
@@ -39,7 +39,7 @@ export default function Profile() {
   const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
   const [recent, setRecent] = useState<RecentMatch[] | null>(null);
   const [openNearby, setOpenNearby] = useState<number | null>(null);
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   useScrollToTop(scroll);
 
   const seen = useRef(false);

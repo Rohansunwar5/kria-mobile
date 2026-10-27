@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { type Tabs } from 'expo-router';
+import { type BottomTabBarProps } from 'expo-router/tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { colors, ease, font, motion, radius } from '@/constants/theme';
-
-// expo-router 57 vendors react-navigation: take the prop type from Tabs itself.
-type BottomTabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>>[0];
 
 export const TABS: { route: string; label: string; icon?: IconName }[] = [
   { route: 'home', label: 'Home', icon: 'home' },
@@ -25,7 +22,7 @@ export const TAB_BAR_SPACE = 96;
  * DESIGN §5.1 + Motion "Tab pill": floating bar, one surface3 pill that
  * travels to the active tab in 280ms with a soft decelerate, no bounce.
  */
-export function TabBar({ state, navigation, avatar }: BottomTabBarProps & { avatar?: { initials: string; photo?: string } }) {
+export function TabBar({ state, emitter, navigateToTab, avatar }: BottomTabBarProps & { avatar?: { initials: string; photo?: string } }) {
   const insets = useSafeAreaInsets();
   const reduced = useReducedMotion();
   const active = TABS.findIndex((t) => t.route === state.routes[state.index]?.name);
@@ -56,8 +53,8 @@ export function TabBar({ state, navigation, avatar }: BottomTabBarProps & { avat
               onPress={() => {
                 if (!route) return;
                 // Re-tapping the active tab lets the screen scroll to top (useScrollToTop).
-                const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-                if (!on && !event.defaultPrevented) navigation.navigate(tab.route);
+                const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+                if (!on && !event.defaultPrevented) navigateToTab(route.key);
               }}
               style={s.item}
             >

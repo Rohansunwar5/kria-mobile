@@ -6,7 +6,7 @@ const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, back: jest.fn(), canGoBack: () => true, replace: jest.fn() }),
 }));
-jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn().mockResolvedValue(true) }));
+jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn().mockResolvedValue(undefined) }));
 const mockPay = jest.fn();
 jest.mock('@/api/payment', () => ({ getMyPayments: (...a: unknown[]) => mockPay(...a) }));
 
@@ -34,7 +34,7 @@ it('shows the total and rows', async () => {
 });
 
 it('row opens the sheet with ids; Get help mails support', async () => {
-  const open = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+  const open = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
   render(<Payments />);
   fireEvent.press(await screen.findByLabelText('Smash Open'));
   expect(screen.getByText(/^Paid · /)).toBeTruthy();

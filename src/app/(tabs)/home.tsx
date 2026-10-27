@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
 import { router, useFocusEffect, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
@@ -39,7 +39,7 @@ export default function Home() {
   const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
   const [events, setEvents] = useState<{ list: Tournament[]; near: boolean } | null>(null);
   const [boards, setBoards] = useState<Record<string, RankedPlayer[] | null>>({});
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   useScrollToTop(scroll);
 
   const city = user?.location?.trim();

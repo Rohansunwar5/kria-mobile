@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Linking, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Linking, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions, type ScrollViewInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { TournamentCategory } from '@/api/tournaments';
@@ -36,7 +36,7 @@ export default function TournamentScreen() {
   const loggedIn = !!useAppSelector((s) => s.auth.user);
   const { data, loading, error, reload } = useTournament(id);
   const { teams, announcements, auctions, matches } = useOverviewExtras(id, data?.categories);
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   const [categoriesY, setCategoriesY] = useState(0);
   const bannerH = Math.round((width * 9) / 16);
 
