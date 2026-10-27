@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Forgot password: code and new password</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B0D}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;font-feature-settings:'liga'}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#0B0B0D;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif">
+  <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;padding:0 12px">
+    <a href="ForgotEmail.dc.html" aria-label="Back" style="all:unset;cursor:pointer;width:44px;height:44px;display:grid;place-items:center"><span class="ms" style="font-size:24px">arrow_back</span></a>
+  </div>
+  <div style="position:absolute;top:106px;left:0;right:0;padding:12px 24px 0;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h2 style="margin:0;font-size:44px;font-stretch:62%;font-weight:800;line-height:.92">Set a new password</h2>
+      <span style="font-size:14px;line-height:1.5;color:#A3A3AB">Enter the 6-digit code we sent to <span style="color:#F5F5F5;font-weight:600">neha.joshi@gmail.com</span></span>
+    </div>
+    <label style="position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;cursor:text">
+      <sc-for list="{{boxes}}" as="b" hint-placeholder-count="6"><span style="height:60px;border-radius:14px;background:#151518;box-shadow:inset 0 0 0 {{b.ring}};display:grid;place-items:center;font-size:30px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums">{{b.d}}</span></sc-for>
+      <input aria-label="6-digit code" value="418236" inputmode="numeric" autocomplete="one-time-code" style="position:absolute;inset:0;opacity:0;border:none;font-size:16px">
+    </label>
+    <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#92929A">Didn't get it? Check spam.</span><span style="color:#6E6E76;font-variant-numeric:tabular-nums">Resend in 0:24</span></div>
+    <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">New password</span>
+      <span style="position:relative;display:flex"><input type="password" value="smash2026" placeholder="At least 8 characters" style="flex:1;min-width:0;height:54px;padding:0 56px 0 16px;border:none;outline:none;border-radius:14px;background:#151518;color:#F5F5F5;font-size:16px"><button aria-label="Show password" style="all:unset;cursor:pointer;position:absolute;right:6px;top:5px;width:44px;height:44px;display:grid;place-items:center"><span class="ms" style="font-size:20px;color:#92929A">visibility</span></button></span>
+    </label>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span style="display:flex;align-items:center;gap:10px;font-size:13px;color:#C6C6CC"><span style="width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#F5F5F5"><span class="ms" style="font-size:14px;color:#0B0B0D;font-variation-settings:'wght' 600">check</span></span>At least 8 characters</span>
+      <span style="display:flex;align-items:center;gap:10px;font-size:13px;color:#C6C6CC"><span style="width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#F5F5F5"><span class="ms" style="font-size:14px;color:#0B0B0D;font-variation-settings:'wght' 600">check</span></span>Add a number or symbol (recommended)</span>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 24px 40px">
+    <a href="LoginAfterReset.dc.html" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:grid;place-items:center;font-size:16px;font-weight:700">Reset password</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const code = '418236';
+    const boxes = Array.from({ length: 6 }, (_, i) => ({ d: code[i] || '', ring: code[i] ? '1.5px #3A3A42' : '0 transparent' }));
+    return { boxes };
+  }
+}
+</script>
+</body>
+</html>

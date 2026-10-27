@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&display=block" rel="stylesheet">
+<style>
+html,body{background:#141416}
+body{margin:0;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#F5F5F5;text-decoration:none}
+a:hover{color:#FF5A1F}
+input{font-family:inherit}
+input::placeholder{color:#5E5E66}
+*::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+
+<section id="t7" style="background:#141416;color:#F5F5F5;width:max-content;min-width:100%;box-sizing:border-box;padding:56px 56px 72px;display:flex;flex-direction:column;gap:44px;border-bottom:1px solid #222227">
+
+<header style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px;align-items:start;max-width:1260px">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px"><img src="assets/kria-logo.png" alt="Kria" style="width:46px;height:40px;object-fit:contain"><span style="font:600 11px 'JetBrains Mono',monospace;color:#FF5A1F;letter-spacing:.08em">KRIA · SIGN-UP INTRO</span></div>
+    <h1 style="margin:0;font-size:60px;font-stretch:62%;font-weight:800;line-height:.9;letter-spacing:-.01em">Three screens on what Kria is for.</h1>
+    <p style="margin:0;font-size:14px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">Shown after Create account on <a href="#5a" style="color:#F5F5F5;text-decoration:underline">5a</a>, before the form on <a href="#5c" style="color:#F5F5F5;text-decoration:underline">5c</a>. Swipe or tap Next. Skip goes straight to the form; Google sign-in and Log in never see them.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Play → Compete → Tournaments</div>
+    <p style="margin:0;text-wrap:pretty">Each screen unpacks one word of the Welcome headline and shows the real UI it describes: a quick-match share code, a win-rate leaderboard, a tournament card. No illustrations to commission or replace later.</p>
+  </div>
+</header>
+
+<div style="display:flex;flex-wrap:wrap;gap:56px 44px;align-items:flex-start">
+
+<!-- 6a PLAY -->
+<div id="7a" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#7a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">7a</a><span style="font-size:13px;font-weight:600">Intro · Play</span><span style="font-size:12px;color:#6E6E76">1 of 3</span></div>
+  <div data-screen-label="7a Intro Play" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px"><a href="#5a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a><a href="#5c" style="height:44px;padding:0 12px;display:grid;place-items:center;font-size:14px;font-weight:600;color:#92929A">Skip</a></div>
+    <div style="position:absolute;top:122px;left:36px;right:36px;display:flex;flex-direction:column">
+      <div style="padding:20px;border-radius:24px;background:#151518;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:20px;color:#FF5A1F;font-variation-settings:'wght' 300">sports_tennis</span>Badminton</span><span style="padding:4px 9px;border-radius:999px;background:#232328;font-size:11px;font-weight:600;color:#C6C6CC">Quick match</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.08em;color:#92929A">SHARE CODE</span>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px"><span style="height:54px;border-radius:12px;background:#0B0B0D;display:grid;place-items:center;font-size:32px;font-stretch:62%;font-weight:800">K</span><span style="height:54px;border-radius:12px;background:#0B0B0D;display:grid;place-items:center;font-size:32px;font-stretch:62%;font-weight:800">R</span><span style="height:54px;border-radius:12px;background:#0B0B0D;display:grid;place-items:center;font-size:32px;font-stretch:62%;font-weight:800">7</span><span style="height:54px;border-radius:12px;background:#0B0B0D;display:grid;place-items:center;font-size:32px;font-stretch:62%;font-weight:800">P</span><span style="height:54px;border-radius:12px;background:#0B0B0D;display:grid;place-items:center;font-size:32px;font-stretch:62%;font-weight:800">2</span><span style="height:54px;border-radius:12px;background:#0B0B0D;display:grid;place-items:center;font-size:32px;font-stretch:62%;font-weight:800">X</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #232328"><span style="width:32px;height:32px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:12px;font-weight:700">NJ</span><span style="flex:1;font-size:14px;font-weight:600">Neha Joshi</span><span style="font-size:12px;color:#92929A">Host</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0 0;border-top:1px solid #232328"><span style="width:32px;height:32px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:12px;font-weight:700">AM</span><span style="flex:1;font-size:14px;font-weight:600">Arjun Mehta</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#C6C6CC"><span style="font-family:'Material Symbols Outlined';font-size:16px;color:#FF5A1F">check</span>Joined</span></div>
+        </div>
+      </div>
+      <div style="align-self:flex-end;margin:-20px -14px 0 0;padding:12px 16px 12px 12px;border-radius:16px;background:#F5F5F5;color:#0B0B0D;display:flex;align-items:center;gap:10px;box-shadow:0 18px 40px -12px rgba(0,0,0,.8)"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-variation-settings:'FILL' 1">check_circle</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;font-weight:700">You won 2–0</span><span style="font-size:11px;color:#55555C">Added to your record</span></span></div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:0 24px 40px;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <span style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.08em;color:#FF5A1F">01 / 03 · PLAY</span>
+        <h2 style="margin:0;font-size:52px;font-stretch:62%;font-weight:800;line-height:.88;letter-spacing:-.01em">Host a match in seconds.</h2>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">Start a quick match, share the code, and friends join from their phones. Every result goes on your record.</p>
+      </div>
+      <div style="display:flex;gap:6px"><span style="width:22px;height:6px;border-radius:3px;background:#F5F5F5"></span><span style="width:6px;height:6px;border-radius:3px;background:#2A2A30"></span><span style="width:6px;height:6px;border-radius:3px;background:#2A2A30"></span></div>
+      <a href="#7b" style="height:56px;border-radius:16px;background:#F5F5F5;color:#0B0B0D;display:grid;place-items:center;font-size:16px;font-weight:700">Next</a>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Lead with what you can do tonight.</span> A quick match needs only a friend and a 6-character code, so it comes first. The card is the real Match Room UI, so the promise matches what they'll see.</p>
+</div>
+
+<!-- 6b COMPETE -->
+<div id="7b" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#7b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">7b</a><span style="font-size:13px;font-weight:600">Intro · Compete</span><span style="font-size:12px;color:#6E6E76">2 of 3</span></div>
+  <div data-screen-label="7b Intro Compete" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px"><a href="#7a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a><a href="#5c" style="height:44px;padding:0 12px;display:grid;place-items:center;font-size:14px;font-weight:600;color:#92929A">Skip</a></div>
+    <div style="position:absolute;top:122px;left:36px;right:36px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:6px"><span style="padding:8px 13px;border-radius:999px;background:#F5F5F5;color:#0B0B0D;font-size:13px;font-weight:600">Badminton</span><span style="padding:8px 13px;border-radius:999px;background:#1D1D21;font-size:13px;font-weight:600">Cricket</span><span style="padding:8px 13px;border-radius:999px;background:#1D1D21;font-size:13px;font-weight:600">Table tennis</span></div>
+      <div style="padding:16px 18px 10px;border-radius:24px;background:#151518;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px"><span style="font-size:13px;font-weight:600">Bengaluru</span><span style="font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.08em;color:#92929A">WIN RATE</span></div>
+        <div style="display:flex;align-items:center;gap:12px;height:46px;border-top:1px solid #232328"><span style="width:18px;font:600 13px 'JetBrains Mono',monospace;color:#92929A">1</span><span style="width:30px;height:30px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:11px;font-weight:700">KR</span><span style="flex:1;font-size:14px;font-weight:600">Karthik Rao</span><span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">82%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;height:46px;border-top:1px solid #232328"><span style="width:18px;font:600 13px 'JetBrains Mono',monospace;color:#92929A">2</span><span style="width:30px;height:30px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:11px;font-weight:700">AI</span><span style="flex:1;font-size:14px;font-weight:600">Ananya Iyer</span><span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">76%</span></div>
+        <div style="margin:0 -10px;padding:10px;border-radius:14px;background:#232328;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:12px"><span style="width:18px;font:600 13px 'JetBrains Mono',monospace;color:#FF5A1F">3</span><span style="width:30px;height:30px;border-radius:50%;background:#F5F5F5;color:#0B0B0D;display:grid;place-items:center;font-size:11px;font-weight:700">NJ</span><span style="flex:1;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600">Neha Joshi<span style="padding:2px 6px;border-radius:5px;background:#0B0B0D;font-size:10.5px;font-weight:600;color:#C6C6CC">You</span></span><span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">71%</span></div>
+          <div style="display:flex;align-items:center;gap:6px;padding-left:30px;font-size:12px;color:#C6C6CC"><span style="font-family:'Material Symbols Outlined';font-size:16px;color:#FF5A1F">arrow_upward</span>5% behind #2</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;height:46px"><span style="width:18px;font:600 13px 'JetBrains Mono',monospace;color:#92929A">4</span><span style="width:30px;height:30px;border-radius:50%;background:#2A2A30;display:grid;place-items:center;font-size:11px;font-weight:700">VS</span><span style="flex:1;font-size:14px;font-weight:600">Vikram Shah</span><span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">68%</span></div>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:0 24px 40px;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <span style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.08em;color:#FF5A1F">02 / 03 · COMPETE</span>
+        <h2 style="margin:0;font-size:52px;font-stretch:62%;font-weight:800;line-height:.88;letter-spacing:-.01em">Climb your city's leaderboard.</h2>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">You're ranked by win rate in every sport you play. Ten matches and you're on the board.</p>
+      </div>
+      <div style="display:flex;gap:6px"><span style="width:6px;height:6px;border-radius:3px;background:#2A2A30"></span><span style="width:22px;height:6px;border-radius:3px;background:#F5F5F5"></span><span style="width:6px;height:6px;border-radius:3px;background:#2A2A30"></span></div>
+      <a href="#7c" style="height:56px;border-radius:16px;background:#F5F5F5;color:#0B0B0D;display:grid;place-items:center;font-size:16px;font-weight:700">Next</a>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">The ranking rule, said once and early.</span> Win rate and the 10-match minimum are stated here, so "Unranked" on the new-player Home reads as a goal, not a bug. The sport pills preview the Home switcher.</p>
+</div>
+
+<!-- 6c TOURNAMENTS -->
+<div id="7c" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#7c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">7c</a><span style="font-size:13px;font-weight:600">Intro · Tournaments</span><span style="font-size:12px;color:#6E6E76">3 of 3 → form</span></div>
+  <div data-screen-label="7c Intro Tournaments" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;padding:0 12px"><a href="#7b" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a></div>
+    <div style="position:absolute;top:118px;left:36px;right:36px;display:flex;flex-direction:column">
+      <div style="border-radius:24px;background:#151518;overflow:hidden;display:flex;flex-direction:column">
+        <img src="assets/banner-arohance-badminton.png" alt="" style="width:100%;height:128px;object-fit:cover;object-position:50% 40%;display:block">
+        <div style="padding:14px 18px 16px;display:flex;flex-direction:column;gap:8px">
+          <span style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#FF5A1F"><span style="width:7px;height:7px;border-radius:50%;background:#FF5A1F"></span>Registration open</span>
+          <span style="font-size:26px;font-stretch:62%;font-weight:800;line-height:.95">Arohance Badminton Tournament</span>
+          <span style="font-size:12.5px;color:#92929A">Men's &amp; Women's Singles · from ₹600</span>
+        </div>
+        <div style="margin:0 18px;padding:12px 0 16px;border-top:1px solid #232328;display:flex;align-items:center;gap:12px">
+          <span style="display:flex"><img src="assets/team-titans.png" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:contain;background:#F5F5F5;box-shadow:0 0 0 2px #151518"><img src="assets/team-tigr.png" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;background:#F5F5F5;box-shadow:0 0 0 2px #151518;margin-left:-8px"><img src="assets/team-sunrise.png" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;background:#F5F5F5;box-shadow:0 0 0 2px #151518;margin-left:-8px"><img src="assets/team-rawnat.png" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:contain;background:#F5F5F5;box-shadow:0 0 0 2px #151518;margin-left:-8px"></span>
+          <span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;font-weight:600">4 teams bidding</span><span style="font-size:11.5px;color:#92929A">Live auction · Sun 18 Oct</span></span>
+        </div>
+      </div>
+      <div style="align-self:flex-start;margin:-18px 0 0 -14px;padding:12px 16px 12px 12px;border-radius:16px;background:#F5F5F5;color:#0B0B0D;display:flex;align-items:center;gap:10px;box-shadow:0 18px 40px -12px rgba(0,0,0,.8)"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-variation-settings:'FILL' 1">military_tech</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;font-weight:700">Champion · Men's Singles</span><span style="font-size:11px;color:#55555C">Awarded by the organiser</span></span></div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:0 24px 40px;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <span style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.08em;color:#FF5A1F">03 / 03 · TOURNAMENTS</span>
+        <h2 style="margin:0;font-size:52px;font-stretch:62%;font-weight:800;line-height:.88;letter-spacing:-.01em">Enter real tournaments.</h2>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">Register for events near you, get picked in team auctions, follow the bracket live and earn awards.</p>
+      </div>
+      <div style="display:flex;gap:6px"><span style="width:6px;height:6px;border-radius:3px;background:#2A2A30"></span><span style="width:6px;height:6px;border-radius:3px;background:#2A2A30"></span><span style="width:22px;height:6px;border-radius:3px;background:#F5F5F5"></span></div>
+      <a href="#5c" style="height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:grid;place-items:center;font-size:16px;font-weight:700">Create my account</a>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Tournaments last, as the reason to stay.</span> Real banner and team crests from Arohance. Skip disappears here because the CTA already goes to the form, and it's the only orange button in the intro.</p>
+</div>
+
+</div>
+</section>
+
+<section id="t5" style="background:#141416;color:#F5F5F5;min-height:100vh;width:max-content;min-width:100%;box-sizing:border-box;padding:56px 56px 72px;display:flex;flex-direction:column;gap:44px">
+
+<header style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start;max-width:1500px">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px"><img src="assets/kria-logo.png" alt="Kria" style="width:46px;height:40px;object-fit:contain"><span style="font:600 11px 'JetBrains Mono',monospace;color:#FF5A1F;letter-spacing:.08em">KRIA · ONBOARDING</span></div>
+    <h1 style="margin:0;font-size:60px;font-stretch:62%;font-weight:800;line-height:.9;letter-spacing:-.01em">From download to first match in under two minutes.</h1>
+    <p style="margin:0;font-size:14px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">Each phone is one step, and every field is live. It ends on the <a href="Kria Player App - New Player.dc.html#4a" style="color:#F5F5F5;text-decoration:underline">new-player Home</a>.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Exactly the player-auth API</div>
+    <p style="margin:0;text-wrap:pretty">Register (first name, last name, email, phone) → verify the emailed OTP → set a password (8+ characters). Log in by password or by emailed code. Google sign-in skips straight to the profile. Status goes pending → otp_verified → verified.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Profile after the account, never before</div>
+    <p style="margin:0;text-wrap:pretty">Sport and city personalise Home. Date of birth and gender are only needed to enter tournaments, so they're skippable with the consequence stated. The notifications screen comes last and only explains what it's for.</p>
+  </div>
+</header>
+
+<div style="display:flex;flex-wrap:wrap;gap:56px 44px;align-items:flex-start;max-width:2200px">
+
+<!-- 5a WELCOME -->
+<div id="5a" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#5a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">5a</a><span style="font-size:13px;font-weight:600">Welcome</span></div>
+  <div data-screen-label="5a Welcome" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <img src="assets/banner-cricket.png" alt="" style="position:absolute;top:0;left:0;width:100%;height:520px;object-fit:cover;object-position:58% 30%">
+    <div style="position:absolute;top:300px;left:0;right:0;height:240px;background:linear-gradient(180deg,rgba(11,11,13,0),#0B0B0D 85%)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:0 24px 40px;display:flex;flex-direction:column;gap:22px">
+      <img src="assets/kria-logo.png" alt="Kria" style="width:56px;height:49px;object-fit:contain">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h2 style="margin:0;font-size:64px;font-stretch:62%;font-weight:800;line-height:.86;letter-spacing:-.01em">Play.<br>Compete.<br>Get on the board.</h2>
+        <p style="margin:0;font-size:15px;line-height:1.5;color:#C6C6CC;max-width:300px">Host games with friends, enter real tournaments and build a record that counts.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <a href="#7a" style="height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:grid;place-items:center;font-size:16px;font-weight:700">Create account</a>
+        <a href="#5f" style="height:56px;border-radius:16px;background:#1D1D21;display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:600"><span style="width:22px;height:22px;border-radius:50%;background:#F5F5F5;color:#0B0B0D;display:grid;place-items:center;font-size:13px;font-weight:800">G</span>Continue with Google</a>
+        <a href="#5b" style="height:44px;display:grid;place-items:center;font-size:14px;color:#C6C6CC">I already have an account · <span style="color:#F5F5F5;font-weight:600">Log in</span></a>
+      </div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">One photo, one promise, one action.</span> This is the only full-bleed photograph in onboarding. The gradient exists only to keep the headline readable. Create account is the single orange element.</p>
+</div>
+
+<!-- 5b LOGIN -->
+<div id="5b" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#5b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">5b</a><span style="font-size:13px;font-weight:600">Log in</span><span style="font-size:12px;color:#6E6E76">password or emailed code</span></div>
+  <div data-screen-label="5b Log in" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;padding:0 12px"><a href="#5a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a></div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:0;padding:12px 24px 0;display:flex;flex-direction:column;gap:26px">
+      <h2 style="margin:0;font-size:44px;font-stretch:62%;font-weight:800;line-height:.92">Welcome back</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:3px;border-radius:14px;background:#151518"><sc-for list="{{ loginModes }}" as="m" hint-placeholder-count="2"><button onClick="{{ m.on }}" style="all:unset;cursor:pointer;height:40px;border-radius:11px;display:grid;place-items:center;font-size:13px;font-weight:600;background:{{ m.bg }};color:{{ m.fg }}">{{ m.label }}</button></sc-for></div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">Email</span><input value="{{ lEmail }}" onChange="{{ setLEmail }}" type="email" placeholder="you@example.com" style="height:54px;padding:0 16px;border:none;outline:none;border-radius:14px;background:#151518;color:#F5F5F5;font-size:16px"></label>
+        <sc-if value="{{ lPwMode }}" hint-placeholder-val="{{ true }}">
+          <label style="display:flex;flex-direction:column;gap:8px"><span style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:#C6C6CC">Password<span style="font-weight:500;color:#92929A">Forgot?</span></span><input type="password" value="kria-smash-21" readonly style="height:54px;padding:0 16px;border:none;outline:none;border-radius:14px;background:#151518;color:#F5F5F5;font-size:16px;letter-spacing:.1em"></label>
+        </sc-if>
+        <sc-if value="{{ lOtpMode }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:13px;line-height:1.5;color:#92929A">We'll email a one-time code to this address. No password needed.</span>
+        </sc-if>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 24px 40px;display:flex;flex-direction:column;gap:10px">
+      <a href="{{ lHref }}" style="height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:grid;place-items:center;font-size:16px;font-weight:700">{{ lCta }}</a>
+      <a href="#7a" style="height:44px;display:grid;place-items:center;font-size:14px;color:#C6C6CC">New to Kria? <span style="color:#F5F5F5;font-weight:600">&nbsp;Create account</span></a>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Both login routes, equal weight.</span> The API supports password and passwordless email codes, so a segmented control switches between them. No buried "use a code instead" link.</p>
+</div>
+
+<!-- 5c REGISTER -->
+<div id="5c" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#5c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">5c</a><span style="font-size:13px;font-weight:600">Create account · 1 of 3</span><span style="font-size:12px;color:#6E6E76">clear a field to see validation</span></div>
+  <div data-screen-label="5c Create account" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px"><a href="#7c" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a><span style="font-size:13px;color:#92929A;padding-right:16px">1 of 3</span></div>
+    <div style="position:absolute;top:106px;left:24px;right:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px"><span style="height:3px;border-radius:2px;background:#FF5A1F"></span><span style="height:3px;border-radius:2px;background:#232328"></span><span style="height:3px;border-radius:2px;background:#232328"></span></div>
+    <div style="position:absolute;top:122px;left:0;right:0;bottom:120px;overflow-y:auto;scrollbar-width:none;padding:20px 24px 0;display:flex;flex-direction:column;gap:24px">
+      <h2 style="margin:0;font-size:44px;font-stretch:62%;font-weight:800;line-height:.92">Who's playing?</h2>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
+        <sc-for list="{{ nameFields }}" as="f" hint-placeholder-count="2">
+          <label style="display:flex;flex-direction:column;gap:8px;min-width:0"><span style="font-size:13px;font-weight:600;color:#C6C6CC">{{ f.label }}</span><input value="{{ f.value }}" onChange="{{ f.set }}" style="height:54px;min-width:0;width:100%;box-sizing:border-box;padding:0 14px;border:none;outline:none;border-radius:14px;background:#151518;box-shadow:inset 0 0 0 {{ f.ring }};color:#F5F5F5;font-size:16px"><span style="font-size:12px;color:#FF7A4D;min-height:15px">{{ f.err }}</span></label>
+        </sc-for>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:8px;margin-top:-8px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">Email</span><input value="{{ r.email }}" onChange="{{ setEmail }}" type="email" style="height:54px;padding:0 16px;border:none;outline:none;border-radius:14px;background:#151518;box-shadow:inset 0 0 0 {{ emailRing }};color:#F5F5F5;font-size:16px"><span style="font-size:12px;color:{{ emailHintColor }}">{{ emailHint }}</span></label>
+      <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">Mobile number</span>
+        <span style="display:flex;gap:8px"><span style="height:54px;padding:0 14px;border-radius:14px;background:#151518;display:grid;place-items:center;font-size:16px;color:#C6C6CC">+91</span><input value="{{ r.phone }}" onChange="{{ setPhone }}" inputmode="numeric" style="flex:1;min-width:0;height:54px;padding:0 16px;border:none;outline:none;border-radius:14px;background:#151518;box-shadow:inset 0 0 0 {{ phoneRing }};color:#F5F5F5;font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:.04em"></span>
+        <span style="font-size:12px;color:{{ phoneHintColor }}">{{ phoneHint }}</span></label>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 24px 40px;display:flex;flex-direction:column;gap:10px">
+      <a href="{{ regHref }}" style="height:56px;border-radius:16px;display:grid;place-items:center;font-size:16px;font-weight:700;background:{{ regBg }};color:{{ regFg }}">Send code to my email</a>
+      <span style="font-size:11px;line-height:1.45;color:#6E6E76;text-align:center">By continuing you agree to Kria's Terms and Privacy Policy.</span>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Four fields, no more.</span> These are exactly what /register requires. Validation runs as you type and the button stays inactive until every field is valid. The CTA says what happens next ("Send code"), not "Next".</p>
+</div>
+
+<!-- 5d OTP -->
+<div id="5d" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#5d" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">5d</a><span style="font-size:13px;font-weight:600">Verify email · 2 of 3</span><span style="font-size:12px;color:#6E6E76">type 6 digits</span></div>
+  <div data-screen-label="5d Verify email" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px"><a href="#5c" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a><span style="font-size:13px;color:#92929A;padding-right:16px">2 of 3</span></div>
+    <div style="position:absolute;top:106px;left:24px;right:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px"><span style="height:3px;border-radius:2px;background:#FF5A1F"></span><span style="height:3px;border-radius:2px;background:#FF5A1F"></span><span style="height:3px;border-radius:2px;background:#232328"></span></div>
+    <div style="position:absolute;top:122px;left:0;right:0;padding:20px 24px 0;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;flex-direction:column;gap:10px"><h2 style="margin:0;font-size:44px;font-stretch:62%;font-weight:800;line-height:.92">Check your inbox</h2><span style="font-size:14px;line-height:1.5;color:#A3A3AB">We sent a 6-digit code to <span style="color:#F5F5F5;font-weight:600">{{ r.email }}</span></span></div>
+      <label style="position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;cursor:text">
+        <sc-for list="{{ otpBoxes }}" as="b" hint-placeholder-count="6"><span style="height:60px;border-radius:14px;background:#151518;box-shadow:inset 0 0 0 {{ b.ring }};display:grid;place-items:center;font-size:30px;font-stretch:62%;font-weight:800;font-variant-numeric:tabular-nums">{{ b.d }}</span></sc-for>
+        <input value="{{ otp }}" onChange="{{ setOtp }}" inputmode="numeric" autocomplete="one-time-code" style="position:absolute;inset:0;opacity:0;border:none;font-size:16px">
+      </label>
+      <span style="display:flex;align-items:center;gap:8px;font-size:13px;color:{{ otpMsgColor }}"><span style="font-family:'Material Symbols Outlined';font-size:17px">{{ otpMsgIcon }}</span>{{ otpMsg }}</span>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#92929A">Didn't get it? Check spam.</span><span style="color:#6E6E76;font-variant-numeric:tabular-nums">Resend in 0:24</span></div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 24px 40px">
+      <a href="{{ otpHref }}" style="height:56px;border-radius:16px;display:grid;place-items:center;font-size:16px;font-weight:700;background:{{ otpBg }};color:{{ otpFg }}">Verify</a>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Six boxes over one real input,</span> so iOS and Android can autofill the code from the email. The address is echoed back in bold so a typo is obvious. Resend waits for a cooldown.</p>
+</div>
+
+<!-- 5e PASSWORD -->
+<div id="5e" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#5e" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">5e</a><span style="font-size:13px;font-weight:600">Set password · 3 of 3</span></div>
+  <div data-screen-label="5e Set password" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px"><a href="#5d" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a><span style="font-size:13px;color:#92929A;padding-right:16px">3 of 3</span></div>
+    <div style="position:absolute;top:106px;left:24px;right:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px"><span style="height:3px;border-radius:2px;background:#FF5A1F"></span><span style="height:3px;border-radius:2px;background:#FF5A1F"></span><span style="height:3px;border-radius:2px;background:#FF5A1F"></span></div>
+    <div style="position:absolute;top:122px;left:0;right:0;padding:20px 24px 0;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#C6C6CC"><span style="font-family:'Material Symbols Outlined';font-size:17px;color:#FF5A1F;font-variation-settings:'FILL' 1">verified</span>Email verified</span><h2 style="margin:0;font-size:44px;font-stretch:62%;font-weight:800;line-height:.92">Lock it in</h2></div>
+      <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">Password</span>
+        <span style="position:relative;display:flex"><input value="{{ pw }}" onChange="{{ setPw }}" type="{{ pwType }}" placeholder="At least 8 characters" style="flex:1;min-width:0;height:54px;padding:0 56px 0 16px;border:none;outline:none;border-radius:14px;background:#151518;color:#F5F5F5;font-size:16px"><button onClick="{{ togglePw }}" style="all:unset;cursor:pointer;position:absolute;right:6px;top:5px;width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:20px;color:#92929A">{{ pwIcon }}</button></span>
+      </label>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ pwRules }}" as="pr" hint-placeholder-count="2"><span style="display:flex;align-items:center;gap:10px;font-size:13px;color:{{ pr.color }}"><span style="width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:{{ pr.bg }};box-shadow:inset 0 0 0 1.5px {{ pr.ring }};font-family:'Material Symbols Outlined';font-size:14px;color:#0B0B0D;font-variation-settings:'wght' 600">{{ pr.icon }}</span>{{ pr.label }}</span></sc-for>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 24px 40px">
+      <a href="{{ pwHref }}" style="height:56px;border-radius:16px;display:grid;place-items:center;font-size:16px;font-weight:700;background:{{ pwBg }};color:{{ pwFg }}">Create my account</a>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">One hard rule, one soft hint.</span> 8 characters is the schema minimum and gates the button. "Add a number or symbol" is advice only, so it never blocks.</p>
+</div>
+
+<!-- 5f YOUR GAME -->
+<div id="5f" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#5f" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">5f</a><span style="font-size:13px;font-weight:600">Your game</span><span style="font-size:12px;color:#6E6E76">pick a sport, a city</span></div>
+  <div data-screen-label="5f Your game" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px"><span style="font-size:13px;color:#92929A">Your profile · 1 of 2</span><a href="#5g" style="font-size:14px;font-weight:600;color:#92929A">Skip</a></div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:120px;overflow-y:auto;scrollbar-width:none;padding:12px 24px 0;display:flex;flex-direction:column;gap:22px">
+      <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font-size:44px;font-stretch:62%;font-weight:800;line-height:.92">What do you play most?</h2><span style="font-size:14px;line-height:1.5;color:#A3A3AB">This sets your home ranking. You can still play and be ranked in any sport.</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <sc-for list="{{ sports }}" as="s" hint-placeholder-count="6">
+          <button onClick="{{ s.on }}" style="all:unset;cursor:pointer;height:76px;padding:0 14px;border-radius:18px;background:#151518;box-shadow:inset 0 0 0 {{ s.ring }};display:flex;flex-direction:column;justify-content:center;gap:6px">
+            <span style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'Material Symbols Outlined';font-size:24px;font-variation-settings:'wght' 300;color:{{ s.ic }}">{{ s.icon }}</span><span style="width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 {{ s.dot }}"></span></span>
+            <span style="font-size:14px;font-weight:600">{{ s.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">City</span><input value="{{ city }}" onChange="{{ setCity }}" placeholder="Where do you usually play?" style="height:54px;padding:0 16px;border:none;outline:none;border-radius:14px;background:#151518;color:#F5F5F5;font-size:16px"></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:-10px"><sc-for list="{{ cities }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="all:unset;cursor:pointer;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</button></sc-for></div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 24px 40px">
+      <a href="#5g" style="height:56px;border-radius:16px;display:grid;place-items:center;font-size:16px;font-weight:700;background:#F5F5F5;color:#0B0B0D">Continue</a>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">One sport, stated plainly.</span> The profile stores a single sport, so this is single-select, with copy that says it doesn't limit anything. The tiles show tournament sports; with 10+ the grid simply scrolls. City is free text with suggestions.</p>
+</div>
+
+<!-- 5g ABOUT YOU -->
+<div id="5g" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#5g" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">5g</a><span style="font-size:13px;font-weight:600">For tournaments</span><span style="font-size:12px;color:#6E6E76">skippable, with the cost shown</span></div>
+  <div data-screen-label="5g For tournaments" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 12px"><a href="#5f" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a><span style="font-size:13px;color:#92929A">Your profile · 2 of 2</span><a href="#5h" style="font-size:14px;font-weight:600;color:#92929A;padding-right:12px">Skip</a></div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:130px;overflow-y:auto;scrollbar-width:none;padding:12px 24px 0;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font-size:44px;font-stretch:62%;font-weight:800;line-height:.92">Ready for tournaments?</h2><span style="font-size:14px;line-height:1.5;color:#A3A3AB">Organisers run categories by age and gender. These go on your entry automatically, so you never retype them.</span></div>
+      <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">Date of birth</span>
+        <span style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr);gap:8px"><sc-for list="{{ dobFields }}" as="d" hint-placeholder-count="3"><input value="{{ d.value }}" onChange="{{ d.set }}" placeholder="{{ d.ph }}" inputmode="numeric" style="height:54px;min-width:0;width:100%;box-sizing:border-box;padding:0 14px;border:none;outline:none;border-radius:14px;background:#151518;color:#F5F5F5;font-size:16px;text-align:center;font-variant-numeric:tabular-nums"></sc-for></span>
+        <span style="font-size:12px;color:{{ dobHintColor }}">{{ dobHint }}</span>
+      </label>
+      <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:600;color:#C6C6CC">Gender</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><sc-for list="{{ genders }}" as="g" hint-placeholder-count="2"><button onClick="{{ g.on }}" style="all:unset;cursor:pointer;height:52px;border-radius:14px;display:grid;place-items:center;font-size:15px;font-weight:600;background:{{ g.bg }};color:{{ g.fg }}">{{ g.label }}</button></sc-for></div>
+        <span style="font-size:12px;color:#6E6E76">Shown to organisers only, to place you in the right category.</span>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 24px 40px;display:flex;flex-direction:column;gap:10px">
+      <a href="#5h" style="height:56px;border-radius:16px;display:grid;place-items:center;font-size:16px;font-weight:700;background:{{ aboutBg }};color:{{ aboutFg }}">Save</a>
+      <span style="font-size:12px;color:#6E6E76;text-align:center">Skip for now, and you'll be asked again when you enter a tournament.</span>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Ask with the reason attached.</span> Registration snapshots age and gender from the profile, so the screen says exactly that. Skipping is respected and the cost is stated in one line. The options match the API's values.</p>
+</div>
+
+<!-- 5h NOTIFICATIONS -->
+<div id="5h" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#5h" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">5h</a><span style="font-size:13px;font-weight:600">Notifications</span><span style="font-size:12px;color:#6E6E76">→ new-player Home</span></div>
+  <div data-screen-label="5h Notifications" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:120px;left:0;right:0;padding:0 24px;display:flex;flex-direction:column;gap:28px">
+      <span style="width:64px;height:64px;border-radius:20px;background:#151518;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:32px;color:#FF5A1F;font-variation-settings:'wght' 300">notifications_active</span>
+      <div style="display:flex;flex-direction:column;gap:10px"><h2 style="margin:0;font-size:44px;font-stretch:62%;font-weight:800;line-height:.92">Know when it's your turn.</h2><span style="font-size:14px;line-height:1.5;color:#A3A3AB">Only for things you're part of. No promotions.</span></div>
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="4">
+          <div style="display:flex;gap:14px;align-items:center;padding:14px 0;border-top:1px solid #18181B">
+            <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#C6C6CC;font-variation-settings:'wght' 300">{{ n.icon }}</span>
+            <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600">{{ n.t }}</span><span style="font-size:12px;color:#92929A">{{ n.d }}</span></span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 24px 40px;display:flex;flex-direction:column;gap:6px">
+      <a href="Kria Player App - New Player.dc.html#4a" style="height:56px;border-radius:16px;background:#FF5A1F;color:#0B0B0D;display:grid;place-items:center;font-size:16px;font-weight:700">Turn on notifications</a>
+      <a href="Kria Player App - New Player.dc.html#4a" style="height:48px;display:grid;place-items:center;font-size:14px;font-weight:600;color:#92929A">Not now</a>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">A pre-prompt, then the system dialog.</span> It lists the four moments that matter (all real backend events), so "Allow" is an informed choice. If they decline, it's never asked again on its own; there's a toggle in Settings.</p>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { lm: 'pw', lEmail: 'neha.joshi@gmail.com', first: 'Neha', last: 'Joshi', email: 'neha.joshi@gmail.com', phone: '98450 21764', otp: '4182', pw: 'smash2026', showPw: false, sport: 'badminton', city: 'Bengaluru', dd: '', mm: '', yyyy: '', gender: '' };
+
+  renderVals() {
+    const S = this.state, ACC = '#FF5A1F';
+    const sel = on => on ? { bg: '#F5F5F5', fg: '#0B0B0D' } : { bg: '#1D1D21', fg: '#F5F5F5' };
+    const go = (ok, a, b) => ok ? { bg: a || ACC, fg: '#0B0B0D' } : { bg: '#1D1D21', fg: '#5E5E66' };
+    const ERR = '1.5px #FF7A4D', NONE = '0 transparent';
+    const set = k => e => this.setState({ [k]: e.target.value });
+
+    const loginModes = [['pw', 'Password'], ['otp', 'Email me a code']].map(([k, l]) => ({ label: l, ...(S.lm === k ? { bg: '#2A2A30', fg: '#F5F5F5' } : { bg: 'transparent', fg: '#85858D' }), on: () => this.setState({ lm: k }) }));
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.email);
+    const digits = S.phone.replace(/\D/g, '');
+    const phoneOk = digits.length === 10;
+    const nameFields = [['first', 'First name'], ['last', 'Last name']].map(([k, label]) => ({ label, value: S[k], set: set(k), ring: S[k].trim() ? NONE : ERR, err: S[k].trim() ? '' : 'Required' }));
+    const regOk = S.first.trim() && S.last.trim() && emailOk && phoneOk;
+    const reg = go(regOk);
+
+    const otpD = S.otp.replace(/\D/g, '').slice(0, 6);
+    const otpBoxes = Array.from({ length: 6 }, (_, i) => ({ d: otpD[i] || '', ring: i === otpD.length ? '1.5px #F5F5F5' : (otpD[i] ? '1.5px #3A3A42' : '0 transparent') }));
+    const otpOk = otpD.length === 6;
+    const otpG = go(otpOk);
+
+    const pwLen = S.pw.length >= 8, pwMix = /[\d\W_]/.test(S.pw);
+    const rule = (ok, label, soft) => ({ label, icon: ok ? 'check' : '', bg: ok ? '#F5F5F5' : 'transparent', ring: ok ? 'transparent' : (soft ? '#2C2C32' : '#3A3A42'), color: ok ? '#C6C6CC' : (soft ? '#6E6E76' : '#F5F5F5') });
+    const pwG = go(pwLen);
+
+    const SP = [['badminton', 'Badminton', 'sports_tennis'], ['cricket', 'Cricket', 'sports_cricket'], ['table_tennis', 'Table tennis', 'table_restaurant'], ['tennis', 'Tennis', 'sports_tennis'], ['football', 'Football', 'sports_soccer'], ['kabaddi', 'Kabaddi', 'sports_kabaddi']];
+    const sports = SP.map(([k, label, icon]) => ({ label, icon, ring: S.sport === k ? '1.5px #F5F5F5' : NONE, dot: S.sport === k ? '6px ' + ACC : '1.5px #3A3A42', ic: S.sport === k ? ACC : '#C6C6CC', on: () => this.setState({ sport: k }) }));
+    const cities = ['Bengaluru', 'Mysuru', 'Pune', 'Hyderabad'].map(c => ({ label: c, ...sel(S.city === c), on: () => this.setState({ city: c }) }));
+
+    const num = (k, max) => e => this.setState({ [k]: e.target.value.replace(/\D/g, '').slice(0, max) });
+    const dobFields = [['dd', 'DD', 2], ['mm', 'MM', 2], ['yyyy', 'YYYY', 4]].map(([k, ph, mx]) => ({ value: S[k], ph, set: num(k, mx) }));
+    const d = +S.dd, m = +S.mm, y = +S.yyyy;
+    const dobFilled = S.dd && S.mm && S.yyyy.length === 4;
+    const dt = new Date(y, m - 1, d);
+    const dobValid = dobFilled && dt.getDate() === d && dt.getMonth() === m - 1 && y > 1930 && y <= 2021;
+    let age = 0; if (dobValid) { age = 2026 - y - ((m > 10 || (m === 10 && d > 15)) ? 1 : 0); }
+    const genders = [['male', 'Male'], ['female', 'Female']].map(([k, l]) => ({ label: l, ...sel(S.gender === k), on: () => this.setState({ gender: k }) }));
+    const aboutOk = dobValid && S.gender;
+    const ab = aboutOk ? { bg: '#F5F5F5', fg: '#0B0B0D' } : { bg: '#1D1D21', fg: '#5E5E66' };
+
+    return {
+      loginModes, lEmail: S.lEmail, setLEmail: set('lEmail'), lPwMode: S.lm === 'pw', lOtpMode: S.lm === 'otp', lCta: S.lm === 'pw' ? 'Log in' : 'Email me a code', lHref: S.lm === 'pw' ? 'Kria Player App.dc.html#1a' : '#5d',
+      r: { email: S.email, phone: S.phone }, nameFields, setEmail: set('email'), setPhone: e => this.setState({ phone: e.target.value.replace(/[^\d ]/g, '').slice(0, 11) }),
+      emailRing: emailOk ? NONE : ERR, emailHint: emailOk ? "We'll send your code here." : 'Enter a valid email, like name@example.com', emailHintColor: emailOk ? '#6E6E76' : '#FF7A4D',
+      phoneRing: phoneOk ? NONE : ERR, phoneHint: phoneOk ? 'Organisers use this to reach you on match day.' : `${10 - Math.min(digits.length, 10)} more digits`, phoneHintColor: phoneOk ? '#6E6E76' : '#FF7A4D',
+      regBg: reg.bg, regFg: reg.fg, regHref: regOk ? '#5d' : '#5c',
+      otp: S.otp, setOtp: e => this.setState({ otp: e.target.value.replace(/\D/g, '').slice(0, 6) }), otpBoxes,
+      otpMsg: otpOk ? 'Code looks complete. Tap Verify.' : `${6 - otpD.length} more digit${6 - otpD.length === 1 ? '' : 's'}`, otpMsgIcon: otpOk ? 'check_circle' : 'mail', otpMsgColor: otpOk ? '#F5F5F5' : '#92929A',
+      otpBg: otpG.bg, otpFg: otpG.fg, otpHref: otpOk ? '#5e' : '#5d',
+      pw: S.pw, setPw: set('pw'), pwType: S.showPw ? 'text' : 'password', pwIcon: S.showPw ? 'visibility_off' : 'visibility', togglePw: () => this.setState({ showPw: !S.showPw }),
+      pwRules: [rule(pwLen, 'At least 8 characters'), rule(pwMix, 'Add a number or symbol (recommended)', true)],
+      pwBg: pwG.bg, pwFg: pwG.fg, pwHref: pwLen ? '#5f' : '#5e',
+      sports, city: S.city, setCity: set('city'), cities,
+      dobFields, genders, dobHint: !dobFilled ? 'Used for age-group categories like U-17.' : dobValid ? `${age} years old · eligible for Open categories` : 'That date doesn’t look right.', dobHintColor: dobFilled && !dobValid ? '#FF7A4D' : '#6E6E76',
+      aboutBg: ab.bg, aboutFg: ab.fg,
+      notifs: [
+        { icon: 'how_to_reg', t: 'Registration approved', d: 'When an organiser accepts your entry' },
+        { icon: 'gavel', t: 'You were picked in an auction', d: 'Your new team and its WhatsApp group' },
+        { icon: 'schedule', t: 'Your match is next', d: 'Court and time, plus schedule changes' },
+        { icon: 'military_tech', t: 'Award earned', d: 'Honours from organisers and new milestones' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

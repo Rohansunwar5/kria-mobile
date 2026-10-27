@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&display=block" rel="stylesheet">
+<style>
+html,body{background:#141416}
+body{margin:0;color:#F5F5F5;font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#F5F5F5;text-decoration:none}
+a:hover{color:#FF5A1F}
+*::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+
+<section id="t3" style="background:#141416;color:#F5F5F5;min-height:100vh;width:max-content;min-width:100%;box-sizing:border-box;padding:56px 56px 72px;display:flex;flex-direction:column;gap:44px">
+
+<header style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start;max-width:1300px">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px"><img src="assets/kria-logo.png" alt="Kria" style="width:46px;height:40px;object-fit:contain"><span style="font:600 11px 'JetBrains Mono',monospace;color:#FF5A1F;letter-spacing:.08em">KRIA · LIVE MATCHES · SPECTATOR VIEW</span></div>
+    <h1 style="margin:0;font-size:60px;font-stretch:62%;font-weight:800;line-height:.9;letter-spacing:-.01em">The score is the screen.</h1>
+    <p style="margin:0;font-size:14px;line-height:1.5;color:#A3A3AB;text-wrap:pretty">How a live match reads, at three depths: a feed row, a sport-specific scoreboard, then detail on demand. Players watch; only staff score, and that stays in the organiser portal.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">One rule per sport</div>
+    <p style="margin:0;text-wrap:pretty"><strong style="color:#F5F5F5;font-weight:600">Badminton:</strong> the current game's points are the hero. Finished games sit beside them as small numbers, and game point or match point appear only when they're true.</p>
+    <p style="margin:0;text-wrap:pretty"><strong style="color:#F5F5F5;font-weight:600">Cricket:</strong> the chase is the hero ("need 32 off 22"), worked out from target and overs in cricketLiveState. Batters, the bowler and this over sit underneath.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.5;color:#A3A3AB">
+    <div style="font-size:13px;font-weight:650;color:#F5F5F5">Data and motion</div>
+    <p style="margin:0;text-wrap:pretty">The feed is GET /live-feed: tournament or quick, title, scoreline, tournament, category and round. Quick rows never show a join code. Match screens join the socket room match:{id} and update in place. The only motion is a quick change on the number that moved.</p>
+  </div>
+</header>
+
+<div style="display:flex;flex-wrap:wrap;gap:56px 44px;align-items:flex-start;max-width:1400px">
+
+<!-- 3a FEED -->
+<div id="3a" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#3a" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">3a</a><span style="font-size:13px;font-weight:600">Live now</span></div>
+  <div data-screen-label="3a Live now" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;padding:0 20px 40px;box-sizing:border-box">
+      <div style="height:56px;display:flex;align-items:center;margin:0 -8px"><a href="Kria Player App.dc.html#1a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a></div>
+      <div style="display:flex;align-items:baseline;gap:12px"><h2 style="margin:0;font-size:40px;font-stretch:62%;font-weight:800;line-height:1">Live now</h2><span style="font-size:13px;color:#92929A">3 matches</span></div>
+
+      <div style="padding:32px 0 6px;font-size:17px;font-weight:650">Tournaments</div>
+      <a href="#3b" style="display:flex;flex-direction:column;gap:12px;padding:20px 0;border-bottom:1px solid #18181B">
+        <span style="display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#92929A"><span>Arohance Badminton · Men's Singles · QF 4</span><span style="display:flex;align-items:center;gap:6px;color:#FF5A1F;font-weight:700;flex:none"><span style="width:6px;height:6px;border-radius:50%;background:#FF5A1F"></span>Live</span></span>
+        <span style="display:grid;grid-template-columns:22px minmax(0,1fr) 20px 30px;gap:8px 10px;align-items:center;font-variant-numeric:tabular-nums">
+          <img src="assets/team-rawnat.png" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:contain;background:#F5F5F5"><span style="font-size:16px;font-weight:600">Rohit Kulkarni</span><span style="font-size:14px;color:#6E6E76;text-align:right">18</span><span style="font-size:24px;font-stretch:62%;font-weight:800;text-align:right">{{ bA }}</span>
+          <img src="assets/team-titans.png" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:contain;background:#F5F5F5"><span style="font-size:16px;font-weight:600;color:#C6C6CC">Karthik Nair</span><span style="font-size:14px;color:#F5F5F5;font-weight:700;text-align:right">21</span><span style="font-size:24px;font-stretch:62%;font-weight:800;text-align:right;color:#C6C6CC">{{ bB }}</span>
+        </span>
+        <span style="font-size:12px;color:#92929A">Game 2 · Court 2</span>
+      </a>
+      <a href="#3c" style="display:flex;flex-direction:column;gap:12px;padding:20px 0;border-bottom:1px solid #18181B">
+        <span style="display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#92929A"><span>Koramangala Corporate T10 · League · Match 6</span><span style="display:flex;align-items:center;gap:6px;color:#FF5A1F;font-weight:700;flex:none"><span style="width:6px;height:6px;border-radius:50%;background:#FF5A1F"></span>Live</span></span>
+        <span style="display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px 10px;align-items:center;font-variant-numeric:tabular-nums">
+          <img src="assets/team-titans.png" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:contain;background:#F5F5F5"><span style="font-size:16px;font-weight:600;color:#C6C6CC">Titans SC</span><span style="font-size:15px;color:#C6C6CC">118/6 <span style="color:#6E6E76">(10)</span></span>
+          <img src="assets/team-rawnat.png" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:contain;background:#F5F5F5"><span style="font-size:16px;font-weight:600">Rawnat United</span><span style="font-size:22px;font-stretch:62%;font-weight:800">87/3 <span style="font-size:14px;font-stretch:100%;font-weight:400;color:#92929A">(6.2)</span></span>
+        </span>
+        <span style="font-size:12px;color:#F5F5F5">Rawnat need <strong style="color:#FF5A1F">32</strong> off 22 balls</span>
+      </a>
+
+      <div style="padding:44px 0 6px;font-size:17px;font-weight:650">Quick matches</div>
+      <div style="display:flex;flex-direction:column;gap:10px;padding:20px 0;border-bottom:1px solid #18181B">
+        <span style="display:flex;justify-content:space-between;font-size:12px;color:#92929A"><span style="display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Outlined';font-size:15px">sports_cricket</span>Cricket · started 34 min ago</span><span style="display:flex;align-items:center;gap:6px;color:#FF5A1F;font-weight:700"><span style="width:6px;height:6px;border-radius:50%;background:#FF5A1F"></span>Live</span></span>
+        <span style="font-size:16px;font-weight:600">Sunday XI vs Office Strikers</span>
+        <span style="font-size:15px;color:#C6C6CC;font-variant-numeric:tabular-nums">64/3 (5.2)</span>
+      </div>
+
+      
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Built from the feed's own fields.</span> Tournament rows lead with tournament, category and round. Quick rows only get title and scoreline, so they stay one line simpler, and private by design. The two-line layout reads like a scoreboard because the scoreline is the content.</p>
+</div>
+
+<!-- 3b BADMINTON -->
+<div id="3b" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#3b" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">3b</a><span style="font-size:13px;font-weight:600">Badminton · live</span><span style="font-size:12px;color:#6E6E76">tap "next rally" to simulate</span></div>
+  <div data-screen-label="3b Badminton live" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+      <span style="display:flex;align-items:center;gap:6px"><a href="#3a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a><span style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:600">Quarter-final 4</span><span style="font-size:11px;color:#92929A">Arohance · Men's Singles · Court 2</span></span></span>
+      <span style="display:flex;align-items:center;gap:6px;padding:6px 10px;margin-right:8px;border-radius:999px;background:#151518;font-size:12px;font-weight:700;color:{{ bStColor }}"><span style="width:7px;height:7px;border-radius:50%;background:{{ bStColor }}"></span>{{ bSt }}</span>
+    </div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;padding:0 20px 40px;box-sizing:border-box">
+      <div style="margin-top:8px;border-radius:26px;background:#151518;padding:22px 20px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#92929A"><span>{{ bGameLabel }}</span><span>Best of 3 · to 21</span></div>
+        <sc-for list="{{ bRows }}" as="r" hint-placeholder-count="2">
+          <div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:12px;align-items:center">
+            <img src="{{ r.logo }}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:contain;background:#F5F5F5">
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:17px;font-weight:650;color:{{ r.nameColor }}">{{ r.name }}</span><span style="font-size:12px;color:#92929A">{{ r.team }}</span></span>
+            <span style="display:flex;gap:8px;font-size:15px;font-variant-numeric:tabular-nums"><sc-for list="{{ r.done }}" as="g" hint-placeholder-count="1"><span style="width:20px;text-align:right;font-weight:{{ g.w }};color:{{ g.c }}">{{ g.v }}</span></sc-for></span>
+            <span style="width:76px;text-align:right;font-size:68px;font-stretch:62%;font-weight:800;line-height:.85;font-variant-numeric:tabular-nums;color:{{ r.ptColor }}">{{ r.pts }}</span>
+          </div>
+        </sc-for>
+        <sc-if value="{{ bFlag }}" hint-placeholder-val="{{ false }}"><div style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:10px;background:#0B0B0D;font-size:12px;font-weight:700;color:#FF5A1F">{{ bFlagText }}</div></sc-if>
+      </div>
+      <button onClick="{{ rally }}" style="all:unset;cursor:pointer;margin-top:10px;padding:8px 12px;border-radius:10px;background:#1D1D21;font-size:12px;font-weight:600;color:#C6C6CC">Next rally (demo)</button>
+
+      <div style="padding-top:44px;display:flex;flex-direction:column">
+        <span style="font-size:17px;font-weight:650;padding-bottom:12px">Games</span>
+        <sc-for list="{{ bGames }}" as="g" hint-placeholder-count="2">
+          <div style="display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #18181B;font-size:14px;font-variant-numeric:tabular-nums">
+            <span style="color:#92929A">Game {{ g.n }}</span><span style="font-weight:600">{{ g.s }}</span><span style="font-size:12px;color:{{ g.wc }}">{{ g.w }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="margin-top:44px;display:flex;gap:14px;align-items:center;padding:16px;border-radius:18px;box-shadow:inset 0 0 0 1px #222227">
+        <span style="font-family:'Material Symbols Outlined';font-size:22px;color:#92929A">account_tree</span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600">Winner plays Rohan D'Souza</span><span style="font-size:12px;color:#92929A">Semi-final 2 · 4:30 PM · Court 1</span></span>
+        <a href="Kria Tournament Details.dc.html#2e" style="font-size:13px;color:#92929A">Bracket</a>
+      </div>
+      <div style="padding-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:18px 16px">
+        <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;color:#92929A">Started</span><span style="font-size:14px;font-weight:600">2:52 PM</span></div>
+        <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;color:#92929A">Group stage</span><span style="font-size:14px;font-weight:600">D1 vs A2</span></div>
+      </div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">Current points huge, history small.</span> Finished games sit to the left of the live count, with the winner's number bright. The game point / match point chip is worked out from pointsToWin and the lead, so it only appears when it's true. Server and rally length aren't stored, so they aren't shown.</p>
+</div>
+
+<!-- 3c CRICKET -->
+<div id="3c" style="display:flex;flex-direction:column;gap:14px;width:390px;scroll-margin-top:24px">
+  <div style="display:flex;align-items:center;gap:10px"><a href="#3c" style="font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:#26262B;border-radius:5px;color:#F5F5F5">3c</a><span style="font-size:13px;font-weight:600">Cricket · live</span><span style="font-size:12px;color:#6E6E76">switch Live · Scorecard · Overs</span></div>
+  <div data-screen-label="3c Cricket live" style="position:relative;width:390px;height:844px;background:#0B0B0D;border-radius:48px;overflow:hidden;box-shadow:0 0 0 1px #2A2A30,0 40px 80px -30px rgba(0,0,0,.7)">
+    <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 36px;font-size:15px;font-weight:600;background:#0B0B0D;z-index:5"><span>9:41</span><span style="display:flex;gap:4px;font-family:'Material Symbols Outlined';font-size:17px;font-weight:normal">signal_cellular_alt wifi battery_full</span></div>
+    <div style="position:absolute;top:50px;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+      <span style="display:flex;align-items:center;gap:6px"><a href="#3a" style="width:44px;height:44px;display:grid;place-items:center;font-family:'Material Symbols Outlined';font-size:24px">arrow_back</a><span style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:600">Match 6 · League</span><span style="font-size:11px;color:#92929A">Koramangala Corporate T10</span></span></span>
+      <span style="display:flex;align-items:center;gap:6px;padding:6px 10px;margin-right:8px;border-radius:999px;background:#151518;font-size:12px;font-weight:700"><span style="width:7px;height:7px;border-radius:50%;background:#FF5A1F"></span>2nd innings</span>
+    </div>
+    <div style="position:absolute;top:106px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;padding:0 20px 40px;box-sizing:border-box">
+      <div style="margin-top:8px;border-radius:26px;background:#151518;padding:20px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center;font-variant-numeric:tabular-nums">
+          <img src="assets/team-titans.png" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:contain;background:#F5F5F5"><span style="font-size:15px;font-weight:600;color:#C6C6CC">Titans SC</span><span style="font-size:16px;color:#C6C6CC">118/6 <span style="font-size:13px;color:#6E6E76">(10.0)</span></span>
+          <img src="assets/team-rawnat.png" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:contain;background:#F5F5F5"><span style="font-size:17px;font-weight:650">Rawnat United</span><span style="font-size:44px;font-stretch:62%;font-weight:800;line-height:.9">87/3 <span style="font-size:15px;font-stretch:100%;font-weight:400;color:#92929A">(6.2)</span></span>
+        </div>
+        <div style="height:1px;background:#222227"></div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+          <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#92929A">To win</span><span style="font-size:28px;font-stretch:62%;font-weight:800;line-height:1">Need <span style="color:#FF5A1F">32</span> off 22</span></span>
+          <span style="display:flex;gap:14px;font-variant-numeric:tabular-nums">
+            <span style="display:flex;flex-direction:column;gap:2px;align-items:flex-end"><span style="font-size:11px;color:#92929A">Req. rate</span><span style="font-size:17px;font-weight:700">8.73</span></span>
+            <span style="display:flex;flex-direction:column;gap:2px;align-items:flex-end"><span style="font-size:11px;color:#92929A">Current</span><span style="font-size:17px;font-weight:700">13.74</span></span>
+          </span>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;padding-top:32px;border-bottom:1px solid #1A1A1D">
+        <sc-for list="{{ cTabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.on }}" style="all:unset;cursor:pointer;padding-bottom:12px;font-size:14px;font-weight:600;color:{{ t.color }};box-shadow:inset 0 -2px 0 {{ t.line }}">{{ t.label }}</button></sc-for>
+      </div>
+
+      <sc-if value="{{ cLive }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:32px;padding-top:28px">
+          <div style="display:flex;flex-direction:column">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 30px 26px 26px 44px;gap:6px;font-size:11px;font-weight:600;color:#6E6E76;padding-bottom:8px"><span>Batting</span><span style="text-align:right">R</span><span style="text-align:right">B</span><span style="text-align:right">4s</span><span style="text-align:right">6s</span><span style="text-align:right">SR</span></div>
+            <sc-for list="{{ crease }}" as="b" hint-placeholder-count="2">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 30px 26px 26px 44px;gap:6px;align-items:center;padding:10px 0;border-top:1px solid #18181B;font-size:14px;font-variant-numeric:tabular-nums">
+                <span style="font-weight:600">{{ b.name }}<span style="color:#FF5A1F">{{ b.star }}</span></span><span style="text-align:right;font-size:18px;font-stretch:62%;font-weight:800">{{ b.r }}</span><span style="text-align:right;color:#C6C6CC">{{ b.b }}</span><span style="text-align:right;color:#92929A">{{ b.f }}</span><span style="text-align:right;color:#92929A">{{ b.s }}</span><span style="text-align:right;color:#92929A">{{ b.sr }}</span>
+              </div>
+            </sc-for>
+            <span style="padding-top:8px;font-size:12px;color:#92929A">Partnership 18 (8)</span>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 26px 30px 26px 44px;gap:6px;font-size:11px;font-weight:600;color:#6E6E76;padding-bottom:8px"><span>Bowling</span><span style="text-align:right">O</span><span style="text-align:right">M</span><span style="text-align:right">R</span><span style="text-align:right">W</span><span style="text-align:right">Econ</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 26px 30px 26px 44px;gap:6px;align-items:center;padding:10px 0;border-top:1px solid #18181B;font-size:14px;font-variant-numeric:tabular-nums"><span style="font-weight:600">Karthik Nair</span><span style="text-align:right">1.2</span><span style="text-align:right;color:#92929A">0</span><span style="text-align:right">20</span><span style="text-align:right;font-size:18px;font-stretch:62%;font-weight:800">1</span><span style="text-align:right;color:#92929A">15.00</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">This over</span><span style="color:#92929A;font-variant-numeric:tabular-nums">6 runs</span></div>
+            <div style="display:flex;gap:6px"><sc-for list="{{ thisOver }}" as="bl" hint-placeholder-count="3"><span style="min-width:34px;height:34px;padding:0 6px;box-sizing:border-box;border-radius:10px;display:grid;place-items:center;font-size:13px;font-weight:700;background:{{ bl.bg }};color:{{ bl.fg }}">{{ bl.l }}</span></sc-for><sc-for list="{{ overSlots }}" as="x" hint-placeholder-count="4"><span style="width:34px;height:34px;border-radius:10px;box-shadow:inset 0 0 0 1px #26262B"></span></sc-for></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:#6E6E76;padding-top:4px"><span>Last over: 1 6 0 2 W 1 · 10 runs</span><span>Toss: Rawnat chose to bowl</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cCard }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:32px;padding-top:28px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:3px;border-radius:12px;background:#151518"><sc-for list="{{ innTabs }}" as="it" hint-placeholder-count="2"><button onClick="{{ it.on }}" style="all:unset;cursor:pointer;height:36px;border-radius:9px;display:grid;place-items:center;font-size:13px;font-weight:600;background:{{ it.bg }};color:{{ it.fg }}">{{ it.label }}</button></sc-for></div>
+          <div style="display:flex;flex-direction:column">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 30px 44px;gap:6px;font-size:11px;font-weight:600;color:#6E6E76;padding-bottom:8px"><span>Batter</span><span style="text-align:right">R</span><span style="text-align:right">B</span><span style="text-align:right">SR</span></div>
+            <sc-for list="{{ card.bat }}" as="b" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 30px 44px;gap:6px;align-items:center;padding:9px 0;border-top:1px solid #18181B;font-variant-numeric:tabular-nums">
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;font-weight:600">{{ b.name }}</span><span style="font-size:11px;color:{{ b.dc }}">{{ b.how }}</span></span>
+                <span style="text-align:right;font-size:17px;font-stretch:62%;font-weight:800">{{ b.r }}</span><span style="text-align:right;font-size:13px;color:#C6C6CC">{{ b.b }}</span><span style="text-align:right;font-size:13px;color:#92929A">{{ b.sr }}</span>
+              </div>
+            </sc-for>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid #18181B;font-size:13px;color:#92929A"><span>{{ card.extras }}</span><span style="font-weight:600;color:#F5F5F5">{{ card.total }}</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 30px 26px 44px;gap:6px;font-size:11px;font-weight:600;color:#6E6E76;padding-bottom:8px"><span>Bowler</span><span style="text-align:right">O</span><span style="text-align:right">R</span><span style="text-align:right">W</span><span style="text-align:right">Econ</span></div>
+            <sc-for list="{{ card.bowl }}" as="b" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 34px 30px 26px 44px;gap:6px;align-items:center;padding:9px 0;border-top:1px solid #18181B;font-size:14px;font-variant-numeric:tabular-nums"><span style="font-weight:600">{{ b.name }}</span><span style="text-align:right">{{ b.o }}</span><span style="text-align:right">{{ b.r }}</span><span style="text-align:right;font-size:17px;font-stretch:62%;font-weight:800">{{ b.w }}</span><span style="text-align:right;color:#92929A">{{ b.e }}</span></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Fall of wickets</span><span style="font-size:12px;line-height:1.6;color:#92929A">{{ card.fow }}</span></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cOvers }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px;padding-top:28px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Runs per over</span><span style="display:flex;gap:12px;font-size:11px;color:#92929A"><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#3A3A42"></span>Titans</span><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:#F5F5F5"></span>Rawnat</span></span></div>
+          <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px;align-items:end;height:170px;padding-bottom:4px;border-bottom:1px solid #222227">
+            <sc-for list="{{ manhattan }}" as="m" hint-placeholder-count="10">
+              <div style="display:flex;align-items:flex-end;justify-content:center;gap:2px;height:100%;position:relative">
+                <span style="width:9px;border-radius:3px 3px 0 0;height:{{ m.h1 }};background:#3A3A42"></span>
+                <span style="width:9px;border-radius:3px 3px 0 0;height:{{ m.h2 }};background:{{ m.c2 }};box-shadow:{{ m.wk }}"></span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px;font-size:10px;color:#6E6E76;text-align:center"><sc-for list="{{ manhattan }}" as="m" hint-placeholder-count="10"><span>{{ m.n }}</span></sc-for></div>
+          <span style="font-size:12px;color:#92929A;line-height:1.5">A ring marks an over with a wicket. Over 7 is in progress. After 6 overs Rawnat were 81, Titans 66.</span>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ overList }}" as="o" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #18181B">
+                <span style="font-size:12px;color:#92929A">Over {{ o.n }}</span>
+                <span style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ o.balls }}" as="bl" hint-placeholder-count="6"><span style="min-width:24px;height:24px;padding:0 4px;box-sizing:border-box;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:700;background:{{ bl.bg }};color:{{ bl.fg }}">{{ bl.l }}</span></sc-for></span>
+                <span style="font-size:13px;font-weight:600;font-variant-numeric:tabular-nums">{{ o.r }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#8E8E96;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:600">The chase is the headline.</span> "Need 32 off 22" and both rates are worked out from target, maxOvers and the live state. Batters, bowler and the ball chips come straight from the scorecard service (battingCard, bowlingCard, oversTimeline). The Overs tab's runs-per-over chart is the one chart cricket fans actually read.</p>
+</div>
+
+</div>
+<p style="margin:0;font-size:12.5px;color:#6E6E76">Try next: "innings break + result states" · "add the Live now row to Home" · "table tennis live (points-based, same as badminton)"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { a: 11, b: 7, games: [[18, 21]], ctab: 'live', inn: 2 };
+
+  renderVals() {
+    const S = this.state, ACC = '#FF5A1F';
+    // Badminton
+    const won = (x, y) => (x >= 21 && x - y >= 2) || x === 30;
+    const gA = S.games.filter(g => g[0] > g[1]).length, gB = S.games.length - gA;
+    const over = gA === 2 || gB === 2;
+    const gp = (x, y) => (x >= 20 && x > y) || x === 29;
+    const matchPtA = gA === 1 && gp(S.a, S.b), matchPtB = gB === 1 && gp(S.b, S.a);
+    let flag = '';
+    if (!over) {
+      if (matchPtA) flag = 'Match point · Kulkarni'; else if (matchPtB) flag = 'Match point · Nair';
+      else if (gp(S.a, S.b)) flag = 'Game point · Kulkarni'; else if (gp(S.b, S.a)) flag = 'Game point · Nair';
+    }
+    const leadA = S.a >= S.b;
+    const rowsDone = (i) => S.games.map(g => ({ v: g[i], w: g[i] > g[1 - i] ? 700 : 400, c: g[i] > g[1 - i] ? '#F5F5F5' : '#6E6E76' }));
+    const bRows = [
+      { name: 'Rohit Kulkarni', team: 'Rawnat United', logo: 'assets/team-rawnat.png', done: rowsDone(0), pts: over ? '' : S.a, ptColor: leadA ? '#F5F5F5' : '#6E6E76', nameColor: over && gA < gB ? '#92929A' : '#F5F5F5' },
+      { name: 'Karthik Nair', team: 'Titans Sports Club', logo: 'assets/team-titans.png', done: rowsDone(1), pts: over ? '' : S.b, ptColor: !leadA ? '#F5F5F5' : '#6E6E76', nameColor: over && gB < gA ? '#92929A' : '#F5F5F5' },
+    ];
+    const bGames = [...S.games.map((g, i) => ({ n: i + 1, s: `${g[0]}–${g[1]}`, w: g[0] > g[1] ? 'Kulkarni' : 'Nair', wc: '#92929A' })), ...(over ? [] : [{ n: S.games.length + 1, s: `${S.a}–${S.b}`, w: 'In play', wc: ACC }])];
+    const rally = () => {
+      if (over) { this.setState({ a: 11, b: 7, games: [[18, 21]] }); return; }
+      const toA = Math.random() < 0.55;
+      let a = S.a + (toA ? 1 : 0), b = S.b + (toA ? 0 : 1), games = S.games;
+      if (won(a, b) || won(b, a)) { games = [...games, [a, b]]; a = 0; b = 0; }
+      this.setState({ a, b, games });
+    };
+
+    // Cricket
+    const chip = l => l === 'W' ? { l, bg: ACC, fg: '#0B0B0D' } : (l === '4' || l === '6') ? { l, bg: '#F5F5F5', fg: '#0B0B0D' } : /^(wd|nb|lb|b)/.test(l) ? { l, bg: '#26262B', fg: '#C6C6CC' } : { l, bg: '#1D1D21', fg: '#F5F5F5' };
+    const thisOver = ['4', 'wd', '1'].map(chip);
+    const cTabs = [['live', 'Live'], ['card', 'Scorecard'], ['overs', 'Overs']].map(([k, l]) => ({ label: l, color: S.ctab === k ? '#F5F5F5' : '#85858D', line: S.ctab === k ? ACC : 'transparent', on: () => this.setState({ ctab: k }) }));
+    const crease = [
+      { name: 'Farhan Shaikh', star: '*', r: 35, b: 13, f: 3, s: 2, sr: '269.2' },
+      { name: 'Arjun Patil', star: '', r: 16, b: 7, f: 2, s: 0, sr: '228.6' },
+    ];
+    const CARDS = {
+      2: {
+        bat: [['Rohit Kulkarni', 'c Hegde b Pillai', 18, 8], ['Manoj Kumar', 'b Hegde', 9, 6], ['Farhan Shaikh', 'not out', 35, 13, true], ['Varun Gowda', 'lbw b Nair', 3, 4], ['Arjun Patil', 'not out', 16, 7, true]],
+        extras: 'Extras 6 (wd 4, lb 2)', total: '87/3 (6.2)',
+        bowl: [['Meera Pillai', '2.0', 24, 1], ['Sneha Reddy', '2.0', 28, 0], ['Vikram Hegde', '1.0', 13, 1], ['Karthik Nair', '1.2', 20, 1]],
+        fow: '1-22 Kulkarni (1.5) · 2-58 Kumar (4.6) · 3-69 Gowda (5.5)',
+      },
+      1: {
+        bat: [['Vikram Hegde', 'c Patil b Shaikh', 31, 17], ['Karthik Nair', 'run out (Kumar)', 22, 14], ['Nikhil Shetty', 'b Kulkarni', 14, 10], ['Aditya Rao', 'c Gowda b Kulkarni', 19, 9], ['Siddharth N', 'not out', 21, 10, true], ['Deepak S', 'b Shaikh', 4, 3]],
+        extras: 'Extras 7 (wd 5, nb 1, lb 1)', total: '118/6 (10.0)',
+        bowl: [['Farhan Shaikh', '2.0', 21, 2], ['Rohit Kulkarni', '2.0', 25, 2], ['Kavya Iyer', '2.0', 23, 0], ['Arjun Patil', '2.0', 24, 0], ['Manoj Kumar', '2.0', 24, 0]],
+        fow: '1-41 Hegde (3.2) · 2-63 Nair (5.1) · 3-79 Shetty (6.4) · 4-99 Rao (8.2) · 5-108 S (9.3) · 6-118 (10.0)',
+      },
+    };
+    const C = CARDS[S.inn];
+    const card = {
+      bat: C.bat.map(([name, how, r, b, no]) => ({ name, how, r, b, sr: (r / b * 100).toFixed(1), dc: no ? ACC : '#6E6E76' })),
+      extras: C.extras, total: C.total, fow: C.fow,
+      bowl: C.bowl.map(([name, o, r, w]) => { const [ov, bl] = o.split('.').map(Number); const balls = ov * 6 + (bl || 0); return { name, o, r, w, e: (r * 6 / balls).toFixed(2) }; }),
+    };
+    const innTabs = [[1, 'Titans SC 118/6'], [2, 'Rawnat Utd 87/3']].map(([k, l]) => ({ label: l, ...(S.inn === k ? { bg: '#2A2A30', fg: '#F5F5F5' } : { bg: 'transparent', fg: '#85858D' }), on: () => this.setState({ inn: k }) }));
+    const I1 = [9, 12, 7, 15, 10, 13, 8, 16, 11, 17], I2 = [12, 14, 11, 9, 19, 16, 6], W2 = [0, 1, 0, 0, 1, 1, 0];
+    const max = 20;
+    const manhattan = I1.map((r, i) => ({ n: i + 1, h1: (r / max * 100) + '%', h2: I2[i] !== undefined ? (I2[i] / max * 100) + '%' : '0%', c2: i === 6 ? ACC : '#F5F5F5', wk: W2[i] ? '0 0 0 1.5px #0B0B0D, 0 0 0 3px ' + ACC : 'none' }));
+    const OL = [[7, ['4', 'wd', '1'], 6], [6, ['1', '6', '0', '2', 'W', '1'], 10], [5, ['4', '1', 'W', '6', '4', '4'], 19]];
+    const overList = OL.map(([n, b, r]) => ({ n, r, balls: b.map(chip) }));
+
+    return {
+      bA: S.a, bB: S.b, bRows, bGames, rally, bFlag: !!flag, bFlagText: flag,
+      bSt: over ? 'Completed' : 'Live', bStColor: over ? '#92929A' : ACC,
+      bGameLabel: over ? (gA > gB ? 'Kulkarni wins ' : 'Nair wins ') + Math.max(gA, gB) + '–' + Math.min(gA, gB) + ' · tap to replay' : `Game ${S.games.length + 1} · Games ${gA}–${gB}`,
+      cTabs, cLive: S.ctab === 'live', cCard: S.ctab === 'card', cOvers: S.ctab === 'overs',
+      crease, thisOver, overSlots: [1, 2, 3, 4], card, innTabs, manhattan, overList,
+    };
+  }
+}
+</script>
+</body>
+</html>
