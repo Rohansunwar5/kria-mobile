@@ -45,7 +45,14 @@
     },
     "extra": {
       "apiBaseUrl": "https://api.kria.club",
-      "router": {}
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "6e2afcc6-b326-4ce8-80e4-b99e314160f7"
+      }
     }
   }
 }
