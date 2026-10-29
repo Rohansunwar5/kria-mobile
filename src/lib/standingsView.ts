@@ -1,4 +1,4 @@
-import type { LeaderboardEntry } from '@/api/leaderboard';
+import type { LeaderboardEntry, PointsConfig, TeamRow } from '@/api/leaderboard';
 import type { Match } from '@/api/match';
 import type { GroupStandings, SubMatch, Tie, TieDetail } from '@/api/teamLeague';
 import type { CategoryStatus, TournamentCategory } from '@/api/tournaments';
@@ -25,24 +25,12 @@ export function playerTable(entries: LeaderboardEntry[], myRegIds: string[]): Ta
 /** A completed match nobody won: a cricket tie ends with no winnerId ('by_score'), an organiser-settled one says 'tie', team leagues 'draw'. */
 const level = (m: Match) => !m.winnerId || m.winReason === 'tie' || m.winReason === 'draw';
 
-export function teamTable(matches: Match[], myTeamId?: string): TableRow[] {
-  const t = new Map<string, TableRow>();
-  const get = (id: string, name: string) => {
-    if (!t.has(id)) t.set(id, { key: id, rank: 0, name, p: 0, w: 0, l: 0, d: 0, mine: !!myTeamId && id === myTeamId });
-    return t.get(id)!;
-  };
-  for (const m of matches) {
-    if (m.status !== 'completed' || !m.teams?.team1Id || !m.teams?.team2Id) continue;
-    const a = get(m.teams.team1Id, m.teams.team1Name);
-    const b = get(m.teams.team2Id, m.teams.team2Name);
-    a.p++; b.p++;
-    if (level(m)) { a.d!++; b.d!++; }
-    else if (m.winnerId === a.key) { a.w++; b.l++; }
-    else if (m.winnerId === b.key) { b.w++; a.l++; }
-  }
-  return [...t.values()]
-    .sort((x, y) => y.w - x.w || x.l - y.l || x.name.localeCompare(y.name))
-    .map((r, i) => ({ ...r, rank: i + 1 }));
+/** The server ranks the team table (spec §4.3); the app keeps its order and renders it. */
+export function teamTable(rows: TeamRow[], myTeamId?: string): TableRow[] {
+  return rows.map((r, i) => ({
+    key: r.teamId, rank: i + 1, name: r.name, p: r.played, w: r.won, l: r.lost, d: r.drawn, pts: r.points,
+    mine: !!myTeamId && r.teamId === myTeamId,
+  }));
 }
 
 export function teamLeagueTable(s: GroupStandings, myTeamId?: string): TableRow[] {
@@ -52,10 +40,10 @@ export function teamLeagueTable(s: GroupStandings, myTeamId?: string): TableRow[
   }));
 }
 
-export function ruleLine(c: TournamentCategory, kind: TableKind): string {
+/** A team table states the points scheme it was ranked by — the server's, once it has answered. */
+export function ruleLine(c: TournamentCategory, kind: TableKind, points?: PointsConfig): string {
   if (kind === 'players') return 'Ranked by points scored, then point difference';
-  if (kind === 'teams') return 'Ranked by wins';
-  const t = c.teamLeagueConfig;
+  const t = (kind === 'teams' && points) || c.teamLeagueConfig;
   return `Win ${t?.pointsForWin ?? 2} · Draw ${t?.pointsForDraw ?? 1} · Loss ${t?.pointsForLoss ?? 0} points`;
 }
 

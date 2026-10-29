@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { getCategoryLeaderboard } from '@/api/leaderboard';
+import { getCategoryLeaderboard, getTeamTable } from '@/api/leaderboard';
 
 describe('getCategoryLeaderboard', () => {
   let mock: MockAdapter;
@@ -61,5 +61,26 @@ describe('getCategoryLeaderboard', () => {
     mock.onGet('/matches/leaderboard/c4').reply(200, {});
     const res = await getCategoryLeaderboard('c4');
     expect(res.boards).toEqual([{ label: null, entries: [] }]);
+  });
+});
+
+describe('getTeamTable', () => {
+  let mock: MockAdapter;
+  beforeEach(() => { mock = new MockAdapter(API); });
+  afterEach(() => { mock.restore(); });
+
+  it('reads the ranked team rows and the points scheme they were ranked by', async () => {
+    const rows = [{ teamId: 't1', name: 'Lions', played: 2, won: 2, lost: 0, drawn: 0, points: 4 }];
+    mock.onGet('/matches/leaderboard/c9').reply(200, {
+      data: { data: { leaderboard: rows, pointsConfig: { pointsForWin: 2, pointsForLoss: 0, pointsForDraw: 1 } } },
+    });
+    const res = await getTeamTable('c9');
+    expect(res.rows).toEqual(rows);
+    expect(res.pointsConfig).toEqual({ pointsForWin: 2, pointsForLoss: 0, pointsForDraw: 1 });
+  });
+
+  it('is empty when the server has no table yet', async () => {
+    mock.onGet('/matches/leaderboard/c10').reply(200, { data: { data: {} } });
+    expect((await getTeamTable('c10')).rows).toEqual([]);
   });
 });

@@ -10,12 +10,15 @@ jest.mock('expo-router', () => ({
 const mockHook = jest.fn();
 jest.mock('@/lib/useTournament', () => ({ useTournament: () => mockHook() }));
 jest.mock('@/api/match', () => ({ getCategoryBracket: jest.fn() }));
-jest.mock('@/api/leaderboard', () => ({ getCategoryLeaderboard: jest.fn() }));
+jest.mock('@/api/leaderboard', () => ({ getCategoryLeaderboard: jest.fn(), getTeamTable: jest.fn() }));
 jest.mock('@/api/teamLeague', () => ({ getGroupStandings: jest.fn(), getTiesByGroup: jest.fn() }));
 jest.mock('@/api/tournaments', () => ({ getTournamentTeams: jest.fn() }));
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { getCategoryBracket } = require('@/api/match');
-const { getCategoryLeaderboard } = require('@/api/leaderboard');
+const { getCategoryLeaderboard, getTeamTable } = require('@/api/leaderboard');
+// A server team-table row (the server ranks it; the screen renders it in that order).
+const trow = (teamId: string, played: number, won: number, lost: number, drawn: number, points: number) =>
+  ({ teamId, name: teamId, played, won, lost, drawn, points });
 const { getGroupStandings, getTiesByGroup } = require('@/api/teamLeague');
 const { getTournamentTeams } = require('@/api/tournaments');
 /* eslint-enable @typescript-eslint/no-require-imports */
@@ -42,6 +45,7 @@ beforeEach(() => {
   byCat = {};
   getCategoryBracket.mockImplementation(async (c: string) => ({ matches: byCat[c] ?? [], rounds: {}, competitorType: 'player' }));
   getCategoryLeaderboard.mockResolvedValue({ boards: [{ label: null, entries: [] }] });
+  getTeamTable.mockResolvedValue({ rows: [] });
   getGroupStandings.mockResolvedValue([]);
   getTiesByGroup.mockResolvedValue([]);
   getTournamentTeams.mockResolvedValue([]);
@@ -107,30 +111,39 @@ describe('Matches screen', () => {
     expect(getCategoryLeaderboard).toHaveBeenCalledWith('c1');
   });
 
-  it('cricket league counts the table from matches', async () => {
+  it('cricket league reads its table from the server, with points', async () => {
     const tm = (id: string, a: string, b: string, winner: string) => m({
       _id: id, sportType: 'cricket', competitorType: 'team', status: 'completed', winnerId: winner, matchConfig: { maxOvers: 20 },
       teams: { team1Id: a, team2Id: b, team1Name: a, team2Name: b }, result: { team1Summary: '120/4', team2Summary: '98/9' },
     });
     byCat = { c1: [tm('m1', 'Lions', 'Tigers', 'Lions'), tm('m2', 'Lions', 'Bears', 'Lions')] };
+    // A non-default scheme: the rule line shows the 2/1/0 default until the server
+    // answers, so only 3 points for a win proves the line came from the server.
+    getTeamTable.mockResolvedValue({
+      rows: [trow('Lions', 2, 2, 0, 0, 6), trow('Bears', 1, 0, 1, 0, 0), trow('Tigers', 1, 0, 1, 0, 0)],
+      pointsConfig: { pointsForWin: 3, pointsForLoss: 0, pointsForDraw: 1 },
+    });
     setup([cat({ _id: 'c1', name: 'Open T20', sport: 'cricket', matchType: 'team', bracketType: 'league' })], [{ _id: 'r1', categoryId: 'c1', teamId: 'Bears' }]);
-    expect(await screen.findByText('Ranked by wins')).toBeTruthy();
-    expect(screen.getByLabelText('1. Lions, played 2, won 2, lost 0, drawn 0')).toBeTruthy();
-    expect(screen.getByLabelText('2. Bears (you), played 1, won 0, lost 1, drawn 0')).toBeTruthy();
-    expect(screen.getByLabelText('3. Tigers, played 1, won 0, lost 1, drawn 0')).toBeTruthy();
+    // Await the table itself, not the rule line, which renders before the rows load.
+    expect(await screen.findByLabelText('1. Lions, played 2, won 2, lost 0, drawn 0, 6 points')).toBeTruthy();
+    expect(screen.getByText('Win 3 · Draw 1 · Loss 0 points')).toBeTruthy();
+    expect(getTeamTable).toHaveBeenCalledWith('c1');
+    expect(screen.getByLabelText('2. Bears (you), played 1, won 0, lost 1, drawn 0, 0 points')).toBeTruthy();
+    expect(screen.getByLabelText('3. Tigers, played 1, won 0, lost 1, drawn 0, 0 points')).toBeTruthy();
     fireEvent.press(screen.getByText('Player stats'));
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/cricket/leaderboard/[categoryId]', params: { categoryId: 'c1', tournamentName: 'Arohance Open', categoryName: 'Open T20' } });
   });
 
   // Live cricket completes a tie with no winnerId and winReason 'by_score'.
-  it('a tied cricket match reads tied with and counts drawn', async () => {
+  it('a tied cricket match reads tied with, and the server table counts it drawn', async () => {
+    getTeamTable.mockResolvedValue({ rows: [trow('Bears', 1, 0, 0, 1, 1), trow('Lions', 1, 0, 0, 1, 1)] });
     byCat = { c1: [m({
       _id: 'm1', sportType: 'cricket', competitorType: 'team', status: 'completed', winReason: 'by_score', matchConfig: { maxOvers: 20 },
       teams: { team1Id: 'Lions', team2Id: 'Bears', team1Name: 'Lions', team2Name: 'Bears' }, result: { team1Summary: '150/8', team2Summary: '150/6' },
     })] };
     setup([cat({ _id: 'c1', name: 'Open T20', sport: 'cricket', matchType: 'team', bracketType: 'league' })], []);
     expect(await screen.findByText('Lions tied with Bears')).toBeTruthy();
-    expect(screen.getByLabelText('1. Bears, played 1, won 0, lost 0, drawn 1')).toBeTruthy();
+    expect(await screen.findByLabelText('1. Bears, played 1, won 0, lost 0, drawn 1, 1 points')).toBeTruthy();
     expect(screen.queryByText('Lions d. Bears')).toBeNull();
   });
 
@@ -141,8 +154,9 @@ describe('Matches screen', () => {
       teams: { team1Id: 'Lions', team2Id: 'Bears', team1Name: 'Lions', team2Name: 'Bears' }, result: { team1Summary: '120/4', team2Summary: '98/9' },
     });
     byCat = { c1: [tm] };
+    getTeamTable.mockResolvedValue({ rows: [trow('Lions', 1, 1, 0, 0, 2), trow('Bears', 1, 0, 1, 0, 0)] });
     setup([cat({ _id: 'c1', name: 'Open T20', sport: 'cricket', matchType: 'team', bracketType: 'league' })], [{ _id: 'r9', categoryId: 'c2', teamId: 'Bears' }]);
-    expect(await screen.findByLabelText('2. Bears, played 1, won 0, lost 1, drawn 0')).toBeTruthy();
+    expect(await screen.findByLabelText('2. Bears, played 1, won 0, lost 1, drawn 0, 0 points')).toBeTruthy();
   });
 
   it('team league shows groups, the line and ties', async () => {

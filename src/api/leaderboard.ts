@@ -15,6 +15,28 @@ export interface LeaderboardEntry {
   rank?: number;
 }
 
+/** One team on a team category's league table, as the server ranks it. */
+export interface TeamRow {
+  teamId: string;
+  name: string;
+  played: number;
+  won: number;
+  lost: number;
+  drawn: number;
+  points: number;
+}
+
+export interface PointsConfig { pointsForWin: number; pointsForLoss: number; pointsForDraw: number }
+
+/**
+ * A team category's league table. The server ranks it (points, then wins, then
+ * fewer losses) and says which points scheme it used, so the app only renders.
+ */
+export async function getTeamTable(categoryId: string): Promise<{ rows: TeamRow[]; pointsConfig?: PointsConfig }> {
+  const data = unwrap(await API.get(`/matches/leaderboard/${categoryId}`)) ?? {};
+  return { rows: data.leaderboard ?? [], pointsConfig: data.pointsConfig };
+}
+
 export interface Board {
   /** Null for a plain category; a sub-match slot name for a team league. */
   label: string | null;

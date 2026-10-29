@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getCategoryLeaderboard, type LeaderboardEntry } from '@/api/leaderboard';
+import { getCategoryLeaderboard, getTeamTable, type LeaderboardEntry, type PointsConfig, type TeamRow } from '@/api/leaderboard';
 import { getCategoryBracket, type Match } from '@/api/match';
 import { getGroupStandings, getTiesByGroup, type GroupStandings, type Tie } from '@/api/teamLeague';
 import { getTournamentTeams, type CategoryStatus, type TournamentCategory } from '@/api/tournaments';
@@ -44,6 +44,7 @@ export default function Matches() {
   const [matches, setMatches] = useState<Record<string, Match[] | undefined>>({});
   const [loaded, setLoaded] = useState(false);
   const [boards, setBoards] = useState<Record<string, LeaderboardEntry[]>>({});
+  const [teamTables, setTeamTables] = useState<Record<string, { rows: TeamRow[]; pointsConfig?: PointsConfig }>>({});
   const [stages, setStages] = useState<Record<string, GroupStandings[][]>>({});
   const [ties, setTies] = useState<Record<string, Tie[]>>({});
   const [logos, setLogos] = useState<Record<string, string | undefined>>({});
@@ -79,7 +80,7 @@ export default function Matches() {
 
   useEffect(() => {
     // No leaderboard call while the view is the empty state; team leagues may have groups before matches.
-    if (!selId || !(view === 'teamLeague' || (view === 'players' && hasMatches))) return;
+    if (!selId || !(view === 'teamLeague' || ((view === 'players' || view === 'teams') && hasMatches))) return;
     let live = true;
     const key = `extras:${selId}`;
     const fail = () => live && flag(key, true);
@@ -87,6 +88,13 @@ export default function Matches() {
       getCategoryLeaderboard(selId).then((r) => {
         if (!live) return;
         setBoards((o) => ({ ...o, [selId]: (r.boards.find((b) => b.label === null) ?? r.boards[0])?.entries ?? [] }));
+        flag(key, false);
+      }, fail);
+    } else if (view === 'teams') {
+      // The server ranks it by points; counting it here from matches ranked by wins and disagreed.
+      getTeamTable(selId).then((r) => {
+        if (!live) return;
+        setTeamTables((o) => ({ ...o, [selId]: r }));
         flag(key, false);
       }, fail);
     } else {
@@ -166,12 +174,13 @@ export default function Matches() {
 
   function table(c: TournamentCategory, list: Match[], kind: 'players' | 'teams') {
     const entries = boards[c._id];
-    const rows = kind === 'teams' ? teamTable(list, me.teamId) : entries && playerTable(entries, me.registrationIds);
+    const tt = teamTables[c._id];
+    const rows = kind === 'teams' ? tt && teamTable(tt.rows, me.teamId) : entries && playerTable(entries, me.registrationIds);
     const results = resultRows(list);
     const upcoming = comingUp(list);
     return (
       <>
-        <Text style={s.rule}>{ruleLine(c, kind)}</Text>
+        <Text style={s.rule}>{ruleLine(c, kind, tt?.pointsConfig)}</Text>
         {!rows ? loading : rows.length ? (
           <StandingsTable rows={rows} head={kind === 'players' ? 'Player' : 'Team'} />
         ) : (

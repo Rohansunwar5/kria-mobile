@@ -19,26 +19,24 @@ test('playerTable', () => {
   expect(rows[0]).toMatchObject({ rank: 1, p: 3, w: 2, l: 1, pts: 120, mine: true, name: 'Asha' });
 });
 
-test('teamTable', () => {
-  const rows = teamTable(
-    [tm(1, 'A', 'B', { winnerId: 'A' }), tm(2, 'B', 'C', { winnerId: 'B' }), tm(3, 'A', 'C', { winReason: 'draw' }), tm(4, 'A', 'B', { status: 'scheduled' })] as any,
-    'B',
-  );
-  expect(rows.map((r) => [r.name, r.rank, r.p, r.w, r.l, r.d ?? 0, r.mine])).toEqual([
-    ['A', 1, 2, 1, 0, 1, false],
-    ['B', 2, 2, 1, 1, 0, true],
-    ['C', 3, 2, 0, 1, 1, false],
-  ]);
+// The server ranks the team table now (it counts draws, points and tie-breaks);
+// the app renders what it is sent. Counting is tested server-side.
+const tr = (teamId: string, played: number, won: number, lost: number, drawn: number, points: number) =>
+  ({ teamId, name: teamId, played, won, lost, drawn, points });
+
+test('teamTable maps the server rows in the order they arrive', () => {
+  const t = teamTable([{ teamId: 'b', name: 'Bravo', played: 2, won: 1, lost: 1, drawn: 0, points: 2 }], 'b');
+  expect(t[0]).toMatchObject({ rank: 1, name: 'Bravo', p: 2, w: 1, l: 1, d: 0, pts: 2, mine: true });
 });
 
-// Live cricket completes a tie with no winnerId and winReason 'by_score'.
-test('teamTable counts a tied cricket match as drawn for both', () => {
-  const rows = teamTable([tm(1, 'A', 'B', { winReason: 'by_score', matchConfig: { maxOvers: 20 } }), tm(2, 'A', 'C', { winnerId: 'A', winReason: 'tie' })] as any);
-  expect(rows.map((r) => [r.name, r.p, r.w, r.l, r.d])).toEqual([
-    ['A', 2, 0, 0, 2],
-    ['B', 1, 0, 0, 1],
-    ['C', 1, 0, 0, 1],
-  ]);
+test('teamTable keeps the points order the server sent rather than re-ranking by wins', () => {
+  // Bravo has fewer wins but more points from draws: ranking by wins would flip them.
+  const t = teamTable([tr('Bravo', 3, 1, 0, 2, 4), tr('Alpha', 3, 1, 2, 0, 2)]);
+  expect(t.map((r) => [r.rank, r.name, r.pts, r.mine])).toEqual([[1, 'Bravo', 4, false], [2, 'Alpha', 2, false]]);
+});
+
+test('teamTable is empty when the category has no table yet', () => {
+  expect(teamTable([])).toEqual([]);
 });
 
 test('teamLeagueTable', () => {
@@ -53,7 +51,9 @@ test('teamLeagueTable', () => {
 
 test('ruleLine', () => {
   expect(ruleLine(cat(), 'players')).toBe('Ranked by points scored, then point difference');
-  expect(ruleLine(cat(), 'teams')).toBe('Ranked by wins');
+  // A team table is ranked by points now, so it says the scheme the server used.
+  expect(ruleLine(cat(), 'teams', { pointsForWin: 3, pointsForDraw: 1, pointsForLoss: 0 })).toBe('Win 3 · Draw 1 · Loss 0 points');
+  expect(ruleLine(cat(), 'teams')).toBe('Win 2 · Draw 1 · Loss 0 points');
   expect(ruleLine(cat({ teamLeagueConfig: { pointsForWin: 3, pointsForDraw: 1, pointsForLoss: 0 } }), 'teamLeague')).toBe('Win 3 · Draw 1 · Loss 0 points');
   expect(ruleLine(cat(), 'teamLeague')).toBe('Win 2 · Draw 1 · Loss 0 points');
 });
