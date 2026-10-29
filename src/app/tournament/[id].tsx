@@ -131,6 +131,15 @@ export default function TournamentScreen() {
         <View style={s.head}>
           <StatusDot text={status.text} tone={status.tone} />
           <Text style={display(38)}>{t.name}</Text>
+          {t.organizer ? (
+            <View style={s.org}>
+              {t.organizer.logo ? (
+                <Image source={{ uri: t.organizer.logo }} accessibilityIgnoresInvertColors style={s.orgLogo} />
+              ) : null}
+              <Text style={s.orgText} numberOfLines={1}>{`Organised by ${t.organizer.name}`}</Text>
+              {t.organizer.verified ? <Icon name="verified" variant="f" size={15} color={colors.accentInk} /> : null}
+            </View>
+          ) : null}
         </View>
         <View style={s.facts}><FactsGrid items={facts(t, categories.length, now)} /></View>
 
@@ -208,6 +217,9 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   back: { position: 'absolute', left: 12, width: 40, height: 40, borderRadius: 20, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   head: { paddingTop: 24, paddingHorizontal: space.gutter, gap: 12 },
+  org: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: -2 },
+  orgLogo: { width: 22, height: 22, borderRadius: 11, backgroundColor: colors.surface2 },
+  orgText: { flexShrink: 1, fontFamily: font.regular, fontSize: 13, color: colors.text3 },
   facts: { marginTop: 28, marginHorizontal: space.gutter, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.surface2 },
   // The tabs grew to the 44px touch target (DESIGN §10) upward; the smaller margin keeps the labels where they were.
   tabsScroll: { marginTop: 20, borderBottomWidth: 1, borderBottomColor: colors.line, flexGrow: 0 },

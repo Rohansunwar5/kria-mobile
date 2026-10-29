@@ -54,6 +54,7 @@ export default function LiveNow() {
             </View>
             <Text style={s.name}>{r.sides.filter(Boolean).join(' vs ')}</Text>
             {r.scoreline ? <Text style={s.scoreline}>{r.scoreline}</Text> : null}
+            {r.started ? <Text style={s.sub}>{r.started}</Text> : null}
           </Tap>
         ))}
 
@@ -105,6 +106,7 @@ function TournamentRow({ r, onPress }: { r: FeedRow; onPress: () => void }) {
       })}
       {r.cricket?.chase ? <Text style={s.sub}>{r.cricket.chase}</Text> : null}
       {r.sub ? <Text style={s.sub}>{r.sub}</Text> : null}
+      {r.started ? <Text style={s.sub}>{r.started}</Text> : null}
     </Tap>
   );
 }

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { listMyQuickKnockouts, resolveQuickCode, type QuickKnockout } from '@/api/quickKnockout';
-import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
+import { listMyQuickMatches, QUICK_PAGE, type QuickMatch } from '@/api/quickMatch';
 import { MatchCard } from '@/components/MatchCard';
 import { Button } from '@/components/ui/Button';
 import { Icon, type IconName } from '@/components/ui/Icon';
@@ -31,23 +31,46 @@ const HOW: { icon: IconName; title: string; body: string }[] = [
 
 /**
  * Compete › Matches (mock 1c, empty 4c). The API has no open-match feed — only
- * /mine (newest 20, SERVER-GAPS.md #4) and code lookup — so this is the code
- * field plus your own history.
+ * /mine and code lookup — so this is the code field plus your own history.
+ * Matches page back through /mine; knockouts are still the newest 20.
  */
 export function Matches({ meId }: { meId: string }) {
   const [matches, setMatches] = useState<QuickMatch[] | null>(null);
   const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
   const [failed, setFailed] = useState(false);
   const [filter, setFilter] = useState<Filter>('all');
+  // The server has no older matches past what is loaded.
+  const [end, setEnd] = useState(false);
+  const [more, setMore] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (status: Filter) => {
     setFailed(false);
-    const [mine, kos] = await Promise.all([listMyQuickMatches().catch(() => null), listMyQuickKnockouts().catch(() => null)]);
-    if (mine) setMatches(mine);
-    else setFailed(true);
+    const [mine, kos] = await Promise.all([
+      listMyQuickMatches(status === 'all' ? undefined : { status }).catch(() => null),
+      listMyQuickKnockouts().catch(() => null),
+    ]);
+    if (mine) {
+      setMatches(mine);
+      setEnd(mine.length < QUICK_PAGE);
+    } else setFailed(true);
     if (kos) setKnockouts(kos);
   }, []);
-  useFocusEffect(useCallback(() => { load(); }, [load]));
+  useFocusEffect(useCallback(() => { load(filter); }, [load, filter]));
+
+  // Cursor paging: the oldest row in hand is where the next page starts.
+  const loadMore = async () => {
+    const oldest = matches?.[matches.length - 1]?.createdAt;
+    if (more || end || !oldest) return;
+    setMore(true);
+    try {
+      const next = await listMyQuickMatches({ before: oldest, ...(filter === 'all' ? {} : { status: filter }) });
+      setMatches((cur) => [...(cur ?? []), ...next]);
+      if (next.length < QUICK_PAGE) setEnd(true);
+    } catch {
+      // Leave the button so it can be tried again.
+    }
+    setMore(false);
+  };
 
   const cards = sortCards([
     ...(matches ?? []).map((m) => ({ ...matchCard(m, meId), createdAt: m.createdAt })),
@@ -63,7 +86,7 @@ export function Matches({ meId }: { meId: string }) {
         <Button variant={none ? 'secondary' : 'primary'} icon="add" label={none ? 'Host your own match' : 'Host a match'} onPress={() => router.push('/quick/new')} />
       </View>
 
-      {failed ? <InlineError what="Couldn't load your matches." onRetry={load} /> : null}
+      {failed ? <InlineError what="Couldn't load your matches." onRetry={() => load(filter)} /> : null}
 
       {matches === null && !failed ? (
         <View style={s.list}>
@@ -104,6 +127,9 @@ export function Matches({ meId }: { meId: string }) {
           <View style={s.list}>
             {shown.map((c) => <MatchCard key={c.id} v={c} />)}
             {shown.length === 0 ? <Text style={s.nothing}>Nothing here. Matches you host or join will show up in this list.</Text> : null}
+            {!end && matches.length ? (
+              <Button variant="secondary" label="Load more" busyLabel="Loading more" busy={more} onPress={loadMore} />
+            ) : null}
           </View>
         </>
       ) : null}

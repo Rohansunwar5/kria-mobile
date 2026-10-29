@@ -80,6 +80,13 @@ export const isFree = (c: TournamentCategory) => !c.isPaidRegistration || !(c.re
 
 export const feeLabel = (c: TournamentCategory) => (isFree(c) ? 'Free' : rupees(c.registrationFee));
 
+/** The card's price pill, from the list's `minFee`. Nothing to say when the
+ *  tournament has no categories yet, so no pill rather than a guess. */
+export function minFeePill(minFee?: number): string | null {
+  if (typeof minFee !== 'number') return null;
+  return minFee > 0 ? `from ${rupees(minFee)}` : 'Free';
+}
+
 export function lowestFee(categories: TournamentCategory[]): string {
   if (categories.some(isFree)) return 'free';
   return rupees(Math.min(...categories.map((c) => c.registrationFee)));

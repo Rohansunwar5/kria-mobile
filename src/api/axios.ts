@@ -10,8 +10,6 @@ export function setUnauthorizedHandler(fn: () => void) {
   onUnauthorized = fn;
 }
 
-const NO_SIGNOUT_ON_401 = ['/player/auth/change-password', '/player/auth/login'];
-
 API.interceptors.request.use(async (req) => {
   const token = await getToken();
   if (token) {
@@ -23,8 +21,9 @@ API.interceptors.request.use(async (req) => {
 API.interceptors.response.use(
   (res) => res,
   async (error) => {
-    // A wrong current password or login password is a 401 too; it must not sign the player out.
-    if (error.response?.status === 401 && !NO_SIGNOUT_ON_401.includes(error.config?.url)) {
+    // Every 401 now means the token is bad: a wrong current/login password
+    // comes back as a 400 carrying the server's message.
+    if (error.response?.status === 401) {
       await clearAuth();
       onUnauthorized?.();
     }

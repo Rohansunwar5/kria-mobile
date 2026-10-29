@@ -67,6 +67,10 @@ export interface TournamentDetail {
   startDate: string; endDate: string; registrationDeadline: string; status: TournamentStatus; teamsCount?: number;
   venue: { name: string; address?: string; city: string; coordinates?: { lat: number; lng: number } };
   awards?: TournamentAward[];
+  /** Who is running it, for the "Organised by" row. Display fields only. */
+  organizer?: { name: string; logo?: string; verified: boolean };
+  /** Lowest entry fee across its categories; 0 when one of them is free. */
+  minFee?: number;
 }
 
 export interface TournamentCategory {
@@ -85,6 +89,10 @@ export interface MyEntry {
   _id: string; tournamentId: string; categoryId: string; createdAt: string; teamId?: string;
   status: 'pending' | 'approved' | 'rejected' | 'auctioned' | 'assigned' | 'withdrawn';
   auctionData?: { basePrice?: number; soldPrice?: number };
+  /** Filled in by the server so the list needs no per-tournament lookups. */
+  tournament?: { _id: string; name: string; sport?: string; startDate?: string; endDate?: string; status?: TournamentStatus } | null;
+  category?: { _id: string; name: string; sport?: string; matchType?: string; registrationFee?: number; isPaidRegistration?: boolean } | null;
+  payment?: { status: string; amount: number; razorpayOrderId?: string; createdAt?: string } | null;
 }
 
 export interface EntryProfile { firstName: string; lastName: string; age: number; gender: 'male' | 'female'; phone: string; photo?: string; skillLevel: SkillLevel }

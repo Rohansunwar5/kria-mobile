@@ -55,7 +55,7 @@ it('clears and confirms on success, ignoring a second press', async () => {
   expect(mockChange).toHaveBeenCalledTimes(1);
   expect(mockChange).toHaveBeenCalledWith('old', 'smash2026!');
   await act(async () => resolve());
-  expect(screen.getByText('Password changed.')).toBeTruthy();
+  expect(screen.getByText('Password changed. Any other device is now signed out.')).toBeTruthy();
   expect(screen.getByLabelText('Current password').props.value).toBe('');
   expect(screen.getByLabelText('New password').props.value).toBe('');
 });

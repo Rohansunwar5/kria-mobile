@@ -34,6 +34,11 @@ export interface Tournament {
     updatedAt: string;
     registeredPlayersCount?: number;
     teamsCount?: number;
+    /** Lowest entry fee across the tournament's categories; 0 when one of
+     *  them is free. Absent when the tournament has no categories yet. */
+    minFee?: number;
+    /** Public display details of whoever is running it. */
+    organizer?: { name: string; logo?: string; verified: boolean };
     awards?: any[];
 }
 

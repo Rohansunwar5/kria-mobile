@@ -2,6 +2,7 @@ import type { LiveItem } from '@/api/live';
 import type { CricketMatch, LiveState } from '@/api/cricketMatch';
 import { feedRound, parseScoreline } from '@/lib/badmintonBoard';
 import { ballsRemaining } from '@/lib/cricketView';
+import { timeAgo } from '@/lib/tournamentView';
 
 export interface FeedRow {
   key: string; kind: 'tournament' | 'quick'; matchId: string; sport: string;
@@ -11,6 +12,9 @@ export interface FeedRow {
   cricket?: { scores: [string | null, string | null]; chase: string | null };
   scoreline?: string;
   sub?: string;
+  /** "Started 25 min ago" — the server sets the real start time when a match
+   *  goes live (SERVER-GAPS #26). */
+  started?: string;
 }
 
 export type CricketEnrich = Record<string, { live: LiveState | null; match: CricketMatch | null }>;
@@ -35,11 +39,15 @@ function cricketOf(e: CricketEnrich[string] | undefined) {
   return { scores, chase };
 }
 
-export function feedRows(items: LiveItem[], cricket: CricketEnrich): { tournament: FeedRow[]; quick: FeedRow[] } {
+export function feedRows(items: LiveItem[], cricket: CricketEnrich, now: Date = new Date()): { tournament: FeedRow[]; quick: FeedRow[] } {
   const out = { tournament: [] as FeedRow[], quick: [] as FeedRow[] };
   for (const it of items) {
     const [a = '', b = ''] = (it.title ?? '').split(' vs ');
-    const base = { key: `${it.kind}-${it.matchId}`, kind: it.kind, matchId: it.matchId, sport: it.sport, sides: [a, b] as [string, string] };
+    const base = {
+      key: `${it.kind}-${it.matchId}`, kind: it.kind, matchId: it.matchId, sport: it.sport,
+      sides: [a, b] as [string, string],
+      started: it.startedAt ? `Started ${timeAgo(it.startedAt, now)}` : undefined,
+    };
     if (it.kind === 'quick') {
       out.quick.push({ ...base, meta: sportLabel(it.sport), scoreline: it.scoreline });
       continue;

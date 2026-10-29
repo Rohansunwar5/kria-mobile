@@ -1,4 +1,4 @@
-import { feeLines, paidAt, paymentsSummary, sortPayments } from '../src/lib/paymentsView';
+import { feeLines, paidAt, paymentLook, paymentsSummary, sortPayments } from '../src/lib/paymentsView';
 import type { Invoice } from '../src/api/payment';
 
 const inv = (o: Partial<Invoice> = {}): Invoice => ({ _id: 'i', amount: 100, status: 'paid', createdAt: '2026-10-01T00:00:00Z', ...o });
@@ -21,4 +21,16 @@ it('builds fee lines and omits missing numbers', () => {
   expect(feeLines(full)[4]).toMatchObject({ label: 'Total', total: true });
   expect(feeLines(inv({ amount: 1000, baseAmount: 1000 })).map((l) => l.label)).toEqual(['Entry fee', 'Total']);
   expect(feeLines(inv({ amount: 1000 })).map((l) => l.label)).toEqual(['Total']);
+});
+
+it('counts only paid money in the headline', () => {
+  const list = [inv({ amount: 100 }), inv({ amount: 50, status: 'failed' }), inv({ amount: 70, status: 'created' }), inv({ amount: 30, status: 'refunded' })];
+  expect(paymentsSummary(list)).toEqual({ total: 100, count: 1 });
+});
+
+it('offers a retry only where money can still land', () => {
+  expect(paymentLook(inv({ status: 'paid' }))).toMatchObject({ label: 'Paid', retry: false });
+  expect(paymentLook(inv({ status: 'failed' }))).toMatchObject({ label: 'Failed', retry: true });
+  expect(paymentLook(inv({ status: 'created' }))).toMatchObject({ label: 'Not paid', retry: true });
+  expect(paymentLook(inv({ status: 'refunded' }))).toMatchObject({ label: 'Refunded', retry: false });
 });

@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { colors, font, radius } from '@/constants/theme';
 import { datePill, sportName } from '@/lib/homeView';
+import { minFeePill } from '@/lib/tournamentView';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 import { Icon, sportIcon } from './ui/Icon';
 import { ImagePill, LivePill } from './ui/Pills';
@@ -10,11 +11,7 @@ import { Tap } from './ui/Tap';
 
 export type Crest = { name: string; logo?: string };
 
-/**
- * DESIGN §5.4 — one layout everywhere. No price pill: the tournament list
- * carries no fee (SERVER-GAPS.md #1), and the card never shows a number the
- * API can't produce.
- */
+/** DESIGN §5.4 — one layout everywhere. */
 export function EventCard({ t, width = 300, imageHeight = 160, crests }: {
   t: Tournament;
   width?: DimensionValue;
@@ -41,10 +38,17 @@ export function EventImage({ t, height, date, round = radius.card }: { t: Tourna
     <View style={[s.image, { height, borderRadius: round }]}>
       {t.bannerImage ? <Image source={{ uri: t.bannerImage }} resizeMode="cover" style={StyleSheet.absoluteFill} /> : <SportCover sport={t.sport} />}
       <View style={s.topLeft}><ImagePill label={date ?? datePill(t.startDate)} /></View>
-      {t.status === 'ongoing' ? <View style={s.topRight}><LivePill /></View> : null}
+      <TopRight t={t} />
       {t.status === 'auction_in_progress' ? <View style={s.bottomLeft}><ImagePill dot label="Auction live" /></View> : null}
     </View>
   );
+}
+
+/** Live wins the corner; otherwise the cheapest way in, when the list knows it. */
+function TopRight({ t }: { t: Tournament }) {
+  if (t.status === 'ongoing') return <View style={s.topRight}><LivePill /></View>;
+  const fee = minFeePill(t.minFee);
+  return fee ? <View style={s.topRight}><ImagePill label={fee} /></View> : null;
 }
 
 export function Where({ t }: { t: Tournament }) {

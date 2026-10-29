@@ -1,8 +1,7 @@
-import type { MyEntry, TournamentCategory } from '@/api/tournaments';
+import type { MyEntry } from '@/api/tournaments';
 import { sportName } from '@/lib/homeView';
 import { rupees } from '@/lib/format';
 
-export interface EntryLookup { tournament: { name: string; status?: string; sport?: string }; categories: TournamentCategory[] }
 export type Tone = 'text' | 'text2' | 'text3' | 'text4' | 'accentInk' | 'lossInk';
 export interface EntryRow {
   id: string; tournamentId: string; categoryId: string; createdAt: string;
@@ -10,6 +9,8 @@ export interface EntryRow {
   sub: string;
   sport?: string;
   status: string; tone: Tone;
+  /** Where the money stands on this entry, when there is money in it. */
+  money?: string;
   canWithdraw: boolean;
 }
 
@@ -26,22 +27,33 @@ function statusOf(e: MyEntry): { status: string; tone: Tone; closed: boolean } {
   }
 }
 
-export function entryRows(entries: MyEntry[], lookups: Record<string, EntryLookup | null>): { active: EntryRow[]; closed: EntryRow[] } {
+/** A paid entry says what it cost; one the server never saw paid says what is
+ *  still owed. A free category says nothing. */
+function moneyOf(e: MyEntry): string | undefined {
+  const fee = e.category?.isPaidRegistration ? (e.category.registrationFee ?? 0) : 0;
+  if (e.payment?.status === 'paid') return `Paid ${rupees(e.payment.amount)}`;
+  if (fee > 0 && e.status !== 'withdrawn' && e.status !== 'rejected') return `${rupees(fee)} to pay`;
+  return undefined;
+}
+
+export function entryRows(entries: MyEntry[]): { active: EntryRow[]; closed: EntryRow[] } {
   const active: EntryRow[] = [];
   const closed: EntryRow[] = [];
   for (const e of entries) {
-    const look = lookups[e.tournamentId] ?? null;
     const st = statusOf(e);
-    const over = look?.tournament.status === 'completed' || look?.tournament.status === 'cancelled';
-    const category = look?.categories.find((c) => c._id === e.categoryId);
-    const sport = category?.sport ?? look?.tournament.sport;
-    const sub = category && sport ? `${category.name} · ${sportName(sport)}` : category ? category.name : sport ? sportName(sport) : '';
+    const over = e.tournament?.status === 'completed' || e.tournament?.status === 'cancelled';
+    // A multisport tournament's own `sport` is just its first one, so the
+    // category's wins when it has one.
+    const sport = e.category?.sport ?? e.tournament?.sport;
+    const categoryName = e.category?.name;
+    const sub = categoryName && sport ? `${categoryName} · ${sportName(sport)}` : categoryName ? categoryName : sport ? sportName(sport) : '';
     const isClosed = st.closed || over;
     const row: EntryRow = {
       id: e._id, tournamentId: e.tournamentId, categoryId: e.categoryId, createdAt: e.createdAt,
-      name: look?.tournament.name || 'Tournament', sub, sport,
-      status: st.closed ? st.status : over ? `Tournament ${look!.tournament.status}` : st.status,
+      name: e.tournament?.name || 'Tournament', sub, sport,
+      status: st.closed ? st.status : over ? `Tournament ${e.tournament!.status}` : st.status,
       tone: st.closed ? st.tone : over ? 'text3' : st.tone,
+      money: moneyOf(e),
       canWithdraw: !isClosed && (e.status === 'pending' || e.status === 'approved'),
     };
     (isClosed ? closed : active).push(row);

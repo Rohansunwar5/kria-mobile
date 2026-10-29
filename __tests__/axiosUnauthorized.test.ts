@@ -17,18 +17,20 @@ describe('401 handling', () => {
   });
   afterEach(() => mock.restore());
 
-  it('leaves the session alone when change-password answers 401', async () => {
-    mock.onPost('/player/auth/change-password').reply(401);
-    await expect(API.post('/player/auth/change-password', {})).rejects.toBeTruthy();
+  // A wrong current or login password is a 400 now (SERVER-GAPS #34/#37), so a
+  // 401 means one thing everywhere: the token is no good.
+  it('leaves the session alone when a wrong password answers 400', async () => {
+    mock.onPost('/player/auth/login').reply(400, { message: 'Invalid email or password.' });
+    await expect(API.post('/player/auth/login', {})).rejects.toBeTruthy();
     expect(clearAuth).not.toHaveBeenCalled();
     expect(onUnauth).not.toHaveBeenCalled();
   });
 
-  it('leaves the session alone when login answers 401', async () => {
-    mock.onPost('/player/auth/login').reply(401);
-    await expect(API.post('/player/auth/login', {})).rejects.toBeTruthy();
-    expect(clearAuth).not.toHaveBeenCalled();
-    expect(onUnauth).not.toHaveBeenCalled();
+  it('signs out when change-password answers 401, which means the token expired', async () => {
+    mock.onPost('/player/auth/change-password').reply(401);
+    await expect(API.post('/player/auth/change-password', {})).rejects.toBeTruthy();
+    expect(clearAuth).toHaveBeenCalledTimes(1);
+    expect(onUnauth).toHaveBeenCalledTimes(1);
   });
 
   it('signs out on a 401 from any other route', async () => {

@@ -96,8 +96,8 @@ describe('settings api', () => {
     expect(body).not.toHaveProperty('phoneNumber');
   });
 
-  it('changePassword maps 401 to the wrong-password message', async () => {
-    mock.onPost('/player/auth/change-password').reply(401, { message: 'Unauthorized' });
+  it('changePassword surfaces the wrong-password message from the server', async () => {
+    mock.onPost('/player/auth/change-password').reply(400, { message: 'Current password is incorrect.' });
     await expect(changePassword('bad', 'new1')).rejects.toThrow('Current password is incorrect.');
   });
 

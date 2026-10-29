@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { getMyEntries, getTournament, getTournamentCategories, withdrawEntry } from '@/api/tournaments';
+import { getMyEntries, withdrawEntry } from '@/api/tournaments';
 import { Button } from '@/components/ui/Button';
 import { TopBar } from '@/components/ui/Bars';
 import { BottomSheet } from '@/components/ui/BottomSheet';
@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, space } from '@/constants/theme';
 import { goBack } from '@/lib/nav';
-import { entryRows, type EntryLookup, type EntryRow } from '@/lib/entriesView';
+import { entryRows, type EntryRow } from '@/lib/entriesView';
 
 type Rows = ReturnType<typeof entryRows>;
 
@@ -28,6 +28,7 @@ function Row({ r, closed, onWithdraw, onOpen }: { r: EntryRow; closed?: boolean;
           <Text numberOfLines={1} style={[s.name, closed && { color: colors.text2 }]}>{r.name}</Text>
           {r.sub ? <Text style={s.sub}>{r.sub}</Text> : null}
           <Text style={[s.status, { color: colors[r.tone] }]}>{r.status}</Text>
+          {r.money ? <Text style={s.money}>{r.money}</Text> : null}
         </View>
       </Tap>
       {r.canWithdraw ? (
@@ -55,16 +56,11 @@ export default function MyEntries() {
     const mine = ++latest.current;
     setFailed(false);
     try {
+      // One request: the server sends each entry's tournament, category and
+      // payment with it (SERVER-GAPS #31).
       const entries = await getMyEntries();
-      const ids = [...new Set(entries.map((e) => e.tournamentId))];
-      const settled = await Promise.allSettled(ids.map((id) => Promise.all([getTournament(id), getTournamentCategories(id)])));
       if (!alive.current || mine !== latest.current) return;
-      const lookups: Record<string, EntryLookup | null> = {};
-      ids.forEach((id, i) => {
-        const r = settled[i];
-        lookups[id] = r.status === 'fulfilled' ? { tournament: r.value[0], categories: r.value[1] } : null;
-      });
-      setRows(entryRows(entries, lookups));
+      setRows(entryRows(entries));
     } catch {
       if (alive.current && mine === latest.current) setFailed(true);
     }
@@ -149,6 +145,7 @@ const s = StyleSheet.create({
   name: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
   sub: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
   status: { fontFamily: font.semibold, fontSize: 12 },
+  money: { fontFamily: font.regular, fontSize: 12, color: colors.text3, fontVariant: ['tabular-nums'] },
   withdraw: { height: 36, paddingHorizontal: 14, borderRadius: 12, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
   withdrawText: { fontFamily: font.semibold, fontSize: 13, color: colors.text2 },
   empty: { paddingTop: 48, paddingHorizontal: 12, alignItems: 'center', gap: 14 },

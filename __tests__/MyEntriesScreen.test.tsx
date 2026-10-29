@@ -7,33 +7,40 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, back: jest.fn(), canGoBack: () => true, replace: jest.fn() }),
 }));
 const mockEntries = jest.fn();
-const mockTournament = jest.fn();
-const mockCats = jest.fn();
 const mockWithdraw = jest.fn();
 jest.mock('@/api/tournaments', () => ({
   getMyEntries: (...a: unknown[]) => mockEntries(...a),
-  getTournament: (...a: unknown[]) => mockTournament(...a),
-  getTournamentCategories: (...a: unknown[]) => mockCats(...a),
   withdrawEntry: (...a: unknown[]) => mockWithdraw(...a),
 }));
 
-const e = (id: string, t: string, o = {}) => ({ _id: id, tournamentId: t, categoryId: `c-${t}`, createdAt: '2026-10-01T00:00:00Z', status: 'pending', ...o });
+// The server sends each entry's tournament, category and payment with it
+// (SERVER-GAPS #31), so the screen makes one request.
+const e = (id: string, t: string, o: Record<string, unknown> = {}) => ({
+  _id: id, tournamentId: t, categoryId: `c-${t}`, createdAt: '2026-10-01T00:00:00Z', status: 'pending',
+  tournament: { _id: t, name: 'Smash Open', status: 'open', sport: 'badminton' },
+  category: { _id: `c-${t}`, name: 'Singles', sport: 'badminton' },
+  ...o,
+});
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockEntries.mockResolvedValue([e('e1', 't1'), e('e2', 't2', { createdAt: '2026-09-01T00:00:00Z' })]);
-  mockTournament.mockImplementation(async (id: string) => {
-    if (id === 't2') throw new Error('boom');
-    return { _id: id, name: 'Smash Open', status: 'open', sport: 'badminton' };
-  });
-  mockCats.mockImplementation(async (id: string) => [{ _id: `c-${id}`, name: 'Singles', sport: 'badminton' }]);
+  mockEntries.mockResolvedValue([
+    e('e1', 't1'),
+    e('e2', 't2', { createdAt: '2026-09-01T00:00:00Z', tournament: null, category: null }),
+  ]);
 });
 
-it('renders both rows when one lookup fails', async () => {
+it('renders a row the server could not name alongside the rest', async () => {
   render(<MyEntries />);
   expect(await screen.findByText('Smash Open')).toBeTruthy();
   expect(screen.getByText('Tournament')).toBeTruthy();
   expect(screen.getByText('Singles · Badminton')).toBeTruthy();
+});
+
+it('shows what an entry cost', async () => {
+  mockEntries.mockResolvedValue([e('e1', 't1', { payment: { status: 'paid', amount: 628.32 } })]);
+  render(<MyEntries />);
+  expect(await screen.findByText('Paid ₹628.32')).toBeTruthy();
 });
 
 it('withdraws once on a double tap, then reloads', async () => {

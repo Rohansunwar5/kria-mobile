@@ -16,11 +16,28 @@ import { colors, display, font, space } from '@/constants/theme';
 import { goBack } from '@/lib/nav';
 import { sportName } from '@/lib/homeView';
 import { formatShortDate, rupees } from '@/lib/format';
-import { feeLines, paidAt, paymentsSummary, sortPayments } from '@/lib/paymentsView';
+import { feeLines, paidAt, paymentLook, paymentsSummary, sortPayments } from '@/lib/paymentsView';
 
 const joinDot = (...p: (string | undefined)[]) => p.filter(Boolean).join(' · ');
 const paidStamp = (inv: Invoice) =>
   new Date(paidAt(inv)).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+
+const TONE = {
+  paid: colors.accent,
+  open: colors.text3,
+  failed: colors.loss,
+  refunded: colors.text3,
+} as const;
+
+function StatusPill({ inv }: { inv: Invoice }) {
+  const look = paymentLook(inv);
+  if (look.tone === 'paid') return null;
+  return (
+    <View style={s.pill}>
+      <Text style={[s.pillText, { color: TONE[look.tone] }]}>{look.label}</Text>
+    </View>
+  );
+}
 
 function IdRow({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
@@ -92,7 +109,7 @@ export default function Payments() {
               <Text style={s.sub}>{`${sum.count} ${sum.count === 1 ? 'entry fee' : 'entry fees'}`}</Text>
             </View>
             <View>
-              <SectionHeader title="Paid entries" />
+              <SectionHeader title="Entry fees" />
               <View style={{ marginTop: 6 }}>
                 {list.map((inv) => (
                   <Tap key={inv._id} accessibilityLabel={inv.tournament?.name ?? 'Tournament'} onPress={() => setSel(inv)} style={s.row}>
@@ -101,7 +118,10 @@ export default function Payments() {
                       <Text numberOfLines={1} style={s.name}>{inv.tournament?.name ?? 'Tournament'}</Text>
                       <Text style={s.sub}>{joinDot(inv.category?.name, formatShortDate(paidAt(inv)))}</Text>
                     </View>
-                    <Text style={s.amount}>{rupees(inv.amount)}</Text>
+                    <View style={{ alignItems: 'flex-end', gap: 3 }}>
+                      <Text style={s.amount}>{rupees(inv.amount)}</Text>
+                      <StatusPill inv={inv} />
+                    </View>
                     <Icon name="chevron_right" size={20} color={colors.text4} />
                   </Tap>
                 ))}
@@ -115,8 +135,13 @@ export default function Payments() {
           <View style={{ gap: 16 }}>
             <View style={{ gap: 6 }}>
               <View style={s.paidRow}>
-                <Icon name="check_circle" variant="f" size={16} color={colors.accent} />
-                <Text style={s.paid}>{`Paid · ${paidStamp(sel)}`}</Text>
+                <Icon
+                  name={paymentLook(sel).tone === 'paid' ? 'check_circle' : 'info'}
+                  variant="f"
+                  size={16}
+                  color={TONE[paymentLook(sel).tone]}
+                />
+                <Text style={s.paid}>{`${paymentLook(sel).label} · ${paidStamp(sel)}`}</Text>
               </View>
               <Text style={display(30)}>{sel.tournament?.name ?? 'Tournament'}</Text>
               <Text style={s.sub}>{joinDot(sel.category?.name, sportName(sel.tournament?.sport ?? ''))}</Text>
@@ -141,7 +166,21 @@ export default function Payments() {
                 style={{ flex: 1 }}
                 onPress={() => { Linking.openURL(`mailto:support@kria.club?subject=${encodeURIComponent(`Payment ${sel.razorpayOrderId ?? sel._id}`)}`).catch(() => undefined); }}
               />
-              <Button label="Done" style={{ flex: 1 }} onPress={() => setSel(null)} />
+              {/* Retry reopens the entry screen, which owns the whole pay flow
+                  (quote, Razorpay, verify) — nothing is duplicated here. */}
+              {paymentLook(sel).retry && sel.categoryId && sel.tournamentId ? (
+                <Button
+                  label="Try again"
+                  style={{ flex: 1 }}
+                  onPress={() => {
+                    const { categoryId, tournamentId } = sel;
+                    setSel(null);
+                    router.push({ pathname: '/category/[categoryId]', params: { categoryId: categoryId!, tournamentId: tournamentId! } });
+                  }}
+                />
+              ) : (
+                <Button label="Done" style={{ flex: 1 }} onPress={() => setSel(null)} />
+              )}
             </View>
           </View>
         ) : null}
@@ -159,6 +198,8 @@ const s = StyleSheet.create({
   circle: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
   name: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
   amount: { fontFamily: font.semibold, fontSize: 14, color: colors.text, fontVariant: ['tabular-nums'] },
+  pill: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 999, backgroundColor: colors.surface2 },
+  pillText: { fontFamily: font.semibold, fontSize: 10, letterSpacing: 0.2 },
   empty: { paddingTop: 48, paddingHorizontal: 12, alignItems: 'center', gap: 14 },
   emptyIcon: { width: 72, height: 72, borderRadius: 36, borderWidth: 1.5, borderColor: colors.lineStrong, alignItems: 'center', justifyContent: 'center' },
   emptyLine: { fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: colors.text3, textAlign: 'center' },

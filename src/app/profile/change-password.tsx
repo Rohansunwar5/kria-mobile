@@ -63,7 +63,7 @@ export default function ChangePassword() {
       setCurrent('');
       setNext('');
       setConfirm('');
-      setNote({ text: 'Password changed.', ok: true });
+      setNote({ text: 'Password changed. Any other device is now signed out.', ok: true });
     } catch (e) {
       if (alive.current) setNote({ text: (e as Error).message || 'Could not change your password.', ok: false });
     } finally {

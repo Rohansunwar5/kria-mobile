@@ -138,9 +138,18 @@ export async function createQuickMatch(input: CreateQuickMatchBody): Promise<Qui
  * leaves to their knockout. Home asks for them so its top card can put the
  * match being scored one tap away; the quick-matches list does not.
  */
-export async function listMyQuickMatches(opts?: { liveKnockout?: boolean }): Promise<QuickMatch[]> {
+/** One page, newest first. `before` is the previous page's oldest `createdAt`,
+ *  and `status` filters on the server so a filter reaches past this page. */
+export const QUICK_PAGE = 20;
+export async function listMyQuickMatches(
+  opts?: { liveKnockout?: boolean; before?: string; status?: QuickMatch['status'] },
+): Promise<QuickMatch[]> {
+  const params: Record<string, string> = {};
+  if (opts?.liveKnockout) params.knockout = 'live';
+  if (opts?.before) params.before = opts.before;
+  if (opts?.status) params.status = opts.status;
   const payload = unwrap(
-    await API.get('/quick-match/mine', opts?.liveKnockout ? { params: { knockout: 'live' } } : undefined),
+    await API.get('/quick-match/mine', Object.keys(params).length ? { params } : undefined),
   ) as QuickMatch[] | null;
   // A player with no matches is a success with nothing in it, not an error —
   // callers render an empty state, they do not branch on null.

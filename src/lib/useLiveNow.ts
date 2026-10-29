@@ -44,6 +44,7 @@ export function useLiveNow({ scores = true }: { scores?: boolean } = {}) {
     return () => clearInterval(t);
   }, [refresh]));
 
-  const rows = useMemo(() => feedRows(items, cricket), [items, cricket]);
+  // Re-derived on every refresh, which is what keeps "Started …" current.
+  const rows = useMemo(() => feedRows(items, cricket, new Date()), [items, cricket]);
   return { ...rows, count: items.length, loading, error, refresh };
 }
