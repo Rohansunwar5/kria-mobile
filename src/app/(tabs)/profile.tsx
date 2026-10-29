@@ -78,7 +78,6 @@ export default function Profile() {
   const awards = record && career.profile
     ? buildAwards({ titles: record.titles, honors: record.honors, achievements: career.profile.achievements, knockouts, totals: { played: totals.played, won: totals.won, sports: played.filter((x) => x.played > 0).length } })
     : null;
-  const titles = record?.titles ?? [];
 
   return (
     <SafeAreaView edges={['top']} style={s.screen}>
@@ -135,7 +134,7 @@ export default function Profile() {
           <SectionHeader title="Tournaments" link={tournamentHistory.length > 5 ? 'All' : undefined} onLink={() => router.push('/profile/history')} />
           <View style={{ marginTop: 6 }}>
             {tournamentHistory.length ? (
-              <TournamentRows entries={tournamentHistory.slice(0, 5)} titles={titles} />
+              <TournamentRows entries={tournamentHistory.slice(0, 5)} />
             ) : (
               <Tap scale={0.99} accessibilityLabel="Find a tournament" onPress={() => router.push({ pathname: '/(tabs)/events', params: user?.sport ? { sport: user.sport } : {} })} style={s.tRow}>
                 <Icon name="stadium" size={22} color={colors.text3} />

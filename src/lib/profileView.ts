@@ -1,5 +1,5 @@
 import type { RecentMatch, SportSummary } from '@/api/career';
-import type { Title } from '@/api/profileApi';
+import type { EntryResult } from '@/api/profileApi';
 import type { RankedPlayer } from '@/api/rankings';
 import { colors } from '@/constants/theme';
 import { heroFor, RANK_MIN, sportName } from '@/lib/homeView';
@@ -78,22 +78,45 @@ export interface RowEntry {
   category?: { name: string } | null;
   team?: { name: string; logo?: string } | null;
   auctionData?: { soldPrice?: number };
+  result?: EntryResult;
+}
+
+const SUFFIX = ['th', 'st', 'nd', 'rd'];
+/** 1st, 2nd, 3rd, 4th … 11th, 12th, 13th … 21st, 22nd. */
+const ordinal = (n: number) => `${n}${SUFFIX[((n % 100) - 20) % 10] || SUFFIX[n % 100] || SUFFIX[0]}`;
+
+/**
+ * Spec §8's wording for how far an entry got. A flat league's top two are the
+ * places it awards titles to, so they read like the shields they hold; topping
+ * a group in a staged event is not winning it.
+ */
+function resultLine(r: EntryResult): { text: string; color: string } | null {
+  if (r.kind === 'winner') return { text: 'Winner', color: colors.gold };
+  if (r.kind === 'runner_up') return { text: 'Runner-up', color: colors.silver };
+  // "Quarter-Final" -> "Quarter-final"; "Round of 16" keeps its number.
+  if (r.kind === 'knockout' && r.round) return { text: r.round.charAt(0) + r.round.slice(1).toLowerCase(), color: colors.text2 };
+  if (r.kind === 'group' && r.position) {
+    if (r.groupName) return { text: `${ordinal(r.position)} in group`, color: colors.text2 };
+    if (r.position === 1) return { text: 'Winner', color: colors.gold };
+    if (r.position === 2) return { text: 'Runner-up', color: colors.silver };
+    return { text: r.outOf ? `${ordinal(r.position)} of ${r.outOf}` : ordinal(r.position), color: colors.text2 };
+  }
+  return null;
 }
 
 /**
- * Tournament rows (mock 1h). The only placement the server records is a
- * winner's title (SERVER-GAPS.md #9/#10), so other rows say where the entry stands.
+ * Tournament rows (mock 1h). An entry's own recorded result comes first; one
+ * with none yet says where the entry stands.
  */
-export function tournamentRow(e: RowEntry, titles: Title[]) {
+export function tournamentRow(e: RowEntry) {
   const t = e.tournament;
-  const won = !!t && !!e.category && titles.some((x) => x.place === 'winner' && x.categoryName === e.category!.name && x.tournamentName === t.name);
-  const result = won ? { text: 'Winner', color: colors.gold }
-    : t?.status === 'ongoing' ? { text: 'In progress', color: colors.text2 }
+  const result = (e.result && resultLine(e.result))
+    || (t?.status === 'ongoing' ? { text: 'In progress', color: colors.text2 }
       : t?.status === 'completed' ? { text: 'Completed', color: colors.text3 }
         : t?.status === 'cancelled' ? { text: 'Cancelled', color: colors.text4 }
           : e.status === 'pending' ? { text: 'Awaiting approval', color: colors.text3 }
             : e.auctionData?.soldPrice ? { text: `Sold ₹${e.auctionData.soldPrice.toLocaleString('en-IN')}`, color: colors.text2 }
-              : { text: 'Entered', color: colors.text2 };
+              : { text: 'Entered', color: colors.text2 });
   const sub = [e.category?.name, e.team ? `for ${e.team.name}` : 'individual entry'].filter(Boolean).join(' · ');
   return { key: e._id, tournamentId: t?._id, name: t?.name ?? 'Tournament', sub, sport: t?.sport, crest: e.team?.logo, team: e.team?.name, result };
 }

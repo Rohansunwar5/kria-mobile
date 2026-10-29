@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
-import { getPublicPlayer, type Title } from '@/api/profileApi';
+import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -29,13 +28,6 @@ export default function History() {
   const sports = historySports(tournamentHistory);
   const shown = sport ? tournamentHistory.filter((e) => e.tournament?.sport === sport) : tournamentHistory;
   const strip = historyStrip(tournamentHistory);
-  const meId = useAppSelector((st) => st.auth?.user?._id);
-  const [titles, setTitles] = useState<Title[]>([]);
-  useEffect(() => {
-    let live = true; // unmount guard
-    if (meId) getPublicPlayer(meId).then((p) => live && p && setTitles(p.player.titles ?? []), () => {});
-    return () => { live = false; };
-  }, [meId]);
   const loading = historyLoading && tournamentHistory.length === 0;
 
   return (
@@ -76,7 +68,7 @@ export default function History() {
         {groupByYear(shown).map((g) => (
           <View key={g.year} style={s.group}>
             <Text style={s.year}>{g.year}</Text>
-            <TournamentRows entries={g.items} titles={titles} extra={recordLine} />
+            <TournamentRows entries={g.items} extra={recordLine} />
           </View>
         ))}
       </ScrollView>

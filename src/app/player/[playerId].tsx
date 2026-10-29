@@ -119,7 +119,7 @@ export default function PlayerProfile() {
           <View style={s.section}>
             <SectionHeader title="Tournaments" />
             <View style={{ marginTop: 6 }}>
-              <TournamentRows entries={data.history} titles={data.player.titles ?? []} />
+              <TournamentRows entries={data.history} />
             </View>
           </View>
         ) : null}

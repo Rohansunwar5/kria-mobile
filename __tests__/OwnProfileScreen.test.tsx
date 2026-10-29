@@ -97,14 +97,18 @@ it('rings each sport played, and a short sport shows its way to a ranking', () =
   expect(screen.getByText('3 of 10 decided matches. 7 more and you appear on the cricket board.')).toBeTruthy();
 });
 
-it('marks a tournament you won from your titles, and says where the others stand', async () => {
-  mockRecord = { titles: [{ place: 'winner', categoryName: "Men's Doubles", tournamentName: 'Kria Smash Cup' }], honors: [] };
+it('marks a tournament you won from its recorded result, and says where the others stand', async () => {
+  // No titles at all: the row reads the entry's own result, not the Awards data.
+  mockRecord = { titles: [], honors: [] };
   mockUseCareer.mockReturnValue(career({ sports: [sport({})] }));
   const entry = (id: string, status: string, name: string, tStatus: string): TournamentHistoryEntry => ({
     _id: id, status, createdAt: '', category: { _id: 'c', name: "Men's Doubles", gender: 'male' },
     tournament: { _id: `t${id}`, name, sport: 'badminton', startDate: '', endDate: '', status: tStatus },
   });
-  renderProfile({}, [entry('1', 'approved', 'Kria Smash Cup', 'completed'), entry('2', 'pending', 'HSR Open', 'registration_open')]);
+  renderProfile({}, [
+    { ...entry('1', 'approved', 'Kria Smash Cup', 'completed'), result: { kind: 'winner' } },
+    entry('2', 'pending', 'HSR Open', 'registration_open'),
+  ]);
   await waitFor(() => expect(screen.getByText('Winner')).toBeTruthy());
   expect(screen.getByText('Awaiting approval')).toBeTruthy();
   fireEvent.press(screen.getByLabelText("HSR Open, Men's Doubles · individual entry, Awaiting approval"));

@@ -16,6 +16,15 @@ export interface Title {
   awardedAt?: string;
 }
 
+/** How far one entry got, recorded at category completion. Facts only — the app words it (spec §5). */
+export interface EntryResult {
+  kind: 'winner' | 'runner_up' | 'knockout' | 'group';
+  round?: string;
+  position?: number;
+  outOf?: number;
+  groupName?: string;
+}
+
 export interface PublicPlayer {
   _id: string;
   firstName: string;
@@ -32,6 +41,7 @@ export interface PublicHistoryEntry {
   status: string;
   profile?: { skillLevel?: string };
   stats?: { matchesPlayed?: number; matchesWon?: number; pointsContributed?: number };
+  result?: EntryResult;
   createdAt: string;
   tournament?: {
     _id: string;

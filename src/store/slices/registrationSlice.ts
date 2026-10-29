@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import API from '@/api/axios';
+import type { EntryResult } from '@/api/profileApi';
 
 // --- TYPES ---
 
@@ -93,6 +94,7 @@ export interface TournamentHistoryEntry {
     category?: { _id: string; name: string; gender: string };
     // The server selects `logo` too (playerAuth.service _buildTournamentHistory).
     team?: { _id: string; name: string; primaryColor?: string; logo?: string };
+    result?: EntryResult;
     createdAt: string;
 }
 

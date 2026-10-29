@@ -14,7 +14,6 @@ import { ResultBadge } from '@/components/ui/Pills';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, space } from '@/constants/theme';
-import type { Title } from '@/api/profileApi';
 import type { Award, buildAwards } from '@/lib/awardsView';
 import { RANK_MIN, resultLetter, sportName } from '@/lib/homeView';
 import { initials } from '@/lib/matchCard';
@@ -269,11 +268,11 @@ function SportDetail({ s: sp, playerId, who, board, recent, onAll }: {
 }
 
 /** One row per entry: crest or sport icon, name, category and team, where it stands. A row opens the tournament. */
-export function TournamentRows<E extends RowEntry>({ entries, titles, extra }: { entries: E[]; titles: Title[]; extra?: (entry: E) => string }) {
+export function TournamentRows<E extends RowEntry>({ entries, extra }: { entries: E[]; extra?: (entry: E) => string }) {
   return (
     <>
       {entries.map((e) => {
-        const r = tournamentRow(e, titles);
+        const r = tournamentRow(e);
         return (
           <Tap key={r.key} scale={0.99} accessibilityLabel={`${r.name}, ${r.sub}, ${r.result.text}`} onPress={() => r.tournamentId && router.push(`/tournament/${r.tournamentId}`)} style={s.tRow}>
             <View style={[s.crest, r.crest ? { backgroundColor: colors.text } : null]}>

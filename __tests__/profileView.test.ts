@@ -107,3 +107,58 @@ describe('match helpers', () => {
     expect(matchSports([m('a', '2026-10-01T12:00:00Z', 'cricket'), m('b', '2026-10-01T12:00:00Z'), m('c', '2026-10-01T12:00:00Z', 'cricket')])).toEqual(['cricket', 'badminton']);
   });
 });
+
+import { colors } from '../src/constants/theme';
+import { tournamentRow, type RowEntry } from '../src/lib/profileView';
+
+describe('tournamentRow result line (spec §8)', () => {
+  const row = (over: Partial<RowEntry> = {}, tStatus = 'completed') =>
+    tournamentRow({
+      _id: 'e1', status: 'approved', category: { name: 'MS' },
+      tournament: { _id: 't1', name: 'Cup', status: tStatus },
+      ...over,
+    });
+
+  it('words each result', () => {
+    expect(row({ result: { kind: 'winner' } }).result).toMatchObject({ text: 'Winner', color: colors.gold });
+    expect(row({ result: { kind: 'runner_up' } }).result).toMatchObject({ text: 'Runner-up', color: colors.silver });
+    expect(row({ result: { kind: 'knockout', round: 'Quarter-Final' } }).result.text).toBe('Quarter-final');
+    expect(row({ result: { kind: 'knockout', round: 'Semi-Final' } }).result.text).toBe('Semi-final');
+    expect(row({ result: { kind: 'knockout', round: 'Round of 16' } }).result.text).toBe('Round of 16');
+    expect(row({ result: { kind: 'group', position: 3, groupName: 'A' } }).result.text).toBe('3rd in group');
+    expect(row({ result: { kind: 'group', position: 3, outOf: 12 } }).result.text).toBe('3rd of 12');
+  });
+
+  it('says "in group" whenever there is a group, even with a count', () => {
+    // The spec's table decides by groupName: a group stage reads "in group",
+    // and "of N" is for a flat league that has no group.
+    expect(row({ result: { kind: 'group', position: 3, outOf: 4, groupName: 'A' } }).result.text).toBe('3rd in group');
+  });
+
+  it('calls a flat league\'s top two Winner and Runner-up, matching the shields they hold', () => {
+    // Those two are exactly the places a league awards titles to; "1st of 12"
+    // beside a gold Champion shield would read as a lesser result.
+    expect(row({ result: { kind: 'group', position: 1, outOf: 12 } }).result).toMatchObject({ text: 'Winner', color: colors.gold });
+    expect(row({ result: { kind: 'group', position: 2, outOf: 12 } }).result).toMatchObject({ text: 'Runner-up', color: colors.silver });
+  });
+
+  it('does not crown a team for topping its group', () => {
+    expect(row({ result: { kind: 'group', position: 1, groupName: 'A' } }).result.text).toBe('1st in group');
+  });
+
+  it('writes ordinals in English', () => {
+    const at = (position: number) => row({ result: { kind: 'group', position, outOf: 200 } }).result.text;
+    expect([3, 4, 11, 12, 13, 21, 22, 23, 101, 111].map(at)).toEqual(
+      ['3rd of 200', '4th of 200', '11th of 200', '12th of 200', '13th of 200',
+        '21st of 200', '22nd of 200', '23rd of 200', '101st of 200', '111th of 200']);
+  });
+
+  it('shows a result even while other categories keep the tournament ongoing', () => {
+    expect(row({ result: { kind: 'knockout', round: 'Semi-Final' } }, 'ongoing').result.text).toBe('Semi-final');
+  });
+
+  it('falls back for an entry with no result', () => {
+    expect(row({}, 'ongoing').result.text).toBe('In progress');
+    expect(row({}, 'completed').result.text).toBe('Completed');
+  });
+});
