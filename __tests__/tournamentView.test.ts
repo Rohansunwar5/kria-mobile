@@ -1,6 +1,6 @@
 import {
   effectiveStage, liveAuctionCategory, statusLine, categoryStatus, formatLine, feeLabel, lowestFee, facts,
-  overviewTabs, footerCta, announcementTag, timeAgo, directionsUrl, awardRow,
+  overviewTabs, footerCta, announcementTag, announcementMeta, timeAgo, directionsUrl, awardRow,
 } from '@/lib/tournamentView';
 import type { TournamentCategory, TournamentDetail, MyEntry } from '@/api/tournaments';
 import type { Announcement } from '@/api/profileApi';
@@ -182,6 +182,13 @@ describe('announcementTag', () => {
     expect(announcementTag(a({}))).toEqual({ text: 'Info', tone: 'text2' });
     expect(announcementTag(a({ severity: 'important' }))).toEqual({ text: 'Important', tone: 'accent' });
     expect(announcementTag(a({ severity: 'schedule_change' }))).toEqual({ text: 'Schedule change', tone: 'accent' });
+  });
+
+  it('meta names the author, their role and when', () => {
+    const now = new Date('2026-10-22T12:00:00Z');
+    const at = '2026-10-22T11:40:00Z';
+    expect(announcementMeta(a({ authorName: 'Asha Rao', authorRole: 'staff', createdAt: at }), now)).toBe('Asha Rao · staff · 20 min ago');
+    expect(announcementMeta(a({ authorName: 'Ravi K', authorRole: 'organizer', createdAt: at }), now)).toBe('Ravi K · organiser · 20 min ago');
   });
 });
 

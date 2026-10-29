@@ -8,10 +8,11 @@ export const SPORT_LABELS: Record<string, string> = {
 };
 
 /**
- * Sports `GET /player/rankings` accepts: the server's sport registry. No endpoint
- * lists them, so this mirrors it by hand (SERVER-GAPS.md #3).
+ * Sports `GET /player/rankings` accepts: every sport a match can be played in,
+ * tournament or quick. The server ranks straight from the participation ledger,
+ * so this is the same list as the Host flow's sports.
  */
-export const RANKED_SPORTS = ['badminton', 'cricket'];
+export const RANKED_SPORTS = ['badminton', 'cricket', 'table_tennis'];
 
 /** Glyph per sport, for history rows and roster headers. */
 export const SPORT_ICON: Record<string, 'shuttlecock' | 'paddle' | 'ball' | 'court'> = {

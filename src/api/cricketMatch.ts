@@ -166,20 +166,11 @@ export interface LiveMatchSummary {
   matchConfig?: { maxOvers?: number };
 }
 
-export async function getMatch(matchId: string): Promise<CricketMatch> {
-  const res = await API.get(`/sports/cricket/match/${matchId}`);
-  return unwrap(res);
-}
-
-export async function getLiveState(matchId: string): Promise<LiveState | null> {
-  const res = await API.get(`/sports/cricket/match/${matchId}/live`);
-  return unwrap(res)?.liveState ?? null;
-}
-
-export async function getMatchLive(matchId: string): Promise<{ liveState: LiveState | null; recentBalls: unknown[] }> {
+/** The live state with the match fields a board needs (teams, config, result, round), in one request. */
+export async function getMatchLive(matchId: string): Promise<{ liveState: LiveState | null; recentBalls: unknown[]; match: CricketMatch | null }> {
   const res = await API.get(`/sports/cricket/match/${matchId}/live`);
   const d = unwrap(res);
-  return { liveState: d?.liveState ?? null, recentBalls: d?.recentBalls ?? [] };
+  return { liveState: d?.liveState ?? null, recentBalls: d?.recentBalls ?? [], match: d?.match ?? null };
 }
 
 export async function getScorecard(matchId: string): Promise<Scorecard> {

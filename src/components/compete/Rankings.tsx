@@ -11,6 +11,7 @@ import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, space } from '@/constants/theme';
 import { rankingRows, VISIBLE, type RankRow } from '@/lib/competeView';
 import { RANK_MIN, sportName } from '@/lib/homeView';
+import { EVENT_SPORTS } from '@/lib/eventsList';
 import { RANKED_SPORTS } from '@/lib/sports';
 
 /**
@@ -89,7 +90,10 @@ export function Rankings({ sport, onSport, meId, meName, mine, onPlay }: {
               ? "You've qualified. Rankings refresh every few minutes."
               : `The first player to ${RANK_MIN} decided matches opens this board. You're ${RANK_MIN - (me?.decided ?? 0)} away.`}
           </Text>
-          <Button variant="secondary" label={`Find a ${name} event`} onPress={() => router.push({ pathname: '/(tabs)/events', params: { sport } })} style={{ marginTop: 8, height: 48, paddingHorizontal: 20 }} />
+          {/* Table tennis has no tournaments, only quick matches. */}
+          {EVENT_SPORTS.includes(sport)
+            ? <Button variant="secondary" label={`Find a ${name} event`} onPress={() => router.push({ pathname: '/(tabs)/events', params: { sport } })} style={{ marginTop: 8, height: 48, paddingHorizontal: 20 }} />
+            : <Button variant="secondary" label={`Play a ${name} match`} onPress={onPlay} style={{ marginTop: 8, height: 48, paddingHorizontal: 20 }} />}
         </View>
       ) : (
         <Board board={board} meId={meId} meName={meName} me={mine ? me : null} expanded={expanded} onExpand={() => setExpanded((e) => !e)} onPlay={onPlay} />

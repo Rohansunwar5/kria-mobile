@@ -11,6 +11,8 @@ export interface EntryRow {
   status: string; tone: Tone;
   /** Where the money stands on this entry, when there is money in it. */
   money?: string;
+  /** "Partner: Priya Nair" on a paired doubles entry. */
+  partner?: string;
   canWithdraw: boolean;
 }
 
@@ -54,6 +56,7 @@ export function entryRows(entries: MyEntry[]): { active: EntryRow[]; closed: Ent
       status: st.closed ? st.status : over ? `Tournament ${e.tournament!.status}` : st.status,
       tone: st.closed ? st.tone : over ? 'text3' : st.tone,
       money: moneyOf(e),
+      partner: e.partner ? `Partner: ${e.partner.name}` : undefined,
       canWithdraw: !isClosed && (e.status === 'pending' || e.status === 'approved'),
     };
     (isClosed ? closed : active).push(row);

@@ -24,7 +24,7 @@ describe('Intro', () => {
     expect(screen.getByText('Host a match in seconds.')).toBeTruthy();
     fireEvent.press(screen.getByLabelText('Next'));
     expect(screen.getByText('Climb the leaderboard.')).toBeTruthy();
-    expect(screen.getByText(/badminton and cricket/)).toBeTruthy();
+    expect(screen.getByText(/ranked by win rate in badminton, cricket and table tennis\./)).toBeTruthy();
     fireEvent.press(screen.getByLabelText('Skip'));
     expect(mockPush).toHaveBeenCalledWith('/(auth)/register');
     await act(async () => {});

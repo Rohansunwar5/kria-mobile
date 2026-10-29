@@ -1,12 +1,12 @@
 import type { Tournament } from '@/store/slices/tournamentSlice';
 import { datePill } from '@/lib/homeView';
-import { RANKED_SPORTS } from '@/lib/sports';
 
 /**
  * Sports a tournament can be created for: the server's sport registry
- * (`assertSportsRegistered`), the same list rankings accept.
+ * (`assertSportsRegistered`). Narrower than RANKED_SPORTS, since table tennis
+ * is played only as quick matches.
  */
-export const EVENT_SPORTS = RANKED_SPORTS;
+export const EVENT_SPORTS = ['badminton', 'cricket'];
 
 /** The stages GET /tournament filters on (exact match, one at a time). */
 export const EVENT_STATUSES = [

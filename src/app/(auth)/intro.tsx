@@ -13,7 +13,8 @@ import { Tap } from '@/components/ui/Tap';
 import { RANKED_SPORTS } from '@/lib/sports';
 import { RANK_MIN, sportName } from '@/lib/homeView';
 
-const ranked = RANKED_SPORTS.map((k) => sportName(k).toLowerCase()).join(' and ');
+const names = RANKED_SPORTS.map((k) => sportName(k).toLowerCase());
+const ranked = `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 const PAGES = [
   { tag: '01 / 03 · PLAY', title: 'Host a match in seconds.', line: 'Start a quick match, share the code, and friends join from their phones. Every result goes on your record.', card: <PlayCard /> },
   { tag: '02 / 03 · COMPETE', title: 'Climb the leaderboard.', line: `You're ranked by win rate in ${ranked}. Ten decided matches and you're on the board.`, card: <CompeteCard sports={RANKED_SPORTS} rankMin={RANK_MIN} /> },

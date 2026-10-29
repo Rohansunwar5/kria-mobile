@@ -1,5 +1,5 @@
 import type { Match } from '@/api/match';
-import { bracketColumns, champion, isMine, liveRound, myNextMatch, nextMatchLabel, nextMatchView, sideName } from '@/lib/tournamentBracket';
+import { bracketColumns, champion, isMine, liveRound, meFrom, myNextMatch, nextMatchLabel, nextMatchView, sideName } from '@/lib/tournamentBracket';
 
 const P = (id: string, name: string) => ({ registrationId: id, name, teamId: '', teamName: '' });
 const TBD = P('TBD', 'TBD');
@@ -105,4 +105,13 @@ test('champion', () => {
   expect(champion([sf1, { ...fin, player1: P('r1', 'Asha'), player2: P('r3', 'Cara'), status: 'completed', winnerId: 'r1' }])).toBe('Asha');
   const tf = mk({ bracketRound: 'Final', competitorType: 'team', teams: { team1Id: 'T1', team2Id: 'T2', team1Name: 'Lions', team2Name: 'Tigers' }, status: 'completed', winnerId: 'T2' });
   expect(champion([tf])).toBe('Tigers');
+});
+
+describe('meFrom', () => {
+  it('counts a doubles partner\'s registration as mine, so the pair\'s side is mine', () => {
+    const me2 = meFrom([{ _id: 'r9', teamId: 'T1', partnerRegistrationId: 'r1' }, { _id: 'r8' }]);
+    expect(me2).toEqual({ registrationIds: ['r9', 'r1', 'r8'], teamId: 'T1' });
+    expect(isMine(sf1, me2)).toBe(true);
+    expect(isMine(sf1, meFrom([{ _id: 'r9' }]))).toBe(false);
+  });
 });

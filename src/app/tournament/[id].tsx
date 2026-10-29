@@ -18,7 +18,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, space } from '@/constants/theme';
 import { goBack } from '@/lib/nav';
-import { liveRound, myNextMatch, nextMatchLabel, type Me } from '@/lib/tournamentBracket';
+import { liveRound, meFrom, myNextMatch, nextMatchLabel } from '@/lib/tournamentBracket';
 import {
   deadlinePassed, directionsUrl, effectiveStage, facts, footerCta, liveAuctionCategory, overviewTabs, statusLine,
   type CtaGo, type TabKey,
@@ -90,7 +90,7 @@ export default function TournamentScreen() {
   let next: { categoryId: string; label: string } | undefined;
   for (const c of categories) {
     const entries = mine.filter((e) => e.categoryId === c._id && e.status !== 'withdrawn');
-    const me: Me = { registrationIds: entries.map((e) => e._id), teamId: entries.find((e) => e.teamId)?.teamId };
+    const me = meFrom(entries);
     const m = myNextMatch(matches[c._id] ?? [], me);
     if (m) { next = { categoryId: c._id, label: nextMatchLabel(m) }; break; }
   }

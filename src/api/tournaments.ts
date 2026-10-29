@@ -93,6 +93,9 @@ export interface MyEntry {
   tournament?: { _id: string; name: string; sport?: string; startDate?: string; endDate?: string; status?: TournamentStatus } | null;
   category?: { _id: string; name: string; sport?: string; matchType?: string; registrationFee?: number; isPaidRegistration?: boolean } | null;
   payment?: { status: string; amount: number; razorpayOrderId?: string; createdAt?: string } | null;
+  /** Doubles: the teammate the organiser paired this entry with. */
+  partnerRegistrationId?: string;
+  partner?: { registrationId: string; name: string } | null;
 }
 
 export interface EntryProfile { firstName: string; lastName: string; age: number; gender: 'male' | 'female'; phone: string; photo?: string; skillLevel: SkillLevel }

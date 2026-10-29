@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
-import { getMatch, getLiveState, getScorecard, CricketMatch, LiveState, Scorecard } from '@/api/cricketMatch';
+import { getMatchLive, getScorecard, CricketMatch, LiveState, Scorecard } from '@/api/cricketMatch';
 import { tallyKey } from '@/lib/cricketView';
 
 interface CricketState {
@@ -35,10 +35,8 @@ export function useCricketMatchSocket(matchId?: string) {
   const reload = useCallback(async () => {
     if (!matchId) return;
     try {
-      const [match, live] = await Promise.all([
-        getMatch(matchId),
-        getLiveState(matchId).catch(() => null),
-      ]);
+      const { match, liveState: live } = await getMatchLive(matchId);
+      if (!match) throw new Error('no match');
       lastTally.current = tallyKey(live);
       ready.current = true;
       setState((s) => ({ ...s, match, live, loading: false, error: false }));

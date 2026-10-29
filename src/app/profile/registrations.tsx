@@ -27,6 +27,7 @@ function Row({ r, closed, onWithdraw, onOpen }: { r: EntryRow; closed?: boolean;
         <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
           <Text numberOfLines={1} style={[s.name, closed && { color: colors.text2 }]}>{r.name}</Text>
           {r.sub ? <Text style={s.sub}>{r.sub}</Text> : null}
+          {r.partner ? <Text style={s.sub}>{r.partner}</Text> : null}
           <Text style={[s.status, { color: colors[r.tone] }]}>{r.status}</Text>
           {r.money ? <Text style={s.money}>{r.money}</Text> : null}
         </View>

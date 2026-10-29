@@ -1,9 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
-import { getLiveState, getMatch, getScorecard } from '@/api/cricketMatch';
+import { getMatchLive, getScorecard } from '@/api/cricketMatch';
 import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
 import { useCricketMatchSocket } from '@/lib/useCricketMatchSocket';
 
-jest.mock('@/api/cricketMatch', () => ({ getMatch: jest.fn(), getLiveState: jest.fn(), getScorecard: jest.fn() }));
+jest.mock('@/api/cricketMatch', () => ({ getMatchLive: jest.fn(), getScorecard: jest.fn() }));
 jest.mock('@/lib/socket', () => {
   const handlers: Record<string, ((...a: unknown[]) => void)[]> = {};
   return {
@@ -21,14 +21,14 @@ jest.mock('@/lib/socket', () => {
 });
 const server = socket as unknown as { emit: jest.Mock; __emit: (e: string, p?: unknown) => void; __count: (e: string) => number };
 const EVENTS = ['ball:recorded', 'ball:undone', 'connect', 'disconnect', 'connect_error'];
-const match = getMatch as jest.Mock;
+const match = getMatchLive as jest.Mock;
 
 const live = (runs: number, matchStatus = 'innings1') => ({ runs, wickets: 0, completedOvers: 0, ballsInCurrentOver: 1, currentInnings: 1, matchStatus });
+const withMatch = (m: object, liveState: object | null = live(4)) => ({ match: m, liveState, recentBalls: [] });
 
 beforeEach(() => {
   jest.clearAllMocks();
-  match.mockResolvedValue({ _id: 'm1', status: 'in_progress' });
-  (getLiveState as jest.Mock).mockResolvedValue(live(4));
+  match.mockResolvedValue(withMatch({ _id: 'm1', status: 'in_progress' }));
   (getScorecard as jest.Mock).mockResolvedValue({ innings1: null, innings2: null });
 });
 
@@ -60,7 +60,7 @@ it("takes this match's ball:recorded and ignores another match's", async () => {
 it('reloads the match when a ball ends it, so the result shows', async () => {
   const { result } = await mount();
   match.mockClear();
-  match.mockResolvedValue({ _id: 'm1', status: 'completed', winnerId: 'tA', result: { marginOfVictory: 'by 7 wickets' } });
+  match.mockResolvedValue(withMatch({ _id: 'm1', status: 'completed', winnerId: 'tA', result: { marginOfVictory: 'by 7 wickets' } }, live(120, 'completed')));
   await act(async () => server.__emit('ball:recorded', { ball: { matchId: 'm1' }, liveState: live(120, 'completed'), matchEnded: true, winnerId: 'tA' }));
   await waitFor(() => expect(result.current.match?.status).toBe('completed'));
   expect(match).toHaveBeenCalledTimes(1);

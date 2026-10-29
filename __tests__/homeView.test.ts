@@ -33,8 +33,13 @@ describe('heroFor', () => {
   });
 
   it('never promises a rank in a sport the server cannot rank', () => {
+    const h = heroFor(sport({ sport: 'football', played: 3, decided: 3, won: 2, winRate: 2 / 3 }), null, 'me');
+    expect(h).toMatchObject({ big: '—', gapB: "Kria doesn't rank football yet", ranked: false });
+  });
+
+  it('puts table tennis on the path to a rank like any other sport', () => {
     const h = heroFor(sport({ sport: 'table_tennis', played: 3, decided: 3, won: 2, winRate: 2 / 3 }), null, 'me');
-    expect(h).toMatchObject({ big: '—', gapB: "Kria doesn't rank table tennis yet", ranked: false });
+    expect(h).toMatchObject({ big: '3/10', gapA: '7 more', ranked: false });
   });
 
   it('never invents a rank when the board failed to load', () => {

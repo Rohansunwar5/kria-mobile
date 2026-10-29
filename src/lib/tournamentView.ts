@@ -172,6 +172,12 @@ export function announcementTag(a: Announcement): { text: string; tone: Tone } {
   return { text: a.pinned ? `Pinned · ${label}` : label, tone };
 }
 
+/** "Asha Rao · staff · 20 min ago". The role is set by the server from the poster's account. */
+export function announcementMeta(a: Announcement, now: Date): string {
+  const role = a.authorRole === 'staff' ? 'staff' : 'organiser';
+  return `${a.authorName} · ${role} · ${timeAgo(a.createdAt, now)}`;
+}
+
 export function timeAgo(iso: string, now: Date): string {
   const s = (now.getTime() - new Date(iso).getTime()) / 1000;
   if (s < 60) return 'just now';

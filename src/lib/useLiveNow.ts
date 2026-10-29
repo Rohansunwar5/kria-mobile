@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { getMatch, getMatchLive } from '@/api/cricketMatch';
+import { getMatchLive } from '@/api/cricketMatch';
 import { fetchLiveFeed, type LiveItem } from '@/api/live';
 import { feedRows, type CricketEnrich } from '@/lib/liveFeedView';
 
 const EVERY = 30_000;
 
-/** `scores: false` skips the per-row cricket reads (two each) for callers that only show the count. */
+/** `scores: false` skips the per-row cricket read for callers that only show the count. */
 export function useLiveNow({ scores = true }: { scores?: boolean } = {}) {
   const [items, setItems] = useState<LiveItem[]>([]);
   const [cricket, setCricket] = useState<CricketEnrich>({});
@@ -21,11 +21,8 @@ export function useLiveNow({ scores = true }: { scores?: boolean } = {}) {
       const enrich: CricketEnrich = {};
       const wanted = scores ? feed.items.filter((i) => i.kind === 'tournament' && i.sport === 'cricket') : [];
       await Promise.all(wanted.map(async (i) => {
-        const [live, match] = await Promise.all([
-          getMatchLive(i.matchId).then((r) => r.liveState, () => null),
-          getMatch(i.matchId).catch(() => null),
-        ]);
-        enrich[i.matchId] = { live, match };
+        const r = await getMatchLive(i.matchId).catch(() => null);
+        enrich[i.matchId] = { live: r?.liveState ?? null, match: r?.match ?? null };
       }));
       if (!alive.current) return;
       setItems(feed.items);

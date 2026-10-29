@@ -241,6 +241,11 @@ describe('cricketOutcomeLabel', () => {
     expect(cricketOutcomeLabel(m)).toBe('Reds won');
   });
 
+  it('adds the margin the server stored', () => {
+    const m = { ...ready(), status: 'completed', outcome: 'side2', winMargin: 'by 7 wickets' } as QuickMatch;
+    expect(cricketOutcomeLabel(m)).toBe('Blues won by 7 wickets');
+  });
+
   it('reports a tie', () => {
     const m = { ...ready(), status: 'completed', outcome: 'tied' } as QuickMatch;
     expect(cricketOutcomeLabel(m)).toBe('Tied');

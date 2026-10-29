@@ -12,7 +12,8 @@ it('totals all sports from the counts, not by averaging rates', () => {
 it('rings a rate, a path to 10 for a short rankable sport, and a rate for an unrankable one', () => {
   expect(ringFor(s({ decided: 12, won: 9, winRate: 0.75 }))).toEqual({ fraction: 0.75, label: '75%', muted: false });
   expect(ringFor(s({ decided: 4, won: 3, winRate: 0.75 }))).toEqual({ fraction: 0.4, label: '4/10', muted: true });
-  expect(ringFor(s({ sport: 'table_tennis', decided: 4, won: 3, winRate: 0.75 })).label).toBe('75%');
+  expect(ringFor(s({ sport: 'football', decided: 4, won: 3, winRate: 0.75 })).label).toBe('75%');
+  expect(ringFor(s({ sport: 'table_tennis', decided: 4, won: 3, winRate: 0.75 })).label).toBe('4/10');
   expect(ringFor(s({ sport: ALL }))).toMatchObject({ label: '—', muted: true });
 });
 
@@ -31,7 +32,7 @@ describe('rankNote on another player\'s profile ("they")', () => {
   const row = (playerId: string, winRate: number) => ({ playerId, firstName: 'Dev', lastName: 'Shah', played: 20, decided: 20, won: 10, winRate }) as never;
   const ranked = s({ decided: 12, won: 9, winRate: 0.75 });
   const branches = {
-    unranked: rankNote(s({ sport: 'table_tennis', decided: 4 }), undefined, 'p1', 'they'),
+    unranked: rankNote(s({ sport: 'football', decided: 4 }), undefined, 'p1', 'they'),
     short: rankNote(s({ decided: 3 }), undefined, 'p1', 'they'),
     loading: rankNote(ranked, undefined, 'p1', 'they'),
     unavailable: rankNote(ranked, null, 'p1', 'they'),
@@ -45,7 +46,7 @@ describe('rankNote on another player\'s profile ("they")', () => {
   it('reads in the third person on every branch', () => {
     for (const n of Object.values(branches)) expect(`${n.title} ${n.line}`).not.toMatch(/\byou/i);
     expect(branches.short.line).toBe('3 of 10 decided matches. 7 more and they appear on the badminton board.');
-    expect(branches.unranked.line).toBe("Kria doesn't rank table tennis yet.");
+    expect(branches.unranked.line).toBe("Kria doesn't rank football yet.");
     expect(branches.loading.line).toBe('Loading the board…');
     expect(branches.unavailable.line).toBe('Rankings unavailable right now');
     expect(branches.outside.title).toBe('Outside the top 50 in badminton');

@@ -20,7 +20,7 @@ import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, radius, space } from '@/constants/theme';
 import { goBack } from '@/lib/nav';
 import { comingUp, emptyCopy, playerTable, resultRows, ruleLine, tableKind, teamLeagueTable, teamTable, tieRow } from '@/lib/standingsView';
-import { bracketColumns, myNextMatch, nextMatchView, type Me } from '@/lib/tournamentBracket';
+import { bracketColumns, meFrom, myNextMatch, nextMatchView } from '@/lib/tournamentBracket';
 import { useTournament } from '@/lib/useTournament';
 
 /** Knockout bracket, a league table (players or teams), or team-league groups. */
@@ -130,7 +130,7 @@ export default function Matches() {
   const ms = selId ? matches[selId] : undefined;
   // Scoped to the selected category, as 2a does: a player can be on different teams in different categories.
   const myEntries = data?.mine.filter((e) => e.categoryId === selId && e.status !== 'withdrawn') ?? [];
-  const me: Me = { registrationIds: myEntries.map((e) => e._id), teamId: myEntries.find((e) => e.teamId)?.teamId };
+  const me = meFrom(myEntries);
   const loading = anyFailed ? null : <Loading />;
   const choose = (c: string) => { setPicked(c); setStage(0); setGroup(undefined); };
 

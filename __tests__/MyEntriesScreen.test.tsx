@@ -94,3 +94,9 @@ it('still loads after effects re-run (StrictMode mount/unmount/mount)', async ()
   render(<StrictMode><MyEntries /></StrictMode>);
   expect(await screen.findByText('Smash Open')).toBeTruthy();
 });
+
+it('shows a doubles partner', async () => {
+  mockEntries.mockResolvedValue([e('e1', 't1', { status: 'assigned', partner: { registrationId: 'e9', name: 'Priya Nair' } })]);
+  render(<MyEntries />);
+  expect(await screen.findByText('Partner: Priya Nair')).toBeTruthy();
+});

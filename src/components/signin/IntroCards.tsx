@@ -113,7 +113,7 @@ const s = StyleSheet.create({
   roster: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   rosterName: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
   result: { fontFamily: font.semibold, fontSize: 14, color: colors.text2, textAlign: 'center' },
-  pills: { flexDirection: 'row', gap: 8 },
+  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   pill: { height: 32, paddingHorizontal: 14, borderRadius: 16, backgroundColor: colors.surface2, justifyContent: 'center' },
   pillText: { fontFamily: font.semibold, fontSize: 13, color: colors.text2 },
   mono: { fontFamily: font.mono, fontSize: 11, letterSpacing: 1, color: colors.text4 },

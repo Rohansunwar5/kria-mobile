@@ -4,6 +4,17 @@ import { roundAbbr, roundLabel } from '@/lib/knockoutRoom';
 import { dayDate } from '@/lib/matchCard';
 
 export interface Me { registrationIds: string[]; teamId?: string }
+
+/**
+ * Who "me" is in a category's matches: my entries, plus each doubles partner's
+ * registration, since a pair plays as one side carried by either partner's id.
+ */
+export function meFrom(entries: { _id: string; teamId?: string; partnerRegistrationId?: string }[]): Me {
+  return {
+    registrationIds: entries.flatMap((e) => (e.partnerRegistrationId ? [e._id, e.partnerRegistrationId] : [e._id])),
+    teamId: entries.find((e) => e.teamId)?.teamId,
+  };
+}
 type Slot = 1 | 2;
 
 const isTeam = (m: Match) => !m.player1 && !m.player2;

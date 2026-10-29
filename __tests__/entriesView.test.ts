@@ -50,3 +50,7 @@ it('newest first', () => {
   const r = entryRows([entry({ _id: 'a', createdAt: '2026-01-01' }), entry({ _id: 'b', createdAt: '2026-05-01' })]);
   expect(r.active.map((x) => x.id)).toEqual(['b', 'a']);
 });
+it('names a doubles partner', () => {
+  expect(one(entry({ status: 'assigned', partner: { registrationId: 'e9', name: 'Priya Nair' } })).partner).toBe('Partner: Priya Nair');
+  expect(one(entry()).partner).toBeUndefined();
+});

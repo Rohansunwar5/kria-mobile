@@ -31,6 +31,8 @@ export interface QuickMatch {
   status: 'waiting' | 'live' | 'completed' | 'cancelled';
   sides: QuickMatchSide[];
   outcome?: 'side1' | 'side2' | 'tied' | 'no_result';
+  /** Cricket only: "by 7 wickets", "by 12 runs" or "match tied", set at completion. */
+  winMargin?: string;
   lockedAt?: string;
   createdAt: string;
   gameScores?: QuickGameScore[];

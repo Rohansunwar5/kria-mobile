@@ -1,40 +1,27 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { getMatch, getMatchLive, getLiveState, getScorecard, getTournamentMatches, resolveMatchSport } from '@/api/cricketMatch';
+import { getMatchLive, getScorecard, getTournamentMatches, resolveMatchSport } from '@/api/cricketMatch';
 
 describe('cricketMatch api', () => {
   let mock: MockAdapter;
   beforeEach(() => { mock = new MockAdapter(API); });
   afterEach(() => { mock.restore(); });
 
-  it('getMatch unwraps nested data', async () => {
-    mock.onGet('/sports/cricket/match/m1').reply(200, { data: { data: { _id: 'm1', tournamentId: 't1' } } });
-    const m = await getMatch('m1');
-    expect(m._id).toBe('m1');
-    expect(m.tournamentId).toBe('t1');
-  });
-
-  it('getLiveState returns the inner liveState', async () => {
-    mock.onGet('/sports/cricket/match/m1/live').reply(200, {
-      data: { data: { liveState: { runs: 42, wickets: 1 }, recentBalls: [], match: {} } },
-    });
-    const live = await getLiveState('m1');
-    expect(live?.runs).toBe(42);
-  });
-
-  it('getLiveState returns null before the match starts', async () => {
+  it('getMatchLive returns null state and match before the match starts', async () => {
     mock.onGet('/sports/cricket/match/m1/live').reply(200, { data: { data: { liveState: null } } });
-    const live = await getLiveState('m1');
-    expect(live).toBeNull();
+    const live = await getMatchLive('m1');
+    expect(live.liveState).toBeNull();
+    expect(live.match).toBeNull();
   });
 
-  it('getMatchLive returns liveState and recentBalls', async () => {
+  it('getMatchLive returns liveState, recentBalls and the match', async () => {
     mock.onGet('/sports/cricket/match/m1/live').reply(200, {
-      data: { data: { liveState: { runs: 7, wickets: 0 }, recentBalls: [] } },
+      data: { data: { liveState: { runs: 7, wickets: 0 }, recentBalls: [], match: { _id: 'm1', matchConfig: { maxOvers: 20 } } } },
     });
     const live = await getMatchLive('m1');
     expect(live.liveState?.runs).toBe(7);
     expect(live.recentBalls).toEqual([]);
+    expect(live.match?.matchConfig?.maxOvers).toBe(20);
   });
 
   it('getScorecard returns innings shape', async () => {

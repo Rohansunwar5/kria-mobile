@@ -115,8 +115,9 @@ export function cricketOutcomeLabel(match: QuickMatch): string | null {
   if (match.status !== 'completed') return null;
 
   const [side1, side2] = match.sides;
-  if (match.outcome === 'side1') return `${side1.name} won`;
-  if (match.outcome === 'side2') return `${side2.name} won`;
+  const by = match.winMargin ? ` ${match.winMargin}` : '';
+  if (match.outcome === 'side1') return `${side1.name} won${by}`;
+  if (match.outcome === 'side2') return `${side2.name} won${by}`;
   if (match.outcome === 'tied') {
     // A tied knockout match goes on with the team the host picked.
     const through = match.sides.find((s) => s.sideId === match.tieWinnerSideId);

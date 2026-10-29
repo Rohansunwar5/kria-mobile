@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { Announcement } from '@/api/profileApi';
 import { Icon } from '@/components/ui/Icon';
 import { colors, font, radius, space } from '@/constants/theme';
-import { announcementTag, timeAgo } from '@/lib/tournamentView';
+import { announcementMeta, announcementTag } from '@/lib/tournamentView';
 
 export function AnnouncementCard({ a, now }: { a: Announcement; now: Date }) {
   const tag = announcementTag(a);
@@ -15,7 +15,7 @@ export function AnnouncementCard({ a, now }: { a: Announcement; now: Date }) {
       </View>
       {a.title ? <Text style={s.title}>{a.title}</Text> : null}
       <Text style={s.message}>{a.message}</Text>
-      <Text style={s.meta}>{a.authorName} · {timeAgo(a.createdAt, now)}</Text>
+      <Text style={s.meta}>{announcementMeta(a, now)}</Text>
     </View>
   );
 }
