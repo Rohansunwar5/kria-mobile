@@ -2,6 +2,20 @@ import API from './axios';
 import { unwrap } from './unwrap';
 import type { Honor } from '@/lib/badges';
 
+/**
+ * A tournament title, as the server serves it. Legacy titles (parsed from the
+ * old "Winner of … at …" strings) carry no ids and no date.
+ */
+export interface Title {
+  place: 'winner' | 'runner_up';
+  tournamentId?: string;
+  categoryId?: string;
+  tournamentName?: string;
+  categoryName?: string;
+  sport?: string;
+  awardedAt?: string;
+}
+
 export interface PublicPlayer {
   _id: string;
   firstName: string;
@@ -9,7 +23,7 @@ export interface PublicPlayer {
   sport?: string;
   location?: string;
   profileImage?: string;
-  titles: string[];
+  titles: Title[];
   honors?: Honor[];
 }
 

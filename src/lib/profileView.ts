@@ -1,4 +1,5 @@
 import type { RecentMatch, SportSummary } from '@/api/career';
+import type { Title } from '@/api/profileApi';
 import type { RankedPlayer } from '@/api/rankings';
 import { colors } from '@/constants/theme';
 import { heroFor, RANK_MIN, sportName } from '@/lib/homeView';
@@ -83,9 +84,9 @@ export interface RowEntry {
  * Tournament rows (mock 1h). The only placement the server records is a
  * winner's title (SERVER-GAPS.md #9/#10), so other rows say where the entry stands.
  */
-export function tournamentRow(e: RowEntry, titles: string[]) {
+export function tournamentRow(e: RowEntry, titles: Title[]) {
   const t = e.tournament;
-  const won = !!t && !!e.category && titles.includes(`Winner of ${e.category.name} at ${t.name}`);
+  const won = !!t && !!e.category && titles.some((x) => x.place === 'winner' && x.categoryName === e.category!.name && x.tournamentName === t.name);
   const result = won ? { text: 'Winner', color: colors.gold }
     : t?.status === 'ongoing' ? { text: 'In progress', color: colors.text2 }
       : t?.status === 'completed' ? { text: 'Completed', color: colors.text3 }

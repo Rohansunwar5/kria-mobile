@@ -5,6 +5,7 @@ import authReducer, { type PlayerStats } from '@/store/slices/authSlice';
 import registrationReducer, { type TournamentHistoryEntry } from '@/store/slices/registrationSlice';
 import Profile from '../src/app/(tabs)/profile';
 import type { CareerProfile, RecentMatch, SportSummary } from '@/api/career';
+import type { Title } from '@/api/profileApi';
 
 // Profile tab (mocks 1h, 4e): identity, checklist, win-rate rings per sport,
 // per-sport detail, tournaments, account.
@@ -20,7 +21,7 @@ jest.mock('expo-router', () => ({
 }));
 jest.mock('@/components/profile/usePhotoUpload', () => ({ usePhotoUpload: () => ({ pick: jest.fn(), busy: false }) }));
 jest.mock('@/api/quickKnockout', () => ({ listMyQuickKnockouts: jest.fn(async () => []) }));
-let mockRecord = { titles: [] as string[], honors: [] as { title: string; badge: string }[] };
+let mockRecord = { titles: [] as Title[], honors: [] as { title: string; badge: string }[] };
 jest.mock('@/api/profileApi', () => ({ getPublicPlayer: jest.fn(async () => ({ player: mockRecord, history: [] })) }));
 let mockRecent: RecentMatch[] = [];
 jest.mock('@/api/career', () => ({ getRecentMatches: jest.fn(async () => mockRecent) }));
@@ -97,7 +98,7 @@ it('rings each sport played, and a short sport shows its way to a ranking', () =
 });
 
 it('marks a tournament you won from your titles, and says where the others stand', async () => {
-  mockRecord = { titles: ["Winner of Men's Doubles at Kria Smash Cup"], honors: [] };
+  mockRecord = { titles: [{ place: 'winner', categoryName: "Men's Doubles", tournamentName: 'Kria Smash Cup' }], honors: [] };
   mockUseCareer.mockReturnValue(career({ sports: [sport({})] }));
   const entry = (id: string, status: string, name: string, tStatus: string): TournamentHistoryEntry => ({
     _id: id, status, createdAt: '', category: { _id: 'c', name: "Men's Doubles", gender: 'male' },

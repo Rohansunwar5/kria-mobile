@@ -1,4 +1,5 @@
 import type { Achievement } from '@/api/career';
+import type { Title } from '@/api/profileApi';
 import type { QuickKnockout } from '@/api/quickKnockout';
 import type { BadgeShape } from '@/components/AwardBadge';
 import type { IconName } from '@/components/ui/iconPaths';
@@ -47,23 +48,40 @@ export interface Award {
   criteria: string;
   status?: { label: string; value: string };
   earned: boolean;
+  /** A title that can link to the tournament it was won at. Legacy titles have none. */
+  tournamentId?: string;
 }
 
 export interface MilestoneTotals { played: number; won: number; sports: number }
 
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`;
 
-/** "Winner of Men's Doubles at HSR Shuttle Cup" — the only shape the server writes. */
-export function titleAward(title: string, i: number): Award {
-  const m = /^Winner of (.+?) at (.+)$/.exec(title);
+/** A winner's gold shield or a runner-up's silver one — the same shape, a different metal (spec §8). */
+export function titleAward(title: Title, i: number): Award {
+  const won = title.place === 'winner';
+  const where = title.tournamentName ?? '';
+  const label = won ? 'Champion' : 'Runner-up';
   return {
-    key: `title-${i}`, family: 'title', shape: 'shield', metal: 'gold', icon: 'emoji_events',
-    name: m ? `Champion · ${m[1]}` : title, context: m ? m[2] : '', tier: 'Tournament title',
-    description: m ? `Won at ${m[2]}.` : title,
-    criteria: 'Win a tournament category',
-    status: m ? { label: 'Won at', value: m[2] } : undefined,
+    key: `title-${i}`, family: 'title', shape: 'shield', metal: won ? 'gold' : 'silver', icon: 'emoji_events',
+    name: title.categoryName ? `${label} · ${title.categoryName}` : label, context: where, tier: 'Tournament title',
+    description: won ? `Won at ${where}.` : `Lost the final at ${where}.`,
+    criteria: won ? 'Win a tournament category' : 'Reach a tournament category final',
+    status: where ? { label: won ? 'Won at' : 'Runner-up at', value: where } : undefined,
     earned: true,
+    tournamentId: title.tournamentId,
   };
+}
+
+/**
+ * The headline title: a win over a runner-up, then the newest awardedAt. An
+ * undated (legacy) title sorts last, and a tie goes to the later-appended one —
+ * the server appends, so that is the newer.
+ */
+function featuredTitle(titles: Title[]): number {
+  const when = (t: Title) => (t.awardedAt ? Date.parse(t.awardedAt) : -Infinity);
+  const beats = (a: Title, b: Title) =>
+    (a.place === 'winner') !== (b.place === 'winner') ? a.place === 'winner' : when(a) >= when(b);
+  return titles.reduce((best, t, i) => (best < 0 || beats(t, titles[best]) ? i : best), -1);
 }
 
 export function honourAward(h: Honor, i: number, knockouts: QuickKnockout[]): Award {
@@ -148,7 +166,7 @@ export function lockedHonours(): Award[] {
  * "most recent" is the order the server appended them in.
  */
 export function buildAwards(input: {
-  titles: string[];
+  titles: Title[];
   honors: Honor[];
   achievements: Achievement[];
   knockouts: QuickKnockout[];
@@ -161,7 +179,7 @@ export function buildAwards(input: {
   const earned = titles.length + honours.length + knockouts.reduce((n, k) => n + (k.count ?? 1), 0) + milestones.filter((m) => m.earned).length;
   const closest = milestones.find((m) => !m.earned) ?? null;
   const pick = (award: Award, label: 'Latest title' | 'Latest honour' | 'Knockout winner' | 'Next milestone' | 'Closest first award') => ({ award, label });
-  const featured = titles.length ? pick(titles[titles.length - 1], 'Latest title')
+  const featured = titles.length ? pick(titles[featuredTitle(input.titles)], 'Latest title')
     : honours.length ? pick(honours[honours.length - 1], 'Latest honour')
       : knockouts.length ? pick(knockouts[knockouts.length - 1], 'Knockout winner')
         : closest ? pick(closest, earned ? 'Next milestone' : 'Closest first award') : null;

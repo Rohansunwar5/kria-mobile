@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'rea
 import { router, useFocusEffect, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getRecentMatches, type RecentMatch } from '@/api/career';
-import { getPublicPlayer } from '@/api/profileApi';
+import { getPublicPlayer, type Title } from '@/api/profileApi';
 import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
 import { latestTournaments } from '@/api/tournaments';
 import { Checklist } from '@/components/home/NewPlayer';
@@ -35,7 +35,7 @@ export default function Profile() {
   const meId = user?._id ?? '';
   const career = useCareer(user?._id);
   const photo = usePhotoUpload();
-  const [record, setRecord] = useState<{ titles: string[]; honors: Honor[] } | null>(null);
+  const [record, setRecord] = useState<{ titles: Title[]; honors: Honor[] } | null>(null);
   const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
   const [recent, setRecent] = useState<RecentMatch[] | null>(null);
   const [openNearby, setOpenNearby] = useState<number | null>(null);
@@ -78,7 +78,7 @@ export default function Profile() {
   const awards = record && career.profile
     ? buildAwards({ titles: record.titles, honors: record.honors, achievements: career.profile.achievements, knockouts, totals: { played: totals.played, won: totals.won, sports: played.filter((x) => x.played > 0).length } })
     : null;
-  const titles = record?.titles ?? user?.titles ?? [];
+  const titles = record?.titles ?? [];
 
   return (
     <SafeAreaView edges={['top']} style={s.screen}>

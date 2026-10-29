@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
 import { AwardBadgeFor } from '@/components/awards/AwardGrid';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
@@ -36,7 +37,14 @@ export function AwardDetail({ award: a, onDone }: { award: Award; onDone: () => 
           </View>
         ) : null}
       </View>
-      <Button variant="secondary" label="Done" onPress={onDone} style={{ alignSelf: 'stretch', height: 52, marginTop: 4 }} />
+      {a.tournamentId ? (
+        <Button
+          label="View tournament"
+          onPress={() => { onDone(); router.push(`/tournament/${a.tournamentId}`); }}
+          style={{ alignSelf: 'stretch', height: 52, marginTop: 4 }}
+        />
+      ) : null}
+      <Button variant="secondary" label="Done" onPress={onDone} style={{ alignSelf: 'stretch', height: 52, marginTop: a.tournamentId ? 0 : 4 }} />
     </View>
   );
 }

@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
 import { useFocusEffect, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getPublicPlayer } from '@/api/profileApi';
+import { getPublicPlayer, type Title } from '@/api/profileApi';
 import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { AwardBadgeFor, AwardGrid } from '@/components/awards/AwardGrid';
@@ -24,7 +24,7 @@ export default function Awards() {
   const meId = user?._id ?? '';
   const insets = useSafeAreaInsets();
   const career = useCareer(user?._id);
-  const [record, setRecord] = useState<{ titles: string[]; honors: Honor[] } | null>(null);
+  const [record, setRecord] = useState<{ titles: Title[]; honors: Honor[] } | null>(null);
   const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
   const [failed, setFailed] = useState(false);
   const [open, setOpen] = useState<Award | null>(null);

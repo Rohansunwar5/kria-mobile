@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getPublicPlayer } from '@/api/profileApi';
+import { getPublicPlayer, type Title } from '@/api/profileApi';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -30,7 +30,7 @@ export default function History() {
   const shown = sport ? tournamentHistory.filter((e) => e.tournament?.sport === sport) : tournamentHistory;
   const strip = historyStrip(tournamentHistory);
   const meId = useAppSelector((st) => st.auth?.user?._id);
-  const [titles, setTitles] = useState<string[]>([]);
+  const [titles, setTitles] = useState<Title[]>([]);
   useEffect(() => {
     let live = true; // unmount guard
     if (meId) getPublicPlayer(meId).then((p) => live && p && setTitles(p.player.titles ?? []), () => {});

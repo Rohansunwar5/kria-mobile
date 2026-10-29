@@ -1,3 +1,4 @@
+import type { Title } from '../src/api/profileApi';
 import { buildAwards, honourAward, knockoutAwards, lockedHonours, milestoneAwards, titleAward } from '../src/lib/awardsView';
 
 const ko = (id: string, name: string, sport: 'badminton' | 'cricket') => ({ _id: id, name, sport }) as never;
@@ -6,15 +7,48 @@ const ach = (id: string, earned: boolean, progress: number, target: number) => (
 const build = (over: Partial<Parameters<typeof buildAwards>[0]> = {}) =>
   buildAwards({ titles: [], honors: [], achievements: [], knockouts: [], totals, ...over });
 
+const winner = (over: Partial<Title> = {}): Title => ({ place: 'winner', categoryName: 'MD', tournamentName: 'Cup', ...over });
+const runnerUp = (over: Partial<Title> = {}): Title => ({ place: 'runner_up', categoryName: 'MS', tournamentName: 'Cup', ...over });
+
 describe('titles', () => {
-  it('reads the server string into a champion name and tournament', () => {
-    expect(titleAward("Winner of Men's Doubles at HSR Shuttle Cup", 0)).toMatchObject({
-      name: "Champion · Men's Doubles", context: 'HSR Shuttle Cup', shape: 'shield', metal: 'gold',
-      status: { label: 'Won at', value: 'HSR Shuttle Cup' },
+  it('renders a winner in gold', () => {
+    expect(titleAward(winner(), 0)).toMatchObject({
+      shape: 'shield', metal: 'gold', name: 'Champion · MD', context: 'Cup', tier: 'Tournament title',
+      description: 'Won at Cup.', criteria: 'Win a tournament category', status: { label: 'Won at', value: 'Cup' },
     });
   });
-  it('keeps unparseable text as it is', () => {
-    expect(titleAward('Something else', 1)).toMatchObject({ name: 'Something else', context: '' });
+  it('renders a runner-up in silver', () => {
+    expect(titleAward(runnerUp(), 0)).toMatchObject({
+      shape: 'shield', metal: 'silver', name: 'Runner-up · MS', context: 'Cup', tier: 'Tournament title',
+      description: 'Lost the final at Cup.', criteria: 'Reach a tournament category final',
+    });
+  });
+  it('links a title to its tournament only when it carries one', () => {
+    expect(titleAward(winner({ tournamentId: 't1' }), 0).tournamentId).toBe('t1');
+    expect(titleAward(winner(), 0).tournamentId).toBeUndefined();
+  });
+  it('survives a legacy title with no ids or date', () => {
+    expect(titleAward(winner(), 0).earned).toBe(true);
+  });
+  it('names a title plainly when the server sent no category', () => {
+    expect(titleAward({ place: 'winner' }, 0).name).toBe('Champion');
+  });
+  it('features a winner over a newer runner-up', () => {
+    const a = build({ titles: [winner({ awardedAt: '2025-01-01' }), runnerUp({ awardedAt: '2026-10-01' })] });
+    // Name as well as metal: every title used to render gold, so metal alone passed by accident.
+    expect(a.featured!.award).toMatchObject({ metal: 'gold', name: 'Champion · MD' });
+  });
+  it('features the newest by awardedAt among winners, not the last in the list', () => {
+    const a = build({ titles: [winner({ categoryName: 'New', awardedAt: '2026-10-01' }), winner({ categoryName: 'Old', awardedAt: '2024-01-01' })] });
+    expect(a.featured!.award.name).toBe('Champion · New');
+  });
+  it('sorts an undated legacy title after a dated one', () => {
+    const a = build({ titles: [winner({ categoryName: 'Dated', awardedAt: '2024-01-01' }), winner({ categoryName: 'Legacy' })] });
+    expect(a.featured!.award.name).toBe('Champion · Dated');
+  });
+  it('falls back to the newest runner-up when there is no win', () => {
+    const a = build({ titles: [runnerUp({ categoryName: 'New', awardedAt: '2026-10-01' }), runnerUp({ categoryName: 'Old', awardedAt: '2024-01-01' })] });
+    expect(a.featured!.award.name).toBe('Runner-up · New');
   });
 });
 
@@ -70,7 +104,8 @@ describe('milestones', () => {
 
 describe('featured', () => {
   const honors = [{ title: 'Fair', badge: 'fair-play' }, { title: 'Last honour', badge: 'hat-trick' }, { title: 'Won K', badge: 'knockout-winner' }];
-  const titles = ['Winner of A at T1', 'Winner of B at T2'];
+  // Undated (legacy), so the tie goes to the later-appended one, as it always has.
+  const titles = [winner({ categoryName: 'A', tournamentName: 'T1' }), winner({ categoryName: 'B', tournamentName: 'T2' })];
   it('latest title first', () => {
     expect(build({ titles, honors }).featured).toMatchObject({ label: 'Latest title', award: { name: 'Champion · B' } });
   });

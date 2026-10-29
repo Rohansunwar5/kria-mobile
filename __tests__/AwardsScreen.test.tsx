@@ -12,7 +12,7 @@ jest.mock('expo-router', () => ({
 jest.mock('@/api/quickKnockout', () => ({ listMyQuickKnockouts: jest.fn(async () => []) }));
 jest.mock('@/api/profileApi', () => ({
   getPublicPlayer: jest.fn(async () => ({
-    player: { titles: ["Winner of Men's Doubles at HSR Shuttle Cup"], honors: [{ title: 'Fair Play', badge: 'fair-play' }] },
+    player: { titles: [{ place: 'winner', categoryName: "Men's Doubles", tournamentName: 'HSR Shuttle Cup' }], honors: [{ title: 'Fair Play', badge: 'fair-play' }] },
     history: [],
   })),
 }));
