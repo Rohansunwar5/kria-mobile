@@ -4,13 +4,13 @@ import { Tap } from '@/components/ui/Tap';
 import { colors, font } from '@/constants/theme';
 import type { Award } from '@/lib/awardsView';
 
-/** One award as a badge: titles get the laurel and the CHAMPION ribbon. */
+/** One award as a badge: titles get the laurel and a ribbon — CHAMPION on gold, RUNNER-UP on silver. */
 export function AwardBadgeFor({ award, size, shine }: { award: Award; size: number; shine?: boolean }) {
   return (
     <AwardBadge
       shape={award.shape} metal={award.metal} size={size} glyph={award.glyph} icon={award.icon} sub={award.sub}
       count={award.count} progress={award.progress} shine={shine}
-      laurel={award.family === 'title'} ribbon={award.family === 'title' ? 'CHAMPION' : undefined}
+      laurel={award.family === 'title'} ribbon={award.family !== 'title' ? undefined : award.metal === 'silver' ? 'RUNNER-UP' : 'CHAMPION'}
     />
   );
 }

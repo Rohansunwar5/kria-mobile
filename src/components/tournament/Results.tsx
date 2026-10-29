@@ -52,7 +52,6 @@ export function Results({ categories, matches, awards, onTable }: {
               <View style={s.text}>
                 <Text style={s.cat}>{c.name}</Text>
                 <Text style={s.table}>Final table</Text>
-                <Text style={s.sub}>Leagues name no champion; the table is the result</Text>
               </View>
               <Icon name="chevron_right" size={20} color={colors.disabled} />
             </Tap>
