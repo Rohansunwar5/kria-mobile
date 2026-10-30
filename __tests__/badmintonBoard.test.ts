@@ -91,6 +91,11 @@ describe('roundTitle / feedRound / parseScoreline', () => {
     expect(feedRound('Semi-Final')).toBe('Semi-final');
     expect(feedRound('S1-GroupA-T3')).toBe('Team league');
     expect(feedRound(undefined)).toBeUndefined();
+    // Numbered as roundTitle numbers them (SERVER-GAPS #23 put the position in the feed).
+    expect(feedRound('Quarter-Final', 3)).toBe('Quarter-final 4');
+    expect(feedRound('Final', 0)).toBe('Final');
+    expect(feedRound('League', 5)).toBe('League');
+    expect(feedRound('S1-GroupA-T3', 2)).toBe('Team league');
   });
   it('parseScoreline', () => {
     expect(parseScoreline('21-15, 4-3')).toEqual([{ a: 21, b: 15 }, { a: 4, b: 3 }]);

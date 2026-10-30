@@ -19,11 +19,6 @@ it('one match is "1 match"', () => {
   render(<LiveNowRow />);
   expect(screen.getByText('1 match')).toBeTruthy();
 });
-it('asks for the count only, no cricket scores', () => {
-  mockCount = 1;
-  render(<LiveNowRow />);
-  expect(mockUseLiveNow).toHaveBeenCalledWith({ scores: false });
-});
 it('absent at zero', () => {
   mockCount = 0;
   render(<LiveNowRow />);

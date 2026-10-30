@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { getMatchLive } from '@/api/cricketMatch';
 import { fetchLiveFeed, type LiveItem } from '@/api/live';
-import { feedRows, type CricketEnrich } from '@/lib/liveFeedView';
+import { feedRows } from '@/lib/liveFeedView';
 
 const EVERY = 30_000;
 
-/** `scores: false` skips the per-row cricket read for callers that only show the count. */
-export function useLiveNow({ scores = true }: { scores?: boolean } = {}) {
+/** The live feed, refreshed on focus and every 30 s while focused. One request: rows need nothing else. */
+export function useLiveNow() {
   const [items, setItems] = useState<LiveItem[]>([]);
-  const [cricket, setCricket] = useState<CricketEnrich>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const alive = useRef(true);
@@ -18,22 +16,15 @@ export function useLiveNow({ scores = true }: { scores?: boolean } = {}) {
   const refresh = useCallback(async () => {
     try {
       const feed = await fetchLiveFeed();
-      const enrich: CricketEnrich = {};
-      const wanted = scores ? feed.items.filter((i) => i.kind === 'tournament' && i.sport === 'cricket') : [];
-      await Promise.all(wanted.map(async (i) => {
-        const r = await getMatchLive(i.matchId).catch(() => null);
-        enrich[i.matchId] = { live: r?.liveState ?? null, match: r?.match ?? null };
-      }));
       if (!alive.current) return;
       setItems(feed.items);
-      setCricket(enrich);
       setError(false);
     } catch {
       if (alive.current) setError(true);
     } finally {
       if (alive.current) setLoading(false);
     }
-  }, [scores]);
+  }, []);
 
   useFocusEffect(useCallback(() => {
     refresh();
@@ -42,6 +33,6 @@ export function useLiveNow({ scores = true }: { scores?: boolean } = {}) {
   }, [refresh]));
 
   // Re-derived on every refresh, which is what keeps "Started …" current.
-  const rows = useMemo(() => feedRows(items, cricket, new Date()), [items, cricket]);
+  const rows = useMemo(() => feedRows(items, new Date()), [items]);
   return { ...rows, count: items.length, loading, error, refresh };
 }

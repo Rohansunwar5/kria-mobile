@@ -98,9 +98,12 @@ export function roundTitle(
   return m.positionInRound != null && !/^(final|league)$/i.test(m.bracketRound) ? `${label} ${m.positionInRound + 1}` : label;
 }
 
-export function feedRound(round?: string): string | undefined {
+/** A feed row's round, numbered as roundTitle numbers a match ("Quarter-final 4"). */
+export function feedRound(round?: string, positionInRound?: number): string | undefined {
   if (!round) return undefined;
-  return round.includes('-') && !/-final$/i.test(round) ? 'Team league' : roundLabel(round);
+  if (round.includes('-') && !/-final$/i.test(round)) return 'Team league';
+  const label = roundLabel(round);
+  return positionInRound != null && !/^(final|league)$/i.test(round) ? `${label} ${positionInRound + 1}` : label;
 }
 
 export function parseScoreline(s?: string): { a: number; b: number }[] {

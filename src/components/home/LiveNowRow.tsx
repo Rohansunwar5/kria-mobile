@@ -7,7 +7,7 @@ import { useLiveNow } from '@/lib/useLiveNow';
 
 /** Home entry to 3a: only when something is live. */
 export function LiveNowRow() {
-  const { count } = useLiveNow({ scores: false });
+  const { count } = useLiveNow();
   if (!count) return null;
   return (
     <View style={s.wrap}>

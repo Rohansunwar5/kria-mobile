@@ -1,11 +1,21 @@
 import API from './axios';
 import { unwrap } from './unwrap';
 
+/** One cricket innings: "118/6 (10.0)" is { runs 118, wickets 6, overs 10, balls 0 }. */
+export interface InningsScore { runs: number; wickets: number; overs: number; balls: number }
+
 interface LiveItemBase {
   matchId: string;
   sport: string;
   title?: string;
+  /** The two side names, team 1 first. Read these, never split `title`: a name may contain " vs ". */
+  sides?: [string, string];
   scoreline?: string;
+  /** Cricket in play: each side's score in team order (null until it bats), and the chase (side 0 = team 1). */
+  cricket?: {
+    scores: [InningsScore | null, InningsScore | null];
+    chase?: { side: 0 | 1; need: number; balls: number };
+  };
   startedAt: string;
 }
 
@@ -24,6 +34,9 @@ export type LiveItem =
       categoryId: string;
       categoryName?: string;
       round?: string;
+      /** 0-based: "Quarter-final 4" is position 3. */
+      positionInRound?: number;
+      court?: string;
     })
   | (LiveItemBase & { kind: 'quick' });
 
