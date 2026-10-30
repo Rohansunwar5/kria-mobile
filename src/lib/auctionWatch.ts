@@ -1,6 +1,7 @@
 import type { AuctionStatus, AuctionStatusResponse, AuctionPlayer, AuctionTeam, AuctionSoldLog } from '@/api/auction';
 import type { MyEntry, TournamentTeam } from '@/api/tournaments';
 import { rupees } from '@/lib/format';
+import { teamShort } from '@/lib/tournamentView';
 
 export type AuctionPill = 'Live' | 'Paused' | 'Tie-breaker' | 'Starts soon' | 'Finished';
 
@@ -48,7 +49,7 @@ export function bidRows(a: AuctionStatus, teams: AuctionTeam[]) {
 export function purseCards(teams: AuctionTeam[]) {
   return teams.map((t) => ({
     key: t._id,
-    name: t.name,
+    name: teamShort(t),
     logo: t.logo,
     left: rupees(t.budget),
     spentPct: t.initialBudget > 0 ? (t.totalSpent * 100) / t.initialBudget : 0,
@@ -70,16 +71,21 @@ export function myAuctionResult(
   entry: MyEntry | undefined,
   d: AuctionStatusResponse,
   teams: TournamentTeam[],
+  soldLog: AuctionSoldLog[] = [],
 ): { title: string; line?: string; teamId?: string } | null {
   if (!entry || entry.status === 'withdrawn' || entry.status === 'rejected') return null;
   if ((entry.status === 'auctioned' || entry.status === 'assigned') && entry.teamId) {
     const sold = entry.auctionData?.soldPrice;
     const name = teams.find((t) => t._id === entry.teamId)?.name ?? 'a team';
-    return { title: `You went to ${name}`, ...(sold ? { line: `Sold for ${rupees(sold)}` } : {}), teamId: entry.teamId };
+    // "player 9 of 32", as the board read when the hammer fell (SERVER-GAPS #20).
+    const lot = soldLog.find((l) => l.registrationId === entry._id);
+    const place = lot?.queueIndex != null && lot.queueSize ? `player ${lot.queueIndex + 1} of ${lot.queueSize}` : '';
+    const line = [sold ? `Sold for ${rupees(sold)}` : '', place].filter(Boolean).join(' · ');
+    return { title: `You went to ${name}`, ...(line ? { line: line.charAt(0).toUpperCase() + line.slice(1) } : {}), teamId: entry.teamId };
   }
   if (d.currentPlayer?._id === entry._id) return { title: "You're on the block" };
   if (d.unsold?.some((u) => u.registrationId === entry._id)) return { title: "You're unsold this round" };
-  const up = d.upcoming?.find((u) => u.registrationId === entry._id);
-  if (up) return { title: `You're up in ${up.queueIndex - d.auction.currentPlayerIndex}` };
+  const ahead = d.queueIds?.indexOf(entry._id) ?? -1;
+  if (ahead >= 0) return { title: `You're up in ${ahead + 1}` };
   return { title: "You're in the pool" };
 }

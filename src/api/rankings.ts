@@ -22,12 +22,12 @@ export interface RankedPlayer {
 }
 
 /**
- * Top players for one sport, readable by any authenticated player.
+ * Top players for one sport. Public: the sign-in intro reads it before login.
  *
  * `sport` is required by the server — there is no "all sports" ranking.
  * `limit` is left off the request unless given, so the server owns the
  * default page size and the two cannot drift. The server excludes anyone
- * below 10 decided matches, so a small sample never shows up here.
+ * below RANK_MIN (5) decided matches, so a small sample never shows up here.
  *
  * Note the route carries no `/api/v1` prefix — this server mounts its router
  * unprefixed.

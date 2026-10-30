@@ -50,6 +50,9 @@ test('purseCards', () => {
   const c = purseCards(teams);
   expect(c[0]).toMatchObject({ left: '₹18,500', spentPct: 81.5, sub: '6 players · ₹81,500 spent', logo: 'l1' });
   expect(c[1].spentPct).toBe(0);
+  // SERVER-GAPS #21: the organiser's short name where the full one won't fit.
+  expect(purseCards([{ ...teams[0], name: 'Titans Sports Club', shortName: 'Titans SC' }])[0].name).toBe('Titans SC');
+  expect(c[0].name).toBe('Titans');
 });
 
 test('tieBreakLine', () => {
@@ -67,7 +70,15 @@ test('myAuctionResult', () => {
   expect(myAuctionResult(e({ status: 'assigned', teamId: 'tm', auctionData: { soldPrice: 16500 } }), d(), T)).toEqual({ title: 'You went to Sunrise', line: 'Sold for ₹16,500', teamId: 'tm' });
   expect(myAuctionResult(e({ status: 'auctioned', teamId: 'tm' }), d(), T)).toEqual({ title: 'You went to Sunrise', teamId: 'tm' });
   expect(myAuctionResult(e(), d({ unsold: [{ registrationId: 'r1' }] }), T)).toEqual({ title: "You're unsold this round" });
-  expect(myAuctionResult(e(), d({ upcoming: [{ registrationId: 'r1', queueIndex: 20 }] }), T)).toEqual({ title: "You're up in 3" });
+  // SERVER-GAPS #20: the whole queue, so a player past the 10-player strip still sees their place.
+  expect(myAuctionResult(e(), d({ queueIds: ['a', 'b', 'r1'] }), T)).toEqual({ title: "You're up in 3" });
+  expect(myAuctionResult(e(), d({ queueIds: [...Array(20).keys()].map(String).concat('r1') }), T)).toEqual({ title: "You're up in 21" });
+  // …and afterwards, which lot they were.
+  const log = [{ registrationId: 'r1', queueIndex: 8, queueSize: 32 }] as any;
+  expect(myAuctionResult(e({ status: 'assigned', teamId: 'tm', auctionData: { soldPrice: 16500 } }), d(), T, log))
+    .toEqual({ title: 'You went to Sunrise', line: 'Sold for ₹16,500 · player 9 of 32', teamId: 'tm' });
+  expect(myAuctionResult(e({ status: 'auctioned', teamId: 'tm' }), d(), T, log))
+    .toEqual({ title: 'You went to Sunrise', line: 'Player 9 of 32', teamId: 'tm' });
   expect(myAuctionResult(e(), d({ currentPlayer: { _id: 'r1' } }), T)).toEqual({ title: "You're on the block" });
   expect(myAuctionResult(e({ status: 'pending' }), d(), T)).toEqual({ title: "You're in the pool" });
   expect(myAuctionResult(e({ status: 'withdrawn' }), d(), T)).toBeNull();

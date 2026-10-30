@@ -32,10 +32,10 @@ export function TopBar({ title, sub, icon = 'arrow_back', onBack, right }: {
   );
 }
 
-export function IconButton({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
+export function IconButton({ icon, label, onPress, filled }: { icon: IconName; label: string; onPress: () => void; filled?: boolean }) {
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={s.iconBtn}>
-      <Icon name={icon} size={22} />
+      <Icon name={icon} size={22} variant={filled ? 'f' : undefined} />
     </Pressable>
   );
 }

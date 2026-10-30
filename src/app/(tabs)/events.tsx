@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollVi
 import { router, useFocusEffect, useLocalSearchParams, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getTeamBrands } from '@/api/cricketMatch';
-import { latestTournaments } from '@/api/tournaments';
+import { getEventFacets, latestTournaments, type EventFacets } from '@/api/tournaments';
 import { EventCard, type Crest } from '@/components/EventCard';
 import { Featured, PastRow } from '@/components/events/EventRows';
 import { Filters } from '@/components/events/Filters';
@@ -13,7 +13,8 @@ import { Icon } from '@/components/ui/Icon';
 import { InlineError } from '@/components/ui/InlineError';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { colors, display, font, radius, space } from '@/constants/theme';
-import { citiesOf, EVENT_SPORTS, eventQuery, groupEvents, NO_FILTERS, type EventFilters } from '@/lib/eventsList';
+import { EVENT_SPORTS, eventQuery, groupEvents, NO_FILTERS, type EventFilters } from '@/lib/eventsList';
+import { useAppSelector } from '@/store/hooks';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 
 // GET /tournament caps `limit` at 100.
@@ -24,12 +25,14 @@ export default function Events() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ sport?: string }>();
   const [filters, setFilters] = useState<EventFilters>(NO_FILTERS);
+  const [saved, setSaved] = useState(false);
+  const loggedIn = !!useAppSelector((st) => st.auth.user);
   const [searching, setSearching] = useState(false);
   const [q, setQ] = useState('');
   const [term, setTerm] = useState('');
   const [list, setList] = useState<Tournament[] | null>(null);
   const [failed, setFailed] = useState(false);
-  const [cities, setCities] = useState<string[]>([]);
+  const [facets, setFacets] = useState<EventFacets | null>(null);
   const [crests, setCrests] = useState<Record<string, Crest[]>>({});
   const scroll = useRef<ScrollViewInstance>(null);
   const latest = useRef(0);
@@ -48,16 +51,20 @@ export default function Events() {
     return () => clearTimeout(t);
   }, [q]);
 
-  const query = eventQuery(filters, term);
+  const query = eventQuery(filters, term, saved && loggedIn);
   const key = JSON.stringify(query);
   const load = useCallback(async () => {
     const id = ++latest.current;
     setFailed(false);
     try {
-      const found = await latestTournaments(LIMIT, JSON.parse(key));
+      // Counts are a nicety: the list still shows if they fail.
+      const [found, counts] = await Promise.all([
+        latestTournaments(LIMIT, JSON.parse(key)),
+        getEventFacets(JSON.parse(key)).catch(() => null),
+      ]);
       if (id !== latest.current) return; // an older filter's answer
       setList(found);
-      if (!JSON.parse(key).city) setCities((known) => citiesOf(found, known));
+      setFacets(counts);
     } catch {
       if (id === latest.current) setFailed(true);
     }
@@ -75,7 +82,7 @@ export default function Events() {
   }, [list]);
 
   const { featured, now, upcoming, past } = groupEvents(list ?? []);
-  const filtered = !!(filters.sport || filters.status || filters.city || term.trim().length >= 3);
+  const filtered = !!(filters.sport || filters.status || filters.city || saved || term.trim().length >= 3);
 
   return (
     <SafeAreaView edges={['top']} style={s.screen}>
@@ -103,7 +110,7 @@ export default function Events() {
             <TextInput value={q} onChangeText={setQ} autoFocus placeholder="Search events" placeholderTextColor={colors.text4} autoCorrect={false} returnKeyType="search" style={s.input} accessibilityLabel="Search events" />
           </View>
         ) : null}
-        <Filters value={filters} onChange={setFilters} cities={cities} />
+        <Filters value={filters} onChange={setFilters} facets={facets} saved={saved} onSaved={loggedIn ? setSaved : undefined} />
 
         {failed && !list ? <InlineError what="Couldn't load events." onRetry={load} /> : null}
 

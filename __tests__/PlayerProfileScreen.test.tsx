@@ -139,9 +139,9 @@ it('Try again re-fetches after a failed load and shows the profile', async () =>
 it('their ranking card speaks about them, not you', async () => {
   mockUseCareer.mockReturnValue(career([{ ...badminton, sport: 'cricket', played: 3, decided: 3, won: 1, lost: 2, winRate: 1 / 3 }]));
   render(<PlayerProfile />);
-  fireEvent.press(await screen.findByLabelText('Cricket: 3/10'));
+  fireEvent.press(await screen.findByLabelText('Cricket: 3/5'));
   const line = screen.getByText(/more and .* appear on the cricket board/);
-  expect(line.props.children).toBe('3 of 10 decided matches. 7 more and they appear on the cricket board.');
+  expect(line.props.children).toBe('3 of 5 decided matches. 2 more and they appear on the cricket board.');
   expect(line.props.children).not.toMatch(/\byou/i);
 });
 

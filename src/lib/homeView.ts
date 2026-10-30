@@ -5,8 +5,8 @@ import { knockoutCard, matchCard, type MatchCardView } from '@/lib/matchCard';
 import { RANKED_SPORTS, SPORT_LABELS } from '@/lib/sports';
 import type { Tournament } from '@/store/slices/tournamentSlice';
 
-/** The server only ranks players with this many decided matches. */
-export const RANK_MIN = 10;
+/** Decided matches before a player is ranked; the server's RANKING_MIN_DECIDED. */
+export const RANK_MIN = 5;
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Linking, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions, type ScrollViewInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import type { TournamentCategory } from '@/api/tournaments';
+import { setTournamentSaved, type TournamentCategory } from '@/api/tournaments';
 import { AnnouncementCard } from '@/components/tournament/AnnouncementCard';
 import { CategoryRows } from '@/components/tournament/CategoryRows';
 import { Crest } from '@/components/tournament/Crest';
@@ -20,11 +20,12 @@ import { colors, display, font, space } from '@/constants/theme';
 import { goBack } from '@/lib/nav';
 import { liveRound, meFrom, myNextMatch, nextMatchLabel } from '@/lib/tournamentBracket';
 import {
-  deadlinePassed, directionsUrl, effectiveStage, facts, footerCta, liveAuctionCategory, overviewTabs, statusLine,
+  deadlinePassed, directionsUrl, effectiveStage, facts, footerCta, liveAuctionCategory, overviewTabs, statusLine, teamShort,
   type CtaGo, type TabKey,
 } from '@/lib/tournamentView';
 import { useOverviewExtras, useTournament } from '@/lib/useTournament';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setSavedTournaments } from '@/store/slices/authSlice';
 
 const TAB_LABEL: Record<TabKey, string> = { matches: 'Matches', auction: 'Auction', teams: 'Teams' };
 
@@ -33,17 +34,35 @@ export default function TournamentScreen() {
   const nav = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const loggedIn = !!useAppSelector((s) => s.auth.user);
+  const user = useAppSelector((s) => s.auth.user);
+  const loggedIn = !!user;
+  const dispatch = useAppDispatch();
   const { data, loading, error, reload } = useTournament(id);
   const { teams, announcements, auctions, matches } = useOverviewExtras(id, data?.categories);
   const scroll = useRef<ScrollViewInstance>(null);
   const [categoriesY, setCategoriesY] = useState(0);
   const bannerH = Math.round((width * 9) / 16);
 
+  // Bookmark (SERVER-GAPS #15): flips at once, then settles to the server's list; a failure puts it back.
+  const savedList = user?.savedTournaments ?? [];
+  const saved = savedList.includes(id);
+  const toggleSaved = () => {
+    const before = savedList;
+    dispatch(setSavedTournaments(saved ? before.filter((x) => x !== id) : [...before, id]));
+    setTournamentSaved(id, !saved).then((list) => dispatch(setSavedTournaments(list)), () => dispatch(setSavedTournaments(before)));
+  };
+
   const back = (
-    <View style={[s.back, { top: insets.top + 10 }]}>
-      <IconButton icon="arrow_back" label="Back" onPress={() => goBack(nav)} />
-    </View>
+    <>
+      <View style={[s.back, { top: insets.top + 10 }]}>
+        <IconButton icon="arrow_back" label="Back" onPress={() => goBack(nav)} />
+      </View>
+      {loggedIn ? (
+        <View style={[s.back, s.save, { top: insets.top + 10 }]}>
+          <IconButton icon="bookmark" filled={saved} label={saved ? 'Remove from saved' : 'Save this event'} onPress={toggleSaved} />
+        </View>
+      ) : null}
+    </>
   );
 
   if (!data) {
@@ -180,7 +199,7 @@ export default function TournamentScreen() {
               {teams.map((tm) => (
                 <Tap key={tm._id} accessibilityLabel={tm.name} scale={0.97} style={s.crest} onPress={() => openTeams(tm._id)}>
                   <Crest uri={tm.logo} name={tm.name} size={56} />
-                  <Text style={s.crestName} numberOfLines={1}>{tm.name}</Text>
+                  <Text style={s.crestName} numberOfLines={1}>{teamShort(tm)}</Text>
                 </Tap>
               ))}
             </View>
@@ -215,6 +234,7 @@ export default function TournamentScreen() {
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
+  save: { left: undefined, right: 12 },
   back: { position: 'absolute', left: 12, width: 40, height: 40, borderRadius: 20, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   head: { paddingTop: 24, paddingHorizontal: space.gutter, gap: 12 },
   org: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: -2 },

@@ -92,9 +92,9 @@ it('rings each sport played, and a short sport shows its way to a ranking', () =
   renderProfile();
   expect(screen.getByLabelText('All sports: 60%')).toBeTruthy();
   expect(screen.getByLabelText('Badminton: 67%, best sport')).toBeTruthy();
-  fireEvent.press(screen.getByLabelText('Cricket: 3/10'));
+  fireEvent.press(screen.getByLabelText('Cricket: 3/5'));
   expect(screen.getByText('Not ranked yet')).toBeTruthy();
-  expect(screen.getByText('3 of 10 decided matches. 7 more and you appear on the cricket board.')).toBeTruthy();
+  expect(screen.getByText('3 of 5 decided matches. 2 more and you appear on the cricket board.')).toBeTruthy();
 });
 
 it('marks a tournament you won from its recorded result, and says where the others stand', async () => {
@@ -120,7 +120,7 @@ it('a new player gets the checklist, honest blanks, and the events open for entr
   mockUseCareer.mockReturnValue(career({ sports: [] }));
   renderProfile({ dateOfBirth: undefined, gender: undefined });
   expect(screen.getByText('Complete your profile')).toBeTruthy();
-  expect(screen.getByText('Win rate, form and results by sport fill in after your first match. Your rank appears at 10 decided matches.')).toBeTruthy();
+  expect(screen.getByText('Win rate, form and results by sport fill in after your first match. Your rank appears at 5 decided matches.')).toBeTruthy();
   await waitFor(() => expect(screen.getByText('2 badminton events are open for entries')).toBeTruthy());
   expect(screen.getByText('Unranked')).toBeTruthy();
 });

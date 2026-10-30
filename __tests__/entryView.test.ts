@@ -137,6 +137,13 @@ describe('timeline', () => {
     expect(titles(w)).toEqual(['Registered', 'Withdrawn']);
     expect(states(w)).toEqual(['done', 'now']);
   });
+  // SERVER-GAPS #18: a date under each step the server dated.
+  it('dates approval, rejection and withdrawal', () => {
+    const at = '2026-10-09T12:00:00Z';
+    expect(t(entry({ status: 'approved', approvedAt: at }), true, false)[2].sub).toBe(dayDate(at));
+    expect(t(entry({ status: 'rejected', rejectedAt: at }), true, false)[2].sub).toBe(dayDate(at));
+    expect(t(entry({ status: 'withdrawn', withdrawnAt: at }), true, false)[1].sub).toBe(dayDate(at));
+  });
 });
 
 describe('enteredHeading', () => {
@@ -155,5 +162,9 @@ describe('enteredHeading', () => {
       .toEqual({ title: "You're on Sunrise", line: 'Sold for ₹16,500.' });
     expect(enteredHeading(entry({ status: 'rejected' }), true)).toEqual({ title: "Your entry wasn't accepted", line: 'The organiser turned this entry down.' });
     expect(enteredHeading(entry({ status: 'withdrawn' }), true)).toEqual({ title: 'You withdrew this entry', line: '' });
+  });
+  it('rejected, with the organiser\'s reason', () => {
+    expect(enteredHeading(entry({ status: 'rejected', rejectionReason: 'Squad is full' }), true).line)
+      .toBe('The organiser turned this entry down. Reason: Squad is full');
   });
 });

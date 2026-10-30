@@ -11,6 +11,8 @@ export interface AuctionPlayer {
 export interface AuctionTeam {
   _id: string;
   name: string;
+  /** Set by the organiser; the purse cards prefer it (SERVER-GAPS #21). */
+  shortName?: string;
   logo?: string;
   budget: number;
   initialBudget: number;
@@ -76,6 +78,9 @@ export interface AuctionSoldLog {
   recordedBy: string;
   timestamp: string;
   playerPhoto?: string | null;
+  /** Where the player sat in the queue when sold (0-based) and its length then: "player 9 of 32". */
+  queueIndex?: number;
+  queueSize?: number;
 }
 
 export interface AuctionStatusResponse {
@@ -86,6 +91,8 @@ export interface AuctionStatusResponse {
   tournament?: { _id: string; name: string } | null;
   upcoming?: AuctionUpcoming[];
   unsold?: { registrationId: string; playerName: string }[];
+  /** Every registration still to come, in order, ids only (SERVER-GAPS #20). */
+  queueIds?: string[];
 }
 
 export interface SoldLogResponse {

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import API from '@/api/axios';
 import * as storage from '@/lib/storage';
 import type { Honor } from '@/lib/badges';
@@ -19,6 +19,8 @@ interface User {
   profileImage?: string;
   titles?: string[];
   honors?: Honor[];
+  /** Events bookmarked on 2a (SERVER-GAPS #15). */
+  savedTournaments?: string[];
   [key: string]: any;
 }
 
@@ -261,6 +263,10 @@ export const authSlice = createSlice({
     endOnboardingHandoff: (state) => {
       state.pendingOnboarding = false;
     },
+    /** The player's saved events: set at once on a tap, then to what the server answered. */
+    setSavedTournaments: (state, action: PayloadAction<string[]>) => {
+      if (state.user) state.user.savedTournaments = action.payload;
+    },
   },
   extraReducers: (builder) => {
     const handleLoginSuccess = (state: AuthState, action: any) => {
@@ -359,6 +365,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { resetRegistration, clearError, beginOnboardingHandoff, endOnboardingHandoff } = authSlice.actions;
+export const { resetRegistration, clearError, beginOnboardingHandoff, endOnboardingHandoff, setSavedTournaments } = authSlice.actions;
 
 export default authSlice.reducer;

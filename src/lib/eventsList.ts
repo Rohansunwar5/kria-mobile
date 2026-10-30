@@ -19,13 +19,14 @@ export const EVENT_STATUSES = [
 export type EventFilters = { sport: string; status: string; city: string };
 export const NO_FILTERS: EventFilters = { sport: '', status: '', city: '' };
 
-/** Only the set filters, as query params; `q` is sent from 3 characters. */
-export function eventQuery(f: EventFilters, q = '') {
+/** Only the set filters, as query params; `q` is sent from 3 characters. `saved` narrows to the player's bookmarks. */
+export function eventQuery(f: EventFilters, q = '', saved = false) {
   const out: Record<string, string> = {};
   if (f.sport) out.sport = f.sport;
   if (f.status) out.status = f.status;
   if (f.city) out.city = f.city;
   if (q.trim().length >= 3) out.q = q.trim();
+  if (saved) out.saved = 'true';
   return out;
 }
 
@@ -63,9 +64,8 @@ export function featuredCta(status: string) {
   return 'View event';
 }
 
-/** Cities seen on events so far — no endpoint lists them (SERVER-GAPS.md #7). */
-export function citiesOf(list: Tournament[], known: string[] = []) {
-  const all = new Set(known);
-  for (const t of list) if (t.venue?.city?.trim()) all.add(t.venue.city.trim());
-  return [...all].sort((a, b) => a.localeCompare(b));
+/** The line under a filter option (mock 1f), from GET /tournament/facets. */
+export function facetLine(count?: number) {
+  if (!count) return 'No events right now';
+  return `${count} ${count === 1 ? 'event' : 'events'}`;
 }

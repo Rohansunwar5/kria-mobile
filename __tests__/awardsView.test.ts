@@ -66,6 +66,17 @@ describe('honours', () => {
   it('an unknown key falls back to a monogram', () => {
     expect(honourAward({ title: 'Smash King', badge: 'mystery' }, 0, []).glyph).toBe('SK');
   });
+  // SERVER-GAPS #8: an honour says where it was earned, and links there.
+  it('an organiser honour names its tournament, and links to it', () => {
+    const a = honourAward({ title: 'Season MVP', badge: 'season-mvp', tournamentId: 't1', eventName: 'Indiranagar Smash Open' }, 0, []);
+    expect(a).toMatchObject({
+      context: 'Indiranagar Smash Open', tournamentId: 't1', status: { label: 'Earned at', value: 'Indiranagar Smash Open' },
+    });
+  });
+  it('a knockout honour names its knockout without the /mine list', () => {
+    const a = honourAward({ title: 'Fair Play · Cup', badge: 'fair-play', ref: 'k9', eventName: 'Cup', sport: 'badminton' }, 0, []);
+    expect(a).toMatchObject({ context: 'Cup', status: { label: 'Earned at', value: 'Cup' } });
+  });
   it('locked honours carry the same icons', () => {
     const l = lockedHonours();
     expect(l).toHaveLength(13);
@@ -83,6 +94,10 @@ describe('knockouts', () => {
   });
   it('one win', () => {
     expect(knockoutAwards(wins(1), kos)[0].tier).toBe('Quick knockout');
+  });
+  it('an old win past the /mine list still groups under its sport', () => {
+    const [a] = knockoutAwards([{ title: 'Won Old', ref: 'kx', eventName: 'Old Cup', sport: 'cricket' }], []);
+    expect(a).toMatchObject({ key: 'ko-cricket', status: { value: 'Old Cup' } });
   });
 });
 
@@ -111,6 +126,13 @@ describe('featured', () => {
   });
   it('then latest honour', () => {
     expect(build({ honors }).featured).toMatchObject({ label: 'Latest honour', award: { name: 'Last honour' } });
+  });
+  it('the latest honour is the newest by date, not by order', () => {
+    const dated = [
+      { title: 'Newer', badge: 'fair-play', awardedAt: '2026-05-01T00:00:00Z' },
+      { title: 'Older', badge: 'hat-trick', awardedAt: '2026-01-01T00:00:00Z' },
+    ];
+    expect(build({ honors: dated }).featured).toMatchObject({ label: 'Latest honour', award: { name: 'Newer' } });
   });
   it('then knockout winner', () => {
     expect(build({ honors: [honors[2]] }).featured).toMatchObject({ label: 'Knockout winner' });

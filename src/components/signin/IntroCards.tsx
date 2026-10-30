@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius } from '@/constants/theme';
+import { getTopPlayers, type RankedPlayer } from '@/api/rankings';
 import { latestTournaments } from '@/api/tournaments';
 import { AwardBadge } from '@/components/AwardBadge';
 import { KriaMark } from '@/components/KriaMark';
@@ -34,8 +35,14 @@ export function PlayCard() {
 
 const MEDALS = [colors.gold, colors.silver, colors.bronze];
 
-/** 7b: an illustration (rankings need login, gap #36). Static, no shimmer. */
+/** 7b: the first sport's real top three (public since gap #36); the illustration until anyone is ranked. Static, no shimmer. */
 export function CompeteCard({ sports, rankMin }: { sports: string[]; rankMin: number }) {
+  const [top, setTop] = useState<RankedPlayer[]>([]);
+  useEffect(() => {
+    let alive = true;
+    if (sports[0]) getTopPlayers(sports[0], 3).then((list) => alive && setTop(list), () => {});
+    return () => { alive = false; };
+  }, [sports]);
   return (
     <View style={s.card}>
       <View style={s.pills}>
@@ -46,11 +53,23 @@ export function CompeteCard({ sports, rankMin }: { sports: string[]; rankMin: nu
         ))}
       </View>
       <Text style={s.mono}>WIN RATE</Text>
-      {MEDALS.map((c, i) => (
-        <View key={i} style={s.rank}>
-          <Text style={[s.rankNo, { color: c }]}>{i + 1}</Text><Dot /><View style={{ flex: 1 }}><Bar w="60%" /></View><Bar w={36} />
-        </View>
-      ))}
+      {MEDALS.map((c, i) => {
+        const p = top[i];
+        return (
+          <View key={i} style={s.rank}>
+            <Text style={[s.rankNo, { color: c }]}>{i + 1}</Text>
+            {p?.profileImage ? <Image source={{ uri: p.profileImage }} style={s.avatar} /> : <Dot />}
+            {p ? (
+              <>
+                <Text style={[s.rosterName, { flex: 1 }]} numberOfLines={1}>{`${p.firstName} ${p.lastName}`}</Text>
+                <Text style={s.rate}>{`${Math.round(p.winRate * 100)}%`}</Text>
+              </>
+            ) : (
+              <><View style={{ flex: 1 }}><Bar w="60%" /></View><Bar w={36} /></>
+            )}
+          </View>
+        );
+      })}
       <View style={[s.rank, { backgroundColor: colors.accentTint, borderRadius: 12, paddingHorizontal: 8 }]}>
         <Text style={[s.rankNo, { color: colors.accentInk }]}>4</Text><Dot />
         <Text style={[s.rosterName, { flex: 1 }]}>You · {rankMin} matches to go</Text>
@@ -119,6 +138,8 @@ const s = StyleSheet.create({
   mono: { fontFamily: font.mono, fontSize: 11, letterSpacing: 1, color: colors.text4 },
   rank: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 40 },
   rankNo: { width: 16, fontFamily: font.display, fontSize: 18 },
+  avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.surface3 },
+  rate: { fontFamily: font.semibold, fontSize: 13, color: colors.text2, fontVariant: ['tabular-nums'] },
   tName: { fontFamily: font.bold, fontSize: 17, color: colors.text },
   tOpen: { fontFamily: font.semibold, fontSize: 13, color: colors.accentInk },
   tMeta: { fontFamily: font.regular, fontSize: 13, color: colors.text3 },

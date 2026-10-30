@@ -7,7 +7,13 @@ export type Emblem =
   | 'bracket' | 'racket' | 'shuttle' | 'flag' | 'medal' | 'target';
 export interface BadgeDef { tier: Tier; emblem: Emblem }
 /** `ref` is the quick knockout that gave it (server: player.model honorSchema). */
-export interface Honor { title: string; badge: string; ref?: string }
+export interface Honor {
+  title: string; badge: string;
+  /** The quick knockout that gave it. */
+  ref?: string;
+  /** Where and when it was earned (SERVER-GAPS #8): an organiser honour's tournament, or a knockout's name and sport. */
+  tournamentId?: string; eventName?: string; sport?: string; awardedAt?: string;
+}
 
 export const BADGES: Record<string, BadgeDef> = {
   'player-of-the-match': { tier: 'legendary', emblem: 'star' },

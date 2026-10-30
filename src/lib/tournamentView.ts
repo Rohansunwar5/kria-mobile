@@ -198,3 +198,6 @@ export function awardRow(a: TournamentAward): { title: string; who: string } {
   const who = p ? [p.firstName, p.lastName].filter(Boolean).join(' ') : a.team?.name ?? '';
   return { title: a.title, who };
 }
+
+/** A team's short name where the full one won't fit (SERVER-GAPS #21); the full name when it has none. */
+export const teamShort = (t: { name: string; shortName?: string }) => t.shortName?.trim() || t.name;

@@ -84,32 +84,43 @@ function featuredTitle(titles: Title[]): number {
   return titles.reduce((best, t, i) => (best < 0 || beats(t, titles[best]) ? i : best), -1);
 }
 
+/**
+ * An honour carries where it was earned (SERVER-GAPS #8). One given before
+ * that, and not yet backfilled, falls back to the knockout in /mine.
+ */
+/** Index of the newest honour by awardedAt; undated sorts first, a tie goes to the later one. */
+function latestHonour(honors: Honor[]): number {
+  const when = (h: Honor) => (h.awardedAt ? Date.parse(h.awardedAt) : -Infinity);
+  return honors.reduce((best, h, i) => (when(h) >= when(honors[best]) ? i : best), 0);
+}
+
 export function honourAward(h: Honor, i: number, knockouts: QuickKnockout[]): Award {
   const def = HONOUR_BADGES[h.badge];
-  const k = h.ref ? knockouts.find((x) => x._id === h.ref) : undefined;
+  const where = h.eventName ?? (h.ref ? knockouts.find((x) => x._id === h.ref)?.name : undefined);
   return {
     key: `honour-${i}`, family: 'honour', shape: 'rosette', metal: 'gold', icon: def?.icon, glyph: def ? def.glyph : initials(h.title) || 'H',
     name: h.title || def?.name || 'Honour',
-    context: h.ref ? (k ? k.name : 'Quick knockout') : 'Given by an organiser',
+    context: where ?? (h.ref ? 'Quick knockout' : 'Given by an organiser'),
     tier: h.ref ? 'Knockout honour' : 'Organiser honour',
     description: h.ref ? 'Given by the host when the knockout finished.' : 'Given by a tournament organiser.',
     criteria: h.ref ? 'Chosen by the knockout host' : 'Chosen by the organiser',
-    status: k ? { label: 'Earned at', value: k.name } : undefined,
+    status: where ? { label: 'Earned at', value: where } : undefined,
+    tournamentId: h.tournamentId,
     earned: true,
   };
 }
 
 /**
- * Knockout wins, one hexagon per sport with ×N (DESIGN §5.11). The honour has
- * no sport; it comes from the knockout itself, when /mine still lists it
- * (newest 20). Older wins group under "Quick knockouts".
+ * Knockout wins, one hexagon per sport with ×N (DESIGN §5.11). The win carries
+ * its knockout's name and sport; an old one not yet backfilled falls back to
+ * /mine (newest 20), and past that groups under "Quick knockouts".
  */
-export function knockoutAwards(wins: { title: string; ref?: string }[], knockouts: QuickKnockout[]): Award[] {
+export function knockoutAwards(wins: Pick<Honor, 'title' | 'ref' | 'eventName' | 'sport'>[], knockouts: QuickKnockout[]): Award[] {
   const groups = new Map<string, string[]>();
   for (const w of wins) {
     const k = w.ref ? knockouts.find((x) => x._id === w.ref) : undefined;
-    const sport = k?.sport ?? '';
-    groups.set(sport, [...(groups.get(sport) ?? []), k?.name ?? w.title.replace(/^Won /, '')]);
+    const sport = w.sport ?? k?.sport ?? '';
+    groups.set(sport, [...(groups.get(sport) ?? []), w.eventName ?? k?.name ?? w.title.replace(/^Won /, '')]);
   }
   return [...groups.entries()].map(([sport, names]) => ({
     key: `ko-${sport || 'any'}`, family: 'knockout', shape: 'hex', metal: 'bronze',
@@ -162,8 +173,8 @@ export function lockedHonours(): Award[] {
 }
 
 /**
- * Everything on the Awards tab. Honours carry no date (SERVER-GAPS.md #8), so
- * "most recent" is the order the server appended them in.
+ * Everything on the Awards tab. The latest honour is the newest by `awardedAt`;
+ * an undated (pre-#8) one sorts last, and a tie goes to the later-appended one.
  */
 export function buildAwards(input: {
   titles: Title[];
@@ -180,7 +191,7 @@ export function buildAwards(input: {
   const closest = milestones.find((m) => !m.earned) ?? null;
   const pick = (award: Award, label: 'Latest title' | 'Latest honour' | 'Knockout winner' | 'Next milestone' | 'Closest first award') => ({ award, label });
   const featured = titles.length ? pick(titles[featuredTitle(input.titles)], 'Latest title')
-    : honours.length ? pick(honours[honours.length - 1], 'Latest honour')
+    : honours.length ? pick(honours[latestHonour(input.honors.filter((h) => h.badge !== KNOCKOUT_BADGE))], 'Latest honour')
       : knockouts.length ? pick(knockouts[knockouts.length - 1], 'Knockout winner')
         : closest ? pick(closest, earned ? 'Next milestone' : 'Closest first award') : null;
   return { titles, honours, knockouts, milestones, earned, featured };

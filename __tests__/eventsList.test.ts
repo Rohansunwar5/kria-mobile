@@ -1,4 +1,4 @@
-import { citiesOf, dateSpan, eventQuery, groupEvents, NO_FILTERS } from '../src/lib/eventsList';
+import { dateSpan, eventQuery, facetLine, groupEvents, NO_FILTERS } from '../src/lib/eventsList';
 
 const t = (id: string, status: string, startDate: string, over: Record<string, unknown> = {}) =>
   ({ _id: id, status, startDate, endDate: startDate, venue: { name: 'Court', city: 'Bengaluru' }, ...over }) as never;
@@ -32,6 +32,16 @@ it('spans multi-day events and keeps one date for a single day', () => {
   expect(dateSpan('2026-10-20T10:00:00', '2026-10-20T18:00:00')).toBe('20 OCT');
 });
 
-it('collects venue cities, keeping ones already seen', () => {
-  expect(citiesOf([t('a', 'ongoing', '2026-10-20', { venue: { city: 'Mysuru' } })], ['Bengaluru'])).toEqual(['Bengaluru', 'Mysuru']);
+// SERVER-GAPS #15: the Saved chip narrows the list to the player's bookmarks.
+it('asks for saved events only when the chip is on', () => {
+  expect(eventQuery(NO_FILTERS, '', true)).toEqual({ saved: 'true' });
+  expect(eventQuery(NO_FILTERS, '', false)).toEqual({});
+});
+
+// SERVER-GAPS #7: each filter option says how many events it would show.
+it('counts events under a filter option', () => {
+  expect(facetLine(3)).toBe('3 events');
+  expect(facetLine(1)).toBe('1 event');
+  expect(facetLine(0)).toBe('No events right now');
+  expect(facetLine(undefined)).toBe('No events right now');
 });

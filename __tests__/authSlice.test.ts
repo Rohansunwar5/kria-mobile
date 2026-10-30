@@ -1,6 +1,7 @@
 import reducer, {
   resetRegistration,
   clearError,
+  setSavedTournaments,
 } from '@/store/slices/authSlice';
 
 const initial = reducer(undefined, { type: '@@INIT' });
@@ -16,6 +17,13 @@ describe('authSlice reducers', () => {
   it('clearError resets the error', () => {
     const dirty = { ...initial, error: 'boom' };
     expect(reducer(dirty, clearError()).error).toBeNull();
+  });
+
+  // SERVER-GAPS #15: the bookmark flips at once; the server's list then settles it.
+  it('setSavedTournaments replaces the saved list, and ignores a logged-out state', () => {
+    const user = { _id: 'u1', firstName: 'A', lastName: 'B', email: 'e', phone: 'p', status: 'verified', savedTournaments: ['t0'] };
+    expect(reducer({ ...initial, user }, setSavedTournaments(['t0', 't1'])).user!.savedTournaments).toEqual(['t0', 't1']);
+    expect(reducer(initial, setSavedTournaments(['t1'])).user).toBeNull();
   });
 
   it('resetRegistration returns to step 1', () => {

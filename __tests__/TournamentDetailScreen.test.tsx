@@ -4,6 +4,9 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/store/slices/authSlice';
 import TournamentDetail from '../src/app/tournament/[id]';
+import { setTournamentSaved } from '@/api/tournaments';
+
+jest.mock('@/api/tournaments', () => ({ ...jest.requireActual('@/api/tournaments'), setTournamentSaved: jest.fn() }));
 
 // 2a Tournament: the screen follows the effective stage (status line, tabs, footer CTA).
 
@@ -125,7 +128,24 @@ describe('2a Tournament', () => {
   it('no mock-only elements', () => {
     renderScreen();
     expect(screen.queryByText(/Organised by/)).toBeNull();
-    expect(screen.queryByLabelText(/Bookmark|Share/)).toBeNull();
+    // Share waits for a public link to share (SERVER-GAPS #15).
+    expect(screen.queryByLabelText(/Share/)).toBeNull();
+  });
+
+  // SERVER-GAPS #15: the banner's bookmark, for a logged-in player.
+  it('saves the event, and takes it back off', async () => {
+    (setTournamentSaved as jest.Mock).mockImplementation(async (_id: string, saved: boolean) => (saved ? ['t1'] : []));
+    renderScreen({ _id: 'u1', savedTournaments: [] });
+    fireEvent.press(screen.getByLabelText('Save this event'));
+    expect(setTournamentSaved).toHaveBeenLastCalledWith('t1', true);
+    fireEvent.press(await screen.findByLabelText('Remove from saved'));
+    expect(setTournamentSaved).toHaveBeenLastCalledWith('t1', false);
+    expect(await screen.findByLabelText('Save this event')).toBeTruthy();
+  });
+
+  it('offers no bookmark when logged out', () => {
+    renderScreen(null);
+    expect(screen.queryByLabelText('Save this event')).toBeNull();
   });
 
   it('completed shows champions and awards (after preview)', () => {

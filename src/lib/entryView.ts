@@ -124,10 +124,13 @@ export function timeline(e: MyEntry, hasTeams: boolean, paid: boolean): { title:
     : e.status === 'pending' ? 0
     : e.status === 'approved' ? 2
     : titles.length; // auctioned / assigned
-  const rest = titles.map((title, i) => ({
-    title,
-    state: (i < now ? 'done' : i === now ? 'now' : 'next') as StepState,
-  }));
+  // The dates the server stamps (SERVER-GAPS #18); older entries have none.
+  const dated: Record<string, string | undefined> = { Approved: e.approvedAt, 'Not accepted': e.rejectedAt, Withdrawn: e.withdrawnAt };
+  const rest = titles.map((title, i) => {
+    const state = (i < now ? 'done' : i === now ? 'now' : 'next') as StepState;
+    const at = state !== 'next' ? dated[title] : undefined;
+    return { title, state, ...(at ? { sub: dayDate(at) } : {}) };
+  });
   const sold = e.auctionData?.soldPrice;
   if ((e.status === 'assigned' || e.status === 'auctioned') && hasTeams && sold) {
     (rest[rest.length - 1] as { sub?: string }).sub = `Sold for ${rupees(sold)}`;
@@ -148,7 +151,10 @@ export function enteredHeading(e: MyEntry, hasTeams: boolean, teamName?: string,
       return { title: `You're on ${teamName ?? 'a team'}`, line: `${paid}${sold ? `Sold for ${rupees(sold)}.` : ''}`.trim() };
     }
     case 'rejected':
-      return { title: "Your entry wasn't accepted", line: `${paid}The organiser turned this entry down.` };
+      return {
+        title: "Your entry wasn't accepted",
+        line: `${paid}The organiser turned this entry down.${e.rejectionReason ? ` Reason: ${e.rejectionReason}` : ''}`,
+      };
     case 'withdrawn':
       return { title: 'You withdrew this entry', line: '' };
   }

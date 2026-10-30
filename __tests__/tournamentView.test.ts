@@ -1,7 +1,14 @@
 import {
   effectiveStage, liveAuctionCategory, statusLine, categoryStatus, formatLine, feeLabel, lowestFee, facts,
-  overviewTabs, footerCta, announcementTag, announcementMeta, timeAgo, directionsUrl, awardRow,
+  overviewTabs, footerCta, announcementTag, announcementMeta, timeAgo, directionsUrl, awardRow, teamShort,
 } from '@/lib/tournamentView';
+
+// SERVER-GAPS #21: 2a's team strip and 2d's team tabs.
+it('teamShort prefers the short name, and falls back to the full one', () => {
+  expect(teamShort({ name: 'Titans Sports Club', shortName: 'Titans SC' })).toBe('Titans SC');
+  expect(teamShort({ name: 'Tigr' })).toBe('Tigr');
+  expect(teamShort({ name: 'Rawnat United', shortName: '  ' })).toBe('Rawnat United');
+});
 import type { TournamentCategory, TournamentDetail, MyEntry } from '@/api/tournaments';
 import type { Announcement } from '@/api/profileApi';
 

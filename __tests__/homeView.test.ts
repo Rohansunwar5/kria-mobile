@@ -22,9 +22,9 @@ describe('heroFor', () => {
     expect(heroFor(me, [ranked('me', 0.7), ranked('b', 0.6)], 'me')).toMatchObject({ big: '#1', gapA: '10.0 pts', gapB: ' ahead of #2 b X' });
   });
 
-  it('shows the distance to 10 decided matches when unranked', () => {
+  it('shows the distance to 5 decided matches when unranked', () => {
     const h = heroFor(sport({ played: 3, decided: 3, won: 2, winRate: 2 / 3 }), null, 'me');
-    expect(h).toMatchObject({ big: '3/10', gapA: '7 more', gapB: ' decided matches to get ranked', rankLabel: 'Unranked' });
+    expect(h).toMatchObject({ big: '3/5', gapA: '2 more', gapB: ' decided matches to get ranked', rankLabel: 'Unranked' });
   });
 
   it('reads a full board without you as outside the top 50', () => {
@@ -39,7 +39,7 @@ describe('heroFor', () => {
 
   it('puts table tennis on the path to a rank like any other sport', () => {
     const h = heroFor(sport({ sport: 'table_tennis', played: 3, decided: 3, won: 2, winRate: 2 / 3 }), null, 'me');
-    expect(h).toMatchObject({ big: '3/10', gapA: '7 more', ranked: false });
+    expect(h).toMatchObject({ big: '3/5', gapA: '2 more', ranked: false });
   });
 
   it('never invents a rank when the board failed to load', () => {

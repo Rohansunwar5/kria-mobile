@@ -55,7 +55,25 @@ export async function latestTournaments(
   return visibleTournaments(payload?.tournaments ?? []);
 }
 
-export type TournamentStatus = 'draft' | 'registration_open' | 'registration_closed' | 'auction_in_progress' | 'ongoing' | 'completed' | 'cancelled';
+/** How many public events each filter option would show; each count applies the other filters (SERVER-GAPS #7). */
+export interface EventFacets {
+  sports: Record<string, number>;
+  statuses: Record<string, number>;
+  cities: { city: string; count: number }[];
+}
+
+/** Bookmark or un-bookmark an event; answers with the player's saved list. */
+export async function setTournamentSaved(id: string, saved: boolean): Promise<string[]> {
+  const res = saved ? await API.post(`/player/auth/saved-tournaments/${id}`) : await API.delete(`/player/auth/saved-tournaments/${id}`);
+  return unwrap<{ savedTournaments: string[] } | null>(res)?.savedTournaments ?? [];
+}
+
+export async function getEventFacets(filters: { sport?: string; city?: string; status?: string; q?: string } = {}): Promise<EventFacets> {
+  const payload = unwrap<EventFacets | null>(await API.get('/tournament/facets', { params: filters }));
+  return payload ?? { sports: {}, statuses: {}, cities: [] };
+}
+
+export type TournamentStatus ='draft' | 'registration_open' | 'registration_closed' | 'auction_in_progress' | 'ongoing' | 'completed' | 'cancelled';
 export type CategoryStatus = 'setup' | 'registration' | 'auction' | 'groups_configured' | 'bracket_configured' | 'ongoing' | 'completed';
 export type BracketType = 'league' | 'knockout' | 'hybrid' | 'team_league';
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'professional';
@@ -83,7 +101,7 @@ export interface TournamentCategory {
   maxRegistrations?: number; registrationFee: number; isPaidRegistration: boolean;
 }
 
-export interface TournamentTeam { _id: string; name: string; logo?: string; owner?: { name?: string }; budget: number; initialBudget: number; whatsappGroupLink?: string }
+export interface TournamentTeam { _id: string; name: string; shortName?: string; logo?: string; owner?: { name?: string }; budget: number; initialBudget: number; whatsappGroupLink?: string }
 
 export interface MyEntry {
   _id: string; tournamentId: string; categoryId: string; createdAt: string; teamId?: string;
@@ -96,6 +114,10 @@ export interface MyEntry {
   /** Doubles: the teammate the organiser paired this entry with. */
   partnerRegistrationId?: string;
   partner?: { registrationId: string; name: string } | null;
+  /** When the status changed (SERVER-GAPS #18); absent on entries from before. */
+  approvedAt?: string; rejectedAt?: string; withdrawnAt?: string;
+  /** The organiser's optional reason, on a rejected entry. */
+  rejectionReason?: string;
 }
 
 export interface EntryProfile { firstName: string; lastName: string; age: number; gender: 'male' | 'female'; phone: string; photo?: string; skillLevel: SkillLevel }

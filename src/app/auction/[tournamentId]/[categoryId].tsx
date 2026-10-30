@@ -28,7 +28,7 @@ export default function Auction() {
 
   const live = data && data.auction.status !== 'not_started' ? data : null;
   const finished = live?.auction.status === 'completed';
-  const result = live ? myAuctionResult(entry, live, teams) : null;
+  const result = live ? myAuctionResult(entry, live, teams, soldLog) : null;
   const onResult = (team: string) => router.push({ pathname: '/tournament/[id]/teams', params: { id: tournamentId, team } });
   const pill = auctionPill(live?.auction ?? null);
   const category = data?.category?.name ?? base?.categories.find((c) => c._id === categoryId)?.name;

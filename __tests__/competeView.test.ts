@@ -30,9 +30,9 @@ describe('rankingRows', () => {
     expect(rankingRows(board(50), 'me', 'A M', summary(30), false).own).toMatchObject({ rank: '—', sub: 'Outside the top 50' });
   });
 
-  it('turns your row into the path to 10 when you are unranked', () => {
-    expect(rankingRows(board(8), 'me', 'Neha Joshi', undefined, false).own).toMatchObject({ rank: '—', sub: '0 of 10 decided matches', play: true, initials: 'NJ' });
-    expect(rankingRows(board(8), 'me', 'Neha Joshi', summary(4), false).own).toMatchObject({ sub: '4 of 10 decided matches' });
+  it('turns your row into the path to 5 when you are unranked', () => {
+    expect(rankingRows(board(8), 'me', 'Neha Joshi', undefined, false).own).toMatchObject({ rank: '—', sub: '0 of 5 decided matches', play: true, initials: 'NJ' });
+    expect(rankingRows(board(8), 'me', 'Neha Joshi', summary(4), false).own).toMatchObject({ sub: '4 of 5 decided matches' });
   });
 });
 

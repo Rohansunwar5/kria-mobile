@@ -17,7 +17,7 @@ const names = RANKED_SPORTS.map((k) => sportName(k).toLowerCase());
 const ranked = `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 const PAGES = [
   { tag: '01 / 03 · PLAY', title: 'Host a match in seconds.', line: 'Start a quick match, share the code, and friends join from their phones. Every result goes on your record.', card: <PlayCard /> },
-  { tag: '02 / 03 · COMPETE', title: 'Climb the leaderboard.', line: `You're ranked by win rate in ${ranked}. Ten decided matches and you're on the board.`, card: <CompeteCard sports={RANKED_SPORTS} rankMin={RANK_MIN} /> },
+  { tag: '02 / 03 · COMPETE', title: 'Climb the leaderboard.', line: `You're ranked by win rate in ${ranked}. Five decided matches and you're on the board.`, card: <CompeteCard sports={RANKED_SPORTS} rankMin={RANK_MIN} /> },
   { tag: '03 / 03 · TOURNAMENTS', title: 'Enter real tournaments.', line: 'Register for events near you, get picked in team auctions, follow the bracket live and earn awards.', card: <TournamentsCard /> },
 ];
 

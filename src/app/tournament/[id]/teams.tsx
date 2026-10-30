@@ -13,6 +13,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, radius, space } from '@/constants/theme';
+import { teamShort } from '@/lib/tournamentView';
 import { rupees } from '@/lib/format';
 import { goBack } from '@/lib/nav';
 import { pickTeam, squad, teamStats } from '@/lib/squadView';
@@ -72,7 +73,7 @@ export default function Teams() {
                   <View style={[s.ring, on && { borderColor: colors.accent }]}>
                     <Crest uri={t.logo} name={t.name} size={48} />
                   </View>
-                  <Text style={[s.crestName, on && { color: colors.text }]} numberOfLines={1}>{t.name}</Text>
+                  <Text style={[s.crestName, on && { color: colors.text }]} numberOfLines={1}>{teamShort(t)}</Text>
                 </Tap>
               );
             })}
