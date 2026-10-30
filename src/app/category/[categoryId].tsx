@@ -124,7 +124,7 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
     setBusy(true);
     setRefusal(null);
     try {
-      setCheckout({ order: await createPaymentOrder(tournamentId, categoryId), playerId: user._id, skill });
+      setCheckout({ order: await createPaymentOrder(tournamentId, categoryId, entryProfile(user, skill, new Date())), playerId: user._id, skill });
     } catch (e) {
       setRefusal(serverMessage(e));
     }

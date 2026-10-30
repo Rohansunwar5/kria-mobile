@@ -15,23 +15,22 @@ describe('payment api (checkout)', () => {
       currency: 'INR', keyId: 'rzp_test_key', paymentId: 'pay_db_1',
     };
     mock.onPost('/payments/create-order').reply(200, { data: { data: order } });
-    const result = await createPaymentOrder('t1', 'c1');
+    const result = await createPaymentOrder('t1', 'c1', { firstName: 'A', lastName: 'B', age: 20, gender: 'male', phone: '1', skillLevel: 'beginner' });
     expect(result.orderId).toBe('ord_1');
     expect(result.keyId).toBe('rzp_test_key');
     expect(result.feeBreakdown.gst).toBe(72);
   });
 
-  it('createPaymentOrder sends tournamentId and categoryId in request body', async () => {
+  const profile: VerifyBody['profile'] = { firstName: 'A', lastName: 'B', age: 20, gender: 'male', phone: '1', skillLevel: 'beginner' };
+
+  it('createPaymentOrder sends the ids and the entry profile in the request body', async () => {
     const order = { orderId: 'ord_2', amount: 5000, baseAmount: 4000, convenienceFee: 1000, feeBreakdown: { razorpayFee: 80, platformFee: 80, gst: 29 }, currency: 'INR', keyId: 'k', paymentId: 'p' };
-    mock.onPost('/payments/create-order', { tournamentId: 'tA', categoryId: 'cB' }).reply(200, { data: { data: order } });
-    const result = await createPaymentOrder('tA', 'cB');
+    mock.onPost('/payments/create-order', { tournamentId: 'tA', categoryId: 'cB', profile }).reply(200, { data: { data: order } });
+    const result = await createPaymentOrder('tA', 'cB', profile);
     expect(result.orderId).toBe('ord_2');
   });
 
-  const body: VerifyBody = {
-    razorpayOrderId: 'ord_1', razorpayPaymentId: 'pay_1', razorpaySignature: 'sig_1',
-    profile: { firstName: 'A', lastName: 'B', age: 20, gender: 'male', phone: '1', skillLevel: 'beginner' },
-  };
+  const body: VerifyBody = { razorpayOrderId: 'ord_1', razorpayPaymentId: 'pay_1', razorpaySignature: 'sig_1', profile };
 
   it('verifyPayment posts the Razorpay fields and the profile', async () => {
     mock.onPost('/payments/verify').reply(200, {});

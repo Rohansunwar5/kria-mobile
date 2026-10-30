@@ -34,8 +34,9 @@ export interface OrderDetails {
   paymentId: string;
 }
 
-export async function createPaymentOrder(tournamentId: string, categoryId: string): Promise<OrderDetails> {
-  const res = await API.post('/payments/create-order', { tournamentId, categoryId });
+/** The profile is saved on the order, so the entry is made even if the app never verifies. */
+export async function createPaymentOrder(tournamentId: string, categoryId: string, profile: EntryProfile): Promise<OrderDetails> {
+  const res = await API.post('/payments/create-order', { tournamentId, categoryId, profile });
   return res.data?.data?.data || res.data?.data;
 }
 

@@ -180,7 +180,7 @@ describe('2b paid flow', () => {
     mine.mockResolvedValue([entry()]);
     await payWith();
     expect(await screen.findByText("You're in the queue for approval")).toBeTruthy();
-    expect(order).toHaveBeenCalledWith('t1', 'c1');
+    expect(order).toHaveBeenCalledWith('t1', 'c1', PROFILE);
     expect(verify).toHaveBeenCalledWith({ razorpayOrderId: 'ord_1', razorpayPaymentId: 'pay_1', razorpaySignature: 'sig_1', profile: PROFILE });
     expect(screen.getByText('₹628.32 paid. The organiser reviews entries before the auction.')).toBeTruthy();
     expect(mockStore.size).toBe(0);

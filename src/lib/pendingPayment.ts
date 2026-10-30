@@ -29,10 +29,10 @@ export async function loadPending(playerId: string, categoryId: string): Promise
 export const clearPending = (playerId: string, categoryId: string) => deleteItem(key(playerId, categoryId));
 
 /**
- * Re-sends the saved payment. The server marks a payment paid before it creates
- * the entry, so a retry can be refused ("already verified") after the entry
- * exists: on any error, check my entries before deciding it failed. If that
- * check also fails, the saved payment stays.
+ * Re-sends the saved payment. Verify returns the entry even when the server's
+ * payment webhook made it first, but any error still might not mean "no entry":
+ * check my entries before deciding it failed. If that check also fails, the
+ * saved payment stays.
  */
 export async function confirmPending(
   p: PendingPayment,
