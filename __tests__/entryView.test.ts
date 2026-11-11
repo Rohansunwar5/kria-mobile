@@ -69,6 +69,17 @@ describe('howItWorks', () => {
     const s = howItWorks(cat({ bracketType: 'team_league' }), 0);
     expect(s[s.length - 1]).toEqual({ title: 'Team league', body: 'Teams play ties in groups; points decide the table.' });
   });
+  it('groups, then knockouts', () => {
+    const s = howItWorks(cat({ bracketType: 'hybrid', hybridConfig: { leagueSize: 4, topN: 2 } }), 0);
+    expect(s[s.length - 1]).toEqual({ title: 'Groups, then knockouts', body: 'Groups of 4 play each other; the top 2 go through.' });
+  });
+});
+
+describe('categoryFacts for groups, then knockouts', () => {
+  it('states the group size and how many go through', () => {
+    const facts = categoryFacts(cat({ bracketType: 'hybrid', matchType: 'singles', hybridConfig: { leagueSize: 4, topN: 2 } }));
+    expect(facts[0]).toEqual({ label: 'Format', value: 'Groups of 4, top 2 to knockouts · Singles' });
+  });
 });
 
 describe('entryBlocker', () => {

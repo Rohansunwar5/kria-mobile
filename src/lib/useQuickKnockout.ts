@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { serverMessage } from '@/api/unwrap';
-import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
+import { acquireSocket, holdRoom, releaseRoom, releaseSocket, socket } from '@/lib/socket';
 import {
   addKnockoutPlayer, addKnockoutTeam, cancelQuickKnockout, drawQuickKnockout, getQuickKnockout, grantKnockoutAward,
   moveKnockoutPlayer, pairKnockoutPlayers, removeKnockoutPlayer, removeKnockoutTeam, renameKnockoutTeam, startQuickKnockout, unpairKnockoutPlayers, type QuickKnockout,
@@ -46,11 +46,12 @@ export function useQuickKnockout(id?: string) {
     const onConnect = () => { join(); load(); };
 
     acquireSocket();
+    holdRoom('match', { matchId: id });
     join();
     socket.on('knockout:update', onUpdate);
     socket.on('connect', onConnect);
     return () => {
-      socket.emit('leave:match', { matchId: id });
+      releaseRoom('match', { matchId: id });
       socket.off('knockout:update', onUpdate);
       socket.off('connect', onConnect);
       releaseSocket();

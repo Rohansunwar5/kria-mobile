@@ -100,7 +100,7 @@ describe('formatLine', () => {
     expect(formatLine(cat())).toBe('Knockout · Best of 3 to 21');
     expect(formatLine(cat({ matchFormat: { bestOf: 1, pointsPerGame: 21 } }))).toBe('Knockout · 1 game to 21');
     expect(formatLine(cat({ matchType: 'doubles' }))).toBe('Doubles · Knockout · Best of 3 to 21');
-    expect(formatLine(cat({ bracketType: 'hybrid' }))).toBe('League · Best of 3 to 21');
+    expect(formatLine(cat({ bracketType: 'hybrid' }))).toBe('Groups → knockouts · Best of 3 to 21');
     expect(formatLine(cat({ bracketType: 'team_league' }))).toBe('Team league · Best of 3 to 21');
     expect(formatLine(cat({ bracketType: 'league', matchFormat: undefined, cricketConfig: { overs: 10, playersPerTeam: 11 } }))).toBe('League · 10 overs · 11 a side');
     expect(formatLine(cat({ matchFormat: undefined }))).toBe('Knockout');

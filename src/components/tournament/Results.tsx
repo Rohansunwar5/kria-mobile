@@ -29,7 +29,9 @@ export function Results({ categories, matches, awards, onTable }: {
   awards: TournamentAward[];
   onTable: (c: TournamentCategory) => void;
 }) {
-  const isKnockout = (c: TournamentCategory) => (c.bracketType ?? 'knockout') === 'knockout';
+  // Groups, then a knockout: crowned by its Final once it is decided, otherwise its table.
+  const isKnockout = (c: TournamentCategory) => (c.bracketType ?? 'knockout') === 'knockout'
+    || (c.bracketType === 'hybrid' && !!matches[c._id]?.some(isFinal));
   const champs = categories.filter(isKnockout).map((c) => championRow(c, matches[c._id])).filter((r) => r !== null);
   const leagues = categories.filter((c) => !isKnockout(c));
   return (

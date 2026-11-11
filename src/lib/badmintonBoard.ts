@@ -1,5 +1,5 @@
 import type { BadmintonMatch } from '@/api/badmintonMatch';
-import { roundLabel } from '@/lib/knockoutRoom';
+import { isGroupRound, roundLabel } from '@/lib/knockoutRoom';
 
 export interface RallyConfig { bestOf: number; pointsToWin: number; cap: number }
 export function rallyConfig(m: Pick<BadmintonMatch, 'matchConfig'>): RallyConfig {
@@ -87,6 +87,9 @@ export function badmintonBoard(m: BadmintonMatch): BoardView {
   return { top, format: `Best of ${c.bestOf} · to ${c.pointsToWin}`, rows: [row(0), row(1)], chip, games, over };
 }
 
+/** A Final, a league match and a group match carry no number. */
+const unnumbered = (round: string) => /^(final|league)$/i.test(round) || isGroupRound(round);
+
 export function roundTitle(
   m: Pick<BadmintonMatch, 'bracketRound' | 'positionInRound' | 'tieId' | 'teams' | 'slotLabel' | 'subMatchSlotNumber'>,
 ): string {
@@ -95,7 +98,7 @@ export function roundTitle(
     return [`${m.teams?.team1Name ?? ''} vs ${m.teams?.team2Name ?? ''}`, slot].filter(Boolean).join(' · ');
   }
   const label = roundLabel(m.bracketRound);
-  return m.positionInRound != null && !/^(final|league)$/i.test(m.bracketRound) ? `${label} ${m.positionInRound + 1}` : label;
+  return m.positionInRound != null && !unnumbered(m.bracketRound) ? `${label} ${m.positionInRound + 1}` : label;
 }
 
 /** A feed row's round, numbered as roundTitle numbers a match ("Quarter-final 4"). */
@@ -103,7 +106,7 @@ export function feedRound(round?: string, positionInRound?: number): string | un
   if (!round) return undefined;
   if (round.includes('-') && !/-final$/i.test(round)) return 'Team league';
   const label = roundLabel(round);
-  return positionInRound != null && !/^(final|league)$/i.test(round) ? `${label} ${positionInRound + 1}` : label;
+  return positionInRound != null && !unnumbered(round) ? `${label} ${positionInRound + 1}` : label;
 }
 
 export function parseScoreline(s?: string): { a: number; b: number }[] {

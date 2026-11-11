@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { socket } from '@/lib/socket';
+import { releaseRoom, socket } from '@/lib/socket';
 import { useQuickKnockout } from '@/lib/useQuickKnockout';
 
 jest.mock('expo-router', () => ({
@@ -10,7 +10,7 @@ jest.mock('expo-router', () => ({
 jest.mock('@/lib/socket', () => {
   const handlers: Record<string, ((...a: unknown[]) => void)[]> = {};
   return {
-    acquireSocket: jest.fn(), releaseSocket: jest.fn(),
+    acquireSocket: jest.fn(), holdRoom: jest.fn(), releaseRoom: jest.fn(), releaseSocket: jest.fn(),
     socket: {
       connected: true, connect: jest.fn(), disconnect: jest.fn(), emit: jest.fn(),
       on: jest.fn((e: string, fn: (...a: unknown[]) => void) => { (handlers[e] ||= []).push(fn); }),
@@ -72,7 +72,7 @@ it('adopts an action\'s response and surfaces a refusal', async () => {
 it('leaves the room on close', async () => {
   const { unmount } = await opened();
   unmount();
-  expect(server.emit).toHaveBeenCalledWith('leave:match', { matchId: 'k1' });
+  expect(releaseRoom).toHaveBeenCalledWith('match', { matchId: 'k1' });
 });
 
 it('arranges cricket teams through the endpoints', async () => {

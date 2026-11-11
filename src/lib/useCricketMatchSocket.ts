@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
+import { acquireSocket, holdRoom, releaseRoom, releaseSocket, socket } from '@/lib/socket';
 import { getMatchLive, getScorecard, CricketMatch, LiveState, Scorecard } from '@/api/cricketMatch';
 import { tallyKey } from '@/lib/cricketView';
 
@@ -72,6 +72,7 @@ export function useCricketMatchSocket(matchId?: string) {
 
     reload();
     acquireSocket();
+    holdRoom('match', { matchId });
     join();
     socket.on('ball:recorded', onBall);
     // An undo can reopen a completed match, so reload the whole thing.
@@ -83,7 +84,7 @@ export function useCricketMatchSocket(matchId?: string) {
     return () => {
       active = false;
       ready.current = false;
-      socket.emit('leave:match', { matchId });
+      releaseRoom('match', { matchId });
       socket.off('ball:recorded', onBall);
       socket.off('ball:undone', reload);
       socket.off('connect', onReconnect);

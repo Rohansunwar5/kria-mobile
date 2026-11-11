@@ -98,6 +98,8 @@ export interface TournamentCategory {
   matchFormat?: { bestOf?: number; pointsPerGame?: number; tieBreakPoints?: number };
   cricketConfig?: { overs?: number; playersPerTeam?: number };
   teamLeagueConfig?: { topNPerGroup?: number; pointsForWin?: number; pointsForLoss?: number; pointsForDraw?: number };
+  /** Groups, then a knockout: entries per group, and how many go through from each. */
+  hybridConfig?: { leagueSize?: number; topN?: number };
   maxRegistrations?: number; registrationFee: number; isPaidRegistration: boolean;
 }
 

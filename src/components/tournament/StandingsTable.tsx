@@ -6,13 +6,15 @@ import type { TableRow } from '@/lib/standingsView';
 
 /**
  * Mock 2f / DESIGN §5.10 standings: rank, name + team, P W L (D), Pts. My row
- * lifted; with `topN`, an accent "Top N go through" line after row N.
+ * lifted; with `topN`, an accent "Top N go through" line after row N, or
+ * `cutText` when the next round is known ("Quarter-final line").
  * `crests` (team id → logo) puts a crest before each name.
  */
-export function StandingsTable({ rows, head, topN, crests }: {
+export function StandingsTable({ rows, head, topN, cutText, crests }: {
   rows: TableRow[];
   head: string;
   topN?: number;
+  cutText?: string;
   crests?: Record<string, string | undefined>;
 }) {
   const hasD = rows.some((r) => r.d !== undefined);
@@ -47,7 +49,7 @@ export function StandingsTable({ rows, head, topN, crests }: {
           {i + 1 === cut ? (
             <View style={s.cut}>
               <View style={s.cutLine} />
-              <Text style={s.cutText}>Top {cut} go through</Text>
+              <Text style={s.cutText}>{cutText ?? `Top ${cut} go through`}</Text>
               <View style={s.cutLine} />
             </View>
           ) : null}

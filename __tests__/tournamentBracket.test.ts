@@ -84,6 +84,9 @@ test('myNextMatch prefers live, then earliest scheduled', () => {
 test('nextMatchLabel', () => {
   expect(nextMatchLabel(sf2)).toBe('Your semi-final · 4:30 PM');
   expect(nextMatchLabel(fin)).toBe('Your final');
+  const group = mk({ bracketRound: 'Group C', positionInRound: 2, schedule: { time: '4:30 PM' } });
+  expect(nextMatchLabel(group)).toBe('Your Group C match · 4:30 PM');
+  expect(nextMatchView(group, me).header).toBe('Your next match · Group C');
 });
 test('nextMatchView', () => {
   const m = { ...sf1, status: 'scheduled' as const, schedule: { date: '2026-10-20T12:00:00', time: '4:30 PM', court: '1' } };

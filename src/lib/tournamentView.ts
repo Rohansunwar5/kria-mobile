@@ -62,7 +62,7 @@ export function categoryStatus(c: TournamentCategory, auction?: AuctionState, li
   }
 }
 
-const BRACKET = { knockout: 'Knockout', league: 'League', hybrid: 'League', team_league: 'Team league' } as const;
+const BRACKET = { knockout: 'Knockout', league: 'League', hybrid: 'Groups → knockouts', team_league: 'Team league' } as const;
 
 export function formatLine(c: TournamentCategory): string {
   const parts: string[] = [];

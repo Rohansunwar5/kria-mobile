@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { socket } from '@/lib/socket';
+import { releaseRoom, socket } from '@/lib/socket';
 import { useQuickMatch } from '@/lib/useQuickMatch';
 
 // Same headless stand-in as useQuickCricket.test.tsx: focus degrades to mount.
@@ -14,7 +14,7 @@ jest.mock('expo-router', () => ({
 jest.mock('@/lib/socket', () => {
   const handlers: Record<string, ((...a: unknown[]) => void)[]> = {};
   return {
-    acquireSocket: jest.fn(), releaseSocket: jest.fn(),
+    acquireSocket: jest.fn(), holdRoom: jest.fn(), releaseRoom: jest.fn(), releaseSocket: jest.fn(),
     socket: {
       connected: true,
       connect: jest.fn(),
@@ -92,7 +92,7 @@ describe('useQuickMatch — live updates', () => {
     expect(server.emit).toHaveBeenCalledWith('join:match', { matchId: 'm1' });
 
     unmount();
-    expect(server.emit).toHaveBeenCalledWith('leave:match', { matchId: 'm1' });
+    expect(releaseRoom).toHaveBeenCalledWith('match', { matchId: 'm1' });
   });
 
   // Anything pushed while the connection was down is gone for good, so a

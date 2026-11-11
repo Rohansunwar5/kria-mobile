@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getCategoryLeaderboard, getTeamTable, type LeaderboardEntry, type PointsConfig, type TeamRow } from '@/api/leaderboard';
+import { getCategoryLeaderboard, getGroupTables, getTeamTable, type GroupTable, type LeaderboardEntry, type PointsConfig, type TeamRow } from '@/api/leaderboard';
 import { getCategoryBracket, type Match } from '@/api/match';
 import { getGroupStandings, getTiesByGroup, type GroupStandings, type Tie } from '@/api/teamLeague';
 import { getTournamentTeams, type CategoryStatus, type TournamentCategory } from '@/api/tournaments';
@@ -19,11 +19,12 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, radius, space } from '@/constants/theme';
 import { goBack } from '@/lib/nav';
-import { comingUp, emptyCopy, playerTable, resultRows, ruleLine, tableKind, teamLeagueTable, teamTable, tieRow } from '@/lib/standingsView';
+import { isGroupRound } from '@/lib/knockoutRoom';
+import { comingUp, cutLine, emptyCopy, groupTable, playerTable, resultRows, ruleLine, tableKind, teamLeagueTable, teamTable, tieRow } from '@/lib/standingsView';
 import { bracketColumns, meFrom, myNextMatch, nextMatchView } from '@/lib/tournamentBracket';
 import { useTournament } from '@/lib/useTournament';
 
-/** Knockout bracket, a league table (players or teams), or team-league groups. */
+/** Knockout bracket, a league table (players or teams), team-league groups, or groups then a knockout. */
 const viewOf = (c: TournamentCategory) => ((c.bracketType ?? 'knockout') === 'knockout' ? 'knockout' : tableKind(c));
 
 /** Stage 1 (no stageNumber), then stages 2..5 until one has no groups. */
@@ -47,6 +48,9 @@ export default function Matches() {
   const [teamTables, setTeamTables] = useState<Record<string, { rows: TeamRow[]; pointsConfig?: PointsConfig }>>({});
   const [stages, setStages] = useState<Record<string, GroupStandings[][]>>({});
   const [ties, setTies] = useState<Record<string, Tie[]>>({});
+  const [groupTabs, setGroupTabs] = useState<Record<string, { groups: GroupTable[]; qualify?: number; knockoutRound?: string }>>({});
+  // Groups, then a knockout: which half is on screen; unset means the knockout once it exists.
+  const [half, setHalf] = useState<'knockouts' | 'groups'>();
   const [logos, setLogos] = useState<Record<string, string | undefined>>({});
   // Failures keyed by what they belong to ("matches:{category}", "extras:{category}", "ties:{group}"),
   // so the banner only shows for the view on screen.
@@ -80,16 +84,25 @@ export default function Matches() {
 
   useEffect(() => {
     // No leaderboard call while the view is the empty state; team leagues may have groups before matches.
-    if (!selId || !(view === 'teamLeague' || ((view === 'players' || view === 'teams') && hasMatches))) return;
+    if (!selId || !(view === 'teamLeague' || ((view === 'players' || view === 'teams' || view === 'groups') && hasMatches))) return;
     let live = true;
     const key = `extras:${selId}`;
     const fail = () => live && flag(key, true);
+    const loadBoard = () => getCategoryLeaderboard(selId).then((r) => {
+      if (!live) return;
+      setBoards((o) => ({ ...o, [selId]: (r.boards.find((b) => b.label === null) ?? r.boards[0])?.entries ?? [] }));
+      flag(key, false);
+    });
     if (view === 'players') {
-      getCategoryLeaderboard(selId).then((r) => {
+      loadBoard().catch(fail);
+    } else if (view === 'groups') {
+      // A hybrid drawn before groups existed has none: it shows the one table instead.
+      getGroupTables(selId).then((r) => {
         if (!live) return;
-        setBoards((o) => ({ ...o, [selId]: (r.boards.find((b) => b.label === null) ?? r.boards[0])?.entries ?? [] }));
-        flag(key, false);
-      }, fail);
+        setGroupTabs((o) => ({ ...o, [selId]: r }));
+        if (r.groups.length) flag(key, false);
+        else return loadBoard();
+      }).catch(fail);
     } else if (view === 'teams') {
       // The server ranks it by points; counting it here from matches ranked by wins and disagreed.
       getTeamTable(selId).then((r) => {
@@ -132,7 +145,7 @@ export default function Matches() {
   const myEntries = data?.mine.filter((e) => e.categoryId === selId && e.status !== 'withdrawn') ?? [];
   const me = meFrom(myEntries);
   const loading = anyFailed ? null : <Loading />;
-  const choose = (c: string) => { setPicked(c); setStage(0); setGroup(undefined); };
+  const choose = (c: string) => { setPicked(c); setStage(0); setGroup(undefined); setHalf(undefined); };
 
   function body() {
     if (!data) return loading;
@@ -145,7 +158,7 @@ export default function Matches() {
 
     return (
       <>
-        {view === 'knockout' ? knockout(ms) : view === 'teamLeague' ? teamLeague(sel) : table(sel, ms, view!)}
+        {view === 'knockout' ? knockout(ms) : view === 'teamLeague' ? teamLeague(sel) : view === 'groups' ? groupStage(sel, ms) : table(sel, ms, view!)}
         {sel.sport === 'cricket' ? (
           <Tap accessibilityRole="link" scale={0.99} onPress={() => router.push({ pathname: '/cricket/leaderboard/[categoryId]', params: { categoryId: sel._id, tournamentName: data?.tournament.name ?? '', categoryName: sel.name } })} style={s.link}>
             <Text style={s.linkText}>Player stats</Text>
@@ -188,6 +201,45 @@ export default function Matches() {
         )}
         {results.length ? <View style={s.section}><SectionHeader title="Results" /><ResultRows rows={results} /></View> : null}
         {upcoming.length ? <View style={s.section}><SectionHeader title="Coming up" /><ComingUpRows rows={upcoming} /></View> : null}
+      </>
+    );
+  }
+
+  /** Mock 2e/2f: Knockouts · Groups once the knockout exists; until then the groups alone. */
+  function groupStage(c: TournamentCategory, list: Match[]) {
+    const t = groupTabs[c._id];
+    if (!t) return loading;
+    if (!t.groups.length) return table(c, list, 'players');
+    const ko = list.filter((m) => !isGroupRound(m.bracketRound));
+    const showKo = ko.length > 0 && half !== 'groups';
+    const g = t.groups.find((x) => x.name === group) ?? t.groups[0];
+    const own = list.filter((m) => m.bracketRound === g.name);
+    const results = resultRows(own);
+    const upcoming = comingUp(own);
+    return (
+      <>
+        {ko.length ? (
+          <View style={s.seg}>
+            <Segmented
+              options={[{ key: 'knockouts', label: 'Knockouts' }, { key: 'groups', label: 'Groups' }]}
+              value={showKo ? 'knockouts' : 'groups'}
+              onChange={(k) => setHalf(k === 'groups' ? 'groups' : 'knockouts')}
+            />
+          </View>
+        ) : null}
+        {showKo ? knockout(ko) : (
+          <>
+            {t.groups.length > 1 ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.segRow}>
+                <Segmented options={t.groups.map((x) => ({ key: x.name, label: x.name }))} value={g.name} onChange={setGroup} />
+              </ScrollView>
+            ) : null}
+            <Text style={s.rule}>{ruleLine(c, 'groups')}</Text>
+            <StandingsTable rows={groupTable(g.rows, me.registrationIds)} head="Player" topN={t.qualify} cutText={cutLine(t.knockoutRound)} />
+            {results.length ? <View style={s.section}><SectionHeader title={`${g.name} results`} /><ResultRows rows={results} /></View> : null}
+            {upcoming.length ? <View style={s.section}><SectionHeader title="Coming up" /><ComingUpRows rows={upcoming} /></View> : null}
+          </>
+        )}
       </>
     );
   }

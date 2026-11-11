@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
+import { acquireSocket, holdRoom, releaseRoom, releaseSocket, socket } from '@/lib/socket';
 import {
   cancelQuickMatch,
   getQuickMatch,
@@ -79,12 +79,13 @@ export function useQuickMatch(id?: string) {
     };
 
     acquireSocket();
+    holdRoom('match', { matchId: id });
     join();
     socket.on('quick:update', onUpdate);
     socket.on('connect', onConnect);
 
     return () => {
-      socket.emit('leave:match', { matchId: id });
+      releaseRoom('match', { matchId: id });
       socket.off('quick:update', onUpdate);
       socket.off('connect', onConnect);
       releaseSocket();

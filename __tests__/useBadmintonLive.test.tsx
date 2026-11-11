@@ -1,13 +1,13 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { getBadmintonMatch } from '@/api/badmintonMatch';
-import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
+import { acquireSocket, releaseRoom, releaseSocket, socket } from '@/lib/socket';
 import { useBadmintonLive } from '@/lib/useBadmintonLive';
 
 jest.mock('@/api/badmintonMatch', () => ({ getBadmintonMatch: jest.fn() }));
 jest.mock('@/lib/socket', () => {
   const handlers: Record<string, ((...a: unknown[]) => void)[]> = {};
   return {
-    acquireSocket: jest.fn(),
+    acquireSocket: jest.fn(), holdRoom: jest.fn(), releaseRoom: jest.fn(),
     releaseSocket: jest.fn(),
     socket: {
       connected: true,
@@ -35,7 +35,7 @@ it('acquires, joins, then leaves and releases on unmount', async () => {
   expect(server.emit).toHaveBeenCalledWith('join:match', { matchId: 'm1' });
   expect(EVENTS.map(server.__count)).toEqual([1, 1, 1, 1]);
   unmount();
-  expect(server.emit).toHaveBeenCalledWith('leave:match', { matchId: 'm1' });
+  expect(releaseRoom).toHaveBeenCalledWith('match', { matchId: 'm1' });
   expect(releaseSocket).toHaveBeenCalledTimes(1);
   expect(EVENTS.map(server.__count)).toEqual([0, 0, 0, 0]);
 });

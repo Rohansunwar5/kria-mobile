@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getBadmintonMatch, type BadmintonMatch } from '@/api/badmintonMatch';
-import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
+import { acquireSocket, holdRoom, releaseRoom, releaseSocket, socket } from '@/lib/socket';
 
 /** Tournament badminton match: fetched once, then replaced by each `score:update`; reloaded on reconnect. */
 export function useBadmintonLive(matchId: string) {
@@ -37,13 +37,14 @@ export function useBadmintonLive(matchId: string) {
     const onDisconnect = () => setConnected(false);
     reload();
     acquireSocket();
+    holdRoom('match', { matchId });
     join();
     socket.on('score:update', onScore);
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('connect_error', onDisconnect);
     return () => {
-      socket.emit('leave:match', { matchId });
+      releaseRoom('match', { matchId });
       socket.off('score:update', onScore);
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);

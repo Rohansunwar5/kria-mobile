@@ -1,4 +1,4 @@
-import { comingUp, emptyCopy, playerTable, resultRows, ruleLine, teamLeagueTable, teamTable, tieRow, tieView, tableKind } from '@/lib/standingsView';
+import { comingUp, cutLine, emptyCopy, groupTable, playerTable, resultRows, ruleLine, teamLeagueTable, teamTable, tieRow, tieView, tableKind } from '@/lib/standingsView';
 
 const cat = (o: any = {}) => ({ _id: 'c', tournamentId: 't', name: 'n', status: 'ongoing', registrationFee: 0, isPaidRegistration: false, ...o });
 const tm = (n: number, a: string, b: string, o: any = {}) => ({
@@ -12,6 +12,27 @@ test('tableKind', () => {
   expect(tableKind(cat({ sport: 'cricket', bracketType: 'knockout' }))).toBe('teams');
   expect(tableKind(cat({ sport: 'badminton', matchType: 'team' }))).toBe('teams');
   expect(tableKind(cat({ sport: 'badminton', matchType: 'singles' }))).toBe('players');
+});
+
+test('tableKind: a hybrid individual category plays groups', () => {
+  expect(tableKind(cat({ bracketType: 'hybrid', matchType: 'singles' }))).toBe('groups');
+  expect(tableKind(cat({ bracketType: 'hybrid', matchType: 'doubles' }))).toBe('groups');
+  expect(tableKind(cat({ bracketType: 'hybrid', matchType: 'team' }))).toBe('teams');
+});
+
+test('groupTable keeps the server order and marks my row', () => {
+  const rows = groupTable([
+    { registrationId: 'r2', name: 'Bina', teamName: 'Smashers', played: 2, won: 2, lost: 0, points: 4 },
+    { registrationId: 'r1', name: 'Asha', played: 2, won: 0, lost: 2, points: 0 },
+  ], ['r1']);
+  expect(rows.map((r) => [r.rank, r.key, r.mine])).toEqual([[1, 'r2', false], [2, 'r1', true]]);
+  expect(rows[0]).toMatchObject({ name: 'Bina', sub: 'Smashers', p: 2, w: 2, l: 0, pts: 4 });
+});
+
+test('the group rule line and the cut line', () => {
+  expect(ruleLine(cat(), 'groups')).toBe('2 points for a win. Level players split by head-to-head, then games, then points.');
+  expect(cutLine('Quarter-Final')).toBe('Quarter-final line');
+  expect(cutLine(undefined)).toBeUndefined();
 });
 
 test('playerTable', () => {

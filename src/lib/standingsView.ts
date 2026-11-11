@@ -1,4 +1,4 @@
-import type { LeaderboardEntry, PointsConfig, TeamRow } from '@/api/leaderboard';
+import type { GroupRow, LeaderboardEntry, PointsConfig, TeamRow } from '@/api/leaderboard';
 import type { Match } from '@/api/match';
 import type { GroupStandings, SubMatch, Tie, TieDetail } from '@/api/teamLeague';
 import type { CategoryStatus, TournamentCategory } from '@/api/tournaments';
@@ -7,12 +7,24 @@ import { dayDate } from '@/lib/matchCard';
 import { sideName } from '@/lib/tournamentBracket';
 
 export interface TableRow { key: string; rank: number; name: string; sub?: string; p: number; w: number; l: number; d?: number; pts?: number; mine: boolean }
-export type TableKind = 'players' | 'teams' | 'teamLeague';
+export type TableKind = 'players' | 'teams' | 'teamLeague' | 'groups';
 
 export function tableKind(c: TournamentCategory): TableKind {
   if (c.bracketType === 'team_league') return 'teamLeague';
-  return c.matchType === 'team' || c.sport === 'cricket' ? 'teams' : 'players';
+  if (c.matchType === 'team' || c.sport === 'cricket') return 'teams';
+  return c.bracketType === 'hybrid' ? 'groups' : 'players';
 }
+
+/** A group's table (mock 2f): the server ranks it; the app keeps its order. */
+export function groupTable(rows: GroupRow[], myRegIds: string[]): TableRow[] {
+  return rows.map((r, i) => ({
+    key: r.registrationId, rank: i + 1, name: r.name, sub: r.teamName || undefined,
+    p: r.played, w: r.won, l: r.lost, pts: r.points, mine: myRegIds.includes(r.registrationId),
+  }));
+}
+
+/** The qualifying line names the round it leads to: "Quarter-final line". */
+export const cutLine = (knockoutRound?: string) => (knockoutRound ? `${roundLabel(knockoutRound)} line` : undefined);
 
 export function playerTable(entries: LeaderboardEntry[], myRegIds: string[]): TableRow[] {
   return entries.map((e, i) => ({
@@ -43,6 +55,7 @@ export function teamLeagueTable(s: GroupStandings, myTeamId?: string): TableRow[
 /** A team table states the points scheme it was ranked by — the server's, once it has answered. */
 export function ruleLine(c: TournamentCategory, kind: TableKind, points?: PointsConfig): string {
   if (kind === 'players') return 'Ranked by points scored, then point difference';
+  if (kind === 'groups') return '2 points for a win. Level players split by head-to-head, then games, then points.';
   const t = (kind === 'teams' && points) || c.teamLeagueConfig;
   return `Win ${t?.pointsForWin ?? 2} · Draw ${t?.pointsForDraw ?? 1} · Loss ${t?.pointsForLoss ?? 0} points`;
 }

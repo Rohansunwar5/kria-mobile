@@ -1,6 +1,6 @@
 import type { Match } from '@/api/match';
 import type { BracketCard, BracketColumn, BracketRow, BracketScore } from '@/lib/bracket';
-import { roundAbbr, roundLabel } from '@/lib/knockoutRoom';
+import { isGroupRound, roundAbbr, roundLabel } from '@/lib/knockoutRoom';
 import { dayDate } from '@/lib/matchCard';
 
 export interface Me { registrationIds: string[]; teamId?: string }
@@ -124,16 +124,17 @@ export function nextMatchView(m: Match, me: Me, all: Match[] = [m]) {
   const side = (slot: Slot) => { const r = row(m, slot, all); return { name: r.name, sub: r.sub }; };
   const round = roundLabel(m.bracketRound);
   return {
-    header: `Your next match · ${m.bracketRound === 'Final' ? round : `${round} ${(m.positionInRound ?? 0) + 1}`}`,
+    header: `Your next match · ${m.bracketRound === 'Final' || isGroupRound(m.bracketRound) ? round : `${round} ${(m.positionInRound ?? 0) + 1}`}`,
     court: m.schedule?.court ? `Court ${m.schedule.court}` : undefined,
     sides: [side(1), side(2)] as [{ name: string; sub?: string }, { name: string; sub?: string }],
     when: [m.schedule?.date ? dayDate(m.schedule.date) : '', m.schedule?.time ?? '', format(m)].filter(Boolean).join(' · '),
   };
 }
 
-/** 2a CTA: "Your semi-final · 4:30 PM". */
+/** 2a CTA: "Your semi-final · 4:30 PM", or "Your Group A match". */
 export const nextMatchLabel = (m: Match) =>
-  [`Your ${roundLabel(m.bracketRound).toLowerCase()}`, m.schedule?.time].filter(Boolean).join(' · ');
+  [isGroupRound(m.bracketRound) ? `Your ${m.bracketRound} match` : `Your ${roundLabel(m.bracketRound).toLowerCase()}`, m.schedule?.time]
+    .filter(Boolean).join(' · ');
 
 export const liveRound = (matches: Match[]) => matches.find((m) => m.status === 'in_progress')?.bracketRound;
 

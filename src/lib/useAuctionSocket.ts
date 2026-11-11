@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { acquireSocket, releaseSocket, socket } from '@/lib/socket';
+import { acquireSocket, holdRoom, releaseRoom, releaseSocket, socket } from '@/lib/socket';
 import {
   getAuctionStatus,
   getAuctionSoldLog,
@@ -57,6 +57,7 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
 
     load();
     acquireSocket();
+    holdRoom('auction', { tournamentId, categoryId });
     join();
     socket.on('auction:update', apply);
     socket.on('connect', onReconnect);
@@ -64,7 +65,7 @@ export function useAuctionSocket(tournamentId?: string, categoryId?: string) {
 
     return () => {
       active = false;
-      socket.emit('leave:auction', { tournamentId, categoryId });
+      releaseRoom('auction', { tournamentId, categoryId });
       socket.off('auction:update', apply);
       socket.off('connect', onReconnect);
       socket.off('disconnect', onDisconnect);

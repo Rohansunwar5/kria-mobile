@@ -10,12 +10,12 @@ jest.mock('expo-router', () => ({
 const mockHook = jest.fn();
 jest.mock('@/lib/useTournament', () => ({ useTournament: () => mockHook() }));
 jest.mock('@/api/match', () => ({ getCategoryBracket: jest.fn() }));
-jest.mock('@/api/leaderboard', () => ({ getCategoryLeaderboard: jest.fn(), getTeamTable: jest.fn() }));
+jest.mock('@/api/leaderboard', () => ({ getCategoryLeaderboard: jest.fn(), getTeamTable: jest.fn(), getGroupTables: jest.fn() }));
 jest.mock('@/api/teamLeague', () => ({ getGroupStandings: jest.fn(), getTiesByGroup: jest.fn() }));
 jest.mock('@/api/tournaments', () => ({ getTournamentTeams: jest.fn() }));
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { getCategoryBracket } = require('@/api/match');
-const { getCategoryLeaderboard, getTeamTable } = require('@/api/leaderboard');
+const { getCategoryLeaderboard, getTeamTable, getGroupTables } = require('@/api/leaderboard');
 // A server team-table row (the server ranks it; the screen renders it in that order).
 const trow = (teamId: string, played: number, won: number, lost: number, drawn: number, points: number) =>
   ({ teamId, name: teamId, played, won, lost, drawn, points });
@@ -46,6 +46,7 @@ beforeEach(() => {
   getCategoryBracket.mockImplementation(async (c: string) => ({ matches: byCat[c] ?? [], rounds: {}, competitorType: 'player' }));
   getCategoryLeaderboard.mockResolvedValue({ boards: [{ label: null, entries: [] }] });
   getTeamTable.mockResolvedValue({ rows: [] });
+  getGroupTables.mockResolvedValue({ groups: [] });
   getGroupStandings.mockResolvedValue([]);
   getTiesByGroup.mockResolvedValue([]);
   getTournamentTeams.mockResolvedValue([]);
@@ -157,6 +158,70 @@ describe('Matches screen', () => {
     getTeamTable.mockResolvedValue({ rows: [trow('Lions', 1, 1, 0, 0, 2), trow('Bears', 1, 0, 1, 0, 0)] });
     setup([cat({ _id: 'c1', name: 'Open T20', sport: 'cricket', matchType: 'team', bracketType: 'league' })], [{ _id: 'r9', categoryId: 'c2', teamId: 'Bears' }]);
     expect(await screen.findByLabelText('2. Bears, played 1, won 0, lost 1, drawn 0, 0 points')).toBeTruthy();
+  });
+
+  describe('groups, then a knockout (2e/2f)', () => {
+    const won = (a: number, b: number) => [{ gameNumber: 1, team1Score: a, team2Score: b }];
+    const ga1 = m({ _id: 'ga1', bracketRound: 'Group A', player1: P('r1', 'Asha'), player2: P('r2', 'Bina'), status: 'completed', winnerId: 'r1', gameScores: won(21, 12), matchConfig: cfg });
+    const ga2 = m({ _id: 'ga2', bracketRound: 'Group A', matchNumber: 2, positionInRound: 1, player1: P('r1', 'Asha'), player2: P('r5', 'Esha'), matchConfig: cfg });
+    const gb1 = m({ _id: 'gb1', bracketRound: 'Group B', matchNumber: 3, player1: P('r3', 'Cara'), player2: P('r4', 'Dev'), status: 'completed', winnerId: 'r3', gameScores: won(21, 18), matchConfig: cfg });
+    const row = (registrationId: string, name: string, won: number, lost: number) =>
+      ({ registrationId, name, played: won + lost, won, lost, points: won * 2 });
+    const tables = {
+      groups: [
+        { name: 'Group A', rows: [row('r1', 'Asha', 1, 0), row('r5', 'Esha', 0, 0), row('r2', 'Bina', 0, 1)] },
+        { name: 'Group B', rows: [row('r3', 'Cara', 1, 0), row('r6', 'Farah', 0, 0), row('r4', 'Dev', 0, 1)] },
+      ],
+      qualify: 2,
+      knockoutRound: 'Semi-Final',
+    };
+    const hybrid = () => cat({ _id: 'c1', name: "Men's Singles", bracketType: 'hybrid', hybridConfig: { leagueSize: 3, topN: 2 } });
+
+    it('shows a group\'s table, the qualifying line and its results while the groups play', async () => {
+      byCat = { c1: [ga1, ga2, gb1] };
+      getGroupTables.mockResolvedValue(tables);
+      setup([hybrid()]);
+
+      expect(await screen.findByText('Semi-final line')).toBeTruthy();
+      expect(screen.getByText('2 points for a win. Level players split by head-to-head, then games, then points.')).toBeTruthy();
+      expect(screen.getByLabelText('1. Asha (you), played 1, won 1, lost 0, 2 points')).toBeTruthy();
+      expect(screen.getByText('Group B')).toBeTruthy();
+      expect(screen.queryByText('Knockouts')).toBeNull();
+      expect(screen.getByText('Group A results')).toBeTruthy();
+      expect(screen.getByText('Asha d. Bina')).toBeTruthy();
+      expect(screen.getByText('Asha v Esha')).toBeTruthy();
+      expect(screen.queryByText('Cara d. Dev')).toBeNull();
+
+      fireEvent.press(screen.getByText('Group B'));
+      expect(await screen.findByLabelText('1. Cara, played 1, won 1, lost 0, 2 points')).toBeTruthy();
+      expect(screen.getByText('Group B results')).toBeTruthy();
+      expect(screen.getByText('Cara d. Dev')).toBeTruthy();
+    });
+
+    it('opens on the knockout once it is drawn, with Groups a tap away', async () => {
+      const final = m({ _id: 'kf', bracketRound: 'Final', roundNumber: 2, matchNumber: 1, player1: P('r1', 'Asha'), player2: P('r3', 'Cara'), matchConfig: cfg });
+      byCat = { c1: [ga1, { ...ga2, status: 'completed', winnerId: 'r1', gameScores: won(21, 9) }, gb1, final] };
+      getGroupTables.mockResolvedValue(tables);
+      setup([hybrid()]);
+
+      expect(await screen.findByText('Your next match · Final')).toBeTruthy();
+      expect(screen.getByText('Knockouts')).toBeTruthy();
+      expect(screen.queryByText('Semi-final line')).toBeNull();
+
+      fireEvent.press(screen.getByText('Groups'));
+      expect(await screen.findByText('Semi-final line')).toBeTruthy();
+    });
+
+    it('falls back to the one table for a hybrid drawn before groups existed', async () => {
+      byCat = { c1: [m({ _id: 'l1', player1: P('r1', 'Asha'), player2: P('r2', 'Bina'), status: 'completed', winnerId: 'r1', gameScores: won(21, 15), matchConfig: cfg })] };
+      getCategoryLeaderboard.mockResolvedValue({ boards: [{ label: null, entries: [
+        { _id: 'r1', playerName: 'Asha', matchesPlayed: 1, matchesWon: 1, totalPointsScored: 21, rank: 1 },
+      ] }] });
+      setup([hybrid()]);
+
+      expect(await screen.findByText('Ranked by points scored, then point difference')).toBeTruthy();
+      expect(await screen.findByLabelText('1. Asha (you), played 1, won 1, lost 0, 21 points')).toBeTruthy();
+    });
   });
 
   it('team league shows groups, the line and ties', async () => {

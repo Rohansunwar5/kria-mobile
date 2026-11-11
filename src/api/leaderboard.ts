@@ -37,6 +37,29 @@ export async function getTeamTable(categoryId: string): Promise<{ rows: TeamRow[
   return { rows: data.leaderboard ?? [], pointsConfig: data.pointsConfig };
 }
 
+/** One player (or doubles side) on a group's table, as the server ranks it. */
+export interface GroupRow {
+  registrationId: string;
+  name: string;
+  teamName?: string;
+  played: number;
+  won: number;
+  lost: number;
+  points: number;
+}
+
+export interface GroupTable { name: string; rows: GroupRow[] }
+
+/**
+ * Groups, then a knockout (SERVER-GAPS #12): each group's table, how many go
+ * through from each, and the knockout's first round. `groups` is empty for a
+ * category that has no group matches.
+ */
+export async function getGroupTables(categoryId: string): Promise<{ groups: GroupTable[]; qualify?: number; knockoutRound?: string }> {
+  const data = unwrap(await API.get(`/matches/leaderboard/${categoryId}`)) ?? {};
+  return { groups: data.groups ?? [], qualify: data.qualify, knockoutRound: data.knockoutRound };
+}
+
 export interface Board {
   /** Null for a plain category; a sub-match slot name for a team league. */
   label: string | null;

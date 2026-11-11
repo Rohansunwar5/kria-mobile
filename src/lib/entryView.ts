@@ -7,7 +7,13 @@ export interface EntryUser {
   gender?: string; dateOfBirth?: string; profileImage?: string;
 }
 
-const FORMAT = { knockout: 'Knockout', league: 'League', hybrid: 'League', team_league: 'Team league' } as const;
+const FORMAT = { knockout: 'Knockout', league: 'League', hybrid: 'Groups → knockouts', team_league: 'Team league' } as const;
+
+/** "Groups of 4, top 2 to knockouts" (mock 2b), when the category says its sizes. */
+const groupsFormat = (c: TournamentCategory) => {
+  const h = c.hybridConfig;
+  return h?.leagueSize && h.topN ? `Groups of ${h.leagueSize}, top ${h.topN} to knockouts` : FORMAT.hybrid;
+};
 const MATCH_TYPE = { singles: 'Singles', doubles: 'Doubles', team: 'Team' } as const;
 const GENDER_WORD = { male: 'Men', female: 'Women', mixed: 'Mixed' } as const;
 
@@ -32,7 +38,7 @@ function eligibility(c: TournamentCategory): string {
 }
 
 export function categoryFacts(c: TournamentCategory): { label: string; value: string }[] {
-  const fmt = c.bracketType ? FORMAT[c.bracketType] : undefined;
+  const fmt = c.bracketType === 'hybrid' ? groupsFormat(c) : c.bracketType ? FORMAT[c.bracketType] : undefined;
   const mt = c.matchType ? MATCH_TYPE[c.matchType] : undefined;
   const cr = c.cricketConfig;
   const mf = c.matchFormat;
@@ -60,7 +66,14 @@ export function howItWorks(c: TournamentCategory, teamsCount: number): { title: 
     { title: 'Organiser approves', body: hasTeams ? 'Approved players join the auction pool.' : 'Approved players are placed in the draw.' },
   ];
   if (hasTeams) steps.push({ title: 'Team auction', body: `${teamsCount} teams bid for players. You join the team that buys you.` });
-  const last = c.bracketType === 'knockout' ? LAST_STEP.knockout : c.bracketType === 'team_league' ? LAST_STEP.team_league : LAST_STEP.league;
+  const h = c.hybridConfig;
+  const last = c.bracketType === 'knockout' ? LAST_STEP.knockout
+    : c.bracketType === 'team_league' ? LAST_STEP.team_league
+    : c.bracketType === 'hybrid' ? {
+      title: 'Groups, then knockouts',
+      body: h?.leagueSize && h.topN ? `Groups of ${h.leagueSize} play each other; the top ${h.topN} go through.` : 'Each group plays each other; the top players go through.',
+    }
+    : LAST_STEP.league;
   steps.push({ ...last });
   return steps;
 }

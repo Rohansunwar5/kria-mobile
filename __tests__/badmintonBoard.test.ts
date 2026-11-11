@@ -96,6 +96,9 @@ describe('roundTitle / feedRound / parseScoreline', () => {
     expect(feedRound('Final', 0)).toBe('Final');
     expect(feedRound('League', 5)).toBe('League');
     expect(feedRound('S1-GroupA-T3', 2)).toBe('Team league');
+    // A group match carries no number, as a league match doesn't.
+    expect(feedRound('Group B', 2)).toBe('Group B');
+    expect(roundTitle({ bracketRound: 'Group C', positionInRound: 1 })).toBe('Group C');
   });
   it('parseScoreline', () => {
     expect(parseScoreline('21-15, 4-3')).toEqual([{ a: 21, b: 15 }, { a: 4, b: 3 }]);

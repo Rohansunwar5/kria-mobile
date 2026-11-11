@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import type { QuickKnockout } from '../src/api/quickKnockout';
 import { CricketPeople } from '../src/components/knockout/People';
-import { fixtureScores, koLine, koStatus, myPlayableFixture, roundAbbr, roundLabel, slotName } from '../src/lib/knockoutRoom';
+import { fixtureScores, isGroupRound, koLine, koStatus, myPlayableFixture, roundAbbr, roundLabel, slotName } from '../src/lib/knockoutRoom';
 
 const base = (over: Partial<QuickKnockout> = {}): QuickKnockout => ({
   _id: 'k', hostId: 'h', name: 'Sunday Smash', sport: 'badminton', format: 'singles', status: 'live',
@@ -24,6 +24,9 @@ const base = (over: Partial<QuickKnockout> = {}): QuickKnockout => ({
 
 it('names rounds in sentence case and abbreviates them for open slots', () => {
   expect([roundLabel('Semi-Final'), roundLabel('Quarter-Final'), roundLabel('Round of 16')]).toEqual(['Semi-final', 'Quarter-final', 'Round of 16']);
+  // A group keeps its letter: "Group A", never "Group a".
+  expect(roundLabel('Group A')).toBe('Group A');
+  expect([isGroupRound('Group C'), isGroupRound('League'), isGroupRound('Group AB'), isGroupRound(undefined)]).toEqual([true, false, false, false]);
   expect([roundAbbr('Semi-Final'), roundAbbr('Quarter-Final'), roundAbbr('Round of 16'), roundAbbr('Preliminary Round')]).toEqual(['SF', 'QF', 'R16', 'PR']);
 });
 

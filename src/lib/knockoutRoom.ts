@@ -34,8 +34,11 @@ export function koLine(k: QuickKnockout, meId: string) {
   return [SPORT_LABELS[k.sport] ?? k.sport, ...format, tail].filter(Boolean).join(' · ');
 }
 
-/** "Semi-Final" → "Semi-final": DESIGN §4.2, no title-case headings. */
-export const roundLabel = (name: string) => name.charAt(0) + name.slice(1).toLowerCase();
+/** A group's round in a groups-then-knockout category: "Group A". */
+export const isGroupRound = (name?: string) => /^Group [A-Z]$/.test(name ?? '');
+
+/** "Semi-Final" → "Semi-final": DESIGN §4.2, no title-case headings. A group keeps its letter ("Group A"). */
+export const roundLabel = (name: string) => (isGroupRound(name) ? name : name.charAt(0) + name.slice(1).toLowerCase());
 
 /** "Semi-Final" → "SF", "Round of 16" → "R16", "Final" → "F". */
 export function roundAbbr(name: string) {
