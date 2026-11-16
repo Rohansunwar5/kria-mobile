@@ -21,10 +21,12 @@ const SKILLS: { key: SkillLevel; label: string }[] = [
 export const FEE_LABELS = ['Entry fee', 'Payment gateway (2%)', 'Platform fee (2%)', 'GST (18% on fees)', 'Total'] as const;
 
 /** Mock 2b form: facts, how it works, your entry, skill level, payment. `user` null hides your entry; no `onSkill` hides the skill choice; no `quote` yet holds the fee rows' place. */
-export function EntryForm({ category: c, teamsCount, user, now, skill, onSkill, onEditProfile, quote }: {
+export function EntryForm({ category: c, teamsCount, user, note, now, skill, onSkill, onEditProfile, quote }: {
   category: TournamentCategory;
   teamsCount: number;
   user: EntryUser | null;
+  /** What the profile still needs before this entry, shown in place of the fine print. */
+  note?: string | null;
   now: Date;
   skill: SkillLevel | null;
   onSkill?: (s: SkillLevel) => void;
@@ -35,7 +37,7 @@ export function EntryForm({ category: c, teamsCount, user, now, skill, onSkill, 
   const rows = quote && f ? [
     [FEE_LABELS[0], quote.baseAmount], [FEE_LABELS[1], f.razorpayFee], [FEE_LABELS[2], f.platformFee], [FEE_LABELS[3], f.gst], [FEE_LABELS[4], quote.amount],
   ] as const : null;
-  const name = user ? `${user.firstName} ${user.lastName}` : '';
+  const name = user ? `${user.firstName} ${user.lastName}`.trim() : '';
 
   return (
     <View style={s.root}>
@@ -73,8 +75,8 @@ export function EntryForm({ category: c, teamsCount, user, now, skill, onSkill, 
               <Text style={s.meta}>{entryLine(user, now)}</Text>
             </View>
           </View>
-          {!user.dateOfBirth || !user.gender ? (
-            <Text style={s.note}>Add your date of birth and gender to enter</Text>
+          {note ? (
+            <Text style={s.note}>{note}</Text>
           ) : (
             <Text style={s.fine}>Age and gender come from your profile. Organisers see this snapshot and your skill level.</Text>
           )}

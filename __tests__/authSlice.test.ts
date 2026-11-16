@@ -1,6 +1,14 @@
+import MockAdapter from 'axios-mock-adapter';
+import { configureStore } from '@reduxjs/toolkit';
+import API from '@/api/axios';
 import reducer, {
+  googleSignIn,
+  logout,
   setSavedTournaments,
 } from '@/store/slices/authSlice';
+import { googleSignOut } from '@/lib/googleSignIn';
+
+jest.mock('@/lib/googleSignIn', () => ({ googleSignOut: jest.fn(() => Promise.resolve()) }));
 
 const initial = reducer(undefined, { type: '@@INIT' });
 
@@ -46,5 +54,40 @@ describe('authSlice reducers', () => {
     const next = reducer(initial, action);
     expect(next.registrationStep).toBe(2);
     expect(next.registrationEmail).toBe('a@b.c');
+  });
+});
+
+// SERVER-GAPS #35: "Continue with Google". `isNew` sends the player through
+// Your game; the AuthGate reads both in the same update.
+describe('Google sign-in', () => {
+  const google = (isNew: boolean) => reducer(initial, {
+    type: 'auth/google/fulfilled',
+    payload: { role: 'player', responseData: { accessToken: 't', player: { _id: 'p' }, isNew } },
+  });
+
+  it('google.fulfilled signs a new player in and starts onboarding', () => {
+    const next = google(true);
+    expect(next.user?._id).toBe('p');
+    expect(next.accessToken).toBe('t');
+    expect(next.pendingOnboarding).toBe(true);
+  });
+
+  it('google.fulfilled for a returning player goes straight in', () => {
+    expect(google(false).pendingOnboarding).toBe(false);
+  });
+
+  it('googleSignIn posts the token and stores the session', async () => {
+    const mock = new MockAdapter(API);
+    mock.onPost('/player/auth/google', { idToken: 'tok' }).reply(200, { data: { data: { accessToken: 't', player: { _id: 'p' }, isNew: false } } });
+    const store = configureStore({ reducer: { auth: reducer } });
+    await store.dispatch(googleSignIn({ idToken: 'tok' }));
+    expect(store.getState().auth.accessToken).toBe('t');
+    mock.restore();
+  });
+
+  it('logout signs out of Google too, so the picker shows next time', async () => {
+    const store = configureStore({ reducer: { auth: reducer } });
+    await store.dispatch(logout());
+    expect(googleSignOut).toHaveBeenCalledTimes(1);
   });
 });

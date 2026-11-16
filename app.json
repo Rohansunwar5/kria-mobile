@@ -39,7 +39,14 @@
       "expo-font",
       "expo-status-bar",
       "expo-web-browser",
-      ["expo-notifications", { "icon": "./assets/images/android-icon-monochrome.png", "color": "#FF5A1F" }]
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#FF5A1F"
+        }
+      ],
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true,

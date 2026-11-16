@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/Button';
 import { InlineError } from '@/components/ui/InlineError';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { colors, font, space } from '@/constants/theme';
-import { entryBlocker, entryProfile } from '@/lib/entryView';
+import { entryBlocker, entryProfile, profileGap } from '@/lib/entryView';
 import { rupees } from '@/lib/format';
 import { goBack } from '@/lib/nav';
 import { confirmPending, loadPending, savePending, type PendingPayment } from '@/lib/pendingPayment';
@@ -24,7 +24,6 @@ import { useAppSelector } from '@/store/hooks';
 // entryBlocker's answers that change the footer rather than sit under Pay.
 const LOGIN = 'Log in to register';
 const CLOSED = 'Entries are closed';
-const NEEDS_PROFILE = 'Add your date of birth and gender to enter';
 
 export default function CategoryScreen() {
   const { categoryId, tournamentId } = useLocalSearchParams<{ categoryId: string; tournamentId?: string }>();
@@ -217,6 +216,8 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
 
   const now = new Date();
   const blocker = entryBlocker(c, t, user, now);
+  // A missing-profile blocker shows on the entry card, next to Edit profile, not under Pay.
+  const note = user && blocker === profileGap(user) ? blocker : null;
   const label = free ? 'Register' : quote ? `Pay ${rupees(quote.amount)} and register` : 'Pay and register';
 
   let footer: React.ReactNode;
@@ -236,7 +237,7 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
           disabled={!!blocker || !skill || !checked || (!free && !quote)}
           onPress={free ? register : pay}
         />
-        {blocker && blocker !== NEEDS_PROFILE ? <Text style={s.reason}>{blocker}</Text> : null}
+        {blocker && blocker !== note ? <Text style={s.reason}>{blocker}</Text> : null}
       </>
     );
   }
@@ -251,6 +252,7 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
           category={c}
           teamsCount={t.teamsCount ?? 0}
           user={blocker === CLOSED ? null : user}
+          note={note}
           now={now}
           skill={skill}
           onSkill={pending ? undefined : setSkill}

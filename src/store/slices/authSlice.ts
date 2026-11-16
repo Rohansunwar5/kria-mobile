@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/tool
 import API from '@/api/axios';
 import * as storage from '@/lib/storage';
 import type { Honor } from '@/lib/badges';
+import { googleSignOut } from '@/lib/googleSignIn';
 
 export type Role = 'player';
 
@@ -10,7 +11,8 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  /** Unset for a Google player until they add one (#35). */
+  phone?: string;
   status: string;
   gender?: string;
   dateOfBirth?: string;
@@ -98,6 +100,28 @@ export const fetchProfile = createAsyncThunk(
       return response.data?.data?.data || response.data?.data;
     } catch (error) {
       return rejectWithValue(extractError(error));
+    }
+  }
+);
+
+/**
+ * "Continue with Google" (#35): Google's ID token in, a session out. `isNew`
+ * starts the profile steps. Rejects with the server's message for a refusal
+ * (4xx) only; a fault or a dropped connection rejects with no message, so the
+ * screen shows its own instead of e.g. "GOOGLE_PLAYER_CLIENT_ID is not set."
+ */
+export const googleSignIn = createAsyncThunk<{ role: Role; responseData: any }, { idToken: string }, { rejectValue: string | undefined }>(
+  'auth/google',
+  async ({ idToken }, { rejectWithValue }) => {
+    try {
+      const role: Role = 'player';
+      const response = await API.post(`/${role}/auth/google`, { idToken });
+      const responseData = response.data?.data?.data || response.data?.data;
+      if (responseData?.accessToken) await storage.setAuth(responseData.accessToken, role);
+      return { role, responseData };
+    } catch (error: any) {
+      const status: number | undefined = error.response?.status;
+      return rejectWithValue(status && status < 500 ? extractError(error) : undefined);
     }
   }
 );
@@ -243,6 +267,7 @@ export const uploadPlayerProfileImage = createAsyncThunk(
 
 export const logout = createAsyncThunk('auth/logout', async () => {
   await storage.clearAuth();
+  await googleSignOut(); // so the account picker shows again next time
 });
 
 export const authSlice = createSlice({
@@ -272,6 +297,13 @@ export const authSlice = createSlice({
     builder.addCase(loginUser.pending, (state) => { state.isLoading = true; state.error = null; });
     builder.addCase(loginUser.fulfilled, handleLoginSuccess);
     builder.addCase(loginUser.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
+
+    builder.addCase(googleSignIn.pending, (state) => { state.isLoading = true; state.error = null; });
+    builder.addCase(googleSignIn.fulfilled, (state, action) => {
+      handleLoginSuccess(state, action);
+      state.pendingOnboarding = !!action.payload.responseData?.isNew;
+    });
+    builder.addCase(googleSignIn.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
 
     builder.addCase(requestLoginOtp.pending, (state) => { state.isLoading = true; state.error = null; });
     builder.addCase(requestLoginOtp.fulfilled, (state) => { state.isLoading = false; });

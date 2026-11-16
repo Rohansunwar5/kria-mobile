@@ -51,6 +51,6 @@ it('blocks a blank first name', async () => {
   renderIt();
   fireEvent.changeText(screen.getByLabelText('First name'), '  ');
   await act(async () => fireEvent.press(screen.getByLabelText('Save')));
-  expect(screen.getByText('First name, last name and phone are required.')).toBeTruthy();
+  expect(screen.getByText('First name is required.')).toBeTruthy();
   expect(mockPatch).not.toHaveBeenCalled();
 });

@@ -169,11 +169,26 @@ describe('2b form', () => {
 
   it('missing DOB blocks entry and links to Edit profile', async () => {
     renderScreen({ ...USER, dateOfBirth: undefined });
-    expect(screen.getByText('Add your date of birth and gender to enter')).toBeTruthy();
+    expect(screen.getAllByText('Add your date of birth to enter')).toHaveLength(1);
+    expect(screen.queryByText('Add your date of birth and gender to enter')).toBeNull();
     fireEvent.press(screen.getByText('Advanced'));
     await waitFor(() => expect(disabled(PAY)).toBe(true));
     fireEvent.press(screen.getByText('Edit profile'));
     expect(mockPush).toHaveBeenCalledWith('/profile/edit');
+  });
+
+  it('a Google player with no phone is asked for it, once (#35)', async () => {
+    renderScreen({ ...USER, phone: undefined });
+    fireEvent.press(screen.getByText('Advanced'));
+    await waitFor(() => expect(disabled(PAY)).toBe(true));
+    expect(screen.getAllByText('Add your mobile number to enter')).toHaveLength(1);
+    expect(screen.queryByText(/Organisers see this snapshot/)).toBeNull();
+  });
+
+  it('a category that is not theirs says so, without asking for a phone', async () => {
+    renderScreen({ ...USER, gender: 'female', phone: undefined });
+    expect(await screen.findByText('This category is for men')).toBeTruthy();
+    expect(screen.queryByText('Add your mobile number to enter')).toBeNull();
   });
 
   it('closed entries show why, with no Pay', async () => {

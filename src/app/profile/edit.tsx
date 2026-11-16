@@ -44,7 +44,7 @@ export default function EditProfile() {
   const user = useAppSelector((st) => st.auth.user);
   const error = useAppSelector((st) => st.auth.error);
   const photo = usePhotoUpload();
-  const before = useRef({ sport: user?.sport, location: user?.location });
+  const before = useRef({ sport: user?.sport, location: user?.location, lastName: user?.lastName, phone: user?.phone });
   const [form, setForm] = useState<ProfileFormValues>({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',

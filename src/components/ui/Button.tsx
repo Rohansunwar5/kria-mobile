@@ -9,9 +9,11 @@ import { Tap } from './Tap';
  * swaps the icon for the Motion arc and the label for its verb-ing form; the
  * button keeps its size. `disabled` is surface2/disabled, never hidden.
  */
-export function Button({ label, icon, variant = 'primary', onPress, style, busy, busyLabel, disabled }: {
+export function Button({ label, icon, lead, variant = 'primary', onPress, style, busy, busyLabel, disabled }: {
   label: string;
   icon?: IconName;
+  /** A mark that isn't a Material icon (the Google "G"), in the icon's place. */
+  lead?: React.ReactNode;
   variant?: 'primary' | 'secondary';
   onPress: () => void;
   style?: StyleProp<ViewStyle>;
@@ -33,7 +35,7 @@ export function Button({ label, icon, variant = 'primary', onPress, style, busy,
         <Arc color={ink} track={primary ? colors.onAccentTrack : colors.lineStrong} />
       ) : icon ? (
         <Icon name={icon} size={primary ? 22 : 20} color={ink} variant={primary ? 'b' : 'o'} />
-      ) : null}
+      ) : lead ?? null}
       <Text style={[s.label, { color: ink, fontFamily: primary ? font.bold : font.semibold }]}>{busy ? busyLabel ?? label : label}</Text>
     </Tap>
   );

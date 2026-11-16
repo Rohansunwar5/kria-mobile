@@ -1,5 +1,5 @@
 import {
-  categoryFacts, howItWorks, entryBlocker, entryProfile, maskPhone, entryLine, timeline, enteredHeading,
+  categoryFacts, howItWorks, entryBlocker, entryProfile, maskPhone, entryLine, timeline, enteredHeading, profileGap,
   type EntryUser,
 } from '@/lib/entryView';
 import { dayDate } from '@/lib/matchCard';
@@ -91,8 +91,9 @@ describe('entryBlocker', () => {
     expect(entryBlocker(c, tour(), user(), new Date('2026-10-25T12:00:00Z'))).toBe('Entries are closed');
   });
   it('profile and eligibility', () => {
-    expect(entryBlocker(c, tour(), user({ dateOfBirth: undefined }), NOW)).toBe('Add your date of birth and gender to enter');
-    expect(entryBlocker(c, tour(), user({ gender: undefined }), NOW)).toBe('Add your date of birth and gender to enter');
+    expect(entryBlocker(c, tour(), user({ dateOfBirth: undefined }), NOW)).toBe('Add your date of birth to enter');
+    expect(entryBlocker(c, tour(), user({ gender: undefined }), NOW)).toBe('Add your gender to enter');
+    expect(entryBlocker(c, tour(), user({ phone: undefined }), NOW)).toBe('Add your mobile number to enter');
     expect(entryBlocker(c, tour(), user({ gender: 'female' }), NOW)).toBe('This category is for men');
     expect(entryBlocker(cat({ gender: 'female' }), tour(), user(), NOW)).toBe('This category is for women');
     expect(entryBlocker(cat({ ageGroup: { min: 18 } }), tour(), user({ dateOfBirth: '2011-01-01' }), NOW)).toBe('This category is for players 18 and over');
@@ -100,6 +101,13 @@ describe('entryBlocker', () => {
     expect(entryBlocker(c, tour(), user(), NOW)).toBeNull();
     expect(entryBlocker(cat({ gender: 'mixed' }), tour(), user({ gender: 'female' }), NOW)).toBeNull();
     expect(entryBlocker(cat({ gender: 'mixed' }), tour(), user(), NOW)).toBeNull();
+  });
+  // Don't send someone to Edit profile for a phone when the category isn't theirs anyway.
+  it('says a category is not theirs before asking for a phone or last name', () => {
+    expect(entryBlocker(cat({ gender: 'female' }), tour(), user({ phone: undefined }), NOW)).toBe('This category is for women');
+    expect(entryBlocker(cat({ ageGroup: { max: 16 } }), tour(), user({ lastName: '' }), NOW)).toBe('This category is for players up to 16');
+    // Eligibility needs date of birth and gender, so everything missing is asked for in one trip.
+    expect(entryBlocker(cat({ gender: 'female' }), tour(), user({ dateOfBirth: undefined, phone: undefined }), NOW)).toBe('Add your date of birth and mobile number to enter');
   });
 });
 
@@ -117,6 +125,19 @@ describe('entry profile', () => {
   });
   it('entryLine', () => {
     expect(entryLine(user(), NOW2)).toBe('Male · 27 · 98••• ••412');
+    // A Google player has no phone until they add one (#35).
+    expect(entryLine(user({ phone: undefined }), NOW2)).toBe('Male · 27');
+  });
+});
+
+describe('profileGap', () => {
+  it('names exactly what is missing', () => {
+    expect(profileGap(user())).toBeNull();
+    expect(profileGap(user({ phone: undefined }))).toBe('Add your mobile number to enter');
+    expect(profileGap(user({ dateOfBirth: undefined }))).toBe('Add your date of birth to enter');
+    expect(profileGap(user({ dateOfBirth: undefined, gender: undefined }))).toBe('Add your date of birth and gender to enter');
+    expect(profileGap(user({ lastName: '', phone: '' }))).toBe('Add your last name and mobile number to enter');
+    expect(profileGap(user({ dateOfBirth: undefined, gender: undefined, phone: undefined }))).toBe('Add your date of birth, gender and mobile number to enter');
   });
 });
 

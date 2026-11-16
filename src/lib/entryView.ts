@@ -3,7 +3,7 @@ import { rupees } from '@/lib/format';
 import { dayDate } from '@/lib/matchCard';
 
 export interface EntryUser {
-  _id: string; firstName: string; lastName: string; phone: string;
+  _id: string; firstName: string; lastName: string; phone?: string;
   gender?: string; dateOfBirth?: string; profileImage?: string;
 }
 
@@ -78,12 +78,33 @@ export function howItWorks(c: TournamentCategory, teamsCount: number): { title: 
   return steps;
 }
 
+/**
+ * What the entry snapshot still needs from the profile, or null. The server
+ * refuses an entry without a last name or phone, and a Google player (#35)
+ * may have neither yet.
+ */
+export function profileGap(user: Pick<EntryUser, 'lastName' | 'dateOfBirth' | 'gender' | 'phone'>): string | null {
+  const missing = [
+    !user.lastName?.trim() && 'last name',
+    !user.dateOfBirth && 'date of birth',
+    !user.gender && 'gender',
+    !user.phone?.trim() && 'mobile number',
+  ].filter((m): m is string => !!m);
+  return missing.length ? `Add your ${andList(missing)} to enter` : null;
+}
+
+/** "a", "a and b", "a, b and c". */
+export function andList(items: string[]): string {
+  return items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
+}
+
 export function entryBlocker(c: TournamentCategory, t: TournamentDetail, user: EntryUser | null, now: Date): string | null {
   if (!user) return 'Log in to register';
   if (t.status !== 'registration_open' || c.status !== 'registration' || now.getTime() > new Date(t.registrationDeadline).getTime()) {
     return 'Entries are closed';
   }
-  if (!user.dateOfBirth || !user.gender) return 'Add your date of birth and gender to enter';
+  // Eligibility needs date of birth and gender: ask for everything missing in one trip.
+  if (!user.dateOfBirth || !user.gender) return profileGap(user);
   if (c.gender && c.gender !== 'mixed' && c.gender !== user.gender) {
     return `This category is for ${c.gender === 'male' ? 'men' : 'women'}`;
   }
@@ -91,7 +112,7 @@ export function entryBlocker(c: TournamentCategory, t: TournamentDetail, user: E
   const { min, max } = c.ageGroup ?? {};
   if (min != null && age < min) return `This category is for players ${min} and over`;
   if (max != null && age > max) return `This category is for players up to ${max}`;
-  return null;
+  return profileGap(user); // a last name or phone, once the category is theirs
 }
 
 export function entryProfile(user: EntryUser, skill: SkillLevel, now: Date): EntryProfile {
@@ -100,7 +121,7 @@ export function entryProfile(user: EntryUser, skill: SkillLevel, now: Date): Ent
     lastName: user.lastName,
     age: ageAt(user.dateOfBirth ?? '', now),
     gender: user.gender as 'male' | 'female',
-    phone: user.phone,
+    phone: user.phone ?? '',
     ...(user.profileImage ? { photo: user.profileImage } : {}),
     skillLevel: skill,
   };
@@ -118,7 +139,7 @@ export function maskPhone(phone: string): string {
 export function entryLine(user: EntryUser, now: Date): string {
   const g = user.gender === 'male' ? 'Male' : user.gender === 'female' ? 'Female' : '';
   const age = user.dateOfBirth ? String(ageAt(user.dateOfBirth, now)) : '';
-  return [g, age, maskPhone(user.phone)].filter(Boolean).join(' · ');
+  return [g, age, user.phone ? maskPhone(user.phone) : ''].filter(Boolean).join(' · ');
 }
 
 export type StepState = 'done' | 'now' | 'next';
