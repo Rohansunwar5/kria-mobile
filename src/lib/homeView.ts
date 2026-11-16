@@ -3,7 +3,7 @@ import type { RankedPlayer } from '@/api/rankings';
 import type { InProgress } from '@/lib/homePortal';
 import { knockoutCard, matchCard, type MatchCardView } from '@/lib/matchCard';
 import { RANKED_SPORTS, SPORT_LABELS } from '@/lib/sports';
-import type { Tournament } from '@/store/slices/tournamentSlice';
+import type { Tournament } from '@/api/tournaments';
 
 /** Decided matches before a player is ranked; the server's RANKING_MIN_DECIDED. */
 export const RANK_MIN = 5;

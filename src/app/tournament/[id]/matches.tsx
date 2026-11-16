@@ -229,10 +229,15 @@ export default function Matches() {
         ) : null}
         {showKo ? knockout(ko) : (
           <>
-            {t.groups.length > 1 ? (
+            {/* 2f: up to four groups share the width equally; more scroll, since "Group E…" would not fit. */}
+            {t.groups.length > 4 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.segRow}>
                 <Segmented options={t.groups.map((x) => ({ key: x.name, label: x.name }))} value={g.name} onChange={setGroup} />
               </ScrollView>
+            ) : t.groups.length > 1 ? (
+              <View style={s.segRow}>
+                <Segmented fill options={t.groups.map((x) => ({ key: x.name, label: x.name }))} value={g.name} onChange={setGroup} />
+              </View>
             ) : null}
             <Text style={s.rule}>{ruleLine(c, 'groups')}</Text>
             <StandingsTable rows={groupTable(g.rows, me.registrationIds)} head="Player" topN={t.qualify} cutText={cutLine(t.knockoutRound)} />

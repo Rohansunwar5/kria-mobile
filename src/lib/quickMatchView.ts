@@ -1,5 +1,4 @@
 import type { QuickGameScore, QuickMatch, QuickMatchSlot } from '@/api/quickMatch';
-import type { TagVariant } from '@/lib/tournamentConstants';
 import { SPORT_LABELS } from '@/lib/sports';
 
 export function isHost(match: QuickMatch, playerId?: string): boolean {
@@ -41,13 +40,6 @@ export function currentGame(match: QuickMatch): QuickGameScore | null {
 /** Unclaimed slots across both sides — the ones a join code can fill. */
 export function freeSlots(match: QuickMatch): QuickMatchSlot[] {
   return match.sides.flatMap((side) => side.slots).filter((slot) => !slot.playerId);
-}
-
-export function statusVariant(status: QuickMatch['status']): TagVariant {
-  if (status === 'live') return 'live';
-  if (status === 'waiting') return 'open';
-  if (status === 'cancelled') return 'fail';
-  return 'end';
 }
 
 /** "Table Tennis · Best of 3 · to 11" — the sport first, so the two rally sports never look alike. */

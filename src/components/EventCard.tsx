@@ -4,7 +4,7 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { colors, font, radius } from '@/constants/theme';
 import { datePill, sportName } from '@/lib/homeView';
 import { minFeePill } from '@/lib/tournamentView';
-import type { Tournament } from '@/store/slices/tournamentSlice';
+import type { Tournament } from '@/api/tournaments';
 import { Icon, sportIcon } from './ui/Icon';
 import { ImagePill, LivePill } from './ui/Pills';
 import { Tap } from './ui/Tap';

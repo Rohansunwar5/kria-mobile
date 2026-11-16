@@ -158,14 +158,6 @@ export interface CricketMatch {
   result?: { marginOfVictory?: string };
 }
 
-export interface LiveMatchSummary {
-  _id: string;
-  status: string;
-  teams: { team1Name?: string; team2Name?: string };
-  cricketLiveState?: { runs?: number; wickets?: number; completedOvers?: number; ballsInCurrentOver?: number; target?: number };
-  matchConfig?: { maxOvers?: number };
-}
-
 /** The live state with the match fields a board needs (teams, config, result, round), in one request. */
 export async function getMatchLive(matchId: string): Promise<{ liveState: LiveState | null; recentBalls: unknown[]; match: CricketMatch | null }> {
   const res = await API.get(`/sports/cricket/match/${matchId}/live`);
@@ -194,11 +186,6 @@ export async function getTeamBrands(tournamentId: string): Promise<Record<string
   } catch {
     return {};
   }
-}
-
-export async function getTournamentMatches(tournamentId: string): Promise<LiveMatchSummary[]> {
-  const res = await API.get(`/sports/cricket/match/by-tournament/${tournamentId}`);
-  return unwrap(res) || [];
 }
 
 // Resolve a match's sport via the GENERIC endpoints (the cricket match endpoint

@@ -1,4 +1,4 @@
-import type { Tournament } from '@/store/slices/tournamentSlice';
+import type { Tournament } from '@/api/tournaments';
 import { datePill } from '@/lib/homeView';
 
 /**

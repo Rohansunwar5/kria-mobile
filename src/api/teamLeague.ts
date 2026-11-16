@@ -1,12 +1,6 @@
 import API from './axios';
 import { unwrap } from './unwrap';
 
-export interface Group {
-  _id: string;
-  groupName: string;
-  teamIds: string[];
-}
-
 export interface StandingEntry {
   teamId: string;
   teamName: string;
@@ -62,12 +56,6 @@ export interface TieDetail {
   tie: Tie | null;
   subMatches: SubMatch[];
   lineups: Lineup[];
-}
-
-export async function getGroups(categoryId: string, stage?: number): Promise<Group[]> {
-  const res = await API.get(`/sports/badminton/team-league/${categoryId}/groups`, { params: stage ? { stageNumber: stage } : {} });
-  const data = unwrap(res);
-  return Array.isArray(data) ? data : [];
 }
 
 export async function getGroupStandings(categoryId: string, stage?: number): Promise<GroupStandings[]> {

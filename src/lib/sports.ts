@@ -14,14 +14,6 @@ export const SPORT_LABELS: Record<string, string> = {
  */
 export const RANKED_SPORTS = ['badminton', 'cricket', 'table_tennis'];
 
-/** Glyph per sport, for history rows and roster headers. */
-export const SPORT_ICON: Record<string, 'shuttlecock' | 'paddle' | 'ball' | 'court'> = {
-  badminton: 'shuttlecock',
-  cricket: 'ball',
-  table_tennis: 'paddle',
-  tennis: 'court',
-};
-
 /**
  * Which sports a tournament actually hosts.
  *
@@ -32,9 +24,4 @@ export const SPORT_ICON: Record<string, 'shuttlecock' | 'paddle' | 'ball' | 'cou
 export function tournamentSports(t?: { sport?: string; sports?: string[] }): string[] {
   if (t?.sports?.length) return t.sports;
   return t?.sport ? [t.sport] : [];
-}
-
-/** A team-league tie is a container for its sub-matches — never a live card. */
-export function isLiveMatch(m: { status?: string; isTie?: boolean }): boolean {
-  return m.status === 'in_progress' && !m.isTie;
 }

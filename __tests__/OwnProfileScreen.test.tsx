@@ -4,7 +4,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer, { type PlayerStats } from '@/store/slices/authSlice';
 import registrationReducer, { type TournamentHistoryEntry } from '@/store/slices/registrationSlice';
 import Profile from '../src/app/(tabs)/profile';
-import type { CareerProfile, RecentMatch, SportSummary } from '@/api/career';
+import { getRecentMatches, type CareerProfile, type RecentMatch, type SportSummary } from '@/api/career';
 import type { Title } from '@/api/profileApi';
 
 // Profile tab (mocks 1h, 4e): identity, checklist, win-rate rings per sport,
@@ -95,6 +95,18 @@ it('rings each sport played, and a short sport shows its way to a ranking', () =
   fireEvent.press(screen.getByLabelText('Cricket: 3/5'));
   expect(screen.getByText('Not ranked yet')).toBeTruthy();
   expect(screen.getByText('3 of 5 decided matches. 2 more and you appear on the cricket board.')).toBeTruthy();
+});
+
+// SERVER-GAPS #3: a sport you rarely play still shows its matches, however many newer ones are in other sports.
+it("a sport's form and recent rows are that sport's own matches, from the server", async () => {
+  const cricketMatch = { _id: 'rc', matchId: 'mc', sport: 'cricket', context: 'quick', result: 'won', playedAt: '2026-09-01T10:00:00Z', title: 'Blues vs Reds', scoreline: '120/4' } as RecentMatch;
+  (getRecentMatches as jest.Mock).mockImplementation(async (_id: string, _limit?: number, sp?: string) => (sp === 'cricket' ? [cricketMatch] : mockRecent));
+  mockUseCareer.mockReturnValue(career({ sports: [sport({}), sport({ sport: 'cricket', played: 3, decided: 3, won: 1, lost: 2, winRate: 1 / 3 })] }));
+  renderProfile();
+  fireEvent.press(screen.getByLabelText('Cricket: 3/5'));
+  expect(await screen.findByText('Blues vs Reds')).toBeTruthy();
+  expect(screen.getByText('Recent in cricket')).toBeTruthy();
+  expect(getRecentMatches).toHaveBeenCalledWith('p1', 10, 'cricket');
 });
 
 it('marks a tournament you won from its recorded result, and says where the others stand', async () => {

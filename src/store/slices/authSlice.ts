@@ -249,14 +249,6 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    resetRegistration: (state) => {
-      state.registrationStep = 1;
-      state.registrationEmail = null;
-      state.error = null;
-    },
-    clearError: (state) => {
-      state.error = null;
-    },
     beginOnboardingHandoff: (state) => {
       state.pendingOnboarding = true;
     },
@@ -365,6 +357,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { resetRegistration, clearError, beginOnboardingHandoff, endOnboardingHandoff, setSavedTournaments } = authSlice.actions;
+export const { beginOnboardingHandoff, endOnboardingHandoff, setSavedTournaments } = authSlice.actions;
 
 export default authSlice.reducer;

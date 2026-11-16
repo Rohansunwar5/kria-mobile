@@ -1,48 +1,52 @@
 import API from './axios';
 import { unwrap } from './unwrap';
-import { toQuery, type Filters } from '@/lib/tournamentFilters';
 import { visibleTournaments } from '@/lib/homePortal';
-import type { Tournament } from '@/store/slices/tournamentSlice';
 
-export interface TournamentHit {
+/** A row of the public tournament list (`GET /tournament`). */
+export interface Tournament {
   _id: string;
   name: string;
+  description?: string;
   sport: string;
+  /** Multisport tournaments list every sport here; `sport` above is the
+   *  legacy single field and defaults to badminton. */
+  sports?: string[];
+  bannerImage?: string;
+  startDate: string;
+  endDate: string;
+  venue: {
+    name: string;
+    address?: string;
+    city: string;
+    coordinates?: { lat: number; lng: number };
+  };
+  registrationDeadline: string;
   status: string;
-  venue?: { name?: string; city?: string };
-}
-
-interface TournamentListPayload {
-  tournaments: TournamentHit[];
-  pagination?: { total?: number };
-}
-
-/**
- * Deliberately NOT the Redux `fetchPublicTournaments` thunk. That writes into
- * a single shared `publicTournaments` slot the Events tab reads, so a search
- * typed here would silently re-filter the Events list and the user
- * would find it changed with no explanation.
- *
- * A search 422s below three characters the same way player search does, and
- * resolves to an empty list rather than surfacing an error the user cannot act
- * on. Anything else rethrows — a dead server must not look like no results.
- */
-export async function searchTournaments(q: string, filters?: Filters): Promise<TournamentHit[]> {
-  try {
-    const params = { ...(filters ? toQuery(filters) : {}), q };
-    const payload = unwrap<TournamentListPayload | null>(await API.get('/tournament', { params }));
-    return payload?.tournaments ?? [];
-  } catch (err) {
-    const status = (err as { response?: { status?: number } })?.response?.status;
-    if (status === 422) return [];
-    throw err;
-  }
+  createdBy: string;
+  staffIds: string[];
+  settings: {
+    maxTeams: number;
+    defaultBudget: number;
+    auctionType: string;
+    allowLateRegistration: boolean;
+  };
+  isActive: boolean;
+  updatedAt: string;
+  registeredPlayersCount?: number;
+  teamsCount?: number;
+  /** Lowest entry fee across the tournament's categories; 0 when one of
+   *  them is free. Absent when the tournament has no categories yet. */
+  minFee?: number;
+  /** Public display details of whoever is running it. */
+  organizer?: { name: string; logo?: string; verified: boolean };
+  awards?: any[];
 }
 
 /**
  * The newest organiser tournaments for home's preview row — the server sorts by
- * start date, newest first. Also not the Redux thunk, for the same reason as
- * above: the Events tab's filters must not reach home. Explore passes a
+ * start date, newest first. Deliberately not the Redux `fetchPublicTournaments`
+ * thunk, which writes the shared slot the Events tab reads: the Events tab's
+ * filters must not reach home, nor home's reach Events. Explore passes a
  * `status` for its open-for-entry row; Events passes its own filters for the
  * "elsewhere" row.
  */

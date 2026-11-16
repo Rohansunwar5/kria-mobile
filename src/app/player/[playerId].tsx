@@ -43,7 +43,7 @@ export default function PlayerProfile() {
     getPublicPlayer(id).then((d) => { if (live) setData(d); });
     // Yours: a knockout win groups by sport only when your own /mine lists that knockout.
     listMyQuickKnockouts().then((k) => { if (live) setKnockouts(k); }, () => undefined);
-    getRecentMatches(id, 50).then((r) => { if (live) setRecent(r); }, () => { if (live) setRecent([]); });
+    getRecentMatches(id, 10).then((r) => { if (live) setRecent(r); }, () => { if (live) setRecent([]); });
     return () => { live = false; };
   }, [id, attempt]);
 

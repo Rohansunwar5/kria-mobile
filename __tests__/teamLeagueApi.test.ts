@@ -1,18 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { getGroups, getGroupStandings, getTiesByGroup, getTieDetails } from '@/api/teamLeague';
+import { getGroupStandings, getTiesByGroup, getTieDetails } from '@/api/teamLeague';
 
 describe('teamLeague api', () => {
   let mock: MockAdapter;
   beforeEach(() => { mock = new MockAdapter(API); });
   afterEach(() => { mock.restore(); });
-
-  it('getGroups unwraps and falls back to []', async () => {
-    mock.onGet('/sports/badminton/team-league/c1/groups').reply(200, { data: { data: [{ _id: 'g1', groupName: 'A', teamIds: ['t1'] }] } });
-    expect(await getGroups('c1')).toHaveLength(1);
-    mock.onGet('/sports/badminton/team-league/c2/groups').reply(200, {});
-    expect(await getGroups('c2')).toEqual([]);
-  });
 
   it('getGroupStandings unwraps and falls back to []', async () => {
     mock.onGet('/sports/badminton/team-league/c1/standings').reply(200, {

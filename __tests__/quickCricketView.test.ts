@@ -5,8 +5,6 @@ import {
   cricketOutcomeLabel,
   isFirstBallOfInnings,
   lineupFromSlots,
-  oversText,
-  scoreLine,
   setupStage,
   whoIsNeeded,
 } from '@/lib/quickCricketView';
@@ -56,31 +54,6 @@ describe('setupStage', () => {
 
   it('is ready once both lineups are set', () => {
     expect(setupStage(ready())).toBe('ready');
-  });
-});
-
-describe('oversText', () => {
-  it('joins completed overs and balls in the current over', () => {
-    expect(oversText(6, 2)).toBe('6.2');
-  });
-
-  it('renders a completed over as x.0, not bare x', () => {
-    expect(oversText(6, 0)).toBe('6.0');
-  });
-
-  it('treats absent values as zero', () => {
-    expect(oversText(undefined, undefined)).toBe('0.0');
-  });
-});
-
-describe('scoreLine', () => {
-  it('is null before the first ball', () => {
-    expect(scoreLine(ready())).toBeNull();
-  });
-
-  it('renders runs, wickets and overs', () => {
-    expect(scoreLine(ready({ runs: 42, wickets: 3, completedOvers: 6, ballsInCurrentOver: 2 })))
-      .toBe('42/3 (6.2)');
   });
 });
 

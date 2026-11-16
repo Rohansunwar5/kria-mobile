@@ -1,10 +1,12 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { PaymentQuote } from '@/api/payment';
 import type { SkillLevel, TournamentCategory } from '@/api/tournaments';
 import { FactsGrid } from '@/components/tournament/FactsGrid';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, font, radius, space } from '@/constants/theme';
 import { categoryFacts, entryLine, howItWorks, type EntryUser } from '@/lib/entryView';
-import { feeBreakdown, rupees } from '@/lib/format';
+import { rupees } from '@/lib/format';
 import { initials } from '@/lib/matchCard';
 import { isFree } from '@/lib/tournamentView';
 
@@ -18,8 +20,8 @@ const SKILLS: { key: SkillLevel; label: string }[] = [
 /** Fee-row labels in order: entry fee, gateway, platform, GST, total. Payments reuses them. */
 export const FEE_LABELS = ['Entry fee', 'Payment gateway (2%)', 'Platform fee (2%)', 'GST (18% on fees)', 'Total'] as const;
 
-/** Mock 2b form: facts, how it works, your entry, skill level, payment. `user` null hides your entry; no `onSkill` hides the skill choice. */
-export function EntryForm({ category: c, teamsCount, user, now, skill, onSkill, onEditProfile }: {
+/** Mock 2b form: facts, how it works, your entry, skill level, payment. `user` null hides your entry; no `onSkill` hides the skill choice; no `quote` yet holds the fee rows' place. */
+export function EntryForm({ category: c, teamsCount, user, now, skill, onSkill, onEditProfile, quote }: {
   category: TournamentCategory;
   teamsCount: number;
   user: EntryUser | null;
@@ -27,11 +29,12 @@ export function EntryForm({ category: c, teamsCount, user, now, skill, onSkill, 
   skill: SkillLevel | null;
   onSkill?: (s: SkillLevel) => void;
   onEditProfile: () => void;
+  quote: PaymentQuote | null;
 }) {
-  const fee = feeBreakdown(c.registrationFee);
-  const rows = [
-    [FEE_LABELS[0], fee.base], [FEE_LABELS[1], fee.razorpayFee], [FEE_LABELS[2], fee.platformFee], [FEE_LABELS[3], fee.gst], [FEE_LABELS[4], fee.total],
-  ] as const;
+  const f = quote?.feeBreakdown;
+  const rows = quote && f ? [
+    [FEE_LABELS[0], quote.baseAmount], [FEE_LABELS[1], f.razorpayFee], [FEE_LABELS[2], f.platformFee], [FEE_LABELS[3], f.gst], [FEE_LABELS[4], quote.amount],
+  ] as const : null;
   const name = user ? `${user.firstName} ${user.lastName}` : '';
 
   return (
@@ -105,6 +108,8 @@ export function EntryForm({ category: c, teamsCount, user, now, skill, onSkill, 
         <Text style={[s.h, { paddingBottom: 12 }]}>Payment</Text>
         {isFree(c) ? (
           <Text style={s.row}>Free entry</Text>
+        ) : !rows ? (
+          <Skeleton style={{ height: 200 }} />
         ) : (
           <>
             {rows.map(([k, v], i) => {

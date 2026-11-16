@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import type { RecentMatch, SportSummary } from '@/api/career';
+import { getRecentMatches, type RecentMatch, type SportSummary } from '@/api/career';
 import { getTopPlayers, type RankedPlayer } from '@/api/rankings';
 import { AwardBadge } from '@/components/AwardBadge';
 import { AwardSheet } from '@/components/awards/AwardSheet';
@@ -153,6 +153,16 @@ export function Analytics({ played, bestSport, playerId, who = 'you', boards, re
   const [picked, setPicked] = useState(ALL);
   const totals = allSports(played);
   const current = picked === ALL ? totals : played.find((x) => x.sport === picked) ?? totals;
+  // SERVER-GAPS #3: a sport's last 10 from the server, so newer matches in other sports can't crowd it out.
+  // Until it arrives (or if it fails), the sport's share of `recent` stands in.
+  const [bySport, setBySport] = useState<Record<string, RecentMatch[]>>({});
+  const sport = current.sport;
+  useEffect(() => {
+    if (sport === ALL || bySport[sport]) return;
+    let live = true;
+    getRecentMatches(playerId, 10, sport).then((r) => live && setBySport((m) => ({ ...m, [sport]: r })), () => {});
+    return () => { live = false; };
+  }, [sport, playerId, bySport]);
   return (
     <View style={[s.section, { paddingHorizontal: 0, gap: 18 }]}>
       <View style={{ paddingHorizontal: space.gutter }}>
@@ -175,7 +185,7 @@ export function Analytics({ played, bestSport, playerId, who = 'you', boards, re
           );
         })}
       </ScrollView>
-      <SportDetail key={current.sport} s={current} playerId={playerId} who={who} board={boards[current.sport]} recent={recent} onAll={onAll} />
+      <SportDetail key={current.sport} s={current} playerId={playerId} who={who} board={boards[current.sport]} recent={bySport[sport] ?? recent} onAll={onAll} />
     </View>
   );
 }

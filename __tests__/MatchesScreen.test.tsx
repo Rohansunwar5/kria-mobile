@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import Matches from '../src/app/tournament/[id]/matches';
 
 const mockPush = jest.fn();
@@ -196,6 +197,20 @@ describe('Matches screen', () => {
       expect(await screen.findByLabelText('1. Cara, played 1, won 1, lost 0, 2 points')).toBeTruthy();
       expect(screen.getByText('Group B results')).toBeTruthy();
       expect(screen.getByText('Cara d. Dev')).toBeTruthy();
+    });
+
+    // 2f: up to four groups share the width equally; more scroll, since "Group E…" would not fit.
+    it('lays out up to four group tabs equal-width, and scrolls more', async () => {
+      byCat = { c1: [ga1, ga2, gb1] };
+      getGroupTables.mockResolvedValue(tables);
+      const view = setup([hybrid()]);
+      expect(StyleSheet.flatten((await screen.findByRole('tab', { name: 'Group A' })).props.style)).toMatchObject({ flex: 1 });
+      view.unmount();
+
+      const five = ['C', 'D', 'E'].map((x) => ({ name: `Group ${x}`, rows: [] }));
+      getGroupTables.mockResolvedValue({ ...tables, groups: [...tables.groups, ...five] });
+      setup([hybrid()]);
+      expect(StyleSheet.flatten((await screen.findByRole('tab', { name: 'Group A' })).props.style).flex).toBeUndefined();
     });
 
     it('opens on the knockout once it is drawn, with Groups a tap away', async () => {

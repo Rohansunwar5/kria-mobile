@@ -1,7 +1,8 @@
 # Expo SDK 57
 
 This app targets **Expo SDK 57** (React 19.2.3, React Native 0.86.3, Reanimated 4.5.1 +
-react-native-worklets 0.10.1, expo-router 57, NativeWind v4, TypeScript 6.0.3).
+react-native-worklets 0.10.1, expo-router 57, TypeScript 6.0.3). Styling is plain `StyleSheet`
+on the tokens in `src/constants/theme.ts`; NativeWind was removed on 2026-11-16.
 
 Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
 

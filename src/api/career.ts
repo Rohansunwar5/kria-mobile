@@ -108,12 +108,13 @@ export interface RecentMatch {
  * serves an opponent's profile as well as your own.
  *
  * `limit` is left off the request unless given, so the server owns the default
- * feed length and the two cannot drift.
+ * feed length and the two cannot drift. `sport` narrows it to one sport.
  */
-export async function getRecentMatches(playerId: string, limit?: number): Promise<RecentMatch[]> {
+export async function getRecentMatches(playerId: string, limit?: number, sport?: string): Promise<RecentMatch[]> {
+  const params = { ...(limit === undefined ? {} : { limit }), ...(sport ? { sport } : {}) };
   const res = await API.get(
     `/player/career/${playerId}/recent`,
-    limit === undefined ? undefined : { params: { limit } },
+    Object.keys(params).length ? { params } : undefined,
   );
   // Null would crash every caller that maps over the result.
   return unwrap<RecentMatch[] | null>(res) ?? [];

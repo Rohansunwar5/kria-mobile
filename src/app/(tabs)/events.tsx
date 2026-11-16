@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollVi
 import { router, useFocusEffect, useLocalSearchParams, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getTeamBrands } from '@/api/cricketMatch';
-import { getEventFacets, latestTournaments, type EventFacets } from '@/api/tournaments';
+import { getEventFacets, latestTournaments, type EventFacets, type Tournament } from '@/api/tournaments';
 import { EventCard, type Crest } from '@/components/EventCard';
 import { Featured, PastRow } from '@/components/events/EventRows';
 import { Filters } from '@/components/events/Filters';
@@ -15,7 +15,6 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { colors, display, font, radius, space } from '@/constants/theme';
 import { EVENT_SPORTS, eventQuery, groupEvents, NO_FILTERS, type EventFilters } from '@/lib/eventsList';
 import { useAppSelector } from '@/store/hooks';
-import type { Tournament } from '@/store/slices/tournamentSlice';
 
 // GET /tournament caps `limit` at 100.
 const LIMIT = 100;

@@ -3,7 +3,7 @@ import { Alert, Linking, Modal } from 'react-native';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/store/slices/authSlice';
-import { createPaymentOrder, verifyPayment } from '@/api/payment';
+import { createPaymentOrder, getPaymentQuote, verifyPayment } from '@/api/payment';
 import { getMyEntries, registerEntry } from '@/api/tournaments';
 import CategoryScreen from '../src/app/category/[categoryId]';
 
@@ -25,7 +25,7 @@ jest.mock('expo-router', () => ({
 let mockBase: Record<string, unknown> = {};
 jest.mock('@/lib/useTournament', () => ({ useTournament: () => mockBase }));
 
-jest.mock('@/api/payment', () => ({ createPaymentOrder: jest.fn(), verifyPayment: jest.fn() }));
+jest.mock('@/api/payment', () => ({ createPaymentOrder: jest.fn(), verifyPayment: jest.fn(), getPaymentQuote: jest.fn() }));
 jest.mock('@/api/tournaments', () => ({ registerEntry: jest.fn(), getMyEntries: jest.fn(), getTournamentTeams: jest.fn(async () => []) }));
 
 const mockStore = new Map<string, string>();
@@ -53,6 +53,7 @@ jest.mock('@/components/tournament/RazorpayWebView', () => {
 });
 
 const order = createPaymentOrder as jest.Mock;
+const quote = getPaymentQuote as jest.Mock;
 const verify = verifyPayment as jest.Mock;
 const mine = getMyEntries as jest.Mock;
 const register = registerEntry as jest.Mock;
@@ -78,6 +79,7 @@ const ORDER = {
 const DOB = new Date(new Date().getFullYear() - 27, 0, 1).toISOString();
 const USER = { _id: 'u1', firstName: 'Aarav', lastName: 'Menon', email: 'aarav@kria.club', phone: '9812345412', status: 'active', gender: 'male', dateOfBirth: DOB };
 const PROFILE = { firstName: 'Aarav', lastName: 'Menon', age: 27, gender: 'male', phone: '9812345412', skillLevel: 'advanced' };
+const QUOTE = { baseAmount: 600, feeBreakdown: { razorpayFee: 12, platformFee: 12, gst: 4.32 }, convenienceFee: 28.32, amount: 628.32, currency: 'INR' };
 const PAY = 'Pay ₹628.32 and register';
 const SAVED = { playerId: 'u1', tournamentId: 't1', categoryId: 'c1', orderId: 'ord_1', paymentId: 'pay_1', signature: 'sig_1', amount: 628.32, skillLevel: 'advanced' };
 
@@ -103,6 +105,7 @@ beforeEach(() => {
   mockParams = { categoryId: 'c1', tournamentId: 't1' };
   mockBase = base();
   order.mockResolvedValue(ORDER);
+  quote.mockResolvedValue(QUOTE);
   mine.mockResolvedValue([]);
 });
 
@@ -115,12 +118,43 @@ describe('2b form', () => {
     expect(screen.getByText('Register and pay')).toBeTruthy();
     expect(screen.getByText('Aarav Menon')).toBeTruthy();
     expect(screen.getByText('Male · 27 · 98••• ••412')).toBeTruthy();
-    expect(screen.getByText('₹600')).toBeTruthy();
+    expect(await screen.findByText('₹600')).toBeTruthy();
     expect(screen.getAllByText('₹12')).toHaveLength(2);
     expect(screen.getByText('₹4.32')).toBeTruthy();
     expect(screen.getByText('₹628.32')).toBeTruthy();
     expect(screen.getByText('Paid via Razorpay · UPI, cards, netbanking')).toBeTruthy();
     expect(await screen.findByLabelText(PAY)).toBeTruthy();
+  });
+
+  // SERVER-GAPS #16: these numbers can't come from the app's own sum of a ₹600 fee.
+  it("shows the server's quote, and Pay charges its total", async () => {
+    quote.mockResolvedValue({ baseAmount: 600, feeBreakdown: { razorpayFee: 13, platformFee: 11, gst: 5 }, convenienceFee: 29, amount: 629, currency: 'INR' });
+    renderScreen();
+    expect(await screen.findByLabelText('Pay ₹629 and register')).toBeTruthy();
+    expect(screen.getByText('₹13')).toBeTruthy();
+    expect(screen.getByText('₹11')).toBeTruthy();
+    expect(screen.getByText('₹5')).toBeTruthy();
+    expect(screen.getByText('₹629')).toBeTruthy();
+    expect(quote).toHaveBeenCalledWith('c1');
+  });
+
+  it("a failed quote says so, and Pay waits for the price", async () => {
+    quote.mockRejectedValueOnce(new Error('offline'));
+    renderScreen();
+    expect(await screen.findByText("Couldn't load the price.")).toBeTruthy();
+    fireEvent.press(screen.getByText('Advanced'));
+    await settle();
+    expect(disabled('Pay and register')).toBe(true);
+    fireEvent.press(screen.getByText('Retry'));
+    await waitFor(() => expect(disabled(PAY)).toBe(false));
+    expect(screen.queryByText("Couldn't load the price.")).toBeNull();
+  });
+
+  it('a free entry asks for no quote', async () => {
+    mockBase = base(tournament(), category({ isPaidRegistration: false, registrationFee: 0 }));
+    renderScreen();
+    expect(await screen.findByLabelText('Register')).toBeTruthy();
+    expect(quote).not.toHaveBeenCalled();
   });
 
   it('Pay is disabled until a skill level is picked', async () => {

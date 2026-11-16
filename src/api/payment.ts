@@ -23,6 +23,20 @@ export const getMyPayments = async (): Promise<Invoice[]> => {
   return response.data?.data?.data || response.data?.data || [];
 };
 
+/** What an entry costs (SERVER-GAPS #16), from the same formula create-order charges by. */
+export interface PaymentQuote {
+  baseAmount: number;
+  feeBreakdown: { razorpayFee: number; platformFee: number; gst: number };
+  convenienceFee: number;
+  amount: number;
+  currency: string;
+}
+
+export async function getPaymentQuote(categoryId: string): Promise<PaymentQuote> {
+  const res = await API.get('/payments/quote', { params: { categoryId } });
+  return res.data?.data?.data || res.data?.data;
+}
+
 export interface OrderDetails {
   orderId: string;
   amount: number;
@@ -49,29 +63,4 @@ export interface VerifyBody {
 
 export async function verifyPayment(body: VerifyBody): Promise<void> {
   await API.post('/payments/verify', body);
-}
-
-export interface PaymentRecord {
-  _id: string;
-  razorpayOrderId: string;
-  razorpayPaymentId?: string;
-  tournamentId: string;
-  categoryId: string;
-  amount: number;
-  baseAmount: number;
-  feeBreakdown: { razorpayFee: number; platformFee: number; gst: number };
-  currency: string;
-  status: string;
-  createdAt: string;
-}
-
-/** Polled by /payment/[orderId]. A missing order is not an exception — the
- *  screen shows its own "order unavailable" state. */
-export async function getPaymentStatus(orderId: string): Promise<PaymentRecord | null> {
-  try {
-    const res = await API.get(`/payments/status/${orderId}`);
-    return res.data?.data?.data || res.data?.data || null;
-  } catch {
-    return null;
-  }
 }

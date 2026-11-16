@@ -13,18 +13,6 @@ export function setupStage(match: QuickMatch): 'needs_toss' | 'needs_lineups' | 
   return 'ready';
 }
 
-/** `6.2`. One place, because three surfaces render it. */
-export function oversText(completedOvers?: number, ballsInCurrentOver?: number): string {
-  return `${completedOvers ?? 0}.${ballsInCurrentOver ?? 0}`;
-}
-
-/** `42/3 (6.2)`, or null before the first ball. */
-export function scoreLine(match: QuickMatch): string | null {
-  const s = match.liveState;
-  if (!s || s.runs === undefined) return null;
-  return `${s.runs}/${s.wickets ?? 0} (${oversText(s.completedOvers, s.ballsInCurrentOver)})`;
-}
-
 /**
  * Who the engine is waiting for. Both can be true at once — the end of an over
  * that also took a wicket — and collecting only one would post the next ball

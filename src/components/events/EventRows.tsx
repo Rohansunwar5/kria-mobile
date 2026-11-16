@@ -7,7 +7,7 @@ import { colors, display, font, radius } from '@/constants/theme';
 import { dateSpan, featuredCta } from '@/lib/eventsList';
 import { sportName } from '@/lib/homeView';
 import { tournamentSports } from '@/lib/sports';
-import type { Tournament } from '@/store/slices/tournamentSlice';
+import type { Tournament } from '@/api/tournaments';
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 

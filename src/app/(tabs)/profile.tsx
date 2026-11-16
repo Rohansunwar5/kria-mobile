@@ -52,7 +52,7 @@ export default function Profile() {
       getPublicPlayer(meId).then((p) => p && setRecord({ titles: p.player.titles ?? [], honors: p.player.honors ?? [] }));
       listMyQuickKnockouts().then(setKnockouts, () => undefined);
       // The newest 50 (the server's cap), split by sport here: its sport filter takes registry sports only.
-      getRecentMatches(meId, 50).then(setRecent, () => setRecent((r) => r ?? []));
+      getRecentMatches(meId, 10).then(setRecent, () => setRecent((r) => r ?? []));
       if (seen.current) reloadCareer();
       seen.current = true;
     }, [meId, dispatch, reloadCareer]),

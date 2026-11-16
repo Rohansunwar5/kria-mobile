@@ -1,8 +1,6 @@
 import type { QuickKnockout } from '@/api/quickKnockout';
 import type { QuickMatch } from '@/api/quickMatch';
-import { formatShortDate } from '@/lib/format';
-import { STATUS_TAG, type TagVariant } from '@/lib/tournamentConstants';
-import type { Tournament } from '@/store/slices/tournamentSlice';
+import type { Tournament } from '@/api/tournaments';
 
 /**
  * What the events list actually shows: drafts and deactivated tournaments are
@@ -10,15 +8,6 @@ import type { Tournament } from '@/store/slices/tournamentSlice';
  */
 export function visibleTournaments(tournaments: Tournament[]): Tournament[] {
   return tournaments.filter((t) => t.status !== 'draft' && t.isActive !== false);
-}
-
-/**
- * How many tournaments are genuinely open for entry. `visibleTournaments`
- * keeps `ongoing` and `completed` because a discovery list should show them,
- * but the strip says OPEN, and only `registration_open` takes an entry.
- */
-export function openForEntryCount(tournaments: Tournament[]): number {
-  return visibleTournaments(tournaments).filter((t) => t.status === 'registration_open').length;
 }
 
 /** A match in progress carries its knockout when it belongs to one, so the top
@@ -60,63 +49,4 @@ export function inProgress(matches: QuickMatch[], knockouts: QuickKnockout[]): I
       .map((knockout) => ({ kind: 'knockout' as const, knockout })),
   ];
   return [...at('live'), ...at('waiting')];
-}
-
-const HOUR = 3_600_000;
-const DAY = 24 * HOUR;
-
-/**
- * The last cell of a tournament poster: what happens next. While entries are
- * open that is the time left to enter, rounded DOWN so a poster never promises
- * more time than there is.
- */
-export function posterCell(
-  t: Pick<Tournament, 'status' | 'registrationDeadline' | 'startDate' | 'endDate'>,
-  now = Date.now(),
-): { label: string; value: string; urgent: boolean } {
-  const left = Date.parse(t.registrationDeadline) - now;
-  if (t.status === 'registration_open' && left > 0) {
-    let value: string;
-    if (left < HOUR) value = '< 1 hr';
-    else if (left < DAY) {
-      const h = Math.floor(left / HOUR);
-      value = `${h} hr${h === 1 ? '' : 's'}`;
-    } else {
-      const d = Math.floor(left / DAY);
-      value = `${d} day${d === 1 ? '' : 's'}`;
-    }
-    return { label: 'Entries close', value, urgent: true };
-  }
-  if (t.status === 'ongoing') return { label: 'Ends', value: formatShortDate(t.endDate), urgent: false };
-  if (t.status === 'completed') return { label: 'Ended', value: formatShortDate(t.endDate), urgent: false };
-  return { label: 'Starts', value: formatShortDate(t.startDate), urgent: false };
-}
-
-/**
- * The one tag on a poster's art. The poster has no data strip, so the tag
- * carries the clock: the time left to enter, or when a live one ends.
- */
-export function posterBadge(
-  t: Pick<Tournament, 'status' | 'registrationDeadline' | 'startDate' | 'endDate'>,
-  now = Date.now(),
-): { label: string; variant: TagVariant; dot?: boolean } {
-  const base = STATUS_TAG[t.status] ?? STATUS_TAG.draft;
-  const cell = posterCell(t, now);
-  const label = cell.urgent
-    ? `${base.label} · ${cell.value} left`
-    : t.status === 'ongoing'
-      ? `${base.label} · ends ${cell.value}`
-      : base.label;
-  return { label, variant: base.variant, dot: base.dot };
-}
-
-/** Home's poster order: open tournaments first, closing soonest first, then
- *  live ones, then the rest — each group otherwise in the server's order. */
-export function posterOrder(tournaments: Tournament[]): Tournament[] {
-  const group = (t: Tournament) => (t.status === 'registration_open' ? 0 : t.status === 'ongoing' ? 1 : 2);
-  return [...tournaments].sort(
-    (a, b) =>
-      group(a) - group(b) ||
-      (group(a) === 0 ? Date.parse(a.registrationDeadline) - Date.parse(b.registrationDeadline) : 0),
-  );
 }

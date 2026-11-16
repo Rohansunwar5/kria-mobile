@@ -55,12 +55,3 @@ export async function getCricketLeaderboard(
   const res = await API.get(`/sports/cricket/stats/categories/${categoryId}/leaderboard`, { params: { sort } });
   return unwrap(res)?.leaderboard ?? [];
 }
-
-/** Player stats are per-registration — scoped to one tournament, not global. */
-export async function getCricketPlayerStats(
-  registrationId: string,
-  tournamentId: string
-): Promise<CricketPlayerStats | null> {
-  const res = await API.get(`/sports/cricket/stats/registrations/${registrationId}/stats`, { params: { tournamentId } });
-  return unwrap(res);
-}

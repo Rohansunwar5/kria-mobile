@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { getPublicPlayer, getTeam, getTeamRoster, listAnnouncements } from '@/api/profileApi';
+import { getPublicPlayer, getTeamRoster, listAnnouncements } from '@/api/profileApi';
 import { withdrawEntry } from '@/api/tournaments';
 import { changePassword, sendContactMessage } from '@/api/settings';
 
@@ -25,11 +25,6 @@ describe('public profile and team api', () => {
   it('getPublicPlayer returns null for an unknown player rather than throwing', async () => {
     mock.onGet('/player/auth/public/nope').reply(404);
     expect(await getPublicPlayer('nope')).toBeNull();
-  });
-
-  it('getTeam unwraps a team', async () => {
-    mock.onGet('/teams/t1').reply(200, { data: { data: { _id: 't1', name: 'Thunder Blazers' } } });
-    expect((await getTeam('t1'))?.name).toBe('Thunder Blazers');
   });
 
   it('getTeamRoster falls back to an empty roster', async () => {

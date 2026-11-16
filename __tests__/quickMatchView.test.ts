@@ -4,7 +4,6 @@ import {
   gamesWon,
   currentGame,
   freeSlots,
-  statusVariant,
   formatLabel,
   outcomeLabel,
 } from '@/lib/quickMatchView';
@@ -122,14 +121,6 @@ describe('freeSlots', () => {
 });
 
 describe('labels', () => {
-  it('maps status to a Tag variant', () => {
-    expect(statusVariant('live')).toBe('live');
-    // Green "open", as an entry-open tournament reads — not grey "ended".
-    expect(statusVariant('waiting')).toBe('open');
-    expect(statusVariant('completed')).toBe('end');
-    expect(statusVariant('cancelled')).toBe('fail');
-  });
-
   it('describes the format', () => {
     expect(formatLabel(base())).toBe('Badminton · Best of 3 · to 21');
     expect(formatLabel(base({ matchConfig: { bestOf: 1, pointsToWin: 11 } }))).toBe('Badminton · Single game · to 11');

@@ -1,11 +1,18 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { createPaymentOrder, verifyPayment, type VerifyBody } from '@/api/payment';
+import { createPaymentOrder, getPaymentQuote, verifyPayment, type VerifyBody } from '@/api/payment';
 
 describe('payment api (checkout)', () => {
   let mock: MockAdapter;
   beforeEach(() => { mock = new MockAdapter(API); });
   afterEach(() => { mock.restore(); });
+
+  // SERVER-GAPS #16: the breakdown comes from the server, never a copy of its formula.
+  it('getPaymentQuote asks the server what a category costs', async () => {
+    const quote = { baseAmount: 600, feeBreakdown: { razorpayFee: 12, platformFee: 12, gst: 4.32 }, convenienceFee: 28.32, amount: 628.32, currency: 'INR' };
+    mock.onGet('/payments/quote', { params: { categoryId: 'c1' } }).reply(200, { data: { data: quote } });
+    expect(await getPaymentQuote('c1')).toEqual(quote);
+  });
 
   it('createPaymentOrder unwraps OrderDetails from nested response', async () => {
     const order = {

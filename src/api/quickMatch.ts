@@ -165,11 +165,6 @@ export async function getQuickMatch(id: string): Promise<QuickMatch> {
   return asMatch(await API.get(`/quick-match/${id}`));
 }
 
-/** Codes are stored uppercase and get read aloud, so normalise before sending. */
-export async function getQuickMatchByCode(joinCode: string): Promise<QuickMatch> {
-  return asMatch(await API.get(`/quick-match/by-code/${joinCode.toUpperCase()}`));
-}
-
 export async function claimQuickMatchSlot(joinCode: string, slotId: string): Promise<QuickMatch> {
   return asMatch(await API.post(`/quick-match/join/${joinCode.toUpperCase()}`, { slotId }));
 }

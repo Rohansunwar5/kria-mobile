@@ -1,4 +1,4 @@
-import { tournamentSports, isLiveMatch, SPORT_ICON } from '../src/lib/sports';
+import { tournamentSports } from '../src/lib/sports';
 
 describe('tournamentSports', () => {
   it('uses the sports array for a multisport tournament', () => {
@@ -18,27 +18,5 @@ describe('tournamentSports', () => {
   it('returns nothing when the tournament has no sport at all', () => {
     expect(tournamentSports(undefined)).toEqual([]);
     expect(tournamentSports({})).toEqual([]);
-  });
-});
-
-describe('isLiveMatch', () => {
-  it('accepts an in-progress match', () => {
-    expect(isLiveMatch({ status: 'in_progress' })).toBe(true);
-  });
-
-  it('rejects anything not in progress', () => {
-    expect(isLiveMatch({ status: 'completed' })).toBe(false);
-    expect(isLiveMatch({ status: 'scheduled' })).toBe(false);
-  });
-
-  it('rejects a team-league tie parent — it is a container, not a playable match', () => {
-    expect(isLiveMatch({ status: 'in_progress', isTie: true })).toBe(false);
-  });
-});
-
-describe('SPORT_ICON', () => {
-  it('gives table tennis its own paddle, not the badminton court', () => {
-    expect(SPORT_ICON.table_tennis).toBe('paddle');
-    expect(SPORT_ICON.badminton).toBe('shuttlecock');
   });
 });

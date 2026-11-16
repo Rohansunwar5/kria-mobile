@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { createPaymentOrder, type OrderDetails } from '@/api/payment';
+import { createPaymentOrder, getPaymentQuote, type OrderDetails, type PaymentQuote } from '@/api/payment';
 import { getMyEntries, getTournamentTeams, registerEntry, type MyEntry, type SkillLevel } from '@/api/tournaments';
 import { serverMessage } from '@/api/unwrap';
 import { EntryForm } from '@/components/tournament/EntryForm';
@@ -14,7 +14,7 @@ import { InlineError } from '@/components/ui/InlineError';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { colors, font, space } from '@/constants/theme';
 import { entryBlocker, entryProfile } from '@/lib/entryView';
-import { feeBreakdown, rupees } from '@/lib/format';
+import { rupees } from '@/lib/format';
 import { goBack } from '@/lib/nav';
 import { confirmPending, loadPending, savePending, type PendingPayment } from '@/lib/pendingPayment';
 import { isFree } from '@/lib/tournamentView';
@@ -62,6 +62,10 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
   const [fresh, setFresh] = useState<MyEntry[]>([]);
   const [entriesError, setEntriesError] = useState(false);
   const [teamName, setTeamName] = useState<string>();
+  // SERVER-GAPS #16: the server's breakdown, so it can never drift from what create-order charges.
+  const [quote, setQuote] = useState<PaymentQuote | null>(null);
+  const [quoteFailed, setQuoteFailed] = useState(false);
+  const [quoteTry, setQuoteTry] = useState(0);
 
   const back = () => goBack(router);
   const loadMine = async () => (await getMyEntries()).filter((e) => e.tournamentId === tournamentId);
@@ -158,6 +162,13 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
   };
 
   const c = data?.categories.find((x) => x._id === categoryId);
+  const paid = !!c && !isFree(c);
+  useEffect(() => {
+    if (!paid) return;
+    let live = true;
+    getPaymentQuote(categoryId).then((q) => live && setQuote(q), () => live && setQuoteFailed(true));
+    return () => { live = false; };
+  }, [paid, categoryId, quoteTry]);
   const top = <TopBar title={c?.name ?? ''} sub={data?.tournament.name} onBack={back} />;
 
   if (!data || !c) {
@@ -206,7 +217,7 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
 
   const now = new Date();
   const blocker = entryBlocker(c, t, user, now);
-  const label = free ? 'Register' : `Pay ${rupees(feeBreakdown(c.registrationFee).total)} and register`;
+  const label = free ? 'Register' : quote ? `Pay ${rupees(quote.amount)} and register` : 'Pay and register';
 
   let footer: React.ReactNode;
   if (pending) {
@@ -222,7 +233,7 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
           label={label}
           busy={busy}
           busyLabel={free ? 'Registering' : 'Opening payment'}
-          disabled={!!blocker || !skill || !checked}
+          disabled={!!blocker || !skill || !checked || (!free && !quote)}
           onPress={free ? register : pay}
         />
         {blocker && blocker !== NEEDS_PROFILE ? <Text style={s.reason}>{blocker}</Text> : null}
@@ -234,6 +245,7 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
     <SafeAreaView style={s.root} edges={['top']}>
       {top}
       {error ? <InlineError what="Couldn't refresh this category." onRetry={reload} /> : null}
+      {quoteFailed ? <InlineError what="Couldn't load the price." onRetry={() => { setQuoteFailed(false); setQuoteTry((n) => n + 1); }} /> : null}
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         <EntryForm
           category={c}
@@ -243,6 +255,7 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
           skill={skill}
           onSkill={pending ? undefined : setSkill}
           onEditProfile={() => router.push('/profile/edit')}
+          quote={quote}
         />
       </ScrollView>
       {failed && pending ? (

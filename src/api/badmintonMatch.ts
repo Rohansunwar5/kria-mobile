@@ -46,13 +46,3 @@ export async function getBadmintonMatch(matchId: string): Promise<BadmintonMatch
   const res = await API.get(`/sports/badminton/match/${matchId}`);
   return unwrap(res);
 }
-
-export async function getBadmintonMatchesByCategory(categoryId: string): Promise<BadmintonMatch[]> {
-  const res = await API.get(`/sports/badminton/match/by-category/${categoryId}`);
-  return unwrap(res) ?? [];
-}
-
-export async function getBadmintonMatchesByTournament(tournamentId: string): Promise<BadmintonMatch[]> {
-  const res = await API.get(`/sports/badminton/match/by-tournament/${tournamentId}`);
-  return unwrap(res) ?? [];
-}

@@ -5,7 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
 import { getTopPlayers, type RankedPlayer } from '@/api/rankings';
-import { latestTournaments } from '@/api/tournaments';
+import { latestTournaments, type Tournament } from '@/api/tournaments';
 import { KriaMark } from '@/components/KriaMark';
 import { EventCard } from '@/components/EventCard';
 import { MatchCard } from '@/components/MatchCard';
@@ -27,7 +27,6 @@ import {
 import { RANKED_SPORTS } from '@/lib/sports';
 import { useCareer } from '@/lib/useCareer';
 import { useAppSelector } from '@/store/hooks';
-import type { Tournament } from '@/store/slices/tournamentSlice';
 
 /** Mocks 1a (established) and 4a (new player). DESIGN §6 Home. */
 export default function Home() {

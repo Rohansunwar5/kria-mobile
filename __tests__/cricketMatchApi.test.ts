@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { getMatchLive, getScorecard, getTournamentMatches, resolveMatchSport } from '@/api/cricketMatch';
+import { getMatchLive, getScorecard, resolveMatchSport } from '@/api/cricketMatch';
 
 describe('cricketMatch api', () => {
   let mock: MockAdapter;
@@ -31,12 +31,6 @@ describe('cricketMatch api', () => {
     const sc = await getScorecard('m1');
     expect(sc.innings1?.inningsNumber).toBe(1);
     expect(sc.innings2).toBeNull();
-  });
-
-  it('getTournamentMatches returns a list (empty fallback)', async () => {
-    mock.onGet('/sports/cricket/match/by-tournament/t1').reply(200, {});
-    const list = await getTournamentMatches('t1');
-    expect(list).toEqual([]);
   });
 
   it('resolveMatchSport reads the sport off the match category', async () => {

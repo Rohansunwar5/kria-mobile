@@ -57,20 +57,6 @@ export interface PublicHistoryEntry {
   team?: { _id: string; name: string; primaryColor?: string } | null;
 }
 
-export interface Team {
-  _id: string;
-  name: string;
-  tournamentId: string;
-  logo?: string;
-  primaryColor?: string;
-  secondaryColor?: string;
-  budget?: number;
-  initialBudget?: number;
-  playersCount?: number;
-  totalSpent?: number;
-  whatsappGroupLink?: string;
-}
-
 export interface RosterPlayer {
   _id: string;
   profile: { firstName: string; lastName: string; gender?: string; skillLevel?: string; photo?: string };
@@ -99,15 +85,6 @@ export async function getPublicPlayer(
 ): Promise<{ player: PublicPlayer; history: PublicHistoryEntry[] } | null> {
   try {
     const res = await API.get(`/player/auth/public/${playerId}`);
-    return unwrap(res);
-  } catch {
-    return null;
-  }
-}
-
-export async function getTeam(teamId: string): Promise<Team | null> {
-  try {
-    const res = await API.get(`/teams/${teamId}`);
     return unwrap(res);
   } catch {
     return null;

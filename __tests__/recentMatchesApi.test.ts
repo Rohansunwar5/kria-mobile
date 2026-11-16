@@ -34,6 +34,13 @@ describe('recent matches api', () => {
     expect(mock.history.get[0].url).toBe('/player/career/p1/recent');
   });
 
+  // SERVER-GAPS #3: one sport's matches come from the server, not filtered out of the newest of all.
+  it('asks for one sport when given', async () => {
+    mock.onGet(/recent/).reply(200, { data: { data: [] } });
+    await getRecentMatches('p1', 10, 'cricket');
+    expect(mock.history.get[0].params).toEqual({ limit: 10, sport: 'cricket' });
+  });
+
   it('sends no limit by default, letting the server decide the feed length', async () => {
     mock.onGet(/recent/).reply(200, { data: { data: [] } });
     await getRecentMatches('p1');

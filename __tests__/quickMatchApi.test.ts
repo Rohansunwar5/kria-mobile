@@ -3,7 +3,6 @@ import API from '@/api/axios';
 import {
   createQuickMatch,
   listMyQuickMatches,
-  getQuickMatchByCode,
   claimQuickMatchSlot,
   recordQuickPoint,
   undoQuickPoint,
@@ -32,15 +31,6 @@ describe('quick match api', () => {
   let mock: MockAdapter;
   beforeEach(() => { mock = new MockAdapter(API); });
   afterEach(() => { mock.restore(); });
-
-  it('unwraps the doubly-nested payload the server sends', async () => {
-    mock.onGet('/quick-match/by-code/ABC234').reply(200, wrap(match()));
-
-    const result = await getQuickMatchByCode('ABC234');
-
-    expect(result._id).toBe('m1');
-    expect(result.sides).toHaveLength(2);
-  });
 
   it('unwraps an array payload for the list endpoint', async () => {
     mock.onGet('/quick-match/mine').reply(200, wrap([match(), match({ _id: 'm2' })]));
@@ -74,12 +64,6 @@ describe('quick match api', () => {
     mock.onGet('/quick-match/mine').reply(200, wrap([]));
     await listMyQuickMatches();
     expect(mock.history.get[0].url).toBe('/quick-match/mine');
-  });
-
-  it('uppercases a join code on the way out', async () => {
-    mock.onGet(/\/quick-match\/by-code\/.*/).reply(200, wrap(match()));
-    await getQuickMatchByCode('abc234');
-    expect(mock.history.get[0].url).toBe('/quick-match/by-code/ABC234');
   });
 
   it('sends displayName on every slot, including slots that carry a playerId', async () => {

@@ -20,12 +20,6 @@ export function entrantName(k: QuickKnockout, entrantId?: string): string {
   return players.map((p) => firstName(p.displayName)).join(' & ');
 }
 
-/** First names only, for the narrow bracket boxes; a cricket team keeps its name. */
-export function entrantShortName(k: QuickKnockout, entrantId?: string): string {
-  if (k.sport === 'cricket') return teamName(k, entrantId);
-  return playersOf(k, entrantId).map((p) => firstName(p.displayName)).join(' & ');
-}
-
 export const isKnockoutHost = (k: QuickKnockout, playerId?: string) => Boolean(playerId) && k.hostId === playerId;
 
 /** "Badminton · Singles", "Table Tennis · Doubles", or "Cricket · 8 overs" — the line under a knockout's name. */

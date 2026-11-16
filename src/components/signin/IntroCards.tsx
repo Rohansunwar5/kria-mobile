@@ -2,13 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius } from '@/constants/theme';
 import { getTopPlayers, type RankedPlayer } from '@/api/rankings';
-import { latestTournaments } from '@/api/tournaments';
+import { latestTournaments, type Tournament } from '@/api/tournaments';
 import { AwardBadge } from '@/components/AwardBadge';
 import { KriaMark } from '@/components/KriaMark';
 import { Icon } from '@/components/ui/Icon';
 import { formatShortDate } from '@/lib/format';
 import { sportName } from '@/lib/homeView';
-import type { Tournament } from '@/store/slices/tournamentSlice';
 
 const Bar = ({ w, h = 10 }: { w: number | `${number}%`; h?: number }) => <View style={{ width: w, height: h, borderRadius: 5, backgroundColor: colors.surface3 }} />;
 const Dot = ({ size = 30 }: { size?: number }) => <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface3 }} />;

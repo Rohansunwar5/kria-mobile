@@ -1,8 +1,7 @@
-import { hasBegun, inProgress, openForEntryCount, posterBadge, posterCell, posterOrder, visibleTournaments } from '../src/lib/homePortal';
-import { formatShortDate } from '../src/lib/format';
+import { hasBegun, inProgress, visibleTournaments } from '../src/lib/homePortal';
 import type { QuickKnockout } from '../src/api/quickKnockout';
 import type { QuickMatch } from '../src/api/quickMatch';
-import type { Tournament } from '../src/store/slices/tournamentSlice';
+import type { Tournament } from '../src/api/tournaments';
 
 const tournament = (over: Partial<Tournament>) => ({ _id: 't', status: 'registration_open', ...over }) as Tournament;
 
@@ -23,51 +22,6 @@ describe('visibleTournaments', () => {
   it('keeps every other status', () => {
     const all = [tournament({ _id: 'a', status: 'ongoing' }), tournament({ _id: 'b', status: 'completed' })];
     expect(visibleTournaments(all).map((t) => t._id)).toEqual(['a', 'b']);
-  });
-});
-
-
-// The strip says OPEN. `visibleTournaments` deliberately keeps `ongoing` and
-// `completed` — right for the list, wrong for that word — so the count is its
-// own function rather than a `.length` on the visible set.
-describe('openForEntryCount', () => {
-  it('counts only the tournaments taking entries in a mixed list', () => {
-    const all = [
-      tournament({ _id: 'a', status: 'registration_open' }),
-      tournament({ _id: 'b', status: 'ongoing' }),
-      tournament({ _id: 'c', status: 'registration_open' }),
-      tournament({ _id: 'd', status: 'completed' }),
-    ];
-    expect(openForEntryCount(all)).toBe(2);
-  });
-
-  // The bug this closes: a screenful of finished events used to report itself
-  // as open for entry.
-  it('is zero when everything has started or finished', () => {
-    const all = [
-      tournament({ _id: 'a', status: 'ongoing' }),
-      tournament({ _id: 'b', status: 'completed' }),
-      tournament({ _id: 'c', status: 'cancelled' }),
-    ];
-    expect(openForEntryCount(all)).toBe(0);
-  });
-
-  it('never counts an organiser draft', () => {
-    expect(openForEntryCount([tournament({ status: 'draft' })])).toBe(0);
-  });
-
-  // Composed through visibleTournaments, so a deactivated tournament is out of
-  // the count for the same reason it is out of the list.
-  it('never counts a deactivated tournament', () => {
-    const all = [
-      tournament({ _id: 'a', status: 'registration_open', isActive: false }),
-      tournament({ _id: 'b', status: 'registration_open' }),
-    ];
-    expect(openForEntryCount(all)).toBe(1);
-  });
-
-  it('is zero for an empty list', () => {
-    expect(openForEntryCount([])).toBe(0);
   });
 });
 
@@ -115,77 +69,5 @@ describe('hasBegun', () => {
     const setup = (recorded: boolean) => ({ toss: { recorded }, lineupsSet: false, side1Lineup: [], side2Lineup: [] }) as QuickMatch['cricketSetup'];
     expect(hasBegun({ sport: 'cricket', cricketSetup: setup(false) } as QuickMatch)).toBe(false);
     expect(hasBegun({ sport: 'cricket', cricketSetup: setup(true) } as QuickMatch)).toBe(true);
-  });
-});
-
-describe('posterCell', () => {
-  const NOW = Date.parse('2026-10-09T10:00:00.000Z');
-  const HOUR = 3_600_000;
-  const t = (over: Partial<Tournament>) =>
-    ({ status: 'registration_open', startDate: '2026-10-18T00:00:00.000Z', endDate: '2026-10-20T00:00:00.000Z', registrationDeadline: '', ...over }) as Tournament;
-  const closesIn = (ms: number) => posterCell(t({ registrationDeadline: new Date(NOW + ms).toISOString() }), NOW);
-
-  // Rounded down: 5.9 days left is "5 days", never a sixth day nobody has.
-  it('counts whole days left to enter, rounded down', () => {
-    expect(closesIn(5.9 * 24 * HOUR)).toEqual({ label: 'Entries close', value: '5 days', urgent: true });
-    expect(closesIn(1.5 * 24 * HOUR).value).toBe('1 day');
-  });
-
-  it('drops to hours inside the last day, and never rounds an hour up', () => {
-    expect(closesIn(5.5 * HOUR).value).toBe('5 hrs');
-    expect(closesIn(1.2 * HOUR).value).toBe('1 hr');
-    expect(closesIn(0.5 * HOUR).value).toBe('< 1 hr');
-  });
-
-  // The status can lag the deadline; a passed deadline is not a countdown.
-  it('falls back to the start date once the deadline has passed', () => {
-    const cell = closesIn(-HOUR);
-    expect(cell).toEqual({ label: 'Starts', value: formatShortDate('2026-10-18T00:00:00.000Z'), urgent: false });
-  });
-
-  it('shows the end date for a live or finished tournament', () => {
-    expect(posterCell(t({ status: 'ongoing' }), NOW).label).toBe('Ends');
-    expect(posterCell(t({ status: 'completed' }), NOW).label).toBe('Ended');
-    expect(posterCell(t({ status: 'ongoing' }), NOW).value).toBe(formatShortDate('2026-10-20T00:00:00.000Z'));
-  });
-});
-
-describe('posterOrder', () => {
-  it('puts open tournaments first, soonest deadline first, then live, then the rest', () => {
-    const order = posterOrder([
-      tournament({ _id: 'live', status: 'ongoing' }),
-      tournament({ _id: 'open-late', registrationDeadline: '2026-10-18T00:00:00.000Z' }),
-      tournament({ _id: 'done', status: 'completed' }),
-      tournament({ _id: 'open-soon', registrationDeadline: '2026-10-14T00:00:00.000Z' }),
-    ]).map((x) => x._id);
-
-    expect(order).toEqual(['open-soon', 'open-late', 'live', 'done']);
-  });
-});
-
-describe('posterBadge', () => {
-  const NOW = Date.parse('2026-10-09T10:00:00.000Z');
-  const DAY = 24 * 3_600_000;
-  const t = (over: Partial<Tournament>) =>
-    ({ status: 'registration_open', startDate: '2026-10-18T00:00:00.000Z', endDate: '2026-10-20T00:00:00.000Z', registrationDeadline: new Date(NOW + 5.5 * DAY).toISOString(), ...over }) as Tournament;
-
-  // The poster has no data strip, so the one tag on the art carries the clock.
-  it('puts the time left to enter on an open tournament', () => {
-    expect(posterBadge(t({}), NOW)).toEqual({ label: 'Open · 5 days left', variant: 'open', dot: undefined });
-  });
-
-  it('puts the end date on a live tournament', () => {
-    expect(posterBadge(t({ status: 'ongoing' }), NOW)).toEqual({
-      label: `Live · ends ${formatShortDate('2026-10-20T00:00:00.000Z')}`,
-      variant: 'live',
-      dot: true,
-    });
-  });
-
-  it('is the plain status otherwise, including an open one whose deadline passed', () => {
-    expect(posterBadge(t({ status: 'completed' }), NOW).label).toBe('Ended');
-    expect(posterBadge(t({ status: 'upcoming' }), NOW).label).toBe('Upcoming');
-    expect(posterBadge(t({ registrationDeadline: new Date(NOW - DAY).toISOString() }), NOW).label).toBe('Open');
-    expect(posterBadge(t({ status: 'mystery' }), NOW)).toMatchObject({ label: 'Draft', variant: 'end' });
   });
 });

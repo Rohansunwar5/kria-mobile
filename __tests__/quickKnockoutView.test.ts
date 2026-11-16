@@ -1,5 +1,5 @@
 import {
-  bracketColumns, championName, drawBlocker, entrantName, entrantShortName, isPlayable, unpairedPlayers, awardablePlayers, formatLabel, teamPlayers, awardBadges,
+  bracketColumns, championName, drawBlocker, entrantName, isPlayable, unpairedPlayers, awardablePlayers, formatLabel, teamPlayers, awardBadges,
   startBlocker,
 } from '@/lib/quickKnockoutView';
 import type { QuickKnockout } from '@/api/quickKnockout';
@@ -28,7 +28,6 @@ it('names entrants: full name alone, first names for pairs', () => {
   expect(entrantName(k(), 'e1')).toBe('Arjun & Priya');
   expect(entrantName(k(), 'e2')).toBe('Sam');
   expect(entrantName(k(), undefined)).toBe('');
-  expect(entrantShortName(k({ format: 'singles', entrants: [{ entrantId: 'e3', playerKeys: ['a'] }] }), 'e3')).toBe('Arjun');
 });
 
 it('explains why Draw is blocked', () => {
@@ -80,7 +79,6 @@ const cricket = (over: Partial<QuickKnockout> = {}) => k({
 
 it('names a cricket entrant by its team', () => {
   expect(entrantName(cricket(), 't1')).toBe('Strikers');
-  expect(entrantShortName(cricket(), 't1')).toBe('Strikers');
   expect(championName(cricket({ championEntrantId: 't1' }))).toBe('Strikers');
 });
 

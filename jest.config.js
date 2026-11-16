@@ -3,8 +3,6 @@ const expoPreset = require('jest-expo/jest-preset');
 // Keep jest-expo's own transformIgnorePatterns (it knows which RN-internal
 // modules must be transformed) and widen it to also transform our added deps.
 const extraPkgs = [
-  'nativewind',
-  'react-native-css-interop',
   '@reduxjs/toolkit',
   'immer',
   'react-redux',
