@@ -9,6 +9,7 @@ import { latestTournaments, type Tournament } from '@/api/tournaments';
 import { KriaMark } from '@/components/KriaMark';
 import { EventCard } from '@/components/EventCard';
 import { MatchCard } from '@/components/MatchCard';
+import { NotificationBell } from '@/components/home/NotificationBell';
 import { LiveNowRow } from '@/components/home/LiveNowRow';
 import { Milestone } from '@/components/home/Milestone';
 import { Checklist, RankTrack, StartHeadline } from '@/components/home/NewPlayer';
@@ -26,6 +27,8 @@ import {
 } from '@/lib/homeView';
 import { RANKED_SPORTS } from '@/lib/sports';
 import { useCareer } from '@/lib/useCareer';
+import { useUnreadCount } from '@/lib/unreadBell';
+import { usePushAsk } from '@/lib/usePushAsk';
 import { useAppSelector } from '@/store/hooks';
 
 /** Mocks 1a (established) and 4a (new player). DESIGN §6 Home. */
@@ -34,6 +37,8 @@ export default function Home() {
   const meId = user?._id ?? '';
   const insets = useSafeAreaInsets();
   const career = useCareer(user?._id);
+  const unread = useUnreadCount();
+  usePushAsk();
   const [matches, setMatches] = useState<QuickMatch[]>([]);
   const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
   const [events, setEvents] = useState<{ list: Tournament[]; near: boolean } | null>(null);
@@ -99,10 +104,11 @@ export default function Home() {
       <ScrollView ref={scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}>
         <View style={s.header}>
           <KriaMark width={40} />
-          <View style={{ gap: 1 }}>
+          <View style={{ gap: 1, flex: 1 }}>
             <Text style={s.date}>{todayLabel(now)}</Text>
             <Text style={s.hello}>{greeting(now, user?.firstName ?? 'there', isNew)}</Text>
           </View>
+          <NotificationBell count={unread.count} onPress={() => router.push('/notifications')} />
         </View>
 
         {career.error && !career.profile ? <InlineError what="Couldn't load your record." onRetry={career.reload} /> : null}

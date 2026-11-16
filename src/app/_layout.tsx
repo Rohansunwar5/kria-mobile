@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
-import { View } from 'react-native';
+import { View, AppState } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { isRunningInExpoGo } from 'expo';
@@ -13,12 +13,16 @@ import { setUnauthorizedHandler } from '@/api/axios';
 import { colors } from '@/constants/theme';
 import { routeFor } from '@/lib/authRoute';
 import { LaunchAnimation } from '@/components/LaunchAnimation';
+import { configurePushHandling, registerPushToken } from '@/lib/push';
+import { usePushOpen } from '@/lib/pushOpen';
 
 SplashScreen.preventAutoHideAsync();
 // No native fade: the overlay underneath is the same #0B0B0D, and a fade would veil
 // the sprint's first frames. `fade` is read on iOS only; Android always fades, over
 // `duration` (400ms by default). Expo Go ignores both and warns, so skip it there.
 if (!isRunningInExpoGo()) SplashScreen.setOptions({ fade: false, duration: 0 });
+
+configurePushHandling();
 
 setUnauthorizedHandler(() => {
   store.dispatch(logout());
@@ -39,6 +43,17 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
     dispatch(bootstrapAuth());
   }, [dispatch]);
 
+  const userId = user?._id;
+  useEffect(() => {
+    if (!userId) return;
+    void registerPushToken(userId);
+    // A permission granted later (phone Settings) registers on return; a saved token makes this a no-op.
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'active') void registerPushToken(userId);
+    });
+    return () => sub.remove();
+  }, [userId]);
+
   const ready = fontsLoaded && bootstrapped;
 
   const target = ready ? routeFor({ signedIn: !!user, pendingOnboarding, root: String(segments[0]), publicRoots: PUBLIC_ROOTS }) : null;
@@ -47,6 +62,7 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
   }, [target, segments, router]); // segments: re-check after every navigation
   // The first route is chosen once the gate has nothing left to replace.
   const routed = ready && !target;
+  usePushOpen(routed && !!user && !pendingOnboarding); // a tap while signed out waits for sign-in
 
   // The native splash and the launch overlay are both #0B0B0D: the splash holds
   // until fonts load, then hides once the overlay is laid out over the app.
@@ -61,6 +77,8 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="tournament/[id]" />
         <Stack.Screen name="profile" />
+        <Stack.Screen name="notifications" />
+        <Stack.Screen name="turn-on-notifications" />
         <Stack.Screen name="auction/[tournamentId]/[categoryId]" />
         <Stack.Screen name="live/index" />
         <Stack.Screen name="live/[matchId]" />

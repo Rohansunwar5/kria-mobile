@@ -18,7 +18,9 @@ jest.mock('@/api/quickMatch', () => ({
 jest.mock('@/api/quickKnockout', () => ({
   createQuickKnockout: jest.fn(async () => ({ _id: 'k5', joinCode: 'KN4CK2', status: 'waiting' })),
 }));
-jest.mock('@/api/playerSearch', () => ({ searchPlayers: jest.fn(async () => []) }));
+jest.mock('@/api/playerSearch', () => ({
+  searchPlayers: jest.fn(async () => [{ _id: 'p2', firstName: 'Asha', lastName: 'Rao' }]),
+}));
 jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn(async () => true) }));
 
 beforeEach(() => jest.clearAllMocks());
@@ -55,6 +57,17 @@ describe('Host a match', () => {
     const [a] = screen.getAllByPlaceholderText('Side name');
     fireEvent(a, 'blur');
     expect(screen.getByText('Each side needs a name.')).toBeTruthy();
+  });
+
+  it('tells the host a spot filled from search will be notified', async () => {
+    render(<NewQuickMatchScreen />);
+    fireEvent.press(screen.getByText('Continue'));
+    fireEvent.press(screen.getByText('Doubles'));
+    fireEvent.press(screen.getByText('Continue'));
+    fireEvent.press(screen.getAllByLabelText('Spot 2: open. Change')[0]);
+    fireEvent.changeText(screen.getByLabelText('Player or guest name'), 'Asha');
+    fireEvent.press(await screen.findByText('Asha Rao', {}, { timeout: 2000 }));
+    expect(screen.getByText('Added from search · will be notified')).toBeTruthy();
   });
 
   it('creates exactly what the API takes, then shows the real code', async () => {

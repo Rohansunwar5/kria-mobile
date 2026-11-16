@@ -15,6 +15,7 @@ const ICONS = {
   undo: 'o', block: 'o', edit: 'o', remove: 'o', error: 'o', search: 'o', more_horiz: 'o',
   gavel: 'of', settings: 'o', photo_camera: 'o', logout: 'o', receipt_long: 'o', assignment: 'o', push_pin: 'o', forum: 'o', campaign: 'o', account_tree: 'o', sensors: 'o',
   sports_baseball: 'o',
+  notifications: 'o', notifications_off: 'o', notifications_active: 'o', play_circle: 'o', group_add: 'o', how_to_reg: 'o', cancel: 'o',
   mail: 'o', lock: 'o', visibility: 'o', visibility_off: 'o', radio_button_unchecked: 'o', calendar_today: 'o',
   check_circle: 'of', verified: 'of', schedule: 'o', bookmark: 'of',
   // Award glyphs (filled).

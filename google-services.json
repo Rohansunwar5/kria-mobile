@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "538256095759",
+    "project_id": "kria-b849d",
+    "storage_bucket": "kria-b849d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538256095759:android:a11fb8be3c67b28b9d417a",
+        "android_client_info": {
+          "package_name": "club.kria.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbwRWhpnuV2aVCklKyHfiJu-CaqR3Jd14"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

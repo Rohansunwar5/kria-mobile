@@ -186,7 +186,7 @@ export function SidesStep({ f, set, host, onSpot }: Props & { host: Host; onSpot
                 <View style={{ flex: 1, gap: 1 }}>
                   <Text style={s.slotName}>{isHost ? spot.name : spot.name || 'Open spot'}</Text>
                   <Text style={s.meta}>
-                    {isHost ? 'You · host' : spot.playerId ? 'Kria player' : spot.name ? 'Guest name · claims with the code' : 'Name it now or let a player claim it'}
+                    {isHost ? 'You · host' : spot.playerId ? 'Added from search · will be notified' : spot.name ? 'Guest name · claims with the code' : 'Name it now or let a player claim it'}
                   </Text>
                 </View>
               </>
