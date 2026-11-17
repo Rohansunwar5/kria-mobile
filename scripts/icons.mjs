@@ -9,7 +9,7 @@ const ICONS = {
   expand_more: 'o', chevron_right: 'o', location_on: 'o', refresh: 'o',
   // Filled variants are the award badge glyphs (AwardBadge: FILL 1).
   sports_tennis: 'of', sports_cricket: 'of', table_restaurant: 'of', sports_soccer: 'of',
-  sports_kabaddi: 'of', sports: 'of', emoji_events: 'of', workspace_premium: 'of',
+  sports_kabaddi: 'of', sports_volleyball: 'of', sports_basketball: 'of', sports: 'of', emoji_events: 'of', workspace_premium: 'of',
   qr_code_2: 'o', person_check: 'o', trending_up: 'o',
   arrow_back: 'o', close: 'o', ios_share: 'o', content_copy: 'o', info: 'o', swipe_vertical: 'o',
   undo: 'o', block: 'o', edit: 'o', remove: 'o', error: 'o', search: 'o', more_horiz: 'o',

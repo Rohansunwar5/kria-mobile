@@ -26,6 +26,8 @@ export const SPORT_ICONS: Record<string, IconName> = {
   table_tennis: 'table_restaurant',
   football: 'sports_soccer',
   kabaddi: 'sports_kabaddi',
+  volleyball: 'sports_volleyball',
+  basketball: 'sports_basketball',
 };
 
 export const sportIcon = (sport?: string): IconName => (sport && SPORT_ICONS[sport]) || 'sports';

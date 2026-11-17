@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { goBack } from '@/lib/nav';
 import { colors, font, radius, space } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
-import { Arc } from '@/components/ui/Arc';
+import { PhotoAvatar } from '@/components/profile/PhotoAvatar';
 import { FooterBar, TopBar } from '@/components/ui/Bars';
 import { Icon, sportIcon } from '@/components/ui/Icon';
 import { Segmented } from '@/components/ui/Segmented';
 import { usePhotoUpload } from '@/components/profile/usePhotoUpload';
 import { DobField } from '@/components/profile/DobField';
-import { EVENT_SPORTS } from '@/lib/eventsList';
+import { ONBOARDING_SPORTS } from '@/lib/sports';
 import { sportName } from '@/lib/homeView';
 import { profileUpdate, readinessLine, type ProfileFormValues } from '@/lib/profileForm';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -85,10 +85,7 @@ export default function EditProfile() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={s.body} keyboardShouldPersistTaps="handled">
           <View style={s.photoRow}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Change profile photo" disabled={photo.busy} onPress={photo.pick} style={s.photo}>
-              {user?.profileImage ? <Image source={{ uri: user.profileImage }} style={[StyleSheet.absoluteFill, { borderRadius: 40 }]} /> : <Text style={s.photoIni}>{initials(form.firstName, form.lastName)}</Text>}
-              <View style={s.badge}>{photo.busy ? <Arc size={16} color={colors.bg} track={colors.onAccentTrack} /> : <Icon name="photo_camera" size={16} color={colors.bg} />}</View>
-            </Pressable>
+            <PhotoAvatar size={80} image={user?.profileImage} initials={initials(form.firstName, form.lastName)} onPress={photo.pick} />
             <View style={{ flex: 1, gap: 3 }}>
               <Text style={s.photoTitle}>Profile photo</Text>
               <Text style={s.hint2}>Optional. Organisers and teammates see it.</Text>
@@ -125,8 +122,8 @@ export default function EditProfile() {
 
           <View style={s.group}>
             <Text style={s.label}>Main sport</Text>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {EVENT_SPORTS.map((sp) => {
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {ONBOARDING_SPORTS.map((sp) => {
                 const on = form.sport === sp;
                 return (
                   <Pressable key={sp} accessibilityRole="button" accessibilityLabel={sportName(sp)} accessibilityState={{ selected: on }} onPress={() => set('sport')(on ? '' : sp)} style={[s.chip, { backgroundColor: on ? colors.text : colors.surface1 }]}>
@@ -155,7 +152,8 @@ export default function EditProfile() {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  body: { paddingHorizontal: space.gutter, paddingTop: 8, paddingBottom: 24, gap: 18 },
+  // paddingTop clears the photo's upload ring, which reaches ~13pt above it at its success scale.
+  body: { paddingHorizontal: space.gutter, paddingTop: 16, paddingBottom: 24, gap: 18 },
   group: { gap: 8 },
   label: { fontFamily: font.semibold, fontSize: 13, color: colors.text2 },
   field: { height: 52, paddingHorizontal: 16, borderRadius: radius.input, backgroundColor: colors.surface1, borderWidth: 1, borderColor: colors.surface3, color: colors.text, fontFamily: font.regular, fontSize: 15 },
@@ -164,10 +162,7 @@ const s = StyleSheet.create({
   hint: { fontFamily: font.regular, fontSize: 12, color: colors.text4 },
   hint2: { fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: colors.text3 },
   photoRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  photo: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
-  photoIni: { fontFamily: font.bold, fontSize: 24, color: colors.text },
   photoTitle: { fontFamily: font.semibold, fontSize: 15, color: colors.text },
-  badge: { position: 'absolute', right: -2, bottom: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: colors.text, borderWidth: 3, borderColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 14, borderRadius: radius.pill },
   chipText: { fontFamily: font.semibold, fontSize: 13 },
   info: { flexDirection: 'row', alignItems: 'center', gap: 6 },

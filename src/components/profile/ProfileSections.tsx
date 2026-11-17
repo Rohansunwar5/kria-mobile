@@ -8,7 +8,7 @@ import { AwardSheet } from '@/components/awards/AwardSheet';
 import { HonoursSheet } from '@/components/profile/HonoursSheet';
 import { RecentRow } from '@/components/profile/RecentRow';
 import { WinRateRing } from '@/components/profile/WinRateRing';
-import { Arc } from '@/components/ui/Arc';
+import { PhotoAvatar } from '@/components/profile/PhotoAvatar';
 import { Icon, sportIcon } from '@/components/ui/Icon';
 import { ResultBadge } from '@/components/ui/Pills';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -51,7 +51,7 @@ export function Identity({ firstName, lastName, image, best, awards, photo, onEd
   best: { rank: number; sport: string } | null;
   /** `buildAwards` output; null while loading. */
   awards: ReturnType<typeof buildAwards> | null;
-  photo?: { pick: () => void; busy: boolean };
+  photo?: { pick: () => void };
   onEdit?: () => void;
   onHonours?: () => void;
 }) {
@@ -65,10 +65,7 @@ export function Identity({ firstName, lastName, image, best, awards, photo, onEd
       <View style={s.identity}>
         <View style={s.idRow}>
           {photo ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={image ? 'Change profile photo' : 'Add a profile photo'} disabled={photo.busy} onPress={photo.pick} style={s.photo}>
-              {face}
-              <View style={s.photoBadge}>{photo.busy ? <Arc size={16} color={colors.bg} track={colors.onAccentTrack} /> : <Icon name="photo_camera" size={18} color={colors.bg} />}</View>
-            </Pressable>
+            <PhotoAvatar size={128} image={image} initials={initials(name)} onPress={photo.pick} />
           ) : (
             <View style={s.photo}>{face}</View>
           )}
@@ -306,7 +303,6 @@ const s = StyleSheet.create({
   idRow: { flexDirection: 'row', alignItems: 'center', gap: 18 },
   photo: { width: 128, height: 128, borderRadius: 64, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
   photoIni: { fontFamily: font.bold, fontSize: 30, color: colors.text },
-  photoBadge: { position: 'absolute', right: 0, bottom: 2, width: 30, height: 30, borderRadius: 15, backgroundColor: colors.text, borderWidth: 3, borderColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   nameCol: { flex: 1, minWidth: 0, gap: 10, alignItems: 'flex-start' },
   rankChip: { paddingVertical: 5, paddingHorizontal: 10, borderRadius: 8, backgroundColor: colors.surface2 },
   rankChipText: { fontFamily: font.semibold, fontSize: 13, color: colors.text },

@@ -6,7 +6,7 @@ import { useAppDispatch } from '@/store/hooks';
 import { updateProfile } from '@/store/slices/authSlice';
 import { latestTournaments } from '@/api/tournaments';
 import { citySuggestions } from '@/lib/authForms';
-import { EVENT_SPORTS } from '@/lib/eventsList';
+import { ONBOARDING_SPORTS, RANKED_SPORTS } from '@/lib/sports';
 import { sportName } from '@/lib/homeView';
 import { AuthScreen, Title } from '@/components/signin/AuthScreen';
 import { Field } from '@/components/signin/Field';
@@ -59,24 +59,32 @@ export default function YourGame() {
     >
       <Title sub="This sets your home ranking. You can still play and be ranked in any sport we rank.">What do you play most?</Title>
       <View style={s.tiles}>
-        {EVENT_SPORTS.map((k) => {
+        {ONBOARDING_SPORTS.map((k) => {
           const on = sport === k;
+          const live = RANKED_SPORTS.includes(k);
           return (
             <Pressable
               key={k}
               accessibilityRole="button"
               accessibilityLabel={sportName(k)}
+              accessibilityHint={live ? undefined : 'Not on Kria yet'}
               accessibilityState={{ selected: on }}
               onPress={() => { setSport(k); setError(null); }}
               style={[s.tile, on && s.tileOn]}
             >
               <Icon name={sportIcon(k)} size={28} color={on ? colors.accent : colors.text3} />
-              <Text style={s.tileLabel}>{sportName(k)}</Text>
+              <View style={{ gap: 2 }}>
+                <Text style={s.tileLabel}>{sportName(k)}</Text>
+                {live ? null : <Text style={s.soon}>Not on Kria yet</Text>}
+              </View>
               {on ? <View style={s.dot} /> : null}
             </Pressable>
           );
         })}
       </View>
+      {sport && !RANKED_SPORTS.includes(sport) ? (
+        <Text style={s.soonNote}>{`${sportName(sport)} isn't on Kria yet. You'll get a ranking once it's live.`}</Text>
+      ) : null}
       <View style={{ gap: 10 }}>
         <Field label="City" value={city} onChangeText={setCity} autoCapitalize="words" returnKeyType="done" />
         {chips.length ? (
@@ -99,6 +107,8 @@ const s = StyleSheet.create({
   tile: { width: '48%', height: 96, borderRadius: radius.input, backgroundColor: colors.surface1, padding: 14, justifyContent: 'space-between', borderWidth: 1.5, borderColor: 'transparent' },
   tileOn: { borderColor: colors.text },
   tileLabel: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
+  soon: { fontFamily: font.regular, fontSize: 12, color: colors.text4 },
+  soonNote: { fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: colors.text3, marginTop: -8 },
   dot: { position: 'absolute', top: 14, right: 14, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { height: 36, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: colors.surface1, justifyContent: 'center' },

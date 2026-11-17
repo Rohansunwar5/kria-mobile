@@ -20,3 +20,11 @@ describe('tournamentSports', () => {
     expect(tournamentSports({})).toEqual([]);
   });
 });
+
+describe('ONBOARDING_SPORTS', () => {
+  it('lists the three live sports first, then the five coming ones, all labelled', () => {
+    const { ONBOARDING_SPORTS, SPORT_LABELS } = jest.requireActual('../src/lib/sports');
+    expect(ONBOARDING_SPORTS).toEqual(['badminton', 'cricket', 'table_tennis', 'football', 'tennis', 'kabaddi', 'volleyball', 'basketball']);
+    for (const k of ONBOARDING_SPORTS) expect(SPORT_LABELS[k]).toBeTruthy();
+  });
+});

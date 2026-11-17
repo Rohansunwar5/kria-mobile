@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
+import { Image } from 'react-native';
 import API from '@/api/axios';
 import * as storage from '@/lib/storage';
 import type { Honor } from '@/lib/badges';
@@ -50,6 +51,8 @@ interface AuthState {
   statsLoading: boolean;
   bootstrapped: boolean;
   pendingOnboarding: boolean;
+  /** A new photo on its way up: the local framing and the share of bytes sent (0–1). */
+  photoUpload: { uri: string; progress: number } | null;
 }
 
 const initialState: AuthState = {
@@ -64,6 +67,7 @@ const initialState: AuthState = {
   statsLoading: false,
   bootstrapped: false,
   pendingOnboarding: false,
+  photoUpload: null,
 };
 
 const extractError = (err: any) =>
@@ -252,7 +256,7 @@ export const updateProfile = createAsyncThunk(
 
 export const uploadPlayerProfileImage = createAsyncThunk(
   'auth/uploadPlayerProfileImage',
-  async (asset: { uri: string; name: string; type: string }, { rejectWithValue }) => {
+  async (asset: { uri: string; name: string; type: string }, { dispatch, rejectWithValue }) => {
     try {
       const formData = new FormData();
       // React Native FormData takes a { uri, name, type } object, not a web File.
@@ -260,8 +264,21 @@ export const uploadPlayerProfileImage = createAsyncThunk(
       // must pass a name ending in .jpg/.png. Let axios set the multipart
       // boundary itself (do not force Content-Type here).
       formData.append('image', asset as any);
-      const response = await API.put('/player/auth/profile-image', formData);
-      return response.data?.data?.data || response.data?.data;
+      const response = await API.put('/player/auth/profile-image', formData, {
+        onUploadProgress: (e) => { if (e.total) dispatch(photoUploadProgress(e.loaded / e.total)); },
+      });
+      const player = response.data?.data?.data || response.data?.data;
+      // Load the new URL before the avatar swaps to it, so it never flashes blank,
+      // but give up after 3s: the photo is saved, a slow CDN shouldn't hold the ring.
+      if (typeof player?.profileImage === 'string') {
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        await Promise.race([
+          Promise.resolve(Image.prefetch(player.profileImage)).catch(() => undefined),
+          new Promise((done) => { timer = setTimeout(done, 3000); }),
+        ]);
+        clearTimeout(timer);
+      }
+      return player;
     } catch (error) {
       return rejectWithValue(extractError(error));
     }
@@ -286,6 +303,9 @@ export const authSlice = createSlice({
     /** The player's saved events: set at once on a tap, then to what the server answered. */
     setSavedTournaments: (state, action: PayloadAction<string[]>) => {
       if (state.user) state.user.savedTournaments = action.payload;
+    },
+    photoUploadProgress: (state, action: PayloadAction<number>) => {
+      if (state.photoUpload) state.photoUpload.progress = Math.min(1, action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -343,12 +363,19 @@ export const authSlice = createSlice({
     });
     builder.addCase(updateProfile.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
 
-    builder.addCase(uploadPlayerProfileImage.pending, (state) => { state.isLoading = true; state.error = null; });
+    builder.addCase(uploadPlayerProfileImage.pending, (state, action) => {
+      state.isLoading = true; state.error = null;
+      state.photoUpload = { uri: action.meta.arg.uri, progress: 0 };
+    });
     builder.addCase(uploadPlayerProfileImage.fulfilled, (state, action) => {
       state.isLoading = false;
+      state.photoUpload = null;
       if (state.user && action.payload) state.user = { ...state.user, ...action.payload };
     });
-    builder.addCase(uploadPlayerProfileImage.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
+    builder.addCase(uploadPlayerProfileImage.rejected, (state, action) => {
+      state.isLoading = false; state.error = action.payload as string;
+      state.photoUpload = null;
+    });
 
     builder.addCase(fetchPlayerStats.pending, (state) => { state.statsLoading = true; });
     builder.addCase(fetchPlayerStats.fulfilled, (state, action) => { state.statsLoading = false; state.playerStats = action.payload; });
@@ -392,6 +419,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { beginOnboardingHandoff, endOnboardingHandoff, setSavedTournaments } = authSlice.actions;
+export const { beginOnboardingHandoff, endOnboardingHandoff, setSavedTournaments, photoUploadProgress } = authSlice.actions;
 
 export default authSlice.reducer;

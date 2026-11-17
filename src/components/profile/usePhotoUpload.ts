@@ -1,16 +1,23 @@
-import { useState } from 'react';
+import { useRef } from 'react';
 import { Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
-import { useAppDispatch } from '@/store/hooks';
-import { uploadPlayerProfileImage } from '@/store/slices/authSlice';
+import { normalizeActions } from '@/lib/photoCrop';
+import { setPhotoDraft } from '@/lib/photoDraft';
 
-/** Pick a photo, shrink it to what the server takes, upload it. Shared by every place a player changes their photo. */
+/** Pick a photo and open the crop screen, which uploads it. Shared by every place a player changes their photo. */
 export function usePhotoUpload() {
-  const dispatch = useAppDispatch();
-  const [busy, setBusy] = useState(false);
+  const router = useRouter();
+  // Preparing a big photo takes a second with nothing on screen; ignore taps meanwhile.
+  const inFlight = useRef(false);
 
   const pick = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    try { await run(); } finally { inFlight.current = false; }
+  };
+  const run = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert('Permission needed', 'Allow photo access to change your avatar.');
@@ -18,25 +25,16 @@ export function usePhotoUpload() {
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
     if (result.canceled) return;
-    setBusy(true);
     try {
-      // iOS often hands back HEIC and/or multi-MB originals. The server only
-      // accepts jpg/png/jpeg/gif by filename extension and caps at 5MB, so
-      // downscale to a 512px avatar and re-encode as JPEG before uploading.
-      const processed = await manipulateAsync(
-        result.assets[0].uri,
-        [{ resize: { width: 512 } }],
-        { compress: 0.8, format: SaveFormat.JPEG }
-      );
-      await dispatch(
-        uploadPlayerProfileImage({ uri: processed.uri, name: 'avatar.jpg', type: 'image/jpeg' })
-      ).unwrap();
+      // Re-encode once: bakes in EXIF rotation (and HEIC) and caps the long side,
+      // so the crop screen and the crop itself work in the same pixels.
+      const asset = result.assets[0];
+      const out = await manipulateAsync(asset.uri, normalizeActions(asset), { compress: 0.9, format: SaveFormat.JPEG });
+      setPhotoDraft({ uri: out.uri, width: out.width, height: out.height });
+      router.push('/photo-crop');
     } catch (e: any) {
-      // Thunk rejects with a string; the resize step throws an Error.
-      Alert.alert('Upload failed', (typeof e === 'string' ? e : e?.message) || 'Could not update your photo. Try again.');
-    } finally {
-      setBusy(false);
+      Alert.alert('Upload failed', e?.message || 'Could not update your photo. Try again.');
     }
   };
-  return { pick, busy };
+  return { pick };
 }

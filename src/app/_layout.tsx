@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useState } from 'react';
-import { View, AppState } from 'react-native';
+import { AppState } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { isRunningInExpoGo } from 'expo';
@@ -69,7 +70,7 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
   if (!fontsLoaded) return null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }} onLayout={() => SplashScreen.hideAsync()}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }} onLayout={() => SplashScreen.hideAsync()}>
       {ready ? <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
@@ -77,6 +78,8 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="tournament/[id]" />
         <Stack.Screen name="profile" />
+        {/* Slides up over Profile or Edit profile; no swipe-back, which would fight dragging the photo. */}
+        <Stack.Screen name="photo-crop" options={{ animation: 'slide_from_bottom', gestureEnabled: false, contentStyle: { backgroundColor: colors.shadow } }} />
         <Stack.Screen name="notifications" />
         <Stack.Screen name="turn-on-notifications" />
         <Stack.Screen name="auction/[tournamentId]/[categoryId]" />
@@ -97,7 +100,7 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
         <Stack.Screen name="tournament/[id]/tie/[tieId]" />
       </Stack> : null}
       {!introDone ? <LaunchAnimation ready={routed} onDone={endIntro} /> : null}
-    </View>
+    </GestureHandlerRootView>
   );
 }
 

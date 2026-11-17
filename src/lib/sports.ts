@@ -5,6 +5,8 @@ export const SPORT_LABELS: Record<string, string> = {
   table_tennis: 'Table Tennis',
   tennis: 'Tennis',
   kabaddi: 'Kabaddi',
+  volleyball: 'Volleyball',
+  basketball: 'Basketball',
 };
 
 /**
@@ -25,3 +27,10 @@ export function tournamentSports(t?: { sport?: string; sports?: string[] }): str
   if (t?.sports?.length) return t.sports;
   return t?.sport ? [t.sport] : [];
 }
+
+/**
+ * Onboarding's "What do you play most?" list: the ranked (live) sports first,
+ * then sports Kria doesn't run yet. Those can still be picked as a main sport;
+ * Home and Profile already say "Kria doesn't rank X yet" for them.
+ */
+export const ONBOARDING_SPORTS = [...RANKED_SPORTS, 'football', 'tennis', 'kabaddi', 'volleyball', 'basketball'];

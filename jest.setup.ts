@@ -30,3 +30,14 @@ jest.mock('expo-notifications', () => ({
   clearLastNotificationResponse: jest.fn(),
   AndroidImportance: { DEFAULT: 5, HIGH: 6 },
 }));
+
+// Gesture handler's own mocks for its native module and host detector (crop screen).
+require('react-native-gesture-handler/jestSetup');
+// Its Reanimated bridge asks worklets for a UI-runtime handle, which jest's
+// worklets build doesn't have; there is no UI thread to bind to here anyway.
+jest.mock('./node_modules/react-native-gesture-handler/src/handlers/gestures/installUIRuntimeBindings', () => ({
+  installUIRuntimeBindings: () => undefined,
+}));
+jest.mock('./node_modules/react-native-gesture-handler/lib/module/handlers/gestures/installUIRuntimeBindings', () => ({
+  installUIRuntimeBindings: () => undefined,
+}));

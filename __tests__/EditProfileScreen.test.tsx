@@ -54,3 +54,16 @@ it('blocks a blank first name', async () => {
   expect(screen.getByText('First name is required.')).toBeTruthy();
   expect(mockPatch).not.toHaveBeenCalled();
 });
+
+it('offers every onboarding sport as the main sport', () => {
+  renderIt();
+  for (const name of ['Table Tennis', 'Football', 'Volleyball', 'Basketball']) expect(screen.getByLabelText(name)).toBeTruthy();
+});
+
+it('leaves room above the photo for its upload ring', () => {
+  renderIt();
+  // The ring reaches 13.35pt above the 80pt photo at its 1.1 success scale.
+  const { ScrollView, StyleSheet } = require('react-native');
+  const style = StyleSheet.flatten(screen.UNSAFE_getByType(ScrollView).props.contentContainerStyle);
+  expect(style.paddingTop).toBeGreaterThanOrEqual(14);
+});
