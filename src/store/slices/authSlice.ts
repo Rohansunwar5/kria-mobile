@@ -69,6 +69,9 @@ const initialState: AuthState = {
 const extractError = (err: any) =>
   err.response?.data?.message ||
   err.response?.data?.error ||
+  // No response at all: axios only says "Network Error", but React Native
+  // keeps the native networking error text on the XHR as _response.
+  (!err.response && typeof err.request?._response === 'string' && err.request._response) ||
   err.message ||
   'Something went wrong';
 

@@ -31,8 +31,9 @@ export function usePhotoUpload() {
       await dispatch(
         uploadPlayerProfileImage({ uri: processed.uri, name: 'avatar.jpg', type: 'image/jpeg' })
       ).unwrap();
-    } catch {
-      Alert.alert('Upload failed', 'Could not update your photo. Try again.');
+    } catch (e: any) {
+      // Thunk rejects with a string; the resize step throws an Error.
+      Alert.alert('Upload failed', (typeof e === 'string' ? e : e?.message) || 'Could not update your photo. Try again.');
     } finally {
       setBusy(false);
     }
