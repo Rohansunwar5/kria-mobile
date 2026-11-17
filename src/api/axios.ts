@@ -15,6 +15,14 @@ API.interceptors.request.use(async (req) => {
   if (token) {
     req.headers.Authorization = `Bearer ${token}`;
   }
+  // To axios, React Native isn't a browser, so a FormData body keeps axios's
+  // POST/PUT/PATCH default type, application/x-www-form-urlencoded. iOS swaps
+  // in its own multipart type; Android's OkHttp refuses the request
+  // ("multipart != application/x-www-form-urlencoded"). Naming the type lets
+  // each platform add the boundary.
+  if (req.data instanceof FormData) {
+    req.headers.setContentType('multipart/form-data');
+  }
   return req;
 });
 

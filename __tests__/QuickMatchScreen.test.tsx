@@ -393,3 +393,27 @@ describe('a quick cricket match', () => {
     expect(screen.queryByText('Who won the toss?')).toBeNull();
   });
 });
+
+describe('pull to refresh', () => {
+  // The page's ScrollView is the first one; Android's native pull-to-refresh
+  // would otherwise grab a swipe down on a score card before it could take a point.
+  const page = () => screen.UNSAFE_getAllByType(ScrollView)[0];
+
+  it('is off while the host scores a live match', () => {
+    mockViewer = 'h1'; mockStatus = 'live';
+    render(<QuickMatchScreen />);
+    expect(page().props.refreshControl).toBeUndefined();
+  });
+
+  it('stays on for someone watching a live match', () => {
+    mockViewer = 'p2'; mockStatus = 'live';
+    render(<QuickMatchScreen />);
+    expect(page().props.refreshControl).toBeTruthy();
+  });
+
+  it('stays on while the match is waiting', () => {
+    mockViewer = 'h1'; mockStatus = 'waiting';
+    render(<QuickMatchScreen />);
+    expect(page().props.refreshControl).toBeTruthy();
+  });
+});

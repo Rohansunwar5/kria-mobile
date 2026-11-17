@@ -261,8 +261,8 @@ export const uploadPlayerProfileImage = createAsyncThunk(
       const formData = new FormData();
       // React Native FormData takes a { uri, name, type } object, not a web File.
       // The server keys its image filter on the filename extension, so callers
-      // must pass a name ending in .jpg/.png. Let axios set the multipart
-      // boundary itself (do not force Content-Type here).
+      // must pass a name ending in .jpg/.png. The API instance sends FormData
+      // as multipart/form-data (Android needs it named); the platform adds the boundary.
       formData.append('image', asset as any);
       const response = await API.put('/player/auth/profile-image', formData, {
         onUploadProgress: (e) => { if (e.total) dispatch(photoUploadProgress(e.loaded / e.total)); },

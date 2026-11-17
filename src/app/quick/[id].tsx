@@ -138,7 +138,9 @@ export default function QuickMatchScreen() {
       <ScrollView
         scrollEnabled={!locked}
         contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 32 }}
-        refreshControl={<RefreshControl refreshing={loading && Boolean(match)} onRefresh={reload} tintColor={colors.accent} />}
+        // No pull-to-refresh while the host swipes scores: Android's native refresh grabs a
+        // swipe down before the card can take the point. The socket keeps the score current.
+        refreshControl={liveHost ? undefined : <RefreshControl refreshing={loading && Boolean(match)} onRefresh={reload} tintColor={colors.accent} />}
       >
         {match?.knockoutId ? (
           <Pressable

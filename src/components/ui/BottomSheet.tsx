@@ -1,13 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Modal, PanResponder, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, ease, font, motion, radius } from '@/constants/theme';
 
 /**
+ * How far to raise the sheet for a keyboard of height `kb`. iOS reports the
+ * keyboard including the home-indicator inset, which the sheet's bottom padding
+ * already covers; Android reports it above the navigation bar.
+ */
+export function sheetLift(kb: number, insetBottom: number, os: string): number {
+  return os === 'ios' ? Math.max(0, kb - insetBottom) : kb;
+}
+
+/** Tallest the sheet can be: from just under the status bar down to the keyboard. */
+export function sheetMaxHeight(windowHeight: number, insetTop: number, lift: number): number {
+  'worklet';
+  return windowHeight - insetTop - 12 - lift;
+}
+
+/**
  * DESIGN §5.10 + Motion "Bottom sheet": opens in 320ms (enter curve) with the
  * scrim fading over 200ms, closes in 220ms (exit curve). Drag down or tap the
- * scrim to dismiss. Reduced motion: fade only.
+ * scrim to dismiss. Reduced motion: fade only. Rides up with the keyboard:
+ * the Modal draws edge to edge, so Android's resize-for-keyboard never applies.
  */
 export function BottomSheet({ open, onClose, title, subtitle, children }: {
   open: boolean;
@@ -23,6 +39,25 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: {
   const height = useRef(0);
   const y = useSharedValue(1000);
   const fade = useSharedValue(0);
+  const lift = useSharedValue(0);
+  const { height: windowHeight } = useWindowDimensions();
+
+  useEffect(() => {
+    if (!mounted) return;
+    const ios = Platform.OS === 'ios';
+    const move = (to: number, duration?: number) => {
+      lift.value = withTiming(to, { duration: duration || motion.enter, easing: ease.standard });
+    };
+    const subs = [
+      Keyboard.addListener(ios ? 'keyboardWillShow' : 'keyboardDidShow', (e) => move(sheetLift(e.endCoordinates.height, insets.bottom, Platform.OS), e.duration)),
+      Keyboard.addListener(ios ? 'keyboardWillHide' : 'keyboardDidHide', (e) => move(0, e?.duration)),
+    ];
+    return () => {
+      subs.forEach((sub) => sub.remove());
+      lift.value = 0;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted]);
 
   useEffect(() => {
     if (open && mounted && height.current) {
@@ -67,7 +102,12 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: {
   ).current;
 
   const scrim = useAnimatedStyle(() => ({ opacity: fade.value }));
-  const sheet = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }], opacity: reduced ? fade.value : 1 }));
+  const topInset = insets.top;
+  const sheet = useAnimatedStyle(() => ({
+    transform: [{ translateY: y.value - lift.value }],
+    maxHeight: sheetMaxHeight(windowHeight, topInset, lift.value),
+    opacity: reduced ? fade.value : 1,
+  }));
 
   if (!mounted) return null;
   return (

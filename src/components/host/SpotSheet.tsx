@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { searchPlayers, type PlayerHit } from '@/api/playerSearch';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Icon } from '@/components/ui/Icon';
@@ -66,7 +66,8 @@ export function SpotSheet({ open, current = { name: '' }, taken, onPick, onClose
         <Icon name="search" size={20} color={colors.text4} />
         <TextInput value={q} onChangeText={setQ} placeholder="Name" placeholderTextColor={colors.text4} autoCorrect={false} style={s.input} accessibilityLabel="Player or guest name" />
       </View>
-      <View>
+      {/* Scrolls under the name field when the keyboard leaves too little room; taps still land. */}
+      <ScrollView keyboardShouldPersistTaps="handled" style={{ flexShrink: 1 }}>
         {first ? <Option initials={first.initials} title={first.title} sub={first.sub} onPress={first.onPress} /> : null}
         {shown.map((h) => {
           const full = `${h.firstName} ${h.lastName}`.trim();
@@ -85,7 +86,7 @@ export function SpotSheet({ open, current = { name: '' }, taken, onPick, onClose
         ) : null}
         {name ? <Option icon title={`Use "${name}" as a guest`} sub={guestSub} onPress={() => onPick({ name })} /> : null}
         {leaveOpen ? <Option icon open title="Leave it open" sub="Anyone with the code can claim it" onPress={() => onPick({ name: '' })} /> : null}
-      </View>
+      </ScrollView>
     </BottomSheet>
   );
 }

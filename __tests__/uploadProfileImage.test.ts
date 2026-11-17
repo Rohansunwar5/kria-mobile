@@ -16,6 +16,15 @@ describe('uploadPlayerProfileImage', () => {
   beforeEach(() => { mock = new MockAdapter(API); });
   afterEach(() => { mock.restore(); });
 
+  // axios sends any PUT without a type as application/x-www-form-urlencoded; iOS
+  // replaces that for a FormData body, but Android's OkHttp refuses it:
+  // "multipart != application/x-www-form-urlencoded".
+  it('sends the photo as multipart/form-data, which Android needs', async () => {
+    mock.onPut('/player/auth/profile-image').reply(200, { data: { _id: 'u1', profileImage: 'http://img/x.jpg' } });
+    await makeStore().dispatch(uploadPlayerProfileImage(asset) as any);
+    expect(mock.history.put[0].headers?.['Content-Type']).toBe('multipart/form-data');
+  });
+
   it('merges the uploaded image url into the existing user', async () => {
     mock.onPut('/player/auth/profile-image').reply(200, { data: { _id: 'u1', firstName: 'A', profileImage: 'http://img/x.jpg' } });
     const store = makeStore();
