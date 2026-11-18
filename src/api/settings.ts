@@ -41,3 +41,12 @@ export async function sendContactMessage(p: {
     throw reason(e, 'Could not send your message.');
   }
 }
+
+/** Deletes the signed-in player's account for good (LAUNCH-AUDIT B7). The caller signs out after. */
+export async function deleteAccount(): Promise<void> {
+  try {
+    await API.delete('/player/auth/account');
+  } catch (e) {
+    throw reason(e, 'Could not delete your account.');
+  }
+}

@@ -53,3 +53,6 @@ example
 
 # graphify code graph — derived, rebuilt by the umbrella refresh-graph.sh
 graphify-out/
+
+# Play Console service-account key for `eas submit` (LAUNCH-AUDIT B10). Never commit it.
+play-service-account.json

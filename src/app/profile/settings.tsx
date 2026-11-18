@@ -8,12 +8,19 @@ import { Button } from '@/components/ui/Button';
 import { FooterBar, TopBar } from '@/components/ui/Bars';
 import { Icon } from '@/components/ui/Icon';
 import { Tap } from '@/components/ui/Tap';
-import { useAppSelector } from '@/store/hooks';
-import { sendContactMessage } from '@/api/settings';
+import { BottomSheet } from '@/components/ui/BottomSheet';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { logout } from '@/store/slices/authSlice';
+import { unregisterPushToken } from '@/lib/push';
+import { deleteAccount, sendContactMessage } from '@/api/settings';
 
 export default function Settings() {
   const router = useRouter();
   const user = useAppSelector((s) => s.auth.user);
+  const dispatch = useAppDispatch();
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteErr, setDeleteErr] = useState('');
   const [message, setMessage] = useState('');
   const [focus, setFocus] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -42,6 +49,23 @@ export default function Settings() {
     }
   };
 
+  // LAUNCH-AUDIT B7. The server signs this account out everywhere; locally we
+  // forget this device's push registration and log out, and the auth gate
+  // takes the app back to Welcome, as Log out does.
+  const removeAccount = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setDeleteErr('');
+    try {
+      await deleteAccount();
+    } catch (e) {
+      if (alive.current) { setDeleteErr((e as Error).message); setDeleting(false); }
+      return;
+    }
+    await unregisterPushToken();
+    dispatch(logout());
+  };
+
   return (
     <SafeAreaView style={s.screen}>
       <TopBar title="Settings" onBack={() => goBack(router, '/(tabs)/profile')} />
@@ -59,6 +83,11 @@ export default function Settings() {
             <Tap scale={0.99} accessibilityLabel="Change password" onPress={() => router.push('/profile/change-password')} style={s.row}>
               <Icon name="lock" size={22} color={colors.text3} />
               <Text style={[s.strong, { flex: 1 }]}>Change password</Text>
+              <Icon name="chevron_right" size={20} color={colors.disabled} />
+            </Tap>
+            <Tap scale={0.99} accessibilityLabel="Delete account" onPress={() => { setDeleteErr(''); setConfirming(true); }} style={s.row}>
+              <Icon name="delete" size={22} color={colors.error} />
+              <Text style={[s.strong, { flex: 1, color: colors.error }]}>Delete account</Text>
               <Icon name="chevron_right" size={20} color={colors.disabled} />
             </Tap>
           </View>
@@ -84,6 +113,14 @@ export default function Settings() {
           <Button variant="secondary" label="Send message" busyLabel="Sending" busy={busy} disabled={!message.trim()} onPress={submit} style={{ flex: 1 }} />
         </FooterBar>
       </KeyboardAvoidingView>
+      <BottomSheet open={confirming} onClose={() => { if (!deleting) setConfirming(false); }} title="Delete your account?">
+        <Text style={s.sheetLine}>Your name, email, phone, photo and sign-in go for good. Your match results stay, shown as &quot;Deleted player&quot;.</Text>
+        {deleteErr ? <Text style={[s.sheetLine, { color: colors.error }]}>{deleteErr}</Text> : null}
+        <View style={{ gap: 10, marginTop: 20 }}>
+          <Button label="Delete my account" busyLabel="Deleting" busy={deleting} onPress={removeAccount} />
+          <Button variant="secondary" label="Keep my account" disabled={deleting} onPress={() => setConfirming(false)} />
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
@@ -96,6 +133,7 @@ const s = StyleSheet.create({
   col: { flex: 1, gap: 2 },
   small: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
   strong: { fontFamily: font.semibold, fontSize: 14, color: colors.text },
+  sheetLine: { fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: colors.text2, marginTop: 8 },
   label: { fontFamily: font.semibold, fontSize: 13, color: colors.text2, marginTop: space.headerToContent, marginBottom: 8 },
   field: { height: 132, textAlignVertical: 'top', paddingHorizontal: 16, paddingVertical: 14, marginBottom: 8, borderRadius: radius.input, backgroundColor: colors.surface1, borderWidth: 1, borderColor: colors.surface3, color: colors.text, fontFamily: font.regular, fontSize: 15 },
 });
