@@ -47,6 +47,22 @@ it('saves once on a double tap and goes back', async () => {
   expect(mockBack).toHaveBeenCalledTimes(1);
 });
 
+// LAUNCH-AUDIT H26: a 13–17 year old whose guardian hasn't agreed yet.
+it('asks for the guardian switch before saving an under-18 date of birth', async () => {
+  const teen = { ...user, dateOfBirth: `${new Date().getFullYear() - 16}-01-01` };
+  const store = configureStore({ reducer: { auth: authReducer }, preloadedState: { auth: { ...authReducer(undefined, { type: '@@x' }), user: teen } as never } });
+  mockPatch.mockResolvedValue({ data: { data: teen } });
+  render(<Provider store={store}><EditProfile /></Provider>);
+
+  await act(async () => fireEvent.press(screen.getByLabelText('Save')));
+  expect(screen.getByText('Players under 18 need a parent or guardian to agree. Turn on the guardian switch.')).toBeTruthy();
+  expect(mockPatch).not.toHaveBeenCalled();
+
+  fireEvent.press(screen.getByLabelText('My parent or guardian agrees'));
+  await act(async () => fireEvent.press(screen.getByLabelText('Save')));
+  expect(mockPatch).toHaveBeenCalledWith('/player/auth/profile', expect.objectContaining({ guardianConsent: true }));
+});
+
 it('blocks a blank first name', async () => {
   renderIt();
   fireEvent.changeText(screen.getByLabelText('First name'), '  ');

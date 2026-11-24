@@ -15,6 +15,8 @@ export function paymentLook(inv: Invoice): PaymentLook {
     case 'paid': return { label: 'Paid', tone: 'paid', retry: false };
     case 'failed': return { label: 'Failed', tone: 'failed', retry: true };
     case 'refunded': return { label: 'Refunded', tone: 'refunded', retry: false };
+    // The entry ended on the organiser's side; Kria refunds it (LAUNCH-AUDIT H13).
+    case 'refund_due': return { label: 'Refund due', tone: 'refunded', retry: false };
     default: return { label: 'Not paid', tone: 'open', retry: true };
   }
 }

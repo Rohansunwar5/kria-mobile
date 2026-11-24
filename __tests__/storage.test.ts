@@ -29,4 +29,11 @@ describe('storage', () => {
     await storage.clearAuth();
     expect(await getItem(storage.RECENT_SEARCHES_KEY)).toBeNull();
   });
+
+  it('clears the saved profile with the session', async () => {
+    await storage.setProfile({ _id: 'p1' });
+    expect(await storage.getProfile()).toEqual({ _id: 'p1' });
+    await storage.clearAuth();
+    expect(await storage.getProfile()).toBeNull();
+  });
 });

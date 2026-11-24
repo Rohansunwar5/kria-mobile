@@ -87,13 +87,12 @@ describe('For tournaments', () => {
     fireEvent.changeText(screen.getByLabelText('YYYY'), y);
   };
 
-  it('enables Save only with a valid date and a gender', () => {
+  // LAUNCH-AUDIT H26 (your call, 23 Nov): the date is required; gender stays optional.
+  it('enables Save once the date is valid, with or without a gender', () => {
     ui(<ForTournaments />);
     expect(disabled('Save')).toBe(true);
     dob('15', '03', '2001');
     expect(screen.getByText(/years old/)).toBeTruthy();
-    expect(disabled('Save')).toBe(true);
-    fireEvent.press(screen.getByText('Female'));
     expect(disabled('Save')).toBe(false);
   });
 
@@ -127,11 +126,8 @@ describe('For tournaments', () => {
     expect(screen.getByText('Nope')).toBeTruthy();
   });
 
-  it('Skip sends nothing, ends the handoff and goes home', async () => {
-    const store = ui(<ForTournaments />);
-    fireEvent.press(screen.getByLabelText('Skip'));
-    expect(mock.history.patch).toHaveLength(0);
-    expect(store.getState().auth.pendingOnboarding).toBe(false);
-    expect(mockReplace).toHaveBeenCalledWith('/(tabs)/home');
+  it('cannot be skipped', () => {
+    ui(<ForTournaments />);
+    expect(screen.queryByLabelText('Skip')).toBeNull();
   });
 });

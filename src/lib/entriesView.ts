@@ -34,6 +34,8 @@ function statusOf(e: MyEntry): { status: string; tone: Tone; closed: boolean } {
 function moneyOf(e: MyEntry): string | undefined {
   const fee = e.category?.isPaidRegistration ? (e.category.registrationFee ?? 0) : 0;
   if (e.payment?.status === 'paid') return `Paid ${rupees(e.payment.amount)}`;
+  if (e.payment?.status === 'refund_due') return `Refund due ${rupees(e.payment.amount)}`;
+  if (e.payment?.status === 'refunded') return `Refunded ${rupees(e.payment.amount)}`;
   if (fee > 0 && e.status !== 'withdrawn' && e.status !== 'rejected') return `${rupees(fee)} to pay`;
   return undefined;
 }

@@ -18,7 +18,7 @@ const MATCH_TYPE = { singles: 'Singles', doubles: 'Doubles', team: 'Team' } as c
 const GENDER_WORD = { male: 'Men', female: 'Women', mixed: 'Mixed' } as const;
 
 /** Age at `now` (computeAge in format.ts reads the real clock, which tests and callers can't pin). */
-function ageAt(dob: string, now: Date): number {
+export function ageAt(dob: string, now: Date): number {
   const d = new Date(dob);
   let age = now.getFullYear() - d.getFullYear();
   const m = now.getMonth() - d.getMonth();

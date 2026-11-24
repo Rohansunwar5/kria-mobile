@@ -3,7 +3,7 @@ import MockAdapter from 'axios-mock-adapter';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import API from '@/api/axios';
-import authReducer, { registerUser } from '@/store/slices/authSlice';
+import authReducer, { registerUser, verifyOtp } from '@/store/slices/authSlice';
 import Register from '../src/app/(auth)/register';
 import VerifyOtp from '../src/app/(auth)/verify-otp';
 import SetPassword from '../src/app/(auth)/set-password';
@@ -135,6 +135,20 @@ describe('VerifyOtp', () => {
 });
 
 describe('SetPassword', () => {
+  // LAUNCH-AUDIT M1: set-password must carry the token the code step returned.
+  it('sends the token from the code step', async () => {
+    mock.onPost('/player/auth/verify-otp').reply(200, { data: { status: 'otp_verified', setupToken: 'setup-1' } });
+    mock.onPost('/player/auth/set-password').reply(200, { data: { accessToken: 't', player: { _id: 'p1' } } });
+    const store = makeStore('asha@example.com');
+    await store.dispatch(verifyOtp({ data: { email: 'asha@example.com', otp: '123456' } }));
+    ui(<SetPassword />, store);
+    fireEvent.changeText(screen.getByLabelText('Password'), 'abcdefgh');
+    fireEvent.press(screen.getByLabelText('Create my account'));
+    await flush();
+    const sent = mock.history.post.find((r) => r.url === '/player/auth/set-password');
+    expect(JSON.parse(sent!.data)).toEqual({ email: 'asha@example.com', password: 'abcdefgh', setupToken: 'setup-1' });
+  });
+
   it('enables Create my account at 8 characters', () => {
     ui(<SetPassword />, makeStore('asha@example.com'));
     const pw = screen.getByLabelText('Password');

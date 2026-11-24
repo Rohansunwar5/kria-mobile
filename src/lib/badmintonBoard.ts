@@ -2,8 +2,11 @@ import type { BadmintonMatch } from '@/api/badmintonMatch';
 import { isGroupRound, roundLabel } from '@/lib/knockoutRoom';
 
 export interface RallyConfig { bestOf: number; pointsToWin: number; cap: number }
+/** The server's caps (liveScoring.util): 21 points caps at 30, 15 at 21, 11 at 15 (LAUNCH-AUDIT M14). */
+const CAPS: Record<number, number> = { 11: 15, 15: 21, 21: 30 };
 export function rallyConfig(m: Pick<BadmintonMatch, 'matchConfig'>): RallyConfig {
-  return { bestOf: m.matchConfig?.bestOf ?? 3, pointsToWin: m.matchConfig?.pointsToWin ?? 21, cap: 30 };
+  const pointsToWin = m.matchConfig?.pointsToWin ?? 21;
+  return { bestOf: m.matchConfig?.bestOf ?? 3, pointsToWin, cap: CAPS[pointsToWin] ?? pointsToWin + 9 };
 }
 
 /** The next point wins this game for `own` (server rule: 2-point lead at pointsToWin, or the cap). */

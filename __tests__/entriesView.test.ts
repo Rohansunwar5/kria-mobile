@@ -45,6 +45,9 @@ it('says what was paid, or what is still owed', () => {
   // A free category owes nothing, and a withdrawn entry is not chased for money.
   expect(one(entry()).money).toBeUndefined();
   expect(one(entry({ status: 'withdrawn', category: { ...C, isPaidRegistration: true, registrationFee: 600 } })).money).toBeUndefined();
+  // LAUNCH-AUDIT H13: a rejected paid entry says its money is coming back.
+  expect(one(entry({ status: 'rejected', payment: { status: 'refund_due', amount: 628.32 } })).money).toBe('Refund due ₹628.32');
+  expect(one(entry({ status: 'rejected', payment: { status: 'refunded', amount: 628.32 } })).money).toBe('Refunded ₹628.32');
 });
 it('newest first', () => {
   const r = entryRows([entry({ _id: 'a', createdAt: '2026-01-01' }), entry({ _id: 'b', createdAt: '2026-05-01' })]);

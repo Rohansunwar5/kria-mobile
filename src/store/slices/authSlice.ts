@@ -47,6 +47,8 @@ interface AuthState {
   error: string | null;
   registrationStep: number;
   registrationEmail: string | null;
+  /** From the code step; set-password needs it (LAUNCH-AUDIT M1). */
+  registrationToken: string | null;
   playerStats: PlayerStats | null;
   statsLoading: boolean;
   bootstrapped: boolean;
@@ -63,6 +65,7 @@ const initialState: AuthState = {
   error: null,
   registrationStep: 1,
   registrationEmail: null,
+  registrationToken: null,
   playerStats: null,
   statsLoading: false,
   bootstrapped: false,
@@ -88,13 +91,35 @@ export const bootstrapAuth = createAsyncThunk(
     try {
       const response = await API.get(`/${role}/auth/profile`);
       const profile = response.data?.data?.data || response.data?.data;
+      void renewToken(token, role); // the store saves the profile (saveProfileOnChange)
       return { token, role, profile };
-    } catch (error) {
-      await storage.clearAuth();
-      return rejectWithValue(extractError(error));
+    } catch (error: any) {
+      // Only a 401 means the session is over; offline, a 5xx or a deploy keep it (LAUNCH-AUDIT H20).
+      if (error.response?.status === 401) {
+        await storage.clearAuth();
+        return rejectWithValue(extractError(error));
+      }
+      const profile = await storage.getProfile();
+      if (profile) return { token, role, profile };
+      return rejectWithValue(extractError(error)); // no saved profile: Welcome, token kept for next time
     }
   }
 );
+
+/**
+ * A later expiry for this session, on every cold start, so a player who opens
+ * the app at least weekly is never signed out (H20). Not awaited: the old
+ * token works until it expires. A logout meanwhile wins.
+ */
+async function renewToken(token: string, role: Role) {
+  try {
+    const res = await API.post(`/${role}/auth/refresh-token`);
+    const renewed = res.data?.data?.data?.accessToken ?? res.data?.data?.accessToken;
+    if (renewed && (await storage.getToken()) === token) await storage.setAuth(renewed, role);
+  } catch {
+    // Kept the old token; the next start tries again.
+  }
+}
 
 export const fetchProfile = createAsyncThunk(
   'auth/fetchProfile',
@@ -192,8 +217,8 @@ export const verifyOtp = createAsyncThunk(
   'auth/verifyOtp',
   async ({ data }: { data: { email: string; otp: string } }, { rejectWithValue }) => {
     try {
-      await API.post(`/player/auth/verify-otp`, data);
-      return true;
+      const response = await API.post(`/player/auth/verify-otp`, data);
+      return ((response.data?.data?.data || response.data?.data)?.setupToken ?? null) as string | null;
     } catch (error) {
       return rejectWithValue(extractError(error));
     }
@@ -202,10 +227,11 @@ export const verifyOtp = createAsyncThunk(
 
 export const setPassword = createAsyncThunk(
   'auth/setPassword',
-  async ({ data }: { data: { email: string; password: string } }, { rejectWithValue }) => {
+  async ({ data }: { data: { email: string; password: string } }, { getState, rejectWithValue }) => {
     try {
       const role: Role = 'player';
-      const response = await API.post(`/${role}/auth/set-password`, data);
+      const setupToken = (getState() as { auth: AuthState }).auth.registrationToken;
+      const response = await API.post(`/${role}/auth/set-password`, { ...data, setupToken });
       const responseData = response.data?.data?.data || response.data?.data;
       if (responseData?.accessToken) await storage.setAuth(responseData.accessToken, role);
       return { role, responseData };
@@ -241,6 +267,8 @@ export const updateProfile = createAsyncThunk(
         dateOfBirth?: string;
         sport?: string;
         location?: string;
+        /** A parent or guardian agrees, for a player 13-17 (LAUNCH-AUDIT H26). */
+        guardianConsent?: boolean;
       };
     },
     { rejectWithValue }
@@ -286,6 +314,11 @@ export const uploadPlayerProfileImage = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk('auth/logout', async () => {
+  // Ends the session on the server too, so a copied token stops working (LAUNCH-AUDIT H1).
+  // Not awaited: signing out never waits on the network. The header is set here because
+  // the request goes out after clearAuth below. No token means a 401 already signed us out.
+  const token = await storage.getToken();
+  if (token) API.post('/player/auth/logout', null, { headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
   await storage.clearAuth();
   await googleSignOut(); // so the account picker shows again next time
 });
@@ -345,7 +378,7 @@ export const authSlice = createSlice({
     builder.addCase(registerUser.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
 
     builder.addCase(verifyOtp.pending, (state) => { state.isLoading = true; state.error = null; });
-    builder.addCase(verifyOtp.fulfilled, (state) => { state.isLoading = false; state.registrationStep = 3; });
+    builder.addCase(verifyOtp.fulfilled, (state, action) => { state.isLoading = false; state.registrationStep = 3; state.registrationToken = action.payload; });
     builder.addCase(verifyOtp.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
 
     builder.addCase(setPassword.pending, (state) => { state.isLoading = true; state.error = null; });
@@ -353,6 +386,7 @@ export const authSlice = createSlice({
       handleLoginSuccess(state, action);
       state.registrationStep = 1;
       state.registrationEmail = null;
+      state.registrationToken = null;
     });
     builder.addCase(setPassword.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
 

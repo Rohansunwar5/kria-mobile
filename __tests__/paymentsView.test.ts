@@ -33,4 +33,6 @@ it('offers a retry only where money can still land', () => {
   expect(paymentLook(inv({ status: 'failed' }))).toMatchObject({ label: 'Failed', retry: true });
   expect(paymentLook(inv({ status: 'created' }))).toMatchObject({ label: 'Not paid', retry: true });
   expect(paymentLook(inv({ status: 'refunded' }))).toMatchObject({ label: 'Refunded', retry: false });
+  // LAUNCH-AUDIT H13: a rejected or cancelled paid entry is owed its money; paying again would be wrong.
+  expect(paymentLook(inv({ status: 'refund_due' }))).toMatchObject({ label: 'Refund due', tone: 'refunded', retry: false });
 });

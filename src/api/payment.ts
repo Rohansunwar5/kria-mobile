@@ -4,7 +4,7 @@ import type { EntryProfile } from './tournaments';
 export interface Invoice {
   _id: string;
   amount: number;
-  /** created | paid | failed | refunded */
+  /** created | paid | failed | refund_due | refunded */
   status: string;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;

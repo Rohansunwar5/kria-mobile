@@ -239,6 +239,29 @@ describe('2b paid flow', () => {
     expect(mockBack).not.toHaveBeenCalled();
   });
 
+  // LAUNCH-AUDIT H13: the app died after paying, and the webhook is late. Pay again
+  // makes the entry from the paid order on the server and is refused with a 400.
+  it('a Pay refused because an earlier payment just became the entry shows the entry', async () => {
+    order.mockRejectedValue({ response: { status: 400, data: { message: 'You have already paid for this category. Your entry is in.' } } });
+    mine.mockResolvedValue([entry()]);
+    renderScreen();
+    fireEvent.press(screen.getByText('Advanced'));
+    await waitFor(() => expect(disabled(PAY)).toBe(false));
+    fireEvent.press(screen.getByLabelText(PAY));
+    expect(await screen.findByText("You're in the queue for approval")).toBeTruthy();
+    expect(screen.queryByLabelText(PAY)).toBeNull();
+  });
+
+  it('a Pay refused for any other reason shows why, and keeps Pay', async () => {
+    order.mockRejectedValue({ response: { status: 400, data: { message: 'Entries for this tournament have closed.' } } });
+    renderScreen();
+    fireEvent.press(screen.getByText('Advanced'));
+    await waitFor(() => expect(disabled(PAY)).toBe(false));
+    fireEvent.press(screen.getByLabelText(PAY));
+    expect(await screen.findByText('Entries for this tournament have closed.')).toBeTruthy();
+    expect(screen.getByLabelText(PAY)).toBeTruthy();
+  });
+
   it('a failed verify keeps the payment and offers Confirm my entry, not Pay', async () => {
     verify.mockRejectedValue(new Error('boom'));
     await payWith();

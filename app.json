@@ -6,7 +6,8 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "kria",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0B0D",
     "android": {
       "package": "club.kria.app",
       "googleServicesFile": "./google-services.json",
@@ -43,8 +44,15 @@
           "color": "#FF5A1F"
         }
       ],
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      "@sentry/react-native"
     ],
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/6e2afcc6-b326-4ce8-80e4-b99e314160f7"
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

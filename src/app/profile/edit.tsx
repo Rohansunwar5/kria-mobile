@@ -13,7 +13,8 @@ import { usePhotoUpload } from '@/components/profile/usePhotoUpload';
 import { DobField } from '@/components/profile/DobField';
 import { ONBOARDING_SPORTS } from '@/lib/sports';
 import { sportName } from '@/lib/homeView';
-import { profileUpdate, readinessLine, type ProfileFormValues } from '@/lib/profileForm';
+import { GUARDIAN_HINT, GUARDIAN_LABEL, needsGuardian, profileUpdate, readinessLine, type ProfileFormValues } from '@/lib/profileForm';
+import { Toggle } from '@/components/ui/Toggle';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateProfile } from '@/store/slices/authSlice';
 
@@ -44,7 +45,7 @@ export default function EditProfile() {
   const user = useAppSelector((st) => st.auth.user);
   const error = useAppSelector((st) => st.auth.error);
   const photo = usePhotoUpload();
-  const before = useRef({ sport: user?.sport, location: user?.location, lastName: user?.lastName, phone: user?.phone });
+  const before = useRef({ sport: user?.sport, location: user?.location, lastName: user?.lastName, phone: user?.phone, guardianConsentAt: user?.guardianConsentAt });
   const [form, setForm] = useState<ProfileFormValues>({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -56,6 +57,7 @@ export default function EditProfile() {
     sport: user?.sport || '',
   });
   const [formError, setFormError] = useState('');
+  const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
   const alive = useRef(true);
@@ -64,7 +66,7 @@ export default function EditProfile() {
 
   const save = async () => {
     if (inFlight.current) return;
-    const r = profileUpdate(form, before.current);
+    const r = profileUpdate(form, before.current, consent);
     if (!r.ok) { setFormError(r.error); return; }
     setFormError('');
     inFlight.current = true;
@@ -119,6 +121,8 @@ export default function EditProfile() {
             </View>
             <View style={{ flex: 1 }}><Field label="City" value={form.location} onChangeText={set('location')} /></View>
           </View>
+          {needsGuardian(form.dateOfBirth, user?.guardianConsentAt)
+            ? <Toggle label={GUARDIAN_LABEL} hint={GUARDIAN_HINT} value={consent} onChange={setConsent} /> : null}
 
           <View style={s.group}>
             <Text style={s.label}>Main sport</Text>

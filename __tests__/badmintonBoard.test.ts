@@ -12,7 +12,14 @@ const mk = (gameScores: BadmintonMatch['gameScores'], extra: Partial<BadmintonMa
 describe('rallyConfig / wouldWin', () => {
   it('defaults and overrides', () => {
     expect(rallyConfig({})).toEqual(c);
-    expect(rallyConfig({ matchConfig: { bestOf: 5, pointsToWin: 11 } })).toEqual({ bestOf: 5, pointsToWin: 11, cap: 30 });
+    expect(rallyConfig({ matchConfig: { bestOf: 5, pointsToWin: 11 } })).toEqual({ bestOf: 5, pointsToWin: 11, cap: 15 });
+  });
+  // LAUNCH-AUDIT M14: the cap follows the points a game is played to, as on the server.
+  it('caps 11- and 15-point games at 15 and 21', () => {
+    expect(rallyConfig({ matchConfig: { pointsToWin: 15 } }).cap).toBe(21);
+    const eleven = rallyConfig({ matchConfig: { pointsToWin: 11 } });
+    expect(wouldWin(14, 14, eleven)).toBe(true);
+    expect(wouldWin(13, 13, eleven)).toBe(false);
   });
   it('rule', () => {
     expect(wouldWin(20, 18, c)).toBe(true);

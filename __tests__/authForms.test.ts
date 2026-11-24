@@ -26,10 +26,13 @@ describe('authForms', () => {
     expect(dobCheck('15', '03', '2001', today)).toEqual({ state: 'valid', iso: '2001-03-15', age: 25 });
     expect(dobCheck('15', '03', '20', today)).toEqual({ state: 'incomplete' });
     expect(dobCheck('', '', '', today)).toEqual({ state: 'incomplete' });
-    expect(dobCheck('15', '03', '2023', today)).toEqual({ state: 'invalid' });
+    expect(dobCheck('15', '03', '2023', today)).toEqual({ state: 'tooYoung' });
+    expect(dobCheck('15', '03', '2027', today)).toEqual({ state: 'invalid' }); // not born yet
     expect(dobCheck('15', '03', '1930', today)).toEqual({ state: 'invalid' });
-    expect(dobCheck('23', '10', '2021', today)).toMatchObject({ state: 'valid', age: 5 });
-    expect(dobCheck('24', '10', '2021', today)).toEqual({ state: 'invalid' });
+    // LAUNCH-AUDIT H26: 13 and over. A real date for someone younger says so.
+    expect(dobCheck('23', '10', '2013', today)).toMatchObject({ state: 'valid', age: 13 });
+    expect(dobCheck('24', '10', '2013', today)).toEqual({ state: 'tooYoung' });
+    expect(dobCheck('23', '10', '2021', today)).toEqual({ state: 'tooYoung' });
   });
   it('citySuggestions', () => {
     const t = (city?: string) => ({ venue: { city } });

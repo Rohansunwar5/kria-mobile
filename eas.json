@@ -5,11 +5,15 @@
   "build": {
     "preview": {
       "distribution": "internal",
-      "android": { "buildType": "apk" }
+      "channel": "preview",
+      "android": { "buildType": "apk" },
+      "env": { "SENTRY_DISABLE_AUTO_UPLOAD": "true" }
     },
     "production": {
       "autoIncrement": true,
-      "android": { "buildType": "app-bundle" }
+      "channel": "production",
+      "android": { "buildType": "app-bundle" },
+      "env": { "SENTRY_DISABLE_AUTO_UPLOAD": "true" }
     }
   },
   "submit": {

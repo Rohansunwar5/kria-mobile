@@ -1,8 +1,10 @@
+import '@/lib/sentry'; // first, so it sees errors from the rest of start-up (LAUNCH-AUDIT H22)
 import { useEffect, useCallback, useState } from 'react';
 import { AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { isRunningInExpoGo } from 'expo';
 import { Provider } from 'react-redux';
 import { useFonts } from 'expo-font';
@@ -16,6 +18,9 @@ import { routeFor } from '@/lib/authRoute';
 import { LaunchAnimation } from '@/components/LaunchAnimation';
 import { configurePushHandling, registerPushToken } from '@/lib/push';
 import { usePushOpen } from '@/lib/pushOpen';
+
+// A screen that throws shows a way back instead of closing the app (LAUNCH-AUDIT H22).
+export { AppErrorBoundary as ErrorBoundary } from '@/components/AppErrorBoundary';
 
 SplashScreen.preventAutoHideAsync();
 // No native fade: the overlay underneath is the same #0B0B0D, and a fade would veil
@@ -57,13 +62,14 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
 
   const ready = fontsLoaded && bootstrapped;
 
-  const target = ready ? routeFor({ signedIn: !!user, pendingOnboarding, root: String(segments[0]), publicRoots: PUBLIC_ROOTS }) : null;
+  const needsDob = !!user && !user.dateOfBirth;
+  const target = ready ? routeFor({ signedIn: !!user, pendingOnboarding, needsDob, root: String(segments[0]), publicRoots: PUBLIC_ROOTS }) : null;
   useEffect(() => {
     if (target) router.replace(target);
   }, [target, segments, router]); // segments: re-check after every navigation
   // The first route is chosen once the gate has nothing left to replace.
   const routed = ready && !target;
-  usePushOpen(routed && !!user && !pendingOnboarding); // a tap while signed out waits for sign-in
+  usePushOpen(routed && !!user && !pendingOnboarding && !needsDob); // a tap while signed out waits for sign-in
 
   // The native splash and the launch overlay are both #0B0B0D: the splash holds
   // until fonts load, then hides once the overlay is laid out over the app.
@@ -71,6 +77,8 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }} onLayout={() => SplashScreen.hideAsync()}>
+      {/* The design is dark-only (LAUNCH-AUDIT H23): light icons whatever the phone's theme. */}
+      <StatusBar style="light" />
       {ready ? <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />

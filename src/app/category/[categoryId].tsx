@@ -129,7 +129,15 @@ function Category({ categoryId, tournamentId }: { categoryId: string; tournament
     try {
       setCheckout({ order: await createPaymentOrder(tournamentId, categoryId, entryProfile(user, skill, new Date())), playerId: user._id, skill });
     } catch (e) {
-      setRefusal(serverMessage(e));
+      // The server may have just made the entry from an earlier order Razorpay
+      // had already taken the money for (LAUNCH-AUDIT H13): show that, not a refusal.
+      const now = await loadMine().catch(() => [] as MyEntry[]);
+      if (now.some((x) => x.categoryId === categoryId)) {
+        setFresh(now);
+        setEntered(true);
+      } else {
+        setRefusal(serverMessage(e));
+      }
     }
     setBusy(false);
   };

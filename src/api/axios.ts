@@ -2,7 +2,8 @@ import axios from 'axios';
 import { getToken, clearAuth } from '@/lib/storage';
 import { API_BASE_URL } from '@/lib/config';
 
-const API = axios.create({ baseURL: API_BASE_URL });
+// A stalled request gives up instead of holding the splash or a spinner forever (LAUNCH-AUDIT H21).
+const API = axios.create({ baseURL: API_BASE_URL, timeout: 15000 });
 
 // Injected by the store layer later to avoid an axios -> store import cycle.
 let onUnauthorized: (() => void) | null = null;
@@ -22,6 +23,7 @@ API.interceptors.request.use(async (req) => {
   // each platform add the boundary.
   if (req.data instanceof FormData) {
     req.headers.setContentType('multipart/form-data');
+    req.timeout = 120000; // an upload on a slow connection takes longer than 15 s
   }
   return req;
 });
@@ -29,6 +31,9 @@ API.interceptors.request.use(async (req) => {
 API.interceptors.response.use(
   (res) => res,
   async (error) => {
+    if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+      error.message = "Kria didn't answer in time. Check your connection and try again.";
+    }
     // Every 401 now means the token is bad: a wrong current/login password
     // comes back as a 400 carrying the server's message.
     if (error.response?.status === 401) {

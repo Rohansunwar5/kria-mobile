@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Linking } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
+import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes';
 import { OrderDetails } from '@/api/payment';
 import { colors } from '@/constants/theme';
 
@@ -17,7 +18,7 @@ function razorpayHtml(order: OrderDetails, name: string, email: string, contact?
   window.onload = function() {
     var rzp = new Razorpay({
       key: ${JSON.stringify(order.keyId)},
-      amount: ${order.amount},
+      amount: ${Math.round(order.amount * 100)}, // paise; the server sends rupees
       currency: ${JSON.stringify(order.currency)},
       order_id: ${JSON.stringify(order.orderId)},
       name: 'Kria Sports',
@@ -41,6 +42,31 @@ function razorpayHtml(order: OrderDetails, name: string, email: string, contact?
 </script>
 </body>
 </html>`;
+}
+
+/**
+ * Where a checkout navigation should go instead of the WebView, or null to load
+ * it there (LAUNCH-AUDIT H14). Choosing a UPI app sends `upi://pay?…`, or for a
+ * named app (GPay, PhonePe) `intent://pay?…#Intent;scheme=upi;package=…;end`,
+ * which no WebView can load: it becomes the plain `upi://` link the app opens.
+ */
+function externalUrl(url: string): string | null {
+  if (/^(https?|about|data|blob|javascript):/i.test(url)) return null;
+  const intent = /^intent:\/\/([^#]*)#Intent;(.*)$/i.exec(url);
+  if (!intent) return url;
+  const scheme = /(?:^|;)scheme=([^;]+)/.exec(intent[2])?.[1];
+  return scheme ? `${scheme}://${intent[1]}` : url; // no scheme: openURL fails quietly, checkout stays
+}
+
+// A link for the phone goes straight to openURL. react-native-webview's own
+// handling asks canOpenURL first, which is false on Android 11+ for a scheme
+// the manifest doesn't list, so a UPI app never opened. openURL needs no listing.
+// ponytail: unverified on a device (LAUNCH-AUDIT section 7). If GPay/PhonePe still fail, switch to react-native-razorpay.
+function onShouldStartLoad(req: ShouldStartLoadRequest): boolean {
+  const external = externalUrl(req.url);
+  if (external === null) return true;
+  Linking.openURL(external).catch(() => {}); // app not installed: checkout stays open for another method
+  return false;
 }
 
 export function RazorpayWebView({ orderDetails, playerName, playerEmail, playerContact, onSuccess, onDismiss }: {
@@ -70,6 +96,8 @@ export function RazorpayWebView({ orderDetails, playerName, playerEmail, playerC
     <View style={{ flex: 1 }}>
       <WebView
         source={{ html }}
+        originWhitelist={['*']}
+        onShouldStartLoadWithRequest={onShouldStartLoad}
         onMessage={onMessage}
         onLoadEnd={() => setWebviewLoaded(true)}
         onError={() => onDismiss()}
