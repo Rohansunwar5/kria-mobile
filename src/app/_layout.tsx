@@ -34,7 +34,7 @@ setUnauthorizedHandler(() => {
   store.dispatch(logout());
 });
 
-const PUBLIC_ROOTS = ['(auth)', 'auction', 'bracket', 'live'];
+const PUBLIC_ROOTS = ['(auth)', 'auction', 'live'];
 
 function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
   const dispatch = useAppDispatch();
@@ -113,7 +113,7 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     // DESIGN.md §4.2. Names match `font` in constants/theme.ts.
     JetBrainsMono_600SemiBold,
     'Archivo-400': require('../../assets/fonts/Archivo-400.ttf'),
@@ -124,7 +124,8 @@ export default function RootLayout() {
   });
   return (
     <Provider store={store}>
-      <AuthGate fontsLoaded={fontsLoaded} />
+      {/* A font that fails to load falls back to the system font rather than holding the splash forever. */}
+      <AuthGate fontsLoaded={fontsLoaded || !!fontError} />
     </Provider>
   );
 }

@@ -16,6 +16,7 @@ let mockProblem = '';
 let mockStatus = 'waiting';
 let mockFetched: Record<string, unknown> = {}; let mockMatchOver: Record<string, unknown> = {};
 let mockBusy = false;
+let mockConnected = true;
 jest.mock('@/store/hooks', () => ({
   useAppSelector: (pick: (s: unknown) => unknown) => pick({ auth: { user: { _id: mockViewer } } }),
 }));
@@ -35,6 +36,9 @@ jest.mock('@/api/quickKnockout', () => ({
 }));
 
 const mockStart = jest.fn();
+const mockAccept = jest.fn(() => Promise.resolve(true));
+const mockDecline = jest.fn(() => Promise.resolve(true));
+const mockPlayAsGuest = jest.fn();
 const mockCancel = jest.fn();
 const mockToss = jest.fn();
 const mockBall = jest.fn();
@@ -53,14 +57,15 @@ jest.mock('@/lib/useQuickMatch', () => ({
       fixtureId: mockKnockoutId ? 'f1' : undefined,
       ...mockMatchOver,
     },
-    loading: false, error: false, busy: mockBusy, problem: mockProblem, reload: jest.fn(),
+    loading: false, error: false, busy: mockBusy, problem: mockProblem, connected: mockConnected, reload: jest.fn(),
     point: jest.fn(), undo: jest.fn(), start: mockStart, cancel: mockCancel, removePlayer: jest.fn(),
     toss: mockToss, lineup: jest.fn(), ball: mockBall, undoBall: jest.fn(),
+    acceptInvite: mockAccept, declineInvite: mockDecline, playAsGuest: mockPlayAsGuest,
   }),
 }));
 jest.mock('@/lib/useQuickScorecard', () => ({ useQuickScorecard: () => null }));
 
-beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; mockStatus = 'waiting'; mockFetched = {}; mockMatchOver = {}; mockBusy = false; });
+beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; mockStatus = 'waiting'; mockFetched = {}; mockMatchOver = {}; mockBusy = false; mockConnected = true; });
 
 describe('a waiting match', () => {
   it('opens in the waiting room, not on the scoreboard, and the host starts it', () => {
@@ -415,5 +420,56 @@ describe('pull to refresh', () => {
     mockViewer = 'h1'; mockStatus = 'waiting';
     render(<QuickMatchScreen />);
     expect(page().props.refreshControl).toBeTruthy();
+  });
+});
+
+// As on the tournament live screens: a dropped socket says the score may be behind.
+describe('a dropped connection', () => {
+  it('tells someone watching that the score is the last one seen', () => {
+    mockViewer = 'p2'; mockStatus = 'live';
+    render(<QuickMatchScreen />);
+    expect(screen.queryByText('Reconnecting. Showing the last update.')).toBeNull();
+
+    mockConnected = false;
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Reconnecting. Showing the last update.')).toBeTruthy();
+  });
+});
+
+describe('an invite', () => {
+  const invitedSides = [
+    { sideId: 's1', name: 'Arjun', slots: [{ slotId: 'a1', playerId: 'h1', displayName: 'Arjun Mehta' }] },
+    { sideId: 's2', name: 'Asha Rao', slots: [{ slotId: 'b1', invitedPlayerId: 'p9', displayName: 'Asha Rao' }] },
+  ];
+
+  it('the host sees an invited slot in the waiting room, and can play it as a guest', () => {
+    mockViewer = 'h1'; mockMatchOver = { sides: invitedSides };
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Invited')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Play Asha Rao as a guest'));
+    expect(mockPlayAsGuest).toHaveBeenCalledWith('b1');
+  });
+
+  it('the invitee sees the invite while waiting or live, and can accept', () => {
+    mockViewer = 'p9'; mockMatchOver = { sides: invitedSides };
+    const { unmount } = render(<QuickMatchScreen />);
+    expect(screen.getByText('Arjun Mehta invited you to Arjun vs Asha Rao')).toBeTruthy();
+    fireEvent.press(screen.getByText('Accept'));
+    expect(mockAccept).toHaveBeenCalled();
+    unmount();
+
+    mockStatus = 'live';
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('Arjun Mehta invited you to Arjun vs Asha Rao')).toBeTruthy();
+  });
+
+  it('after the match, the invitee can only remove their name', async () => {
+    mockViewer = 'p9'; mockStatus = 'completed'; mockMatchOver = { sides: invitedSides, outcome: 'side1' };
+    render(<QuickMatchScreen />);
+    expect(screen.getByText('This finished before you accepted')).toBeTruthy();
+    expect(screen.queryByText('Accept')).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByText('Remove my name')); });
+    expect(mockDecline).toHaveBeenCalled();
+    expect(router.back).toHaveBeenCalled();
   });
 });

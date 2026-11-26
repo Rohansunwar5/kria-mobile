@@ -9,6 +9,7 @@ export const NOTIFICATION_ICON: Record<NotificationKind, IconName> = {
   match_starting: 'play_circle',
   announcement: 'campaign',
   added_to_quick_match: 'group_add',
+  knockout_invite: 'group_add',
 };
 
 /** Rows newer than `seenAt` are new; a player who never opened the screen has only new ones. */
@@ -18,7 +19,7 @@ export function splitBySeen(list: AppNotification[], seenAt: string | null) {
   return { fresh, earlier: list.filter((n) => !fresh.includes(n)) };
 }
 
-const OPENABLE = ['/category/[categoryId]', '/live/[matchId]', '/tournament/[id]/announcements', '/quick/[id]'];
+const OPENABLE = ['/category/[categoryId]', '/live/[matchId]', '/tournament/[id]/announcements', '/quick/[id]', '/knockout/[id]'];
 
 /** The server picks the path, but the app only opens screens it knows. */
 export function targetHref(t: AppNotification['target']): { pathname: string; params: Record<string, string> } | null {

@@ -77,6 +77,7 @@ export function playerSub(k: QuickKnockout, p: KnockoutPlayer, meId: string) {
   if (p.playerId && p.playerId === k.hostId) return p.playerId === meId ? 'Host · you' : 'Host';
   if (p.playerId && p.playerId === meId) return 'You';
   if (p.playerId) return 'Joined';
+  if (p.invitedPlayerId) return 'Invited · waiting';
   return isKnockoutHost(k, meId) ? 'Guest · can claim with the code' : 'Guest';
 }
 

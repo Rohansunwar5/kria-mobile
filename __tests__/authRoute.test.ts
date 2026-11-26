@@ -1,6 +1,6 @@
 import { routeFor } from '@/lib/authRoute';
 
-const PUB = ['(auth)', 'auction', 'bracket', 'live'];
+const PUB = ['(auth)', 'auction', 'live'];
 const r = (signedIn: boolean, pendingOnboarding: boolean, root: string) => routeFor({ signedIn, pendingOnboarding, root, publicRoots: PUB });
 
 describe('routeFor', () => {

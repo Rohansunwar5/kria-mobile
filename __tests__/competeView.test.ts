@@ -2,7 +2,8 @@ import type { SportSummary } from '../src/api/career';
 import type { QuickMatch } from '../src/api/quickMatch';
 import type { RankedPlayer } from '../src/api/rankings';
 import { rankingRows } from '../src/lib/competeView';
-import { matchCard, normaliseCode, sortCards } from '../src/lib/matchCard';
+import { knockoutCard, matchCard, normaliseCode, sortCards } from '../src/lib/matchCard';
+import type { QuickKnockout } from '../src/api/quickKnockout';
 
 const p = (id: string, winRate = 0.6): RankedPlayer => ({ playerId: id, firstName: id, lastName: 'X', played: 12, decided: 12, won: 7, winRate });
 const board = (n: number) => Array.from({ length: n }, (_, i) => p(`p${i}`));
@@ -61,6 +62,24 @@ describe('matchCard', () => {
     ];
     expect(matchCard(base({ sport: 'cricket', inningsScores: inns, outcome: 'side2' }), 'me')).toMatchObject({ foot: '112/6 vs 118/4', result: 'L' });
     expect(matchCard(base({ status: 'cancelled' }), 'me')).toMatchObject({ foot: 'Cancelled by host', dim: true, right: { kind: 'text', text: 'Tue 13 Oct' } });
+  });
+
+  it('labels a match or knockout I am invited to', () => {
+    const invited = base({ status: 'waiting', sides: [
+      { sideId: 'a', name: 'Kabir', slots: [{ slotId: '1', playerId: 'h', displayName: 'Kabir Rao' }] },
+      { sideId: 'b', name: 'Aarav', slots: [{ slotId: '2', invitedPlayerId: 'me', displayName: 'Aarav Menon' }] },
+    ] });
+    expect(matchCard(invited, 'me').right).toEqual({ kind: 'text', text: 'Invited' });
+    expect(matchCard(invited, 'h').right).toEqual({ kind: 'code', code: 'K7QX2M' });
+    // A spot held for an invite isn't open to a code.
+    expect(matchCard(invited, 'h').foot).toBeNull();
+    const k = {
+      _id: 'k', hostId: 'h', name: 'Cup', sport: 'badminton', format: 'singles', status: 'waiting', matchConfig: {},
+      players: [{ playerKey: 'a', playerId: 'h', displayName: 'Kabir' }, { playerKey: 'b', invitedPlayerId: 'me', displayName: 'Aarav' }],
+      pairs: [], entrants: [], fixtures: [], roundNames: [], awards: [], createdAt: '',
+    } as QuickKnockout;
+    expect(knockoutCard(k, 'me').right).toEqual({ kind: 'text', text: 'Invited' });
+    expect(knockoutCard(k, 'h').right).toBeNull();
   });
 
   it('sorts live, then waiting, then finished, newest first', () => {

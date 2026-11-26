@@ -6,6 +6,7 @@ import {
   freeSlots,
   formatLabel,
   outcomeLabel,
+  invitedMe,
 } from '@/lib/quickMatchView';
 // Note for the implementer: these are the ONLY exports quickMatchView has.
 // Do not add a statusLabel — MatchPanel passes match.status straight to Tag,
@@ -132,5 +133,27 @@ describe('labels', () => {
     expect(outcomeLabel(base({ status: 'completed', outcome: 'side2' }))).toBe('Blues won');
     expect(outcomeLabel(base({ status: 'completed', outcome: 'tied' }))).toBe('Tied');
     expect(outcomeLabel(base())).toBeNull();
+  });
+});
+
+describe('invitedMe', () => {
+  it('finds a pending invite in a knockout or a quick match, and nothing once linked', () => {
+    expect(invitedMe({ players: [{ playerKey: 'a', invitedPlayerId: 'me', displayName: 'Me' }] }, 'me')).toBe(true);
+    expect(invitedMe({ players: [{ playerKey: 'a', playerId: 'me', displayName: 'Me' }] }, 'me')).toBe(false);
+    expect(invitedMe({ sides: [{ sideId: 's', name: 'S', slots: [{ slotId: '1', invitedPlayerId: 'me', displayName: 'Me' }] }] }, 'me')).toBe(true);
+    expect(invitedMe({ sides: [{ sideId: 's', name: 'S', slots: [{ slotId: '1', invitedPlayerId: 'other', displayName: 'X' }] }] }, 'me')).toBe(false);
+  });
+});
+
+describe('freeSlots and invites', () => {
+  it("skips a slot held for someone else's invite, and keeps my own open to me", () => {
+    const m = base({
+      sides: [
+        { sideId: 's1', name: 'A', slots: [{ slotId: 'sl1', playerId: 'h1', displayName: 'Host' }] },
+        { sideId: 's2', name: 'B', slots: [{ slotId: 'sl2', invitedPlayerId: 'asha', displayName: 'Asha' }, { slotId: 'sl3', displayName: 'Open' }] },
+      ],
+    });
+    expect(freeSlots(m).map((s) => s.slotId)).toEqual(['sl3']);
+    expect(freeSlots(m, 'asha').map((s) => s.slotId)).toEqual(['sl2', 'sl3']);
   });
 });

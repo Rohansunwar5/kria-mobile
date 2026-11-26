@@ -86,3 +86,17 @@ it('arranges cricket teams through the endpoints', async () => {
   expect(mock.history.post.map((r) => r.url)).toEqual(['/quick-knockout/k1/teams']);
   expect(mock.history.delete.map((r) => r.url)).toEqual(['/quick-knockout/k1/teams/t1']);
 });
+
+it('accepts, declines and plays an invite as a guest through the endpoints', async () => {
+  const { result } = await opened();
+  mock.onPost('/quick-knockout/k1/invite/accept').reply(200, envelope(knockout({ players: [{ playerKey: 'b', playerId: 'me', displayName: 'Asha' }] })));
+  await act(async () => { await result.current.acceptInvite(); });
+  expect(result.current.knockout?.players[0].playerId).toBe('me');
+
+  mock.onPost().reply(200, envelope(knockout()));
+  await act(async () => { await result.current.declineInvite(); });
+  await act(async () => { await result.current.playAsGuest('b'); });
+  expect(mock.history.post.map((r) => r.url)).toEqual([
+    '/quick-knockout/k1/invite/accept', '/quick-knockout/k1/invite/decline', '/quick-knockout/k1/players/b/guest',
+  ]);
+});

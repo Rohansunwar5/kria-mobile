@@ -48,8 +48,22 @@ export function drawBlocker(k: QuickKnockout): string | null {
   return null;
 }
 
-/** Once drawn: a cricket draw outlives roster changes, so Start re-checks the teams (as the server does). */
+/** Picked by the host from search and not yet answered. */
+export const isPendingInvite = (p: KnockoutPlayer) => !p.playerId && !!p.invitedPlayerId;
+
+/** The viewer's own pending invite, if the host invited them and they haven't answered. */
+export const myInvite = (k: QuickKnockout, meId: string) => k.players.find((p) => isPendingInvite(p) && p.invitedPlayerId === meId);
+
+/** "A", "A and B", "A, B and C". */
+const listNames = (names: string[]) => (names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`);
+
+/**
+ * Once drawn, mirrors the server's Start refusals: every invite answered
+ * first, and a cricket draw outlives roster changes, so the teams are re-checked.
+ */
 export function startBlocker(k: QuickKnockout): string | null {
+  const pending = k.players.filter(isPendingInvite).map((p) => p.displayName);
+  if (pending.length) return `Waiting for ${listNames(pending)} to accept. Remove them or play them as guests to start.`;
   if (k.sport !== 'cricket') return null;
   if (teamPlayers(k).length > 0) return 'Put everyone in a team, or reshuffle.';
   if ((k.teams ?? []).some((t) => teamPlayers(k, t.teamId).length < 2)) return 'Every team needs at least 2 players.';

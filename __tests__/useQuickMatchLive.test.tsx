@@ -107,6 +107,18 @@ describe('useQuickMatch — live updates', () => {
     expect(server.emit).toHaveBeenCalledWith('join:match', { matchId: 'm1' });
     await waitFor(() => expect(result.current.match?.gameScores?.[0].side1Score).toBe(7));
   });
+
+  it('says when the connection drops, and when it is back', async () => {
+    const { result } = await opened();
+    expect(result.current.connected).toBe(true);
+
+    act(() => server.__emit('disconnect'));
+    expect(result.current.connected).toBe(false);
+
+    act(() => server.__emit('connect'));
+    expect(result.current.connected).toBe(true);
+    await waitFor(() => expect(result.current.loading).toBe(false));
+  });
 });
 
 describe('useQuickMatch — start', () => {

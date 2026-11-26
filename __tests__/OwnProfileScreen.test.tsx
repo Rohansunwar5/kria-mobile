@@ -24,8 +24,6 @@ jest.mock('@/api/quickKnockout', () => ({ listMyQuickKnockouts: jest.fn(async ()
 let mockRecord = { titles: [] as Title[], honors: [] as { title: string; badge: string }[] };
 jest.mock('@/api/profileApi', () => ({ getPublicPlayer: jest.fn(async () => ({ player: mockRecord, history: [] })) }));
 let mockRecent: RecentMatch[] = [];
-const mockUnregister = jest.fn(async () => {});
-jest.mock('@/lib/push', () => ({ unregisterPushToken: () => mockUnregister() }));
 jest.mock('@/api/career', () => ({ getRecentMatches: jest.fn(async () => mockRecent) }));
 jest.mock('@/api/rankings', () => ({ getTopPlayers: jest.fn(async () => [{ playerId: 'p1', firstName: 'Rohan', lastName: 'Sunwar', played: 12, decided: 12, won: 8, winRate: 8 / 12 }]) }));
 jest.mock('@/api/tournaments', () => ({ latestTournaments: jest.fn(async () => [{ _id: 'a' }, { _id: 'b' }]) }));
@@ -148,6 +146,4 @@ it('keeps entries, payments and log out', async () => {
   expect(mockPush).toHaveBeenCalledWith('/profile/invoices');
   fireEvent.press(screen.getByLabelText('Log out'));
   await waitFor(() => expect(mockLogout).toHaveBeenCalled());
-  expect(mockUnregister).toHaveBeenCalled();
-  expect(mockUnregister.mock.invocationCallOrder[0]).toBeLessThan(mockLogout.mock.invocationCallOrder[0]);
 });

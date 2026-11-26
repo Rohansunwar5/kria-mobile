@@ -5,6 +5,8 @@ import { unwrap } from './unwrap';
 export interface QuickMatchSlot {
   slotId: string;
   playerId?: string;
+  /** Picked by the host from search and not yet answered: no playerId until they accept. */
+  invitedPlayerId?: string;
   displayName: string;
 }
 
@@ -34,6 +36,8 @@ export interface QuickMatch {
   /** Cricket only: "by 7 wickets", "by 12 runs" or "match tied", set at completion. */
   winMargin?: string;
   lockedAt?: string;
+  /** Played to a result at least once; an undo doesn't clear it. Past this, invites can't be accepted. */
+  hasBeenCompleted?: boolean;
   createdAt: string;
   gameScores?: QuickGameScore[];
   /**
@@ -191,6 +195,18 @@ export async function startQuickMatch(id: string): Promise<QuickMatch> {
 
 export async function cancelQuickMatch(id: string): Promise<QuickMatch> {
   return asMatch(await API.post(`/quick-match/${id}/cancel`));
+}
+
+export async function acceptQuickMatchInvite(id: string): Promise<QuickMatch> {
+  return asMatch(await API.post(`/quick-match/${id}/invite/accept`));
+}
+
+export async function declineQuickMatchInvite(id: string): Promise<QuickMatch> {
+  return asMatch(await API.post(`/quick-match/${id}/invite/decline`));
+}
+
+export async function playQuickMatchSlotAsGuest(id: string, slotId: string): Promise<QuickMatch> {
+  return asMatch(await API.post(`/quick-match/${id}/slots/${slotId}/guest`));
 }
 
 export async function removeQuickMatchPlayer(id: string, playerId: string): Promise<QuickMatch> {

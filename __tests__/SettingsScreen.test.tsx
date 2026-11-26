@@ -12,8 +12,6 @@ jest.mock('expo-router', () => ({
 const mockSend = jest.fn();
 const mockDelete = jest.fn();
 jest.mock('@/api/settings', () => ({ sendContactMessage: (...a: unknown[]) => mockSend(...a), deleteAccount: () => mockDelete() }));
-const mockUnregister = jest.fn(async () => {});
-jest.mock('@/lib/push', () => ({ unregisterPushToken: () => mockUnregister() }));
 const mockLogout = jest.fn(() => ({ type: 'test/logout' }));
 jest.mock('@/store/slices/authSlice', () => {
   const actual = jest.requireActual('@/store/slices/authSlice');
@@ -92,7 +90,7 @@ describe('Delete account', () => {
     expect(mockLogout).not.toHaveBeenCalled();
   });
 
-  it('deletes once, then forgets this device and signs out', async () => {
+  it('deletes once, then signs out (which forgets this device)', async () => {
     let resolve!: () => void;
     mockDelete.mockReturnValue(new Promise<void>((r) => (resolve = r)));
     renderIt();
@@ -102,7 +100,6 @@ describe('Delete account', () => {
     expect(mockDelete).toHaveBeenCalledTimes(1);
     expect(mockLogout).not.toHaveBeenCalled();
     await act(async () => resolve());
-    expect(mockUnregister).toHaveBeenCalledTimes(1);
     expect(mockLogout).toHaveBeenCalledTimes(1);
   });
 

@@ -3,7 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { serverMessage } from '@/api/unwrap';
 import { acquireSocket, holdRoom, releaseRoom, releaseSocket, socket } from '@/lib/socket';
 import {
-  addKnockoutPlayer, addKnockoutTeam, cancelQuickKnockout, drawQuickKnockout, getQuickKnockout, grantKnockoutAward,
+  acceptKnockoutInvite, addKnockoutPlayer, addKnockoutTeam, declineKnockoutInvite, playKnockoutAsGuest, cancelQuickKnockout, drawQuickKnockout, getQuickKnockout, grantKnockoutAward,
   moveKnockoutPlayer, pairKnockoutPlayers, removeKnockoutPlayer, removeKnockoutTeam, renameKnockoutTeam, startQuickKnockout, unpairKnockoutPlayers, type QuickKnockout,
 } from '@/api/quickKnockout';
 
@@ -84,6 +84,9 @@ export function useQuickKnockout(id?: string) {
     addGuest: (displayName: string) => withId((k) => addKnockoutPlayer(k, { displayName })),
     addPlayer: (playerId: string) => withId((k) => addKnockoutPlayer(k, { playerId })),
     removePlayer: (playerKey: string) => withId((k) => removeKnockoutPlayer(k, playerKey)),
+    acceptInvite: () => withId(acceptKnockoutInvite),
+    declineInvite: () => withId(declineKnockoutInvite),
+    playAsGuest: (playerKey: string) => withId((k) => playKnockoutAsGuest(k, playerKey)),
     pair: (a: string, b: string) => withId((k) => pairKnockoutPlayers(k, [a, b])),
     unpair: (pairId: string) => withId((k) => unpairKnockoutPlayers(k, pairId)),
     moveToTeam: (playerKey: string, teamId: string | null) => withId((k) => moveKnockoutPlayer(k, playerKey, teamId)),

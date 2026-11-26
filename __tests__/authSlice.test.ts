@@ -14,6 +14,9 @@ import { clearAuth, getProfile, getToken, setAuth } from '@/lib/storage';
 import { waitFor } from '@testing-library/react-native';
 
 jest.mock('@/lib/googleSignIn', () => ({ googleSignOut: jest.fn(() => Promise.resolve()) }));
+// Never settles: a logout that waited on it would hang the test.
+const mockUnregister = jest.fn(() => new Promise<void>(() => {}));
+jest.mock('@/lib/push', () => ({ unregisterPushToken: () => mockUnregister() }));
 
 const initial = reducer(undefined, { type: '@@INIT' });
 
@@ -216,6 +219,17 @@ describe('logout ends the server session', () => {
     await clearAuth();
     await configureStore({ reducer: { auth: reducer } }).dispatch(logout());
     expect(mock.history.post).toHaveLength(0);
+  });
+
+  // Log out, a deleted account and a 401 all end here, so each stops this phone's pushes.
+  it("releases this phone's push token on every logout, 401 included, without waiting for it", async () => {
+    mockUnregister.mockClear();
+    await setAuth('tok-1', 'player');
+    mock.onPost('/player/auth/logout').reply(200, {});
+    await configureStore({ reducer: { auth: reducer } }).dispatch(logout());
+    await clearAuth(); // the 401 sign-out: the interceptor already cleared the token
+    await configureStore({ reducer: { auth: reducer } }).dispatch(logout());
+    expect(mockUnregister).toHaveBeenCalledTimes(2);
   });
 });
 

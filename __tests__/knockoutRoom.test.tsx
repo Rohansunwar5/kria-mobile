@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import type { QuickKnockout } from '../src/api/quickKnockout';
 import { CricketPeople } from '../src/components/knockout/People';
-import { fixtureScores, isGroupRound, koLine, koStatus, myPlayableFixture, roundAbbr, roundLabel, slotName } from '../src/lib/knockoutRoom';
+import { fixtureScores, isGroupRound, koLine, koStatus, myPlayableFixture, playerSub, roundAbbr, roundLabel, slotName } from '../src/lib/knockoutRoom';
 
 const base = (over: Partial<QuickKnockout> = {}): QuickKnockout => ({
   _id: 'k', hostId: 'h', name: 'Sunday Smash', sport: 'badminton', format: 'singles', status: 'live',
@@ -70,11 +70,18 @@ it('moves a cricket player with the sheet, and a full team is closed', () => {
       { playerKey: 'b', playerId: 'me', displayName: 'Kabir Rao' },
     ],
   });
-  render(<CricketPeople k={k} meId="h" busy={false} onRemove={jest.fn()} onMove={onMove} onAddTeam={jest.fn()} onRemoveTeam={jest.fn()} onRenameTeam={jest.fn()} />);
+  render(<CricketPeople k={k} meId="h" busy={false} onRemove={jest.fn()} onGuest={jest.fn()} onMove={onMove} onAddTeam={jest.fn()} onRemoveTeam={jest.fn()} onRenameTeam={jest.fn()} />);
   fireEvent.press(screen.getByLabelText('Kabir Rao, Joined'));
   expect(screen.getByText('Move Kabir Rao')).toBeTruthy();
   expect(screen.getByText('1 / 1 · full')).toBeTruthy();
   const options = screen.getAllByText('Team 2');
   fireEvent.press(options[options.length - 1]); // the sheet's, below the section heading
   expect(onMove).toHaveBeenCalledWith('b', 't2');
+});
+
+it('marks a pending invite as invited, for the host and everyone else', () => {
+  const k = base({ status: 'waiting' });
+  const invited = { playerKey: 'd', invitedPlayerId: 'p9', displayName: 'Asha Rao' };
+  expect(playerSub(k, invited, 'h')).toBe('Invited · waiting');
+  expect(playerSub(k, invited, 'me')).toBe('Invited · waiting');
 });

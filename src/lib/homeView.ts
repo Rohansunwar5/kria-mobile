@@ -85,7 +85,7 @@ export function heroFor(s: SportSummary, board: RankedPlayer[] | null, meId: str
 
 /** The first of `inProgress()` as a card. */
 export function upNext(item: InProgress, meId: string): MatchCardView {
-  return item.kind === 'knockout' ? knockoutCard(item.knockout) : matchCard(item.match, meId);
+  return item.kind === 'knockout' ? knockoutCard(item.knockout, meId) : matchCard(item.match, meId);
 }
 
 export interface Milestone {

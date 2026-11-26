@@ -69,6 +69,15 @@ describe('roomView', () => {
     expect(roster(m(), 'h')[1]).toMatchObject({ count: '1 of 2 claimed' });
   });
 
+  it('marks an invited slot, and only the host can play it as a guest', () => {
+    const invited = m({ sides: [m().sides[0], { sideId: 'b', name: 'Net Gains', slots: [{ slotId: '3', invitedPlayerId: 'n', displayName: 'Nikhil Shetty' }] }] });
+    expect(roster(invited, 'h')[1].slots[0]).toMatchObject({ sub: 'Invited', claimed: false, guestable: true, removable: false });
+    expect(roster(invited, 'k')[1].slots[0]).toMatchObject({ sub: 'Invited', guestable: false });
+    expect(roster(m(), 'h')[1].slots[1]).toMatchObject({ guestable: false });
+    // An invite still pending at Start plays as a guest, so the note still says so.
+    expect(waitingNote(invited, 'h')).toMatch(/Unclaimed spots play as guests/);
+  });
+
   it('tells a joined player who they are waiting for', () => {
     expect(waitingNote(m(), 'k')).toBe('Waiting for Aarav Menon to start the match.');
     expect(waitingNote(m(), 'h')).toMatch(/Unclaimed spots play as guests/);

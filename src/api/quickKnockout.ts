@@ -5,6 +5,8 @@ import type { QuickMatch } from './quickMatch';
 export interface KnockoutPlayer {
   playerKey: string;
   playerId?: string;
+  /** Picked by the host from search and not yet answered: no playerId until they accept. */
+  invitedPlayerId?: string;
   displayName: string;
   /** Cricket: absent = Any team. */
   teamId?: string;
@@ -75,6 +77,15 @@ export async function claimKnockoutGuest(code: string, playerKey: string): Promi
 }
 export async function addKnockoutPlayer(id: string, body: { displayName: string } | { playerId: string }): Promise<QuickKnockout> {
   return asKnockout(await API.post(`/quick-knockout/${id}/players`, body));
+}
+export async function acceptKnockoutInvite(id: string): Promise<QuickKnockout> {
+  return asKnockout(await API.post(`/quick-knockout/${id}/invite/accept`));
+}
+export async function declineKnockoutInvite(id: string): Promise<QuickKnockout> {
+  return asKnockout(await API.post(`/quick-knockout/${id}/invite/decline`));
+}
+export async function playKnockoutAsGuest(id: string, playerKey: string): Promise<QuickKnockout> {
+  return asKnockout(await API.post(`/quick-knockout/${id}/players/${playerKey}/guest`));
 }
 export async function removeKnockoutPlayer(id: string, playerKey: string): Promise<QuickKnockout> {
   return asKnockout(await API.delete(`/quick-knockout/${id}/players/${playerKey}`));

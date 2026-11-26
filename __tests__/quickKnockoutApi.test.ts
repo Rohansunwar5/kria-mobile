@@ -3,6 +3,7 @@ import API from '@/api/axios';
 import {
   createQuickKnockout, joinQuickKnockout, resolveQuickCode, addKnockoutPlayer,
   moveKnockoutPlayer, addKnockoutTeam, removeKnockoutTeam, renameKnockoutTeam, settleKnockoutTie,
+  acceptKnockoutInvite, declineKnockoutInvite, playKnockoutAsGuest,
 } from '@/api/quickKnockout';
 
 const mock = new MockAdapter(API);
@@ -56,4 +57,14 @@ it('arranges teams and settles a tie', async () => {
   expect(mock.history.post.map((r) => r.url)).toEqual(['/quick-knockout/k1/teams', '/quick-knockout/k1/tie']);
   expect(JSON.parse(mock.history.post[1].data)).toEqual({ fixtureId: 'f1', entrantId: 't2' });
   expect(mock.history.delete.map((r) => r.url)).toEqual(['/quick-knockout/k1/teams/t1']);
+});
+
+it('accepts, declines and plays an invite as a guest', async () => {
+  mock.onPost().reply(200, envelope({ _id: 'k1' }));
+  expect((await acceptKnockoutInvite('k1'))._id).toBe('k1');
+  await declineKnockoutInvite('k1');
+  await playKnockoutAsGuest('k1', 'pk2');
+  expect(mock.history.post.map((r) => r.url)).toEqual([
+    '/quick-knockout/k1/invite/accept', '/quick-knockout/k1/invite/decline', '/quick-knockout/k1/players/pk2/guest',
+  ]);
 });

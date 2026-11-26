@@ -1,6 +1,6 @@
 import type { QuickCode } from '@/api/quickKnockout';
 import { formatLabel as knockoutFormat, teamPlayers } from '@/lib/quickKnockoutView';
-import { formatLabel as matchFormat } from '@/lib/quickMatchView';
+import { formatLabel as matchFormat, openToCode } from '@/lib/quickMatchView';
 import { initials } from '@/lib/matchCard';
 import { sportName } from '@/lib/homeView';
 
@@ -24,7 +24,7 @@ export function joinView(found: QuickCode, meId: string): JoinView {
     const m = found.data;
     const sides = m.sides.map((side) => ({
       name: side.name,
-      slots: side.slots.map((s) => ({ slotId: s.slotId, name: s.displayName, ini: initials(s.displayName), taken: Boolean(s.playerId) })),
+      slots: side.slots.map((s) => ({ slotId: s.slotId, name: s.displayName, ini: initials(s.displayName), taken: !openToCode(s, meId) })),
     }));
     return {
       kind: 'match',
@@ -56,6 +56,6 @@ export function joinView(found: QuickCode, meId: string): JoinView {
           return { teamId: t.teamId, name: t.name, count: full ? 'Full' : `${n}/${per}`, full };
         })
       : null,
-    guests: k.players.filter((p) => !p.playerId).map((p) => ({ playerKey: p.playerKey, name: p.displayName })),
+    guests: k.players.filter((p) => openToCode(p, meId)).map((p) => ({ playerKey: p.playerKey, name: p.displayName })),
   };
 }

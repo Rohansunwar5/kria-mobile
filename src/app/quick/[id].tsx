@@ -8,6 +8,7 @@ import { CricketBoard } from '@/components/live/CricketBoard';
 import { CricketPad } from '@/components/live/CricketPad';
 import { TossCard } from '@/components/live/TossCard';
 import { Cancelled, RallyDone, RallyLive } from '@/components/room/RallyRoom';
+import { InviteCard } from '@/components/room/InviteCard';
 import { CodeCard, Roster } from '@/components/room/Roster';
 import { FooterBar, IconButton, TopBar } from '@/components/ui/Bars';
 import { Button } from '@/components/ui/Button';
@@ -20,7 +21,7 @@ import { cricketBoard, fromQuick } from '@/lib/cricketBoard';
 import { goBack } from '@/lib/nav';
 import { panelFor } from '@/lib/quickCricketView';
 import { isKnockoutHost } from '@/lib/quickKnockoutView';
-import { canUndo, freeSlots, isHost } from '@/lib/quickMatchView';
+import { canUndo, freeSlots, invitedMe, isHost } from '@/lib/quickMatchView';
 import { roomLine, STATUS } from '@/lib/roomView';
 import { useQuickMatch } from '@/lib/useQuickMatch';
 import { useQuickScorecard } from '@/lib/useQuickScorecard';
@@ -36,8 +37,8 @@ export default function QuickMatchScreen() {
   const { user } = useAppSelector((s) => s.auth);
   const meId = user?._id ?? '';
   const {
-    match, loading, error, busy, problem, reload,
-    point, undo, start, cancel, removePlayer,
+    match, loading, error, busy, problem, connected, reload,
+    point, undo, start, cancel, removePlayer, acceptInvite, declineInvite, playAsGuest,
     toss, lineup, ball, undoBall,
   } = useQuickMatch(id);
   const scorecard = useQuickScorecard(match);
@@ -115,6 +116,11 @@ export default function QuickMatchScreen() {
       { text: 'Keep match', style: 'cancel' },
       { text: 'Cancel match', style: 'destructive', onPress: () => cancel() },
     ]);
+  const invited = Boolean(match && invitedMe(match, meId));
+  const hostName = match?.sides.flatMap((x) => x.slots).find((x) => x.playerId === match.hostId)?.displayName;
+  const decline = async () => {
+    if (await declineInvite()) goBack(router, '/(tabs)/compete');
+  };
   const rally = match && match.sport !== 'cricket';
   const waitingHost = match?.status === 'waiting' && host;
   const liveHost = rally && match?.status === 'live' && host;
@@ -174,10 +180,21 @@ export default function QuickMatchScreen() {
               <Text style={display(40)}>{title}</Text>
               <Text style={s.line}>{roomLine(match, meId)}</Text>
             </View>
+            {!connected ? <Text style={s.reconnect}>Reconnecting. Showing the last update.</Text> : null}
 
             {problem && !padShown ? <Text style={s.problem}>{problem}</Text> : null}
 
-            {match.status === 'waiting' ? <Roster match={match} meId={meId} busy={busy} onRemove={removePlayer} /> : null}
+            {invited ? (
+              <InviteCard
+                title={`${hostName ?? 'The host'} invited you to ${title}`}
+                busy={busy}
+                finished={match.status === 'completed' || match.status === 'cancelled' || !!match.hasBeenCompleted}
+                onAccept={() => acceptInvite()}
+                onDecline={decline}
+              />
+            ) : null}
+
+            {match.status === 'waiting' ? <Roster match={match} meId={meId} busy={busy} onRemove={removePlayer} onGuest={playAsGuest} /> : null}
             {rally && match.status === 'live' ? <RallyLive match={match} host={host} busy={busy} onPoint={point} onLock={setLocked} /> : null}
             {rally && match.status === 'completed' ? <RallyDone match={match} /> : null}
             {match.status === 'cancelled' ? <Cancelled /> : null}
@@ -244,6 +261,7 @@ const s = StyleSheet.create({
   dot: { width: 7, height: 7, borderRadius: 4 },
   statusText: { fontFamily: font.semibold, fontSize: 12 },
   line: { fontFamily: font.regular, fontSize: 13, color: colors.text3 },
+  reconnect: { marginTop: 12, fontFamily: font.regular, fontSize: 12, color: colors.text3 },
   problem: { paddingTop: 12, fontFamily: font.regular, fontSize: 13, color: colors.error },
   toss: { paddingTop: 36, gap: 32 },
   tools: { paddingTop: 16, gap: 12 },

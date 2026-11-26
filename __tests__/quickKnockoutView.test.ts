@@ -1,6 +1,7 @@
 import {
   bracketColumns, championName, drawBlocker, entrantName, isPlayable, unpairedPlayers, awardablePlayers, formatLabel, teamPlayers, awardBadges,
   startBlocker,
+  myInvite,
 } from '@/lib/quickKnockoutView';
 import type { QuickKnockout } from '@/api/quickKnockout';
 
@@ -121,4 +122,21 @@ it('blocks a drawn cricket Start while someone is in Any team or a team is under
 it('offers cricket three award badges, without Ace Serve', () => {
   expect(awardBadges(cricket()).map(([key]) => key)).toEqual(['iron-player', 'first-cap', 'fair-play']);
   expect(awardBadges(k()).map(([key]) => key)).toEqual(['iron-player', 'first-cap', 'ace-serve', 'fair-play']);
+});
+
+it('Start waits for every invite, named, in every sport', () => {
+  const invited = (name: string, i: number) => ({ playerKey: `i${i}`, invitedPlayerId: `p${i}`, displayName: name });
+  const tail = ' to accept. Remove them or play them as guests to start.';
+  expect(startBlocker(k({ players: [...k().players, invited('Asha Rao', 1)] }))).toBe(`Waiting for Asha Rao${tail}`);
+  expect(startBlocker(k({ players: [...k().players, invited('Asha', 1), invited('Ravi', 2)] }))).toBe(`Waiting for Asha and Ravi${tail}`);
+  expect(startBlocker(k({ players: [...k().players, invited('Asha', 1), invited('Ravi', 2), invited('Meera', 3)] }))).toBe(`Waiting for Asha, Ravi and Meera${tail}`);
+  const placed = cricket().players.map((p) => ({ ...p, teamId: p.teamId ?? 't2' }));
+  expect(startBlocker(cricket({ players: [...placed, { ...invited('Asha', 1), teamId: 't3' }] }))).toBe(`Waiting for Asha${tail}`);
+});
+
+it('finds my pending invite, and nothing once I am linked', () => {
+  const mine = { playerKey: 'i1', invitedPlayerId: 'me', displayName: 'Me' };
+  expect(myInvite(k({ players: [...k().players, mine] }), 'me')).toEqual(mine);
+  expect(myInvite(k({ players: [...k().players, { ...mine, playerId: 'me', invitedPlayerId: undefined }] }), 'me')).toBeUndefined();
+  expect(myInvite(k(), 'me')).toBeUndefined();
 });

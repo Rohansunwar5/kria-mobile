@@ -1,4 +1,5 @@
-import type { QuickGameScore, QuickMatch, QuickMatchSlot } from '@/api/quickMatch';
+import type { KnockoutPlayer } from '@/api/quickKnockout';
+import type { QuickGameScore, QuickMatch, QuickMatchSide, QuickMatchSlot } from '@/api/quickMatch';
 import { SPORT_LABELS } from '@/lib/sports';
 
 export function isHost(match: QuickMatch, playerId?: string): boolean {
@@ -37,9 +38,19 @@ export function currentGame(match: QuickMatch): QuickGameScore | null {
   return live.length > 0 ? live[live.length - 1] : null;
 }
 
+/** The host invited me to this knockout or quick match and I haven't answered. */
+export function invitedMe(item: { players?: KnockoutPlayer[]; sides?: QuickMatchSide[] }, meId: string): boolean {
+  const spots: { playerId?: string; invitedPlayerId?: string }[] = [...(item.players ?? []), ...(item.sides ?? []).flatMap((s) => s.slots)];
+  return !!meId && spots.some((x) => !x.playerId && x.invitedPlayerId === meId);
+}
+
+/** A spot a join code can still fill for `meId`: nobody's in it, and it isn't held for someone else's invite. */
+export const openToCode = (spot: { playerId?: string; invitedPlayerId?: string }, meId = '') =>
+  !spot.playerId && (!spot.invitedPlayerId || spot.invitedPlayerId === meId);
+
 /** Unclaimed slots across both sides — the ones a join code can fill. */
-export function freeSlots(match: QuickMatch): QuickMatchSlot[] {
-  return match.sides.flatMap((side) => side.slots).filter((slot) => !slot.playerId);
+export function freeSlots(match: QuickMatch, meId = ''): QuickMatchSlot[] {
+  return match.sides.flatMap((side) => side.slots).filter((slot) => openToCode(slot, meId));
 }
 
 /** "Table Tennis · Best of 3 · to 11" — the sport first, so the two rally sports never look alike. */

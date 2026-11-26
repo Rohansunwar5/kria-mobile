@@ -74,14 +74,14 @@ export function Matches({ meId }: { meId: string }) {
 
   const cards = sortCards([
     ...(matches ?? []).map((m) => ({ ...matchCard(m, meId), createdAt: m.createdAt })),
-    ...knockouts.map((k) => ({ ...knockoutCard(k), createdAt: k.createdAt })),
+    ...knockouts.map((k) => ({ ...knockoutCard(k, meId), createdAt: k.createdAt })),
   ]);
   const none = matches !== null && cards.length === 0;
   const shown = cards.filter((c) => filter === 'all' || c.status === filter);
 
   return (
     <View>
-      <JoinCard title={none ? 'Got a code from a friend?' : 'Join with a code'} />
+      <JoinCard title={none ? 'Got a code from a friend?' : 'Join with a code'} meId={meId} />
       <View style={{ paddingTop: 14, paddingHorizontal: space.gutter }}>
         <Button variant={none ? 'secondary' : 'primary'} icon="add" label={none ? 'Host your own match' : 'Host a match'} onPress={() => router.push('/quick/new')} />
       </View>
@@ -141,7 +141,7 @@ const serverMessage = (err: unknown) => (err as { response?: { data?: { message?
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`;
 
 /** Looks the code up as soon as it's complete, so the hint says what Join will open. */
-function JoinCard({ title }: { title: string }) {
+function JoinCard({ title, meId }: { title: string; meId: string }) {
   const [code, setCode] = useState('');
   const [lookup, setLookup] = useState<{ ok: boolean; text: string } | 'busy' | null>(null);
 
@@ -162,7 +162,7 @@ function JoinCard({ title }: { title: string }) {
         }
         const m = found.data;
         const name = `${m.sides[0]?.name} vs ${m.sides[1]?.name}`;
-        const open = freeSlots(m).length;
+        const open = freeSlots(m, meId).length;
         if (m.status === 'completed' || m.status === 'cancelled') setLookup({ ok: false, text: `${name} has ${m.status === 'completed' ? 'finished' : 'been cancelled'}.` });
         else if (!open) setLookup({ ok: false, text: `${name} · every spot is taken` });
         else setLookup({ ok: true, text: `${name} · ${plural(open, 'open spot')} · tap Join` });
@@ -172,7 +172,7 @@ function JoinCard({ title }: { title: string }) {
     return () => {
       current = false;
     };
-  }, [code]);
+  }, [code, meId]);
 
   const ready = code.length === CODE_LENGTH && !(lookup && lookup !== 'busy' && !lookup.ok);
   const hint =

@@ -92,3 +92,23 @@ it('cricket teams with capacity', () => {
     { teamId: 't2', name: 'Royals', count: '0/2', full: false },
   ]);
 });
+
+it("shows someone else's invited spot as taken, and my own as open", () => {
+  const others = joinView(match([{ invitedPlayerId: 'asha', displayName: 'Asha Rao' } as never]), 'ravi');
+  if (others.kind !== 'match') throw new Error();
+  expect(others.sides[1].slots[0].taken).toBe(true);
+  expect(others.full).toBe(true);
+  const mine = joinView(match([{ invitedPlayerId: 'asha', displayName: 'Asha Rao' } as never]), 'asha');
+  if (mine.kind !== 'match') throw new Error();
+  expect(mine.sides[1].slots[0].taken).toBe(false);
+});
+
+it("lists someone else's invited knockout row as no guest name to claim, and my own as mine to tap", () => {
+  const players = [{ playerKey: 'a', playerId: 'h', displayName: 'Arjun Mehta' }, { playerKey: 'i', invitedPlayerId: 'asha', displayName: 'Asha Rao' }, { playerKey: 'g', displayName: 'Sam' }];
+  const others = joinView(ko({ players }), 'ravi');
+  if (others.kind !== 'knockout') throw new Error();
+  expect(others.guests.map((g) => g.name)).toEqual(['Sam']);
+  const mine = joinView(ko({ players }), 'asha');
+  if (mine.kind !== 'knockout') throw new Error();
+  expect(mine.guests.map((g) => g.name)).toEqual(['Asha Rao', 'Sam']);
+});

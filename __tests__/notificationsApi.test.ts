@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import API from '@/api/axios';
-import { getNotifications, getUnreadCount, markNotificationsRead, savePushToken, removePushToken } from '@/api/notifications';
+import { getNotifications, getUnreadCount, markNotificationsRead, savePushToken, releasePushToken } from '@/api/notifications';
 
 describe('notifications api', () => {
   let mock: MockAdapter;
@@ -49,10 +49,10 @@ describe('notifications api', () => {
     expect(JSON.parse(mock.history.post[0].data)).toEqual({ token: 'ExponentPushToken[x]' });
   });
 
-  it('removes the push token with a DELETE body', async () => {
-    mock.onDelete('/player/auth/fcm-token').reply(200, {});
-    await removePushToken('ExponentPushToken[x]');
-    expect(JSON.parse(mock.history.delete[0].data)).toEqual({ token: 'ExponentPushToken[x]' });
-    expect(mock.history.delete[0].timeout).toBe(3000);
+  it('releases the push token on the no-auth route, with a short timeout', async () => {
+    mock.onPost('/player/auth/fcm-token/release').reply(200, {});
+    await releasePushToken('ExponentPushToken[x]');
+    expect(JSON.parse(mock.history.post[0].data)).toEqual({ token: 'ExponentPushToken[x]' });
+    expect(mock.history.post[0].timeout).toBe(3000);
   });
 });

@@ -1,3 +1,5 @@
+import { Alert, Linking } from 'react-native';
+
 /**
  * Back, but safe when there is nothing behind this screen.
  *
@@ -19,4 +21,11 @@ type Backable = {
 export function goBack(router: Backable, fallback = '/(tabs)/home') {
   if (router.canGoBack()) router.back();
   else router.replace(fallback as never);
+}
+
+/** A web link from the server (an organiser's WhatsApp group, a map). Anything but http(s) is refused. */
+export function openWebLink(url: string) {
+  const fail = () => Alert.alert("Couldn't open this link");
+  if (!/^https?:\/\//i.test(url)) return fail();
+  Linking.openURL(url).catch(fail);
 }

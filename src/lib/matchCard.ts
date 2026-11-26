@@ -1,6 +1,6 @@
 import type { QuickKnockout } from '@/api/quickKnockout';
 import type { QuickMatch } from '@/api/quickMatch';
-import { currentGame, freeSlots, isHost, outcomeLabel } from '@/lib/quickMatchView';
+import { currentGame, freeSlots, invitedMe, isHost, outcomeLabel } from '@/lib/quickMatchView';
 
 /** One card for a quick match or knockout: Home "Up next" and Compete › Matches (DESIGN §5.5, mock 1c). */
 export interface MatchCardView {
@@ -88,7 +88,7 @@ export function matchCard(m: QuickMatch, meId: string): MatchCardView {
     format: m.sport === 'cricket' ? `${cfg.playersPerTeam ?? perSide} a side` : perSide > 1 ? 'Doubles' : 'Singles',
     title: `${m.sides[0]?.name ?? 'Side 1'} vs ${m.sides[1]?.name ?? 'Side 2'}`,
     line: [rules, who].filter(Boolean).join(' · '),
-    right: waiting ? { kind: 'code', code: m.joinCode } : m.status === 'live' ? { kind: 'live' } : { kind: 'text', text: dayDate(m.createdAt) },
+    right: invitedMe(m, meId) ? { kind: 'text', text: 'Invited' } : waiting ? { kind: 'code', code: m.joinCode } : m.status === 'live' ? { kind: 'live' } : { kind: 'text', text: dayDate(m.createdAt) },
     // Only the host can cancel (quickMatchService.cancel loads as host).
     foot: m.status === 'cancelled' ? 'Cancelled by host' : waiting ? (open ? `${plural(open, 'slot')} left` : null) : score(m),
     footSub: m.status === 'live' && mySide >= 0 ? `You play for ${m.sides[mySide].name}` : outcomeLabel(m),
@@ -99,7 +99,7 @@ export function matchCard(m: QuickMatch, meId: string): MatchCardView {
   };
 }
 
-export function knockoutCard(k: QuickKnockout): MatchCardView {
+export function knockoutCard(k: QuickKnockout, meId = ''): MatchCardView {
   return {
     id: k._id,
     href: `/knockout/${k._id}`,
@@ -108,7 +108,8 @@ export function knockoutCard(k: QuickKnockout): MatchCardView {
     format: 'Knockout',
     title: k.name,
     line: plural(k.entrants.length, 'entrant'),
-    right: k.status === 'waiting' ? (k.joinCode ? { kind: 'code', code: k.joinCode } : null) : k.status === 'live' ? { kind: 'live' } : { kind: 'text', text: dayDate(k.createdAt) },
+    right: invitedMe(k, meId) ? { kind: 'text', text: 'Invited' }
+      : k.status === 'waiting' ? (k.joinCode ? { kind: 'code', code: k.joinCode } : null) : k.status === 'live' ? { kind: 'live' } : { kind: 'text', text: dayDate(k.createdAt) },
     foot: k.status === 'cancelled' ? 'Cancelled by host' : null,
     footSub: null,
     avatars: [],

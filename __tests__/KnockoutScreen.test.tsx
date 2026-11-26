@@ -1,7 +1,8 @@
 import { Alert, ScrollView, type AlertButton } from 'react-native';
-import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, within } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import KnockoutScreen from '../src/app/knockout/[id]';
+import type { KnockoutPlayer } from '../src/api/quickKnockout';
 
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: () => true },
@@ -10,16 +11,21 @@ jest.mock('expo-router', () => ({
 }));
 let mockViewer = 'h1';
 let mockStatus = 'waiting';
+const mockBasePlayers: KnockoutPlayer[] = [{ playerKey: 'a', playerId: 'h1', displayName: 'Arjun' }, { playerKey: 'b', playerId: 'p2', displayName: 'Rahul' }, { playerKey: 'c', displayName: 'Sam' }];
+let mockPlayers: KnockoutPlayer[] = mockBasePlayers;
 jest.mock('@/store/hooks', () => ({
   useAppSelector: (pick: (s: unknown) => unknown) => pick({ auth: { user: { _id: mockViewer } } }),
 }));
-const mockActions = { draw: jest.fn(), start: jest.fn(), cancel: jest.fn(), award: jest.fn(), addGuest: jest.fn(), addPlayer: jest.fn(), removePlayer: jest.fn(), pair: jest.fn(), unpair: jest.fn() };
+const mockActions = {
+  draw: jest.fn(), start: jest.fn(), cancel: jest.fn(), award: jest.fn(), addGuest: jest.fn(), addPlayer: jest.fn(), removePlayer: jest.fn(), pair: jest.fn(), unpair: jest.fn(),
+  acceptInvite: jest.fn(() => Promise.resolve(true)), declineInvite: jest.fn(() => Promise.resolve(true)), playAsGuest: jest.fn(),
+};
 jest.mock('@/lib/useQuickKnockout', () => ({
   useQuickKnockout: () => ({
     knockout: {
       _id: 'k1', hostId: 'h1', joinCode: 'KX4P9M', name: 'Cup', sport: 'badminton', format: 'singles',
       matchConfig: { bestOf: 1, pointsToWin: 21 }, status: mockStatus, awardsEligible: true,
-      players: [{ playerKey: 'a', playerId: 'h1', displayName: 'Arjun' }, { playerKey: 'b', playerId: 'p2', displayName: 'Rahul' }, { playerKey: 'c', displayName: 'Sam' }],
+      players: mockPlayers,
       pairs: [],
       entrants: [{ entrantId: 'e1', playerKeys: ['a'] }, { entrantId: 'e2', playerKeys: ['b'] }, { entrantId: 'e3', playerKeys: ['c'] }],
       fixtures: [
@@ -35,7 +41,7 @@ jest.mock('@/lib/useQuickKnockout', () => ({
 }));
 
 const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => { jest.clearAllMocks(); mockPlayers = mockBasePlayers; });
 
 /** Presses Cancel knockout and returns the confirmation's buttons. */
 function askToCancel() {
@@ -98,4 +104,47 @@ it('completed: a joined player gets no Give awards button', () => {
   mockViewer = 'p2'; mockStatus = 'completed';
   render(<KnockoutScreen />);
   expect(screen.queryByText('Give awards')).toBeNull();
+});
+
+const invitedAsha = { playerKey: 'd', invitedPlayerId: 'p9', displayName: 'Asha Rao' };
+
+it('waiting: the host sees an invite as waiting, and can play them as a guest', () => {
+  mockViewer = 'h1'; mockStatus = 'waiting'; mockPlayers = [...mockBasePlayers, invitedAsha];
+  render(<KnockoutScreen />);
+  expect(screen.getByText('Invited · waiting')).toBeTruthy();
+  expect(screen.getByText('Waiting for Asha Rao to accept. Remove them or play them as guests to start.')).toBeTruthy();
+  fireEvent.press(screen.getByLabelText('Play Asha Rao as a guest'));
+  expect(mockActions.playAsGuest).toHaveBeenCalledWith('d');
+});
+
+it('waiting: the search sheet says players are invited', () => {
+  mockViewer = 'h1'; mockStatus = 'waiting';
+  render(<KnockoutScreen />);
+  fireEvent.press(screen.getByLabelText('Add a player'));
+  expect(screen.getByText("Find a Kria player to invite, or type a guest's name.")).toBeTruthy();
+});
+
+it('waiting: the invitee sees the invite, and can accept', () => {
+  mockViewer = 'p9'; mockStatus = 'waiting'; mockPlayers = [...mockBasePlayers, invitedAsha];
+  render(<KnockoutScreen />);
+  expect(screen.getByText('Arjun invited you to Cup')).toBeTruthy();
+  fireEvent.press(screen.getByText('Accept'));
+  expect(mockActions.acceptInvite).toHaveBeenCalled();
+});
+
+it('waiting: declining the invite goes back', async () => {
+  mockViewer = 'p9'; mockStatus = 'waiting'; mockPlayers = [...mockBasePlayers, invitedAsha];
+  render(<KnockoutScreen />);
+  await act(async () => { fireEvent.press(screen.getByText('Decline')); });
+  expect(mockActions.declineInvite).toHaveBeenCalled();
+  expect(router.back).toHaveBeenCalled();
+});
+
+it('cancelled: the invitee can only remove their name', async () => {
+  mockViewer = 'p9'; mockStatus = 'cancelled'; mockPlayers = [...mockBasePlayers, invitedAsha];
+  render(<KnockoutScreen />);
+  expect(screen.getByText('This finished before you accepted')).toBeTruthy();
+  expect(screen.queryByText('Accept')).toBeNull();
+  await act(async () => { fireEvent.press(screen.getByText('Remove my name')); });
+  expect(mockActions.declineInvite).toHaveBeenCalled();
 });

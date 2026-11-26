@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getTournamentTeams, type TournamentTeam } from '@/api/tournaments';
@@ -15,7 +15,7 @@ import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, radius, space } from '@/constants/theme';
 import { teamShort } from '@/lib/tournamentView';
 import { rupees } from '@/lib/format';
-import { goBack } from '@/lib/nav';
+import { goBack, openWebLink } from '@/lib/nav';
 import { pickTeam, squad, teamStats } from '@/lib/squadView';
 import { useTournament } from '@/lib/useTournament';
 import { useAppSelector } from '@/store/hooks';
@@ -106,7 +106,7 @@ export default function Teams() {
                   <Text style={s.waTitle}>Team WhatsApp group</Text>
                   <Text style={s.waSub}>Only visible to {sel.name} players</Text>
                 </View>
-                <Tap accessibilityRole="link" onPress={() => Linking.openURL(sel.whatsappGroupLink!)} style={s.join}>
+                <Tap accessibilityRole="link" onPress={() => openWebLink(sel.whatsappGroupLink!)} style={s.join}>
                   <Text style={s.joinText}>Join</Text>
                 </Tap>
               </View>

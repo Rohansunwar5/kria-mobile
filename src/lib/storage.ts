@@ -2,9 +2,6 @@ import { getItem, setItem, deleteItem } from './secureStore';
 
 const TOKEN_KEY = 'accessToken';
 const ROLE_KEY = 'role';
-/** Explore's recent searches, as a JSON array. Cleared with the session so the
- *  next account signed in on this phone never sees them. */
-export const RECENT_SEARCHES_KEY = 'exploreRecent';
 /** The last profile the server sent, so a cold start offline still opens signed in (LAUNCH-AUDIT H20). */
 const PROFILE_KEY = 'profile';
 
@@ -40,6 +37,5 @@ export async function setProfile(profile: unknown): Promise<void> {
 export async function clearAuth(): Promise<void> {
   await deleteItem(TOKEN_KEY);
   await deleteItem(ROLE_KEY);
-  await deleteItem(RECENT_SEARCHES_KEY);
   await deleteItem(PROFILE_KEY);
 }

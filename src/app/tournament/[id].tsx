@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Linking, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions, type ScrollViewInstance } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions, type ScrollViewInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { setTournamentSaved, type TournamentCategory } from '@/api/tournaments';
@@ -17,7 +17,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, space } from '@/constants/theme';
-import { goBack } from '@/lib/nav';
+import { goBack, openWebLink } from '@/lib/nav';
 import { liveRound, meFrom, myNextMatch, nextMatchLabel } from '@/lib/tournamentBracket';
 import {
   deadlinePassed, directionsUrl, effectiveStage, facts, footerCta, liveAuctionCategory, overviewTabs, statusLine, teamShort,
@@ -216,7 +216,7 @@ export default function TournamentScreen() {
           <View style={s.addr}>
             <Icon name="location_on" size={18} color={colors.text2} />
             <Text style={s.addrText}>{addr}</Text>
-            <Pressable accessibilityRole="link" hitSlop={12} onPress={() => Linking.openURL(directionsUrl(t.venue))}>
+            <Pressable accessibilityRole="link" hitSlop={12} onPress={() => openWebLink(directionsUrl(t.venue))}>
               <Text style={s.directions}>Directions</Text>
             </Pressable>
           </View>

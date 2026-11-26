@@ -4,6 +4,7 @@ import API from '@/api/axios';
 import * as storage from '@/lib/storage';
 import type { Honor } from '@/lib/badges';
 import { googleSignOut } from '@/lib/googleSignIn';
+import { unregisterPushToken } from '@/lib/push';
 
 export type Role = 'player';
 
@@ -120,21 +121,6 @@ async function renewToken(token: string, role: Role) {
     // Kept the old token; the next start tries again.
   }
 }
-
-export const fetchProfile = createAsyncThunk(
-  'auth/fetchProfile',
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as { auth: AuthState };
-      const role = state.auth.role;
-      if (!role) return rejectWithValue('No role found');
-      const response = await API.get(`/${role}/auth/profile`);
-      return response.data?.data?.data || response.data?.data;
-    } catch (error) {
-      return rejectWithValue(extractError(error));
-    }
-  }
-);
 
 /**
  * "Continue with Google" (#35): Google's ID token in, a session out. `isNew`
@@ -314,6 +300,9 @@ export const uploadPlayerProfileImage = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk('auth/logout', async () => {
+  // Every way out (Log out, a deleted account, a 401) stops this phone's pushes. First, so the
+  // saved token is forgotten before anyone can sign in again; not awaited, like the call below.
+  void unregisterPushToken();
   // Ends the session on the server too, so a copied token stops working (LAUNCH-AUDIT H1).
   // Not awaited: signing out never waits on the network. The header is set here because
   // the request goes out after clearAuth below. No token means a 401 already signed us out.
@@ -414,19 +403,6 @@ export const authSlice = createSlice({
     builder.addCase(fetchPlayerStats.pending, (state) => { state.statsLoading = true; });
     builder.addCase(fetchPlayerStats.fulfilled, (state, action) => { state.statsLoading = false; state.playerStats = action.payload; });
     builder.addCase(fetchPlayerStats.rejected, (state) => { state.statsLoading = false; });
-
-    builder.addCase(fetchProfile.pending, (state) => { state.isLoading = true; state.error = null; });
-    builder.addCase(fetchProfile.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.user = action.payload?.user || action.payload?.player || action.payload;
-    });
-    builder.addCase(fetchProfile.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload as string;
-      state.user = null;
-      state.role = null;
-      state.accessToken = null;
-    });
 
     builder.addCase(bootstrapAuth.fulfilled, (state, action) => {
       state.bootstrapped = true;

@@ -24,7 +24,6 @@ import { allSports, bestRank } from '@/lib/profileView';
 import { useCareer } from '@/lib/useCareer';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchPlayerStats, logout } from '@/store/slices/authSlice';
-import { unregisterPushToken } from '@/lib/push';
 import { fetchPlayerTournamentHistory } from '@/store/slices/registrationSlice';
 
 /** Profile tab (mocks 1h, 4e; DESIGN §5.8 and §6 Profile). */
@@ -158,7 +157,7 @@ export default function Profile() {
           <View style={{ marginTop: 6 }}>
             <AccountRow icon="assignment" label="My entries" onPress={() => router.push('/profile/registrations')} />
             <AccountRow icon="receipt_long" label="Payments" onPress={() => router.push('/profile/invoices')} />
-            <AccountRow icon="logout" label="Log out" danger onPress={async () => { await unregisterPushToken(); dispatch(logout()); }} />
+            <AccountRow icon="logout" label="Log out" danger onPress={() => dispatch(logout())} />
           </View>
         </View>
       </ScrollView>

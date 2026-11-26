@@ -41,11 +41,12 @@ export function CodeCard({ code }: { code: string }) {
 }
 
 /** Mock 1e, waiting room: the code, both sides' spots, and what starting now means. */
-export function Roster({ match, meId, busy, onRemove }: {
+export function Roster({ match, meId, busy, onRemove, onGuest }: {
   match: QuickMatch;
   meId: string;
   busy: boolean;
   onRemove: (playerId: string) => void;
+  onGuest: (slotId: string) => void;
 }) {
   return (
     <View style={{ gap: 44, paddingTop: 32 }}>
@@ -67,6 +68,18 @@ export function Roster({ match, meId, busy, onRemove }: {
                 <Text style={[s.name, { color: slot.claimed ? colors.text : colors.text2 }]}>{slot.name}</Text>
                 <Text style={s.sub}>{slot.sub}</Text>
               </View>
+              {slot.guestable ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Play ${slot.name} as a guest`}
+                  disabled={busy}
+                  onPress={() => onGuest(slot.key)}
+                  hitSlop={8}
+                  style={s.guest}
+                >
+                  <Text style={s.guestText}>Play as guest</Text>
+                </Pressable>
+              ) : null}
               {slot.removable && slot.playerId ? (
                 <Pressable
                   accessibilityRole="button"
@@ -107,6 +120,8 @@ const s = StyleSheet.create({
   name: { fontFamily: font.semibold, fontSize: 15 },
   sub: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
   remove: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  guest: { minHeight: 44, paddingHorizontal: 6, justifyContent: 'center' },
+  guestText: { fontFamily: font.semibold, fontSize: 12, color: colors.text2 },
   note: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
   noteText: { flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 19, color: colors.text3 },
 });

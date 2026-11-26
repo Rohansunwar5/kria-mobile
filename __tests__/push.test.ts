@@ -1,11 +1,11 @@
 import * as Notifications from 'expo-notifications';
 import { registerPushToken, unregisterPushToken } from '@/lib/push';
-import { savePushToken, removePushToken } from '@/api/notifications';
+import { savePushToken, releasePushToken } from '@/api/notifications';
 
 jest.mock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { extra: { eas: { projectId: '6e2afcc6-b326-4ce8-80e4-b99e314160f7' } } } } }));
 jest.mock('@/api/notifications', () => ({
   savePushToken: jest.fn(async () => {}),
-  removePushToken: jest.fn(async () => {}),
+  releasePushToken: jest.fn(async () => {}),
 }));
 
 const N = Notifications as jest.Mocked<typeof Notifications>;
@@ -55,21 +55,21 @@ describe('registerPushToken', () => {
 describe('unregisterPushToken', () => {
   it('removes the saved token, and swallows a failure', async () => {
     await registerPushToken('p1');
-    (removePushToken as jest.Mock).mockRejectedValueOnce(new Error('offline'));
+    (releasePushToken as jest.Mock).mockRejectedValueOnce(new Error('offline'));
     await expect(unregisterPushToken()).resolves.toBeUndefined();
-    expect(removePushToken).toHaveBeenCalledWith('ExponentPushToken[x]');
+    expect(releasePushToken).toHaveBeenCalledWith('ExponentPushToken[x]');
   });
 
   it('with no saved token, fetches this device token and removes it', async () => {
     await unregisterPushToken();
     expect(N.getExpoPushTokenAsync).toHaveBeenCalledWith({ projectId: '6e2afcc6-b326-4ce8-80e4-b99e314160f7' });
-    expect(removePushToken).toHaveBeenCalledWith('ExponentPushToken[x]');
+    expect(releasePushToken).toHaveBeenCalledWith('ExponentPushToken[x]');
   });
 
   it('with no saved token and no permission, removes nothing', async () => {
     N.getPermissionsAsync.mockResolvedValue(perm('denied'));
     await unregisterPushToken();
-    expect(removePushToken).not.toHaveBeenCalled();
+    expect(releasePushToken).not.toHaveBeenCalled();
   });
 
   it('with no saved token, swallows a token failure', async () => {

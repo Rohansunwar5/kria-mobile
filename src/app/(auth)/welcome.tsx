@@ -53,7 +53,7 @@ export default function Welcome() {
     <View style={s.screen}>
       <View style={s.photoBox}>
         <Image
-          source={require('../../../assets/images/welcome.png')}
+          source={require('../../../assets/images/welcome.webp')}
           style={{ width: imgW, height: imgH, marginLeft: -(imgW - boxW) * 0.58, marginTop: -(imgH - PHOTO.box) * 0.3 }}
           accessible={false}
         />

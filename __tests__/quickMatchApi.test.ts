@@ -6,6 +6,9 @@ import {
   claimQuickMatchSlot,
   recordQuickPoint,
   undoQuickPoint,
+  acceptQuickMatchInvite,
+  declineQuickMatchInvite,
+  playQuickMatchSlotAsGuest,
 } from '@/api/quickMatch';
 import { searchPlayers } from '@/api/playerSearch';
 
@@ -102,6 +105,16 @@ describe('quick match api', () => {
     await recordQuickPoint('m1', 2);
 
     expect(JSON.parse(mock.history.post[0].data)).toEqual({ side: 2, delta: 1 });
+  });
+
+  it('accepts, declines and plays an invited slot as a guest', async () => {
+    mock.onPost().reply(200, wrap(match()));
+    expect((await acceptQuickMatchInvite('m1'))._id).toBe('m1');
+    await declineQuickMatchInvite('m1');
+    await playQuickMatchSlotAsGuest('m1', 'sl2');
+    expect(mock.history.post.map((r) => r.url)).toEqual([
+      '/quick-match/m1/invite/accept', '/quick-match/m1/invite/decline', '/quick-match/m1/slots/sl2/guest',
+    ]);
   });
 
   it('posts undo with no body', async () => {

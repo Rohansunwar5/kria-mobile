@@ -8,6 +8,7 @@ import { MatchCard } from '@/components/MatchCard';
 import { SpotSheet } from '@/components/host/SpotSheet';
 import { Bracket } from '@/components/Bracket';
 import { CricketPeople, RallyPeople, SectionHead } from '@/components/knockout/People';
+import { InviteCard } from '@/components/room/InviteCard';
 import { CodeCard } from '@/components/room/Roster';
 import { FooterBar, IconButton, TopBar } from '@/components/ui/Bars';
 import { Button } from '@/components/ui/Button';
@@ -20,7 +21,7 @@ import { HONOUR_BADGES } from '@/lib/awardsView';
 import { fixtureScores, hostName, knockoutColumns, koLine, koRules, koStatus, myPlayableFixture, roundLabel, slotName } from '@/lib/knockoutRoom';
 import { initials } from '@/lib/matchCard';
 import { goBack } from '@/lib/nav';
-import { championName, drawBlocker, isKnockoutHost, startBlocker } from '@/lib/quickKnockoutView';
+import { championName, drawBlocker, isKnockoutHost, myInvite, startBlocker } from '@/lib/quickKnockoutView';
 import { useQuickKnockout } from '@/lib/useQuickKnockout';
 import { useAppSelector } from '@/store/hooks';
 
@@ -69,6 +70,10 @@ export default function KnockoutScreen() {
   const mine = k && k.status === 'live' ? myPlayableFixture(k, meId) : undefined;
   const mePlaying = !!k && k.players.some((p) => p.playerId === meId);
   const status = k ? koStatus(k) : null;
+  const invite = k ? myInvite(k, meId) : undefined;
+  const decline = async () => {
+    if (await ko.declineInvite()) goBack(router, '/(tabs)/compete');
+  };
 
   return (
     <SafeAreaView edges={['top']} style={s.screen}>
@@ -103,10 +108,20 @@ export default function KnockoutScreen() {
 
             {ko.problem && !waitingHost ? <Text style={s.problem}>{ko.problem}</Text> : null}
 
+            {invite ? (
+              <InviteCard
+                title={`${hostName(k) ?? 'The host'} invited you to ${k.name}`}
+                busy={ko.busy}
+                finished={k.status !== 'waiting'}
+                onAccept={() => ko.acceptInvite()}
+                onDecline={decline}
+              />
+            ) : null}
+
             {k.status === 'waiting' ? (
               <>
                 {host && k.joinCode ? <View style={{ marginTop: 28 }}><CodeCard code={k.joinCode} /></View> : null}
-                {!host ? (
+                {!host && !invite ? (
                   <View style={s.wait}>
                     <Text style={display(22)}>{`Waiting for ${hostName(k) ?? 'the host'} to ${drawn ? 'start' : 'draw'}`}</Text>
                     <Text style={s.waitText}>
@@ -125,10 +140,10 @@ export default function KnockoutScreen() {
                 {k.sport === 'cricket' ? (
                   <CricketPeople
                     k={k} meId={meId} busy={ko.busy} onAdd={host ? () => setAdding(true) : undefined}
-                    onRemove={ko.removePlayer} onMove={ko.moveToTeam} onAddTeam={ko.addTeam} onRemoveTeam={ko.removeTeam} onRenameTeam={ko.renameTeam}
+                    onRemove={ko.removePlayer} onGuest={ko.playAsGuest} onMove={ko.moveToTeam} onAddTeam={ko.addTeam} onRemoveTeam={ko.removeTeam} onRenameTeam={ko.renameTeam}
                   />
                 ) : (
-                  <RallyPeople k={k} meId={meId} busy={ko.busy} onAdd={host ? () => setAdding(true) : undefined} onRemove={ko.removePlayer} onPair={ko.pair} onUnpair={ko.unpair} />
+                  <RallyPeople k={k} meId={meId} busy={ko.busy} onAdd={host ? () => setAdding(true) : undefined} onRemove={ko.removePlayer} onGuest={ko.playAsGuest} onPair={ko.pair} onUnpair={ko.unpair} />
                 )}
                 {host && k.sport !== 'cricket' ? (
                   <View style={s.note}>
@@ -242,10 +257,10 @@ export default function KnockoutScreen() {
           open={adding}
           onClose={() => setAdding(false)}
           title="Add a player"
-          subtitle="Find a Kria player, or type a guest's name."
+          subtitle="Find a Kria player to invite, or type a guest's name."
           guestSub="They play under this name and can claim it with the code"
           leaveOpen={false}
-          taken={k.players.map((p) => p.playerId).filter((x): x is string => !!x)}
+          taken={k.players.map((p) => p.playerId ?? p.invitedPlayerId).filter((x): x is string => !!x)}
           // Search never finds yourself, so a host who removed themselves gets this way back.
           first={!mePlaying && meId ? { title: 'Add me', sub: 'Play in your own knockout', initials: initials(`${user?.firstName ?? ''} ${user?.lastName ?? ''}`), onPress: () => { ko.addPlayer(meId); setAdding(false); } } : undefined}
           onPick={(spot) => {

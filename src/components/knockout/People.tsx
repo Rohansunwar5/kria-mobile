@@ -7,19 +7,20 @@ import { Icon } from '@/components/ui/Icon';
 import { colors, display, font, radius } from '@/constants/theme';
 import { playerSub, teamLine } from '@/lib/knockoutRoom';
 import { initials } from '@/lib/matchCard';
-import { isKnockoutHost, teamPlayers, unpairedPlayers } from '@/lib/quickKnockoutView';
+import { isKnockoutHost, isPendingInvite, teamPlayers, unpairedPlayers } from '@/lib/quickKnockoutView';
 
 const MIN_TEAMS = 3;
 const MAX_TEAMS = 8;
 
-/** One person: avatar, name, Host / You / Joined / Guest, and remove for the host. */
-export function PlayerRow({ k, p, meId, selected, onPress, onRemove }: {
+/** One person: avatar, name, Host / You / Joined / Invited / Guest, and remove (or play an invite as a guest) for the host. */
+export function PlayerRow({ k, p, meId, selected, onPress, onRemove, onGuest }: {
   k: QuickKnockout;
   p: KnockoutPlayer;
   meId: string;
   selected?: boolean;
   onPress?: () => void;
   onRemove?: () => void;
+  onGuest?: () => void;
 }) {
   const me = !!p.playerId && p.playerId === meId;
   // The viewer's own row is tinted for everyone but the host, who sees it as "Host · you".
@@ -36,6 +37,11 @@ export function PlayerRow({ k, p, meId, selected, onPress, onRemove }: {
           <Text style={[s.sub, tinted && { color: colors.accentInk }]} numberOfLines={1}>{sub}</Text>
         </View>
       </Pressable>
+      {onGuest ? (
+        <Pressable accessibilityRole="button" accessibilityLabel={`Play ${p.displayName} as a guest`} onPress={onGuest} hitSlop={8} style={s.guestBtn}>
+          <Text style={s.split}>Play as guest</Text>
+        </Pressable>
+      ) : null}
       {onRemove ? (
         <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${p.displayName}`} onPress={onRemove} style={s.x}>
           <Icon name="close" size={20} color={colors.text4} />
@@ -69,12 +75,13 @@ export function SectionHead({ title, meta }: { title: string; meta?: string }) {
 }
 
 /** Rally sports (K1, K2): players, or for doubles the host's pairs then everyone still unpaired. */
-export function RallyPeople({ k, meId, busy, onAdd, onRemove, onPair, onUnpair }: {
+export function RallyPeople({ k, meId, busy, onAdd, onRemove, onGuest, onPair, onUnpair }: {
   k: QuickKnockout;
   meId: string;
   busy: boolean;
   onAdd?: () => void;
   onRemove: (playerKey: string) => void;
+  onGuest: (playerKey: string) => void;
   onPair: (a: string, b: string) => void;
   onUnpair: (pairId: string) => void;
 }) {
@@ -102,6 +109,7 @@ export function RallyPeople({ k, meId, busy, onAdd, onRemove, onPair, onUnpair }
       selected={selected === p.playerKey}
       onPress={editable && doubles && !busy ? () => tap(p.playerKey) : undefined}
       onRemove={host && !busy ? () => onRemove(p.playerKey) : undefined}
+      onGuest={host && !busy && isPendingInvite(p) ? () => onGuest(p.playerKey) : undefined}
     />
   );
 
@@ -148,12 +156,13 @@ export function RallyPeople({ k, meId, busy, onAdd, onRemove, onPair, onUnpair }
 }
 
 /** Cricket (K3, K4): each team a section; the host moves people with a sheet. */
-export function CricketPeople({ k, meId, busy, onAdd, onRemove, onMove, onAddTeam, onRemoveTeam, onRenameTeam }: {
+export function CricketPeople({ k, meId, busy, onAdd, onRemove, onGuest, onMove, onAddTeam, onRemoveTeam, onRenameTeam }: {
   k: QuickKnockout;
   meId: string;
   busy: boolean;
   onAdd?: () => void;
   onRemove: (playerKey: string) => void;
+  onGuest: (playerKey: string) => void;
   onMove: (playerKey: string, teamId: string | null) => void;
   onAddTeam: () => void;
   onRemoveTeam: (teamId: string) => void;
@@ -167,7 +176,13 @@ export function CricketPeople({ k, meId, busy, onAdd, onRemove, onMove, onAddTea
   const [name, setName] = useState('');
 
   const people = (list: KnockoutPlayer[]) =>
-    list.map((p) => <PlayerRow key={p.playerKey} k={k} p={p} meId={meId} onPress={host && !busy ? () => setMoving(p) : undefined} />);
+    list.map((p) => (
+      <PlayerRow
+        key={p.playerKey} k={k} p={p} meId={meId}
+        onPress={host && !busy ? () => setMoving(p) : undefined}
+        onGuest={host && !busy && isPendingInvite(p) ? () => onGuest(p.playerKey) : undefined}
+      />
+    ));
 
   return (
     <View>
@@ -271,6 +286,7 @@ const s = StyleSheet.create({
   name: { fontFamily: font.semibold, fontSize: 15, color: colors.text },
   sub: { fontFamily: font.regular, fontSize: 12, color: colors.text3 },
   x: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  guestBtn: { minHeight: 44, paddingHorizontal: 6, justifyContent: 'center' },
   pair: { marginTop: 10, borderRadius: 18, backgroundColor: colors.surface1, paddingHorizontal: 14, paddingBottom: 2 },
   pairHead: { height: 36, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   pairLabel: { fontFamily: font.semibold, fontSize: 12, color: colors.text3 },

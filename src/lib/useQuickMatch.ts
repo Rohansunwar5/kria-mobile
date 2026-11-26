@@ -9,7 +9,7 @@ import {
   recordQuickPoint,
   recordQuickToss,
   startQuickMatch,
-  removeQuickMatchPlayer,
+  removeQuickMatchPlayer, acceptQuickMatchInvite, declineQuickMatchInvite, playQuickMatchSlotAsGuest,
   undoQuickBall,
   undoQuickPoint,
   type BallEntry,
@@ -42,6 +42,8 @@ export function useQuickMatch(id?: string) {
   // Why the last action was refused ('' when it was not). A refused undo
   // otherwise looks like a button that does nothing.
   const [problem, setProblem] = useState('');
+  // Assumed until told otherwise, as in useBadmintonLive: a fresh open must not flash "Reconnecting".
+  const [connected, setConnected] = useState(true);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -74,20 +76,26 @@ export function useQuickMatch(id?: string) {
     };
     const join = () => socket.emit('join:match', { matchId: id });
     const onConnect = () => {
+      setConnected(true);
       join();
       load();
     };
+    const onDisconnect = () => setConnected(false);
 
     acquireSocket();
     holdRoom('match', { matchId: id });
     join();
     socket.on('quick:update', onUpdate);
     socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('connect_error', onDisconnect);
 
     return () => {
       releaseRoom('match', { matchId: id });
       socket.off('quick:update', onUpdate);
       socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('connect_error', onDisconnect);
       releaseSocket();
     };
   }, [id, load]);
@@ -95,16 +103,18 @@ export function useQuickMatch(id?: string) {
   /** Runs one host action and adopts the match it returns. `busy` disables
    *  every control while it is in flight, so a double tap cannot score twice —
    *  there is no optimistic-concurrency guard on the server. */
-  const run = useCallback(async (action: () => Promise<QuickMatch>) => {
+  const run = useCallback(async (action: () => Promise<QuickMatch>): Promise<boolean> => {
     setBusy(true);
     setProblem('');
     try {
       setMatch(await action());
+      return true;
     } catch (err) {
       // The server refused (a completed match, a spent snapshot). Say why,
       // and re-read rather than leaving the screen showing state the server rejected.
       setProblem((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Something went wrong. Please try again.');
       await load();
+      return false;
     } finally {
       setBusy(false);
     }
@@ -135,6 +145,21 @@ export function useQuickMatch(id?: string) {
     return run(() => removeQuickMatchPlayer(id, playerId));
   }, [id, run]);
 
+  const acceptInvite = useCallback(() => {
+    if (!id) return;
+    return run(() => acceptQuickMatchInvite(id));
+  }, [id, run]);
+
+  const declineInvite = useCallback(() => {
+    if (!id) return;
+    return run(() => declineQuickMatchInvite(id));
+  }, [id, run]);
+
+  const playAsGuest = useCallback((slotId: string) => {
+    if (!id) return;
+    return run(() => playQuickMatchSlotAsGuest(id, slotId));
+  }, [id, run]);
+
   const toss = useCallback((input: { winnerSideId: string; decision: 'bat' | 'bowl' }) => {
     if (!id) return;
     return run(() => recordQuickToss(id, input));
@@ -156,8 +181,8 @@ export function useQuickMatch(id?: string) {
   }, [id, run]);
 
   return {
-    match, loading, error, busy, problem, reload: load,
-    point, undo, start, cancel, removePlayer,
+    match, loading, error, busy, problem, connected, reload: load,
+    point, undo, start, cancel, removePlayer, acceptInvite, declineInvite, playAsGuest,
     toss, lineup, ball, undoBall,
   };
 }

@@ -1,12 +1,12 @@
 import * as Notifications from 'expo-notifications';
 import { AndroidImportance } from 'expo-notifications';
 import Constants from 'expo-constants';
-import { savePushToken, removePushToken } from '@/api/notifications';
+import { savePushToken, releasePushToken } from '@/api/notifications';
 
 type Permission = 'granted' | 'denied' | 'undetermined';
 
 let savedToken: string | null = null;
-let savedFor: string | null = null; // a 401 logout keeps the token, so the next player must save again
+let savedFor: string | null = null; // another player signing in must save again
 
 export async function pushPermission(): Promise<Permission> {
   return (await Notifications.getPermissionsAsync()).status as Permission;
@@ -41,6 +41,7 @@ export async function registerPushToken(playerId: string): Promise<string | null
   }
 }
 
+/** Every logout runs this (the `logout` thunk). Never throws. */
 export async function unregisterPushToken(): Promise<void> {
   let token = savedToken;
   savedToken = null;
@@ -51,7 +52,7 @@ export async function unregisterPushToken(): Promise<void> {
       const projectId = Constants.expoConfig?.extra?.eas?.projectId;
       if (projectId) token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
     }
-    if (token) await removePushToken(token);
+    if (token) await releasePushToken(token);
   } catch {
     // Logging out must not wait on a failed cleanup.
   }

@@ -1,3 +1,4 @@
+import { AppState } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import { fetchLiveFeed } from '@/api/live';
 import { useLiveNow } from '@/lib/useLiveNow';
@@ -56,4 +57,25 @@ it('stops on unmount', async () => {
   unmount();
   await tick(90_000);
   expect(feed).toHaveBeenCalledTimes(1);
+});
+
+it('stops polling in the background and refreshes on return', async () => {
+  const remove = jest.fn();
+  let change: (s: string) => void = () => {};
+  jest.spyOn(AppState, 'addEventListener').mockImplementation(((_: string, f: (s: string) => void) => { change = f; return { remove }; }) as never);
+  const { unmount } = renderHook(() => useLiveNow());
+  await flush();
+  act(() => change('background'));
+  await tick(90_000);
+  expect(feed).toHaveBeenCalledTimes(1);
+
+  act(() => change('active'));
+  await flush();
+  expect(feed).toHaveBeenCalledTimes(2);
+  await tick(30_000);
+  expect(feed).toHaveBeenCalledTimes(3);
+
+  unmount();
+  expect(remove).toHaveBeenCalled();
+  jest.restoreAllMocks();
 });

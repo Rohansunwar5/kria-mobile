@@ -7,7 +7,8 @@ export type NotificationKind =
   | 'sold'
   | 'match_starting'
   | 'announcement'
-  | 'added_to_quick_match';
+  | 'added_to_quick_match'
+  | 'knockout_invite';
 
 export type AppNotification = {
   _id: string;
@@ -39,6 +40,7 @@ export async function savePushToken(token: string): Promise<void> {
   await API.post('/player/auth/fcm-token', { token });
 }
 
-export async function removePushToken(token: string): Promise<void> {
-  await API.delete('/player/auth/fcm-token', { data: { token }, timeout: 3000 });
+// No auth, so it works after a 401 too: the server drops this token from every account.
+export async function releasePushToken(token: string): Promise<void> {
+  await API.post('/player/auth/fcm-token/release', { token }, { timeout: 3000 });
 }

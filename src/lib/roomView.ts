@@ -1,7 +1,7 @@
 import type { QuickMatch } from '@/api/quickMatch';
 import { colors } from '@/constants/theme';
 import { initials, matchCard } from '@/lib/matchCard';
-import { freeSlots, gamesWon, isHost } from '@/lib/quickMatchView';
+import { gamesWon, isHost } from '@/lib/quickMatchView';
 import { SPORT_LABELS } from '@/lib/sports';
 
 /** Status = dot + word (DESIGN §5.10). */
@@ -34,6 +34,8 @@ export interface RosterSlot {
   sub: string;
   claimed: boolean;
   removable: boolean;
+  /** An invite the host can stop waiting on: the name stays, as a guest. */
+  guestable: boolean;
 }
 
 /** The waiting room's sides. Only the host may remove a claimed player, never in a knockout (server rule). */
@@ -51,9 +53,10 @@ export function roster(m: QuickMatch, meId: string) {
         playerId: s.playerId,
         initials: initials(s.displayName),
         name: s.displayName,
-        sub: isTheHost ? (s.playerId === meId ? 'Host · you' : 'Host') : s.playerId === meId ? 'You' : s.playerId ? 'Claimed' : 'Waiting to claim with the code',
+        sub: isTheHost ? (s.playerId === meId ? 'Host · you' : 'Host') : s.playerId === meId ? 'You' : s.playerId ? 'Claimed' : s.invitedPlayerId ? 'Invited' : 'Waiting to claim with the code',
         claimed: !!s.playerId,
         removable: canRemove && !!s.playerId && !isTheHost,
+        guestable: host && !s.playerId && !!s.invitedPlayerId,
       };
     }),
   }));
@@ -65,7 +68,8 @@ export function waitingNote(m: QuickMatch, meId: string) {
     const host = m.sides.flatMap((s) => s.slots).find((s) => s.playerId === m.hostId)?.displayName;
     return host ? `Waiting for ${host} to start the match.` : 'Waiting for the host to start the match.';
   }
-  return freeSlots(m).length
+  // An invite still pending at Start plays as a guest too.
+  return m.sides.some((s) => s.slots.some((x) => !x.playerId))
     ? 'You can start now. Unclaimed spots play as guests and earn no career stats.'
     : "Everyone's in. Start when you're ready.";
 }

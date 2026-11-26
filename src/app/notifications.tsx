@@ -22,6 +22,7 @@ export default function Notifications() {
   const [items, setItems] = useState<AppNotification[] | null>(null);
   // Fixed at load: rows that were new keep their dot until the player leaves.
   const [seenAt, setSeenAt] = useState<string | null>(null);
+  // The first page failed while there are no rows; Load more failed once there are.
   const [failed, setFailed] = useState(false);
   const [end, setEnd] = useState(false);
   const [more, setMore] = useState(false);
@@ -68,12 +69,13 @@ export default function Notifications() {
     const oldest = items?.[items.length - 1]?.createdAt;
     if (more || end || !oldest) return;
     setMore(true);
+    setFailed(false);
     try {
       const next = (await getNotifications(oldest)).notifications;
       setItems((cur) => [...(cur ?? []), ...next]);
       if (next.length < PAGE) setEnd(true);
     } catch {
-      // Leave the button so it can be tried again.
+      setFailed(true);
     }
     setMore(false);
   };
@@ -140,7 +142,8 @@ export default function Notifications() {
         <ScrollView contentContainerStyle={s.list}>
           {section('New', fresh, true)}
           {section('Earlier', earlier, false)}
-          {!end ? <Button variant="secondary" label="Load more" busyLabel="Loading more" busy={more} onPress={loadMore} /> : null}
+          {failed ? <InlineError what="Couldn't load more notifications." onRetry={loadMore} />
+            : !end ? <Button variant="secondary" label="Load more" busyLabel="Loading more" busy={more} onPress={loadMore} /> : null}
         </ScrollView>
       ) : null}
     </SafeAreaView>

@@ -9,7 +9,7 @@ describe('notificationsView', () => {
   it('has an icon for each kind', () => {
     expect(NOTIFICATION_ICON).toEqual({
       entry_approved: 'how_to_reg', entry_rejected: 'cancel', sold: 'gavel',
-      match_starting: 'play_circle', announcement: 'campaign', added_to_quick_match: 'group_add',
+      match_starting: 'play_circle', announcement: 'campaign', added_to_quick_match: 'group_add', knockout_invite: 'group_add',
     });
   });
 
@@ -23,7 +23,7 @@ describe('notificationsView', () => {
 
   it('targetHref ignores unknown paths', () => {
     expect(targetHref({ path: '/admin', params: {} })).toBeNull();
-    for (const path of ['/category/[categoryId]', '/live/[matchId]', '/tournament/[id]/announcements', '/quick/[id]']) {
+    for (const path of ['/category/[categoryId]', '/live/[matchId]', '/tournament/[id]/announcements', '/quick/[id]', '/knockout/[id]']) {
       expect(targetHref({ path, params: { x: '1' } })).toEqual({ pathname: path, params: { x: '1' } });
     }
   });

@@ -79,6 +79,21 @@ describe('notifications screen', () => {
     expect(screen.queryByLabelText('Load more')).toBeNull();
   });
 
+  it('a failed Load more says so, and Retry loads the page', async () => {
+    const page = Array.from({ length: 30 }, (_, i) => row(`r${i}`, 10 + i));
+    get.mockResolvedValueOnce({ notifications: page, seenAt: null }).mockRejectedValueOnce(new Error('offline'));
+    renderScreen();
+    fireEvent.press(await screen.findByLabelText('Load more'));
+    expect(await screen.findByText("Couldn't load more notifications.")).toBeTruthy();
+    expect(screen.getByText('Title r0')).toBeTruthy(); // what loaded stays
+
+    get.mockResolvedValueOnce({ notifications: [row('last', 900)], seenAt: null });
+    fireEvent.press(screen.getByText('Retry'));
+    expect(await screen.findByText('Title last')).toBeTruthy();
+    expect(screen.queryByText("Couldn't load more notifications.")).toBeNull();
+    expect(get).toHaveBeenLastCalledWith(page[29].createdAt);
+  });
+
   it('nothing yet', async () => {
     renderScreen();
     expect(await screen.findByText('Nothing yet')).toBeTruthy();

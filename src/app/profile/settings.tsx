@@ -11,7 +11,6 @@ import { Tap } from '@/components/ui/Tap';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logout } from '@/store/slices/authSlice';
-import { unregisterPushToken } from '@/lib/push';
 import { deleteAccount, sendContactMessage } from '@/api/settings';
 
 export default function Settings() {
@@ -50,7 +49,7 @@ export default function Settings() {
   };
 
   // LAUNCH-AUDIT B7. The server signs this account out everywhere; locally we
-  // forget this device's push registration and log out, and the auth gate
+  // log out (which forgets this device's push registration), and the auth gate
   // takes the app back to Welcome, as Log out does.
   const removeAccount = async () => {
     if (deleting) return;
@@ -62,7 +61,6 @@ export default function Settings() {
       if (alive.current) { setDeleteErr((e as Error).message); setDeleting(false); }
       return;
     }
-    await unregisterPushToken();
     dispatch(logout());
   };
 
