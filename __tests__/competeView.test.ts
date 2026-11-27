@@ -91,3 +91,25 @@ describe('matchCard', () => {
 it('keeps only the server code alphabet', () => {
   expect(normaliseCode('k7-qx 2m0O1I9')).toBe('K7QX2M');
 });
+
+describe('nextRankLine (reward spec §9)', () => {
+  const { nextRankLine } = jest.requireActual('../src/lib/competeView') as typeof import('../src/lib/competeView');
+  const rp = (playerId: string, firstName: string, won: number, decided: number) =>
+    ({ playerId, firstName, lastName: 'X', played: decided, decided, won, winRate: won / decided });
+  const BOARD = ([['kav', 'Kavya', 18, 22], ['arj', 'Arjun', 15, 20], ['neh', 'Neha', 14, 19], ['rav', 'Ravi', 13, 18], ['imr', 'Imran', 12, 17],
+    ['pri', 'Priya', 10, 15], ['dev', 'Dev', 9, 14], ['me', 'Asha', 8, 13], ['mee', 'Meera', 7, 12]] as const)
+    .map(([id, n, w, d]) => rp(id, n, w, d));
+
+  it('the preview board: two wins to pass Dev', () => {
+    expect(nextRankLine(BOARD, 'me')).toBe('Win your next 2 to pass Dev (#7)');
+  });
+  it('an equal rate is broken by more decided matches, as the server sorts', () => {
+    expect(nextRankLine([rp('a', 'Ann', 2, 3), rp('me', 'Me', 2, 4)], 'me')).toBe('Win your next 2 to pass Ann (#1)');
+  });
+  it('#1, off the board, unreachable, or more than 10 wins away → null', () => {
+    expect(nextRankLine(BOARD, 'kav')).toBeNull();
+    expect(nextRankLine(BOARD, 'ghost')).toBeNull();
+    expect(nextRankLine([rp('a', 'A', 5, 5), rp('me', 'Me', 4, 5)], 'me')).toBeNull();
+    expect(nextRankLine([rp('a', 'A', 19, 20), rp('me', 'Me', 0, 20)], 'me')).toBeNull();
+  });
+});

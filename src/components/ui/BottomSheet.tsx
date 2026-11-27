@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Keyboard, Modal, PanResponder, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -46,7 +46,7 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: {
     if (!mounted) return;
     const ios = Platform.OS === 'ios';
     const move = (to: number, duration?: number) => {
-      lift.value = withTiming(to, { duration: duration || motion.enter, easing: ease.standard });
+      lift.set(withTiming(to, { duration: duration || motion.enter, easing: ease.standard }));
     };
     const subs = [
       Keyboard.addListener(ios ? 'keyboardWillShow' : 'keyboardDidShow', (e) => move(sheetLift(e.endCoordinates.height, insets.bottom, Platform.OS), e.duration)),
@@ -54,25 +54,29 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: {
     ];
     return () => {
       subs.forEach((sub) => sub.remove());
-      lift.value = 0;
+      lift.set(0);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
+  // Opening mounts during render (React's "previous value" pattern); a finished close unmounts
+  // and forgets the height, so the next open measures afresh and slides in from it.
+  if (open && !mounted) setMounted(true);
+  const closed = () => {
+    height.current = 0;
+    setMounted(false);
+  };
   useEffect(() => {
-    if (open && mounted && height.current) {
+    if (open && height.current) {
       // Reopened mid-close: no new layout pass will come, so turn it around here.
-      y.value = withTiming(0, { duration: reduced ? 0 : motion.slow, easing: ease.enter });
-      fade.value = withTiming(1, { duration: 200, easing: ease.standard });
-    } else if (open) {
-      height.current = 0;
-      setMounted(true);
-    } else if (mounted) {
+      y.set(withTiming(0, { duration: reduced ? 0 : motion.slow, easing: ease.enter }));
+      fade.set(withTiming(1, { duration: 200, easing: ease.standard }));
+    } else if (!open && mounted) {
       const t = { duration: motion.enter, easing: ease.exit };
-      fade.value = withTiming(0, t);
-      y.value = withTiming(reduced ? 0 : height.current, t, (done) => {
-        if (done) runOnJS(setMounted)(false);
-      });
+      fade.set(withTiming(0, t));
+      y.set(withTiming(reduced ? 0 : height.current, t, (done) => {
+        if (done) runOnJS(closed)();
+      }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -81,32 +85,37 @@ export function BottomSheet({ open, onClose, title, subtitle, children }: {
   const enter = (h: number) => {
     if (!open || height.current) return;
     height.current = h;
-    y.value = reduced ? 0 : h;
-    y.value = withTiming(0, { duration: reduced ? 0 : motion.slow, easing: ease.enter });
-    fade.value = withTiming(1, { duration: 200, easing: ease.standard });
+    y.set(reduced ? 0 : h);
+    y.set(withTiming(0, { duration: reduced ? 0 : motion.slow, easing: ease.enter }));
+    fade.set(withTiming(1, { duration: 200, easing: ease.standard }));
   };
 
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-  const pan = useRef(
+  useLayoutEffect(() => {
+    onCloseRef.current = onClose;
+  });
+  // The handlers read the ref only while dragging, never during render; the compiler
+  // can't see through PanResponder's callbacks (same as RallyRoom's swipe cards).
+  // eslint-disable-next-line react-hooks/refs
+  const [pan] = useState(() =>
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => g.dy > 6 && Math.abs(g.dy) > Math.abs(g.dx),
       onPanResponderMove: (_, g) => {
-        y.value = Math.max(0, g.dy);
+        y.set(Math.max(0, g.dy));
       },
       onPanResponderRelease: (_, g) => {
         if (g.dy > 80 || g.vy > 0.8) onCloseRef.current();
-        else y.value = withTiming(0, { duration: motion.enter, easing: ease.standard });
+        else y.set(withTiming(0, { duration: motion.enter, easing: ease.standard }));
       },
     }),
-  ).current;
+  );
 
-  const scrim = useAnimatedStyle(() => ({ opacity: fade.value }));
+  const scrim = useAnimatedStyle(() => ({ opacity: fade.get() }));
   const topInset = insets.top;
   const sheet = useAnimatedStyle(() => ({
-    transform: [{ translateY: y.value - lift.value }],
-    maxHeight: sheetMaxHeight(windowHeight, topInset, lift.value),
-    opacity: reduced ? fade.value : 1,
+    transform: [{ translateY: y.get() - lift.get() }],
+    maxHeight: sheetMaxHeight(windowHeight, topInset, lift.get()),
+    opacity: reduced ? fade.get() : 1,
   }));
 
   if (!mounted) return null;

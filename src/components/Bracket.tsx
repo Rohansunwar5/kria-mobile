@@ -1,7 +1,12 @@
-import { Fragment } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
-import { colors, font, space } from '@/constants/theme';
-import { bracketLayout, CARD_W, GUTTER, type BracketCard, type BracketColumn, type BracketRow } from '@/lib/bracket';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View, type ScrollViewInstance, type ViewStyle } from 'react-native';
+import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withTiming, type SharedValue } from 'react-native-reanimated';
+import { colors, ease, font, space } from '@/constants/theme';
+import { bracketLayout, CARD_W, GUTTER, highlightSegments, type BracketCard, type BracketColumn, type BracketRow, type Seg } from '@/lib/bracket';
+
+/** Champion path (reward spec §10): one round every 240ms, its three segments 40ms each. */
+const ROUND_MS = 240;
+const SEG_MS = 40;
 
 // Fixed card heights, so a card never drifts with its content (mock 2e: 92).
 const HEADED_H = 92;
@@ -16,12 +21,39 @@ const LINE = 1.5;
  * joined by 1.5px connectors.
  * Data-neutral: the knockout room and official tournaments each map their own into columns.
  */
-export function Bracket({ columns, onOpen }: { columns: BracketColumn[]; onOpen?: (id: string) => void }) {
+export function Bracket({ columns, onOpen, highlight }: {
+  columns: BracketColumn[];
+  onOpen?: (id: string) => void;
+  /** The champion's cards; `play` draws their path once, following it sideways, then calls `onDone`. */
+  highlight?: { ids: string[]; play: boolean; onDone?: () => void };
+}) {
   const headed = columns.some((col) => col.cards.some((c) => c.header !== undefined));
   const cardH = headed ? HEADED_H : PLAIN_H;
   const { tops, links, width, height } = bracketLayout(columns, cardH);
+  const reduced = useReducedMotion();
+  const segs = highlight ? highlightSegments(columns, cardH, highlight.ids) : [];
+  const play = !!highlight?.play;
+  const scroller = useRef<ScrollViewInstance>(null);
+  const [viewW, setViewW] = useState(0);
+  const [lit, setLit] = useState(false);
+  useEffect(() => {
+    if (!play) return;
+    // Before each round draws, bring the card it runs into on screen.
+    const timers = segs.map((sg, i) => setTimeout(() => {
+      const right = space.gutter + (sg.round + 1) * (CARD_W + GUTTER) + CARD_W + space.gutter;
+      scroller.current?.scrollTo({ x: Math.max(0, right - viewW), animated: !reduced });
+    }, i * ROUND_MS));
+    timers.push(setTimeout(() => {
+      setLit(true);
+      highlight?.onDone?.();
+    }, segs.length * ROUND_MS + SEG_MS * 3));
+    return () => timers.forEach(clearTimeout);
+    // Plays once when `play` turns on.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [play]);
+  const lastId = highlight?.ids[highlight.ids.length - 1];
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -space.gutter }} contentContainerStyle={s.row}>
+    <ScrollView ref={scroller} onLayout={(e) => setViewW(e.nativeEvent.layout.width)} horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -space.gutter }} contentContainerStyle={s.row}>
       <View style={{ width, gap: 14 }}>
         <View style={s.titles}>
           {columns.map((col) => <Text key={col.title} style={s.round}>{col.title}</Text>)}
@@ -37,8 +69,9 @@ export function Bracket({ columns, onOpen }: { columns: BracketColumn[]; onOpen?
               <View style={[s.wire, { left: l.x + GUTTER / 2, top: l.yMid - LINE / 2, width: GUTTER / 2 }]} />
             </Fragment>
           ))}
+          {segs.map((sg, i) => <PathSeg key={sg.round} seg={sg} at={i * ROUND_MS} play={play} reduced={reduced} />)}
           {columns.map((col, ci) => col.cards.map((c, j) => (
-            <Card key={c.id} c={c} headed={headed} at={{ left: ci * (CARD_W + GUTTER), top: tops[ci][j], height: cardH }} onOpen={onOpen} />
+            <Card key={c.id} c={c} headed={headed} champion={lit && c.id === lastId} at={{ left: ci * (CARD_W + GUTTER), top: tops[ci][j], height: cardH }} onOpen={onOpen} />
           )))}
         </View>
       </View>
@@ -46,13 +79,13 @@ export function Bracket({ columns, onOpen }: { columns: BracketColumn[]; onOpen?
   );
 }
 
-function Line({ r, headed }: { r: BracketRow; headed: boolean }) {
+function Line({ r, headed, champion }: { r: BracketRow; headed: boolean; champion?: boolean }) {
   // Headed (tournament) cards: a won game is bright, the rest dim. Headerless (knockout room): score text2, dim on the lost row.
   const scoreColor = (strong: boolean) => (headed ? (strong ? colors.text : colors.text4) : strong ? colors.text2 : colors.text4);
   return (
     <View style={[s.line, { height: headed ? 26 : 18 }]}>
       <View style={s.nameBox}>
-        <Text numberOfLines={1} style={[s.name, headed && s.nameHeaded, r.won && { fontFamily: font.semibold }, (r.lost || r.open) && { color: colors.text4 }]}>{r.name}</Text>
+        <Text numberOfLines={1} style={[s.name, headed && s.nameHeaded, r.won && { fontFamily: font.semibold }, (r.lost || r.open) && { color: colors.text4 }, champion && r.won && { color: colors.accentInk }]}>{r.name}</Text>
         {r.sub ? <Text numberOfLines={1} style={s.sub}>{r.sub}</Text> : null}
       </View>
       {r.scores.length ? (
@@ -66,7 +99,7 @@ function Line({ r, headed }: { r: BracketRow; headed: boolean }) {
   );
 }
 
-function Card({ c, headed, at, onOpen }: { c: BracketCard; headed: boolean; at: ViewStyle; onOpen?: (id: string) => void }) {
+function Card({ c, headed, at, onOpen, champion }: { c: BracketCard; headed: boolean; at: ViewStyle; onOpen?: (id: string) => void; champion?: boolean }) {
   const body = (
     <>
       {headed ? (
@@ -80,8 +113,8 @@ function Card({ c, headed, at, onOpen }: { c: BracketCard; headed: boolean; at: 
           <Text style={s.liveText}>Live</Text>
         </View>
       ) : null}
-      <Line r={c.rows[0]} headed={headed} />
-      <Line r={c.rows[1]} headed={headed} />
+      <Line r={c.rows[0]} headed={headed} champion={champion} />
+      <Line r={c.rows[1]} headed={headed} champion={champion} />
     </>
   );
   const style = [s.card, headed ? s.cardHeaded : s.cardPlain, at, c.mine && { borderColor: colors.accent }];
@@ -95,7 +128,35 @@ function Card({ c, headed, at, onOpen }: { c: BracketCard; headed: boolean; at: 
   );
 }
 
+/** One round of the champion's path: stub, run, wire, each growing from the champion's side. Reduced motion: a fade. */
+function PathSeg({ seg, at, play, reduced }: { seg: { stub: Seg; run: Seg; wire: Seg }; at: number; play: boolean; reduced: boolean }) {
+  const a = useSharedValue(0);
+  const b = useSharedValue(0);
+  const c = useSharedValue(0);
+  useEffect(() => {
+    if (!play) return;
+    const grow = (v: SharedValue<number>, after: number) =>
+      v.set(reduced ? withTiming(1, { duration: 160 }) : withDelay(at + after, withTiming(1, { duration: SEG_MS, easing: ease.enter })));
+    grow(a, 0);
+    grow(b, SEG_MS);
+    grow(c, SEG_MS * 2);
+  }, [play, reduced, at, a, b, c]);
+  // The run grows from the champion's card: down from a top card, up from a bottom one.
+  const fromBottom = seg.stub.top > seg.run.top;
+  const stub = useAnimatedStyle(() => (reduced ? { opacity: a.get() } : { transform: [{ scaleX: a.get() }] }));
+  const run = useAnimatedStyle(() => (reduced ? { opacity: b.get() } : { transform: [{ scaleY: b.get() }] }));
+  const wire = useAnimatedStyle(() => (reduced ? { opacity: c.get() } : { transform: [{ scaleX: c.get() }] }));
+  return (
+    <>
+      <Animated.View pointerEvents="none" style={[s.path, seg.stub, { transformOrigin: 'left' }, stub]} />
+      <Animated.View pointerEvents="none" style={[s.path, seg.run, { transformOrigin: fromBottom ? 'bottom' : 'top' }, run]} />
+      <Animated.View pointerEvents="none" style={[s.path, seg.wire, { transformOrigin: 'left' }, wire]} />
+    </>
+  );
+}
+
 const s = StyleSheet.create({
+  path: { position: 'absolute', zIndex: 1, backgroundColor: colors.accent },
   row: { paddingHorizontal: space.gutter, paddingTop: 4, paddingBottom: 8 },
   titles: { flexDirection: 'row', gap: GUTTER },
   round: { width: CARD_W, fontFamily: font.semibold, fontSize: 12, color: colors.text3 },

@@ -8,14 +8,14 @@ export const colors = {
   bg: '#0B0B0D', surface1: '#151518', surface2: '#1D1D21', surface3: '#2A2A30',
   line: '#18181B', lineStrong: '#26262B',
   text: '#F5F5F5', text2: '#C6C6CC', text3: '#92929A', text4: '#6E6E76', disabled: '#5E5E66',
-  accent: '#FF5A1F', onAccent: '#0B0B0D', accentTint: 'rgba(255,90,31,0.16)', accentInk: '#FF7A45',
+  accent: '#FF5A1F', onAccent: '#0B0B0D', accentTint: 'rgba(255,90,31,0.16)', accentInk: '#FF7A45', accentLip: '#B8411A',
   loss: '#F0525F', lossTint: 'rgba(240,68,82,0.14)', lossInk: '#F26B76',
   tie: '#3B9EFF', tieTint: 'rgba(59,158,255,0.16)', tieInk: '#6BB6FF', noResult: '#4A4A52',
   error: '#FF7A4D',
   gold: '#C9A35A', silver: '#A9AFB7', bronze: '#A8714A', platinum: '#C3CAD6',
 
   cardLine: '#222227', navRing: '#24242A', navIdle: '#85858D', ring: '#3A3A42',
-  scrim: 'rgba(0,0,0,0.62)', coverIn: '#232328', coverOut: '#141416', glowOut: '#121214',
+  scrim: 'rgba(0,0,0,0.62)', revealScrim: 'rgba(11,11,13,0.94)', coverIn: '#232328', coverOut: '#141416', glowOut: '#121214',
   skeleton: '#17171A', skeletonHi: '#232328', bgClear: 'rgba(11,11,13,0)', shadow: '#000000', flipTop: '#222227', onAccentTrack: 'rgba(11,11,13,0.25)', bracketLine: '#34343B',
 };
 
@@ -67,4 +67,16 @@ export const ease = {
   enter: Easing.bezier(0.05, 0.7, 0.1, 1),
   exit: Easing.bezier(0.3, 0, 0.8, 0.15),
   tab: Easing.bezier(0.2, 0.9, 0.3, 1),
+};
+
+/**
+ * DESIGN v1.2 §9 springs, for a value that changes in front of the player
+ * (first-view fills keep `motion` + `ease`). Always pass one: Reanimated 4's
+ * default spring is a different curve.
+ */
+export const spring = {
+  snappy: { damping: 32, stiffness: 400, mass: 1 }, // ζ 0.80 · 1.5% overshoot · ~400ms: press release, thumbs
+  bouncy: { damping: 17, stiffness: 220, mass: 1 }, // ζ 0.57 · 11% overshoot · ~680ms: badge landing, row pop
+  gentle: { damping: 26, stiffness: 170, mass: 1 }, // ζ 1.00 · no overshoot · ~580ms: text entrances
+  fill: { damping: 19, stiffness: 180, mass: 1 }, // ζ 0.71 · 4% overshoot · ~580ms: a bar or ring changing
 };

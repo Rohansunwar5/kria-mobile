@@ -1,13 +1,14 @@
-import type { Achievement } from '@/api/career';
+import type { Achievement, SportSummary } from '@/api/career';
 import type { Title } from '@/api/profileApi';
 import type { QuickKnockout } from '@/api/quickKnockout';
 import type { BadgeShape } from '@/components/AwardBadge';
 import type { IconName } from '@/components/ui/iconPaths';
 import type { Metal } from '@/constants/theme';
 import { sportIcon } from '@/components/ui/Icon';
-import { sportName } from '@/lib/homeView';
+import { MONTHS, sportName } from '@/lib/homeView';
 import type { Honor } from '@/lib/badges';
 import { initials } from '@/lib/matchCard';
+import { awardSeenKey, type RewardState } from '@/lib/rewardSeen';
 
 /**
  * Names and monograms for the server's BADGE_KEYS (server/src/models/player.model.ts).
@@ -50,11 +51,42 @@ export interface Award {
   earned: boolean;
   /** A title that can link to the tournament it was won at. Legacy titles have none. */
   tournamentId?: string;
+  /** Stable "already seen" keys (reward spec C1); [] for locked and legacy items. */
+  seenKeys: string[];
+  /** Titles and honours: when it was given, for the reveal's order. */
+  awardedAt?: string;
+  /** The full-screen reveal's copy (reward spec C4), earned items only. */
+  reveal?: { label: string; title: string; line: string; prevTarget?: number; nextTarget?: number };
 }
 
 export interface MilestoneTotals { played: number; won: number; sports: number }
 
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`;
+const keys = (k: string | null) => (k ? [k] : []);
+const day = (iso: string) => {
+  const d = new Date(iso);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+};
+const month = (iso: string) => {
+  const d = new Date(iso);
+  return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+};
+
+/** 1st, 2nd, 3rd, 4th … 11th, 12th, 13th … 21st. */
+export function ordinal(n: number): string {
+  const teen = n % 100 >= 11 && n % 100 <= 13;
+  const suffix = teen ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th';
+  return `${n}${suffix}`;
+}
+
+/** Career totals across sports, for the milestone cells' real counts. */
+export function totalsFrom(sports: SportSummary[]): MilestoneTotals {
+  return {
+    played: sports.reduce((n, s) => n + s.played, 0),
+    won: sports.reduce((n, s) => n + s.won, 0),
+    sports: sports.filter((s) => s.played > 0).length,
+  };
+}
 
 /** A winner's gold shield or a runner-up's silver one — the same shape, a different metal (spec §8). */
 export function titleAward(title: Title, i: number): Award {
@@ -69,6 +101,13 @@ export function titleAward(title: Title, i: number): Award {
     status: where ? { label: won ? 'Won at' : 'Runner-up at', value: where } : undefined,
     earned: true,
     tournamentId: title.tournamentId,
+    seenKeys: keys(awardSeenKey({ kind: 'title', title })),
+    awardedAt: title.awardedAt,
+    reveal: {
+      label: won ? 'Title · Winner' : 'Title · Runner-up',
+      title: where,
+      line: [title.categoryName ? `${title.categoryName}.` : '', title.awardedAt ? `Awarded ${day(title.awardedAt)}.` : ''].filter(Boolean).join(' '),
+    },
   };
 }
 
@@ -107,6 +146,13 @@ export function honourAward(h: Honor, i: number, knockouts: QuickKnockout[]): Aw
     status: where ? { label: 'Earned at', value: where } : undefined,
     tournamentId: h.tournamentId,
     earned: true,
+    seenKeys: keys(awardSeenKey({ kind: 'honour', honor: h })),
+    awardedAt: h.awardedAt,
+    reveal: {
+      label: 'Honour',
+      title: h.title || def?.name || 'Honour',
+      line: [where, h.awardedAt ? month(h.awardedAt) : ''].filter(Boolean).join(' · '),
+    },
   };
 }
 
@@ -115,14 +161,16 @@ export function honourAward(h: Honor, i: number, knockouts: QuickKnockout[]): Aw
  * its knockout's name and sport; an old one not yet backfilled falls back to
  * /mine (newest 20), and past that groups under "Quick knockouts".
  */
-export function knockoutAwards(wins: Pick<Honor, 'title' | 'ref' | 'eventName' | 'sport'>[], knockouts: QuickKnockout[]): Award[] {
+export function knockoutAwards(wins: (Pick<Honor, 'title' | 'ref' | 'eventName' | 'sport'> & { badge?: string })[], knockouts: QuickKnockout[]): Award[] {
   const groups = new Map<string, string[]>();
+  const refs = new Map<string, string[]>();
   for (const w of wins) {
     const k = w.ref ? knockouts.find((x) => x._id === w.ref) : undefined;
     const sport = w.sport ?? k?.sport ?? '';
     groups.set(sport, [...(groups.get(sport) ?? []), w.eventName ?? k?.name ?? w.title.replace(/^Won /, '')]);
+    refs.set(sport, [...(refs.get(sport) ?? []), ...keys(awardSeenKey({ kind: 'honour', honor: { ...w, badge: KNOCKOUT_BADGE } }))]);
   }
-  return [...groups.entries()].map(([sport, names]) => ({
+  return [...groups.entries()].map(([sport, names]): Award => ({
     key: `ko-${sport || 'any'}`, family: 'knockout', shape: 'hex', metal: 'bronze',
     icon: sport ? sportIcon(sport) : 'emoji_events', count: names.length,
     name: 'Knockout winner', context: sport ? `${sportName(sport)} · ${plural(names.length, 'win')}` : plural(names.length, 'win'),
@@ -130,6 +178,8 @@ export function knockoutAwards(wins: Pick<Honor, 'title' | 'ref' | 'eventName' |
     criteria: 'Win the final of a quick knockout',
     status: { label: 'Earned at', value: names.join(', ') },
     earned: true,
+    seenKeys: refs.get(sport) ?? [],
+    reveal: { label: 'Knockout winner', title: names[names.length - 1], line: `Your ${ordinal(wins.length)} knockout win.` },
   }));
 }
 
@@ -151,9 +201,54 @@ export function milestoneAwards(achievements: Achievement[], totals: MilestoneTo
         criteria: a.label,
         status: { label: 'Progress', value: (a.earned && real(kind)) || `${a.progress} of ${a.target}` },
         earned: a.earned,
+        seenKeys: a.earned ? keys(awardSeenKey({ kind: 'achievement', id: a.id })) : [],
+        reveal: a.earned ? milestoneReveal(a, achievements) : undefined,
       };
     })
     .sort((x, y) => Number(y.earned) - Number(x.earned) || (y.progress ?? 1) - (x.progress ?? 1));
+}
+
+/** "50 matches played" / "25 wins" / "2 sports played", with the neighbouring targets of its kind. */
+function milestoneReveal(a: Achievement, all: Achievement[]): NonNullable<Award['reveal']> {
+  const kind = a.id.split('-')[0];
+  const same = all.filter((x) => x.id.split('-')[0] === kind).map((x) => x.target);
+  const below = same.filter((t) => t < a.target);
+  const above = same.filter((t) => t > a.target);
+  const nextTarget = above.length ? Math.min(...above) : undefined;
+  return {
+    label: 'Milestone',
+    title: kind === 'wins' ? `${a.target} wins` : `${a.target} ${kind} played`,
+    line: nextTarget ? `Next: ${nextTarget}.` : '',
+    prevTarget: below.length ? Math.max(...below) : undefined,
+    nextTarget,
+  };
+}
+
+/**
+ * The one award to reveal now (reward spec C3): titles, then honours, then
+ * knockout wins, then milestones; within titles and honours the newest first.
+ * Only `new` keys count — an announced one already had its batch's reveal.
+ * `batch` is every new key, so the rest can be announced when this one mints.
+ */
+export function nextReveal(
+  a: Pick<ReturnType<typeof buildAwards>, 'titles' | 'honours' | 'knockouts' | 'milestones'>,
+  states: Map<string, RewardState>,
+): { award: Award; key: string; batch: string[] } | null {
+  const isNew = (k: string) => (states.get(k) ?? 'new') === 'new';
+  const newest = (xs: Award[]) => [...xs].sort((x, y) => (y.awardedAt ? Date.parse(y.awardedAt) : -Infinity) - (x.awardedAt ? Date.parse(x.awardedAt) : -Infinity));
+  const order = [...newest(a.titles), ...newest(a.honours), ...a.knockouts, ...a.milestones].filter((x) => x.earned);
+  const batch = order.flatMap((x) => x.seenKeys).filter(isNew);
+  for (const award of order) {
+    const key = award.seenKeys.find(isNew);
+    if (key) return { award, key, batch };
+  }
+  return null;
+}
+
+/** The "New" dot: any key of this award not yet opened. */
+export function hasDot(award: Award, states: Map<string, RewardState>): boolean {
+  // An unloaded key has no dot yet, so the grid never flashes dots before the states arrive.
+  return award.seenKeys.some((k) => { const s = states.get(k); return s === 'new' || s === 'announced'; });
 }
 
 /** The cabinet before anything is earned: every honour's shape, locked. */
@@ -162,12 +257,12 @@ export function lockedHonours(): Award[] {
     ...Object.entries(HONOUR_BADGES).map(([badge, def]): Award => ({
       key: `locked-${badge}`, family: 'honour', shape: 'rosette', metal: 'locked', icon: def.icon, glyph: def.glyph,
       name: def.name, context: 'Organiser', tier: 'Organiser honour', description: 'Organisers give these at tournaments.',
-      criteria: 'Chosen by the organiser', earned: false,
+      criteria: 'Chosen by the organiser', earned: false, seenKeys: [],
     })),
     {
       key: 'locked-ko', family: 'knockout', shape: 'hex', metal: 'locked', icon: 'emoji_events',
       name: 'Knockout winner', context: 'Quick knockout', tier: 'Quick knockout', description: 'Last one standing in a player-run knockout.',
-      criteria: 'Win the final of a quick knockout', earned: false,
+      criteria: 'Win the final of a quick knockout', earned: false, seenKeys: [],
     },
   ];
 }

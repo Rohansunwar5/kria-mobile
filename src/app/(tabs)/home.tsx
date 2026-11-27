@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
-import { router, useFocusEffect, useScrollToTop } from 'expo-router';
+import { router, useFocusEffect, useIsFocused, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getPublicPlayer, type Title } from '@/api/profileApi';
 import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
 import { listMyQuickMatches, type QuickMatch } from '@/api/quickMatch';
 import { getTopPlayers, type RankedPlayer } from '@/api/rankings';
@@ -14,6 +15,7 @@ import { LiveNowRow } from '@/components/home/LiveNowRow';
 import { Milestone } from '@/components/home/Milestone';
 import { Checklist, RankTrack, StartHeadline } from '@/components/home/NewPlayer';
 import { RankHero } from '@/components/home/RankHero';
+import { AwardReveal } from '@/components/rewards/AwardReveal';
 import { TAB_BAR_SPACE } from '@/components/navigation/TabBar';
 import { Button } from '@/components/ui/Button';
 import { InlineError } from '@/components/ui/InlineError';
@@ -21,11 +23,14 @@ import { ResultBadge } from '@/components/ui/Pills';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { colors, font, space } from '@/constants/theme';
+import { buildAwards, totalsFrom } from '@/lib/awardsView';
+import type { Honor } from '@/lib/badges';
 import { inProgress } from '@/lib/homePortal';
 import {
   checklist, greeting, nextMilestone, railTournaments, RANK_MIN, resultLetter, sportName, sportsByRecency, todayLabel, upNext,
 } from '@/lib/homeView';
 import { RANKED_SPORTS } from '@/lib/sports';
+import { useAwardReveal } from '@/lib/useAwardReveal';
 import { useCareer } from '@/lib/useCareer';
 import { useUnreadCount } from '@/lib/unreadBell';
 import { usePushAsk } from '@/lib/usePushAsk';
@@ -43,19 +48,23 @@ export default function Home() {
   const [knockouts, setKnockouts] = useState<QuickKnockout[]>([]);
   const [events, setEvents] = useState<{ list: Tournament[]; near: boolean } | null>(null);
   const [boards, setBoards] = useState<Record<string, RankedPlayer[] | null>>({});
+  // Titles and honours, only for award reveals: no notification announces an organiser's award (reward spec C3).
+  const [record, setRecord] = useState<{ titles: Title[]; honors: Honor[] } | null>(null);
   const scroll = useRef<ScrollViewInstance>(null);
   useScrollToTop(scroll);
 
   const city = user?.location?.trim();
   const load = useCallback(async () => {
-    const [mine, kos, near] = await Promise.all([
+    const [mine, kos, near, pub] = await Promise.all([
       listMyQuickMatches({ liveKnockout: true }).catch(() => null),
       listMyQuickKnockouts().catch(() => null),
       latestTournaments(10, city ? { city } : {}).catch(() => null),
+      meId ? getPublicPlayer(meId).catch(() => null) : null,
     ]);
     // Each list fails alone and keeps its last good value.
     if (mine) setMatches(mine);
     if (kos) setKnockouts(kos);
+    if (pub) setRecord({ titles: pub.player.titles ?? [], honors: pub.player.honors ?? [] });
     let list = near && railTournaments(near);
     let isNear = !!city;
     if (city && list && !list.length) {
@@ -65,7 +74,7 @@ export default function Home() {
       isNear = false;
     }
     if (list) setEvents({ list, near: isNear });
-  }, [city]);
+  }, [city, meId]);
 
   // The career hook loads on mount; later focuses (back from a match) refresh it.
   const seen = useRef(false);
@@ -95,6 +104,10 @@ export default function Home() {
   const next = inProgress(matches, knockouts)[0];
   const milestone = career.profile ? nextMilestone(career.profile.achievements) : null;
   const list = user ? checklist(user) : null;
+  const awards = career.profile && record
+    ? buildAwards({ ...record, achievements: career.profile.achievements, knockouts, totals: totalsFrom(career.profile.sports) })
+    : null;
+  const rv = useAwardReveal({ meId, awards, focused: useIsFocused(), blocked: false });
 
   const join = <Button key="join" variant={isNew ? 'primary' : 'secondary'} icon="pin" label="Join with code" onPress={() => router.push({ pathname: '/(tabs)/compete', params: { seg: 'matches' } })} style={{ flex: isNew ? 1.3 : 1 }} />;
   const host = <Button key="host" variant={isNew ? 'secondary' : 'primary'} icon="add" label="Host a match" onPress={() => router.push('/quick/new')} style={{ flex: isNew ? 1 : 1.3 }} />;
@@ -184,6 +197,17 @@ export default function Home() {
         ) : null}
         {!isNew && career.recentError && !recent.length ? <InlineError what="Couldn't load recent matches." onRetry={career.reload} /> : null}
       </ScrollView>
+      {rv.reveal ? (
+        <AwardReveal
+          award={rv.reveal.award}
+          onMinted={rv.onMinted}
+          onDone={rv.close}
+          onSeeAward={() => {
+            rv.close();
+            router.push('/(tabs)/awards');
+          }}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

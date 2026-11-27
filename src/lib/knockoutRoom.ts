@@ -130,3 +130,25 @@ export function knockoutColumns(k: QuickKnockout, meId: string, scores: Record<s
 export function teamLine(count: number, cap: number, here: boolean) {
   return `${count} / ${cap}${here ? ' · here now' : count >= cap ? ' · full' : ''}`;
 }
+
+/** The signed-in player is in the knockout's champion entrant. */
+export function isChampion(k: QuickKnockout, meId: string): boolean {
+  const mine = myEntrant(k, meId);
+  return !!mine && mine === k.championEntrantId;
+}
+
+/** The champion's fixtures in round order (a bye included): the cards their path runs through. */
+export function championPath(k: QuickKnockout): string[] {
+  const c = k.championEntrantId;
+  if (!c) return [];
+  return k.fixtures
+    .filter((f) => f.entrantA === c || f.entrantB === c)
+    .sort((a, b) => a.round - b.round)
+    .map((f) => f.fixtureId);
+}
+
+/** Matches the champion actually won: byes don't count. */
+export function championWins(k: QuickKnockout): number {
+  const c = k.championEntrantId;
+  return c ? k.fixtures.filter((f) => f.winnerEntrantId === c && !f.bye).length : 0;
+}

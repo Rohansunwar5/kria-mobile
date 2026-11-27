@@ -16,6 +16,7 @@ import { setUnauthorizedHandler } from '@/api/axios';
 import { colors } from '@/constants/theme';
 import { routeFor } from '@/lib/authRoute';
 import { LaunchAnimation } from '@/components/LaunchAnimation';
+import { markLaunchDone } from '@/lib/launchGate';
 import { configurePushHandling, registerPushToken } from '@/lib/push';
 import { usePushOpen } from '@/lib/pushOpen';
 
@@ -43,7 +44,10 @@ function AuthGate({ fontsLoaded }: { fontsLoaded: boolean }) {
   const { bootstrapped, user } = useAppSelector((s) => s.auth);
   const pendingOnboarding = useAppSelector((s) => s.auth.pendingOnboarding);
   const [introDone, setIntroDone] = useState(false);
-  const endIntro = useCallback(() => setIntroDone(true), []);
+  const endIntro = useCallback(() => {
+    markLaunchDone(); // reveals wait for the launch overlay (reward spec C3)
+    setIntroDone(true);
+  }, []);
 
   useEffect(() => {
     dispatch(bootstrapAuth());

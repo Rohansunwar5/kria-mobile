@@ -1,6 +1,6 @@
 # Kria Player App — Design System & Implementation Spec
 
-Version 1.1 · 21 October 2026 · Dark-first · Player app only (organiser tools live in the organiser portal)
+Version 1.2 · 27 November 2026 (v1.2: the reward and motion layer, §9) · Dark-first · Player app only (organiser tools live in the organiser portal)
 
 Kria is a player's sporting career in their pocket. Every screen answers at least one of: *Where do I stand? What have I achieved? Who can I play? What's next?*
 
@@ -172,6 +172,8 @@ Floating, inset 12, height 64, radius 24, `surface1` + 1px `#24242A` ring, fade 
 
 Labels state the outcome ("Pay ₹628.32 and register"), never "Next".
 
+Primary sits on a 4px `accentLip` edge. Press moves the face down 4px and hides the edge; release springs back (`snappy`). Secondary keeps the 0.96 scale. Disabled has no edge.
+
 ### 5.3 Pills
 | Pill | Style | Where |
 |---|---|---|
@@ -215,7 +217,9 @@ Title (14/600) · score (text2, tabular) · context (12, text3, "Quick match · 
 - Row: rank (condensed 20; top 3 at 26 in metal colour) · 40px avatar (metal hairline for top 3) · name + "W won · D decided" · win rate (condensed 24).
 - **Your row** highlighted: `accentTint` background, rank + rate in `accentInk`, radius 14. If you're outside the visible 6, append your row as the 7th with a `…` gap row above.
 - **No pinned "You" bar** — removed.
-- Always state the metric above the list ("Win rate · min 10 decided matches").
+- Always state the metric above the list ("Win rate · min 5 decided matches").
+- Your row adds one line when it can: "Win your next N to pass X (#k)", the fewest straight wins that pass the player above in the server's order (win rate, then decided). Hidden at #1, off the board, or past 10 wins.
+- "See full rankings" scrolls to your row and pops it once (scale 1 → 1.03 → 1).
 
 ### 5.8 Profile win-rate circles
 - One circle per sport played (sideways scroll, sorted by volume), plus "All sports".
@@ -294,6 +298,8 @@ Feed row (`/live-feed`) → sport scoreboard → detail tabs.
 | Empty | Outline icon (wght 200) + condensed title + one line on how to fill it + one action |
 | Error | Inline above content: what failed + Retry; keep cached data |
 | Success | Check + condensed statement + next action (code shown huge after hosting) |
+| Result | W/L letter + headline + the numbers that changed + what's next (Moment tier, §9) |
+| Empty leaderboard | Ghost rows with your avatar + how many to go |
 | Permission denied | Explain why ("Only the host can score") instead of hiding |
 | Validation | Inline under field, server message where available |
 
@@ -301,7 +307,20 @@ Feed row (`/live-feed`) → sport scoreboard → detail tabs.
 
 ## 9. Motion
 
-150–250ms, ease-out. Tokens 100 / 160 / 220 / 320 / 620ms. Allowed: selection feedback, sheet slide-up, segment thumb slide, score digit flip, win-rate ring fill, progress fill, one award-unlock reveal. Not allowed: floating cards, parallax, confetti, animated gradients, looping pulses. `prefers-reduced-motion` → opacity only. Full demos in `Kria Motion.dc.html`.
+150–250ms, ease-out for UI feedback. Timing tokens 100 / 160 / 170 / 220 / 280 / 320 / 520 / 620ms; spring tokens snappy / bouncy / gentle / fill (`theme.ts`). A first-view fill uses timing; a value that changes in front of the player uses a spring.
+
+Allowed: selection feedback, sheet slide-up, segment thumb slide, score digit flip, ring and bar fills, a number roll on a changed value, a first-load list stagger (≤ 6 items, 40ms apart), the primary-button press-down, and the reward layer.
+
+**Reward layer.** Three tiers.
+- *Micro* (≤ 400ms, inline): point, game, toggle, streak slot.
+- *Moment* (≤ 1.2s, inline on a result; actions live throughout): match result.
+- *Milestone* (≤ 2.4s, full screen, plays once per award, a tap anywhere skips): award reveal, knockout champion.
+
+At most one moment or milestone per screen visit; other unlocks wait as "New" on Awards. A celebration shows only numbers the API returned. A badge's shine loops on one badge per viewport; a reveal sweeps once. A milestone reveal also gets one radial burst: 8 strokes in the badge's metal, 320ms, once.
+
+Not allowed: floating cards, parallax, confetti or particle showers, animated gradients, looping pulses, screen shake, characters or mascots, sound.
+
+Reduced motion → opacity only: fades ≤ 160ms, final values shown at once, before → after as text. Haptics still fire. Nothing is conveyed by motion alone. Full demos in `Kria Motion.dc.html`; the reward layer is specified in `docs/superpowers/specs/2026-11-27-reward-motion-design.md`.
 
 ---
 
@@ -317,7 +336,7 @@ Feed row (`/live-feed`) → sport scoreboard → detail tabs.
 
 ## 11. Voice
 
-Short, direct, sporting. Second person. Numbers over adjectives ("7 more decided matches"). Explain why when asking for data. No exclamation marks, emoji or hype.
+Short, direct, sporting. Second person. Numbers over adjectives ("7 more decided matches"). Explain why when asking for data. No exclamation marks, emoji or hype, celebrations included. A celebration states what happened and what's next, in numbers ("50 matches played. Next: 100."). Never praise the player ("Amazing", "Legend"), never soften or joke about a loss, and never use guilt to bring someone back ("Don't lose your streak").
 
 ---
 
@@ -332,14 +351,14 @@ Short, direct, sporting. Second person. Numbers over adjectives ("7 more decided
 
 ## 13. Don'ts
 
-Glassmorphism · neon glows · podium graphics · cards for every section · solid orange backgrounds on cards · status lines on event cards · W-L record on win-rate circles · pinned You bar · "+N" avatar chip under 4 players · tap-to-score · fake stats · lorem ipsum · emoji · more than one primary button per screen · uppercase headings · organiser controls in the player app.
+Glassmorphism · neon glows · podium graphics · cards for every section · solid orange backgrounds on cards · status lines on event cards · W-L record on win-rate circles · pinned You bar · "+N" avatar chip under 4 players · tap-to-score · fake stats · lorem ipsum · emoji · more than one primary button per screen · uppercase headings · organiser controls in the player app · confetti and particle showers · characters or mascots · XP, gems, points or levels the API doesn't serve · streak freezes or paid repairs · guilt copy · stacked celebration screens · sound effects.
 
 ---
 
 ## 14. Open items
 
 - [ ] **Points-rule line above group tables** — keep or move to a tooltip/info icon? (Currently shown.)
-- [ ] Milestone tiers pending backend: 10 · 50 · 100 · 250 matches; 10 · 50 · 100 wins; Runner-up title.
+- [ ] Milestone tiers pending backend: 10 · 50 · 100 · 250 matches; 10 · 50 · 100 wins; Runner-up title. Tracked as SERVER-GAPS #43 (with earned dates), proposed in `d:\kria\GAMIFICATION-MOTION.md` §12.
 
 ---
 

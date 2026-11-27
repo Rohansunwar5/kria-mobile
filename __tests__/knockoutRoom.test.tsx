@@ -85,3 +85,26 @@ it('marks a pending invite as invited, for the host and everyone else', () => {
   expect(playerSub(k, invited, 'h')).toBe('Invited · waiting');
   expect(playerSub(k, invited, 'me')).toBe('Invited · waiting');
 });
+
+describe('the champion (reward spec §10)', () => {
+  const { championPath, championWins, isChampion } = jest.requireActual('../src/lib/knockoutRoom') as typeof import('../src/lib/knockoutRoom');
+  const done = (champion: string): QuickKnockout => base({
+    status: 'completed', championEntrantId: champion,
+    fixtures: [
+      { fixtureId: 'f1', round: 1, position: 0, entrantA: 'e1', bye: true, winnerEntrantId: 'e1' },
+      { fixtureId: 'f2', round: 1, position: 1, entrantA: 'e2', entrantB: 'e3', bye: false, winnerEntrantId: 'e2' },
+      { fixtureId: 'f3', round: 2, position: 0, entrantA: 'e1', entrantB: 'e2', bye: false, winnerEntrantId: champion },
+    ],
+  });
+  it('knows who the champion is, and nobody else is', () => {
+    expect(isChampion(done('e2'), 'me')).toBe(true);
+    expect(isChampion(done('e2'), 'h')).toBe(false);
+    expect(isChampion(base(), 'me')).toBe(false);
+  });
+  it('walks the champion\'s fixtures in round order; a bye is on the path but is not a win', () => {
+    expect(championPath(done('e2'))).toEqual(['f2', 'f3']);
+    expect(championWins(done('e2'))).toBe(2);
+    expect(championPath(done('e1'))).toEqual(['f1', 'f3']);
+    expect(championWins(done('e1'))).toBe(1);
+  });
+});

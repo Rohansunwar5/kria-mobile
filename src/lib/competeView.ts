@@ -54,3 +54,23 @@ export function rankingRows(board: RankedPlayer[], meId: string, meName: string,
   }
   return { rows, own };
 }
+
+/**
+ * "Win your next N to pass X (#k)" on your own row (reward spec §9): the
+ * fewest straight wins that would put you above the player directly above,
+ * in the server's order (win rate desc, then decided desc). Whole numbers
+ * only, never rounded rates. Null when you're #1, not on the board, or more
+ * than 10 wins away (including never, e.g. above you is 100% and you've lost).
+ */
+export function nextRankLine(board: RankedPlayer[], meId: string): string | null {
+  const i = board.findIndex((p) => p.playerId === meId);
+  if (i <= 0) return null;
+  const me = board[i];
+  const a = board[i - 1];
+  for (let x = 1; x <= 10; x++) {
+    const mine = (me.won + x) * a.decided;
+    const theirs = a.won * (me.decided + x);
+    if (mine > theirs || (mine === theirs && me.decided + x > a.decided)) return `Win your next ${x} to pass ${a.firstName} (#${i})`;
+  }
+  return null;
+}

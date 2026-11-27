@@ -37,7 +37,8 @@ export function AwardBadge({ shape, metal, size, icon, glyph, sub, ribbon, laure
   sub?: string;
   ribbon?: string;
   laurel?: boolean;
-  shine?: boolean;
+  /** true: the 4.2s sweep forever; a number: that many 760ms sweeps (a reveal uses 1). */
+  shine?: boolean | number;
   progress?: number;
   count?: number;
 }) {
@@ -187,7 +188,7 @@ export function AwardBadge({ shape, metal, size, icon, glyph, sub, ribbon, laure
       ) : null}
 
       {shapeAt(b0, `url(#${id}gloss)`, 'gloss')}
-      {shine && !locked ? <Shine clip={`url(#${id}clip)`} fill={`url(#${id}shine)`} x={mx} y={my} w={mw} h={mh} /> : null}
+      {shineRepeats(shine) !== 0 && !locked ? <Shine times={shineRepeats(shine)} clip={`url(#${id}clip)`} fill={`url(#${id}shine)`} x={mx} y={my} w={mw} h={mh} /> : null}
 
       {showRibbon ? (
         <Ribbon S={S} y={my + mh - S * 0.16 * 0.62} text={showRibbon} ink={M.deep} band={`url(#${id}band)`} tail={`url(#${id}tail)`} />
@@ -250,24 +251,26 @@ function Ribbon({ S, y, text, ink, band, tail }: { S: number; y: number; text: s
   );
 }
 
-/** One sweep across the face every 4.2s (45% moving, the rest resting). */
-function Shine({ clip, fill, x, y, w, h }: { clip: string; fill: string; x: number; y: number; w: number; h: number }) {
+/** How many sweeps a `shine` value asks for: -1 is forever. */
+export const shineRepeats = (shine?: boolean | number) => (shine === true ? -1 : typeof shine === 'number' ? Math.max(0, shine) : 0);
+
+/**
+ * One sweep across the face every 4.2s (45% moving, the rest resting), for
+ * `times` < 0. A positive `times` runs that many 760ms sweeps (a reveal's one
+ * sweep), then rests off the face.
+ */
+function Shine({ times, clip, fill, x, y, w, h }: { times: number; clip: string; fill: string; x: number; y: number; w: number; h: number }) {
   const reduced = useReducedMotion();
   const p = useSharedValue(0);
   useEffect(() => {
     if (reduced) return;
-    p.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 4200 * 0.45, easing: Easing.bezier(0.4, 0, 0.2, 1) }),
-        withTiming(1, { duration: 4200 * 0.55 }),
-        withTiming(0, { duration: 0 }),
-      ),
-      -1,
-      false,
-    );
+    const curve = Easing.bezier(0.4, 0, 0.2, 1);
+    p.set(times < 0
+      ? withRepeat(withSequence(withTiming(1, { duration: 4200 * 0.45, easing: curve }), withTiming(1, { duration: 4200 * 0.55 }), withTiming(0, { duration: 0 })), -1, false)
+      : withRepeat(withSequence(withTiming(1, { duration: 760, easing: curve }), withTiming(0, { duration: 0 })), times, false));
     return () => cancelAnimation(p);
-  }, [reduced, p]);
-  const props = useAnimatedProps(() => ({ x: x - w * 1.3 + p.value * w * 2.6 }));
+  }, [reduced, p, times]);
+  const props = useAnimatedProps(() => ({ x: x - w * 1.3 + p.get() * w * 2.6 }));
   if (reduced) return null;
   return (
     <G clipPath={clip}>

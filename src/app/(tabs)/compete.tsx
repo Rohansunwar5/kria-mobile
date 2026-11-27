@@ -26,18 +26,29 @@ export default function Compete() {
   const [picked, setPicked] = useState<string>();
   const scroll = useRef<ScrollViewInstance>(null);
   useScrollToTop(scroll);
+  // Scroll-to-you after "See full rankings" (reward spec §9): centre your row in the viewport.
+  const [rankingsY, setRankingsY] = useState(0);
+  const [viewportH, setViewportH] = useState(0);
+  const scrollToRow = (y: number, h: number) =>
+    scroll.current?.scrollTo({ y: Math.max(0, rankingsY + y - viewportH / 2 + h / 2), animated: true });
 
   // Home links here with ?seg= or ?sport=; take them once, then clear them so
   // the same link works again after you've moved around.
-  useEffect(() => {
-    if (!params.seg && !params.sport) return;
+  // Applied during render when the link changes (React's "previous value" pattern); the
+  // effect below only clears the URL, which resets `taken` for the next identical link.
+  const link = params.seg || params.sport ? `${params.seg ?? ''}|${params.sport ?? ''}` : '';
+  const [taken, setTaken] = useState('');
+  if (link !== taken) {
+    setTaken(link);
     if (params.seg === 'matches' || params.seg === 'rankings') setSeg(params.seg);
     if (params.sport && RANKED_SPORTS.includes(params.sport)) {
       setPicked(params.sport);
       setSeg('rankings');
     }
-    router.setParams({ seg: undefined, sport: undefined });
-  }, [params.seg, params.sport]);
+  }
+  useEffect(() => {
+    if (link) router.setParams({ seg: undefined, sport: undefined });
+  }, [link]);
 
   const seen = useRef(false);
   const reloadCareer = career.reload;
@@ -55,15 +66,15 @@ export default function Compete() {
 
   return (
     <SafeAreaView edges={['top']} style={s.screen}>
-      <ScrollView ref={scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}>
+      <ScrollView ref={scroll} onLayout={(e) => setViewportH(e.nativeEvent.layout.height)} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}>
         <View style={s.header}>
           <Text style={display(40)}>Compete</Text>
           <Segmented<Seg> options={[{ key: 'rankings', label: 'Rankings' }, { key: 'matches', label: 'Matches' }]} value={seg} onChange={setSeg} />
         </View>
         {/* Motion: the content crossfades while the thumb slides, so the two don't compete. */}
-        <Animated.View key={seg} entering={FadeIn.duration(motion.enter)}>
+        <Animated.View key={seg} entering={FadeIn.duration(motion.enter)} onLayout={(e) => setRankingsY(e.nativeEvent.layout.y)}>
           {seg === 'rankings' ? (
-            <Rankings sport={sport} onSport={setPicked} meId={meId} meName={meName} mine={career.profile?.sports ?? null} onPlay={() => setSeg('matches')} />
+            <Rankings sport={sport} onSport={setPicked} meId={meId} meName={meName} mine={career.profile?.sports ?? null} onPlay={() => setSeg('matches')} onOwnRowLayout={scrollToRow} />
           ) : (
             <Matches meId={meId} />
           )}

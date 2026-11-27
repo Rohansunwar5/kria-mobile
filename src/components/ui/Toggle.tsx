@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import Animated, { interpolateColor, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { colors, ease, font } from '@/constants/theme';
+import { haptics } from '@/lib/haptics';
 
 /** Motion "Toggle": knob and track move together in 180ms; the whole row is the hit target. */
 export function Toggle({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void }) {
@@ -20,7 +20,7 @@ export function Toggle({ label, hint, value, onChange }: { label: string; hint?:
       accessibilityState={{ checked: value }}
       accessibilityLabel={label}
       onPress={() => {
-        Haptics.selectionAsync().catch(() => undefined);
+        haptics.select();
         onChange(!value);
       }}
       style={s.row}

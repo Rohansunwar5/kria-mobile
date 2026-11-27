@@ -64,8 +64,36 @@ jest.mock('@/lib/useQuickMatch', () => ({
   }),
 }));
 jest.mock('@/lib/useQuickScorecard', () => ({ useQuickScorecard: () => null }));
+// The moment's own logic is tested in useResultMoment.test; here, only that the room shows what it returns.
+let mockMoment: unknown = null;
+const mockMomentArgs: { suppress: boolean }[] = [];
+jest.mock('@/lib/useResultMoment', () => ({
+  useResultMoment: (a: { suppress: boolean }) => {
+    mockMomentArgs.push(a);
+    return { moment: mockMoment, play: false };
+  },
+}));
 
-beforeEach(() => { jest.clearAllMocks(); mockKnockoutId = undefined; mockProblem = ''; mockStatus = 'waiting'; mockFetched = {}; mockMatchOver = {}; mockBusy = false; mockConnected = true; });
+describe('a completed rally match', () => {
+  it('shows the result moment when the hook has one, and the plain result when not', () => {
+    mockViewer = 'h1';
+    mockStatus = 'completed';
+    mockMatchOver = { outcome: 'side1', gameScores: [{ gameNumber: 1, side1Score: 21, side2Score: 15, winnerSideId: 's1' }] };
+    mockMoment = {
+      outcome: 'win', sport: 'badminton', winRate: { from: '58.3%', to: '61.5%' }, decided: { from: '12', to: '13' },
+      next: { remaining: 11, unit: 'matches', target: 50 }, bar: { label: 'Play 50 matches', from: 38, to: 39, target: 50 },
+      qualified: false, minted: null, mintNext: null,
+    };
+    const view = render(<QuickMatchScreen />);
+    expect(screen.getByText('Win rate')).toBeTruthy();
+    expect(screen.getByText('was 58.3%')).toBeTruthy();
+    mockMoment = null;
+    view.rerender(<QuickMatchScreen />);
+    expect(screen.queryByText('Win rate')).toBeNull();
+  });
+});
+
+beforeEach(() => { jest.clearAllMocks(); mockMoment = null; mockKnockoutId = undefined; mockProblem = ''; mockStatus = 'waiting'; mockFetched = {}; mockMatchOver = {}; mockBusy = false; mockConnected = true; });
 
 describe('a waiting match', () => {
   it('opens in the waiting room, not on the scoreboard, and the host starts it', () => {
@@ -115,6 +143,26 @@ describe('a knockout match', () => {
     mockProblem = 'The next match has already started.';
     render(<QuickMatchScreen />);
     expect(screen.getByText('The next match has already started.')).toBeTruthy();
+  });
+
+  describe("the host's result moment (review #5)", () => {
+    beforeEach(() => { mockMomentArgs.length = 0; });
+
+    it('plays for an earlier round: only the final hands over to the awards', async () => {
+      mockViewer = 'h1'; mockKnockoutId = 'k1';
+      mockFetched = { fixtures: [{ fixtureId: 'f1', round: 1, position: 0, bye: false }] };
+      render(<QuickMatchScreen />);
+      expect(await screen.findByText('Cup · Semi-Final · Bracket')).toBeTruthy();
+      expect(mockMomentArgs.at(-1)?.suppress).toBe(false);
+    });
+
+    it('stays suppressed for the final, and until the round is known', async () => {
+      mockViewer = 'h1'; mockKnockoutId = 'k1';
+      render(<QuickMatchScreen />);
+      expect(mockMomentArgs[0]?.suppress).toBe(true);
+      expect(await screen.findByText('Cup · Final · Bracket')).toBeTruthy();
+      expect(mockMomentArgs.every((a) => a.suppress)).toBe(true);
+    });
   });
 
   it('names the knockout and round in the bar', async () => {

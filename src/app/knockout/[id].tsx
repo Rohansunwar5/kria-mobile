@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Alert, Pressable, RefreshControl, ScrollView, Share, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
+import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
+import { getPublicPlayer } from '@/api/profileApi';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getQuickMatch } from '@/api/quickMatch';
 import { AwardBadge } from '@/components/AwardBadge';
@@ -10,6 +11,7 @@ import { Bracket } from '@/components/Bracket';
 import { CricketPeople, RallyPeople, SectionHead } from '@/components/knockout/People';
 import { InviteCard } from '@/components/room/InviteCard';
 import { CodeCard } from '@/components/room/Roster';
+import { AwardReveal } from '@/components/rewards/AwardReveal';
 import { FooterBar, IconButton, TopBar } from '@/components/ui/Bars';
 import { Button } from '@/components/ui/Button';
 import { Icon, sportIcon } from '@/components/ui/Icon';
@@ -17,11 +19,13 @@ import { InlineError } from '@/components/ui/InlineError';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, metals, radius, space } from '@/constants/theme';
-import { HONOUR_BADGES } from '@/lib/awardsView';
-import { fixtureScores, hostName, knockoutColumns, koLine, koRules, koStatus, myPlayableFixture, roundLabel, slotName } from '@/lib/knockoutRoom';
+import { HONOUR_BADGES, KNOCKOUT_BADGE, knockoutAwards, ordinal, type Award } from '@/lib/awardsView';
+import { championPath, championWins, fixtureScores, hostName, isChampion, knockoutColumns, koLine, koRules, koStatus, myPlayableFixture, roundLabel, slotName } from '@/lib/knockoutRoom';
+import { whenLaunchDone } from '@/lib/launchGate';
 import { initials } from '@/lib/matchCard';
 import { goBack } from '@/lib/nav';
 import { championName, drawBlocker, isKnockoutHost, myInvite, startBlocker } from '@/lib/quickKnockoutView';
+import { loadStates, markOpened } from '@/lib/rewardSeen';
 import { useQuickKnockout } from '@/lib/useQuickKnockout';
 import { useAppSelector } from '@/store/hooks';
 
@@ -63,6 +67,47 @@ export default function KnockoutScreen() {
     k?.joinCode && Share.share({ message: `Join my knockout "${k.name}" on Kria with code ${k.joinCode}.` }).catch(() => undefined);
   const openMatch = (matchId: string) => router.push(`/quick/${matchId}`);
 
+  // Reward spec §10: the champion's reveal (once, via the ko_ key), then the path through the bracket.
+  const page = useRef<ScrollViewInstance>(null);
+  const [bracketY, setBracketY] = useState(0);
+  const [reveal, setReveal] = useState<{ award: Award; line: string } | null>(null);
+  const [path, setPath] = useState(false);
+  const focused = useIsFocused();
+  const champ = !!k && k.status === 'completed' && isChampion(k, meId);
+  const [wasFocused, setWasFocused] = useState(focused);
+  if (focused !== wasFocused) {
+    setWasFocused(focused);
+    if (!focused && reveal) setReveal(null); // unmarked: it can play again
+  }
+  useEffect(() => {
+    if (!champ || !k || !focused || reveal || path) return;
+    let alive = true;
+    (async () => {
+      await whenLaunchDone();
+      const key = `ko_${k._id}`;
+      if ((await loadStates(meId, [key])).get(key) !== 'new') return;
+      const pub = await getPublicPlayer(meId).catch(() => null);
+      // No profile, no count: the line never guesses "1st" (real data only).
+      const count = pub ? Math.max(1, (pub.player.honors ?? []).filter((h) => h.badge === KNOCKOUT_BADGE).length) : null;
+      const award = { ...knockoutAwards([{ title: k.name, badge: KNOCKOUT_BADGE, ref: k._id, eventName: k.name, sport: k.sport }], [])[0], ...(count ? { count } : {}) };
+      const wins = championWins(k);
+      const line = `${wins} ${wins === 1 ? 'win' : 'wins'} to the title.` + (count ? ` Your ${ordinal(count)} knockout win.` : '');
+      if (alive) setReveal({ award, line });
+    })().catch(() => {});
+    return () => {
+      alive = false;
+    };
+    // Runs when this becomes a champion's completed knockout in focus.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [champ, focused, k?._id, meId]);
+  const drawPath = () => {
+    setReveal(null);
+    setTimeout(() => {
+      page.current?.scrollTo({ y: Math.max(0, bracketY - 24), animated: true });
+      setPath(true);
+    }, 160);
+  };
+
   const drawn = !!k && k.entrants.length > 0;
   const waitingHost = !!k && k.status === 'waiting' && host;
   const blocker = k ? (drawn ? startBlocker(k) : drawBlocker(k)) : null;
@@ -83,6 +128,7 @@ export default function KnockoutScreen() {
         right={k?.joinCode && k.status === 'waiting' ? <IconButton icon="ios_share" label="Share join code" onPress={share} /> : null}
       />
       <ScrollView
+        ref={page}
         contentContainerStyle={{ paddingHorizontal: space.gutter, paddingBottom: 32 }}
         refreshControl={<RefreshControl refreshing={ko.loading && !!k} onRefresh={ko.reload} tintColor={colors.accent} />}
       >
@@ -201,9 +247,9 @@ export default function KnockoutScreen() {
             ) : null}
 
             {k.status === 'live' || k.status === 'completed' ? (
-              <View style={s.section}>
+              <View style={s.section} onLayout={(e) => setBracketY(e.nativeEvent.layout.y)}>
                 <SectionHead title={k.status === 'completed' ? 'Final bracket' : 'Bracket'} meta={k.status === 'live' ? 'Tap a match to open it' : undefined} />
-                <Bracket columns={knockoutColumns(k, meId, scores)} onOpen={openMatch} />
+                <Bracket columns={knockoutColumns(k, meId, scores)} onOpen={openMatch} highlight={champ ? { ids: championPath(k), play: path } : undefined} />
               </View>
             ) : null}
 
@@ -211,7 +257,7 @@ export default function KnockoutScreen() {
               <View style={s.cancelled}>
                 <Icon name="block" size={36} color={colors.text4} />
                 <Text style={display(28)}>Knockout cancelled</Text>
-                <Text style={s.cancelledText}>Unfinished matches were cancelled with it. Finished ones stay on everyone's record.</Text>
+                <Text style={s.cancelledText}>{"Unfinished matches were cancelled with it. Finished ones stay on everyone's record."}</Text>
               </View>
             ) : null}
 
@@ -267,6 +313,18 @@ export default function KnockoutScreen() {
             if (spot.playerId) ko.addPlayer(spot.playerId);
             else if (spot.name.trim()) ko.addGuest(spot.name.trim());
             setAdding(false);
+          }}
+        />
+      ) : null}
+      {reveal && k ? (
+        <AwardReveal
+          award={reveal.award}
+          line={reveal.line}
+          onMinted={() => { markOpened(meId, [`ko_${k._id}`]).catch(() => {}); }}
+          onDone={drawPath}
+          onSeeAward={() => {
+            setReveal(null);
+            router.push('/(tabs)/awards');
           }}
         />
       ) : null}

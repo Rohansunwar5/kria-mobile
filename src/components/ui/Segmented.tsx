@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
-import { colors, ease, font, motion } from '@/constants/theme';
+import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSpring } from 'react-native-reanimated';
+import { colors, font, spring } from '@/constants/theme';
+import { haptics } from '@/lib/haptics';
 
 /**
- * DESIGN §5.10 + Motion "Segment slide": surface3 thumb slides in 220ms on a surface1 track.
+ * DESIGN §5.10 + Motion "Segment slide": surface3 thumb springs (snappy, v1.2 §9) on a surface1 track.
  * `light` is the cricket pad's look (on a surface1 sheet): equal segments, a light thumb on a bg track.
  */
 export function Segmented<T extends string>({ options, value, onChange, light, fill }: {
@@ -23,12 +24,15 @@ export function Segmented<T extends string>({ options, value, onChange, light, f
 
   useEffect(() => {
     if (!box) return;
-    const first = w.value === 0;
-    const t = { duration: first || reduced ? 0 : motion.enter, easing: ease.standard };
-    x.value = withTiming(box.x, t);
-    w.value = withTiming(box.width, t);
+    if (w.get() === 0 || reduced) {
+      x.set(box.x);
+      w.set(box.width);
+      return;
+    }
+    x.set(withSpring(box.x, spring.snappy));
+    w.set(withSpring(box.width, spring.snappy));
   }, [box, reduced, x, w]);
-  const thumb = useAnimatedStyle(() => ({ width: w.value, transform: [{ translateX: x.value }] }));
+  const thumb = useAnimatedStyle(() => ({ width: w.get(), transform: [{ translateX: x.get() }] }));
 
   return (
     <View style={[s.track, light && s.lightTrack]} accessibilityRole="tablist">
@@ -42,10 +46,13 @@ export function Segmented<T extends string>({ options, value, onChange, light, f
             const { x: bx, width } = e.nativeEvent.layout;
             setBoxes((b) => ({ ...b, [o.key]: { x: bx, width } }));
           }}
-          onPress={() => onChange(o.key)}
+          onPress={() => {
+            if (o.key !== value) haptics.select();
+            onChange(o.key);
+          }}
           style={[s.segment, light && s.lightSegment, fill && s.fillSegment]}
         >
-          <Text style={[s.label, { color: o.key === value ? (light ? colors.bg : colors.text) : light ? colors.navIdle : colors.text3 }]}>{o.label}</Text>
+          <Text maxFontSizeMultiplier={1.3} style={[s.label, { color: o.key === value ? (light ? colors.bg : colors.text) : light ? colors.navIdle : colors.text3 }]}>{o.label}</Text>
         </Pressable>
       ))}
     </View>

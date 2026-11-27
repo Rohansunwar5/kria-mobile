@@ -36,3 +36,21 @@ test('the last round draws no connectors, and an empty bracket is empty', () => 
   expect(bracketLayout(cols(1), 92).links).toEqual([]);
   expect(bracketLayout([], 92)).toEqual({ tops: [], links: [], width: 0, height: 0 });
 });
+
+describe('highlightSegments (reward spec §10: only the champion\'s half of each link)', () => {
+  const { highlightSegments } = jest.requireActual('@/lib/bracket') as typeof import('@/lib/bracket');
+  it('draws a stub out of the champion\'s card, a run to the midpoint, and the wire on', () => {
+    expect(highlightSegments(cols(4, 2, 1), 65, ['0-1', '1-0', '2-0'])).toEqual([
+      { round: 0, stub: { left: 200, top: 112.5, width: 18, height: 2 }, run: { left: 217, top: 73, width: 2, height: 40.5 }, wire: { left: 218, top: 72, width: 18, height: 2 } },
+      { round: 1, stub: { left: 436, top: 72, width: 18, height: 2 }, run: { left: 453, top: 73, width: 2, height: 81 }, wire: { left: 454, top: 153, width: 18, height: 2 } },
+    ]);
+  });
+  it('a lone feeder gets a zero-length run', () => {
+    const [seg] = highlightSegments(cols(3, 2), 65, ['0-2', '1-1']);
+    expect(seg.round).toBe(0);
+    expect(seg.run.height).toBe(0);
+  });
+  it('no ids, no segments', () => {
+    expect(highlightSegments(cols(4, 2, 1), 65, [])).toEqual([]);
+  });
+});

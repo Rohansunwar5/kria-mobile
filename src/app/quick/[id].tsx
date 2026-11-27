@@ -25,6 +25,7 @@ import { canUndo, freeSlots, invitedMe, isHost } from '@/lib/quickMatchView';
 import { roomLine, STATUS } from '@/lib/roomView';
 import { useQuickMatch } from '@/lib/useQuickMatch';
 import { useQuickScorecard } from '@/lib/useQuickScorecard';
+import { useResultMoment } from '@/lib/useResultMoment';
 import { useAppSelector } from '@/store/hooks';
 
 /**
@@ -53,6 +54,8 @@ export default function QuickMatchScreen() {
   const knockoutId = match?.knockoutId;
   const fixtureId = match?.fixtureId;
   const [barTitle, setBarTitle] = useState('');
+  // Null until the knockout loads (or if it never does).
+  const [isFinal, setIsFinal] = useState<boolean | null>(null);
   useEffect(() => {
     if (!knockoutId) return;
     let alive = true;
@@ -60,11 +63,16 @@ export default function QuickMatchScreen() {
       .then((k) => {
         const round = k.fixtures.find((f) => f.fixtureId === fixtureId)?.round;
         const roundName = round ? k.roundNames[round - 1] : undefined;
-        if (alive) setBarTitle([k.name, roundName].filter(Boolean).join(' · '));
+        if (!alive) return;
+        setBarTitle([k.name, roundName].filter(Boolean).join(' · '));
+        setIsFinal(round === k.roundNames.length);
       })
       .catch(() => undefined);
     return () => { alive = false; };
   }, [knockoutId, fixtureId]);
+  // The knockout-host redirect to the awards screen wins over the result moment, so the host's
+  // final (or a round not known yet) has none; earlier rounds play it like any match.
+  const { moment, play } = useResultMoment({ match, meId, suppress: Boolean(knockoutId && host && isFinal !== false) });
 
   // Awards open themselves only when this host's screen watches the final
   // finish; the ref keeps an already-finished final, opened later, from counting.
@@ -196,7 +204,7 @@ export default function QuickMatchScreen() {
 
             {match.status === 'waiting' ? <Roster match={match} meId={meId} busy={busy} onRemove={removePlayer} onGuest={playAsGuest} /> : null}
             {rally && match.status === 'live' ? <RallyLive match={match} host={host} busy={busy} onPoint={point} onLock={setLocked} /> : null}
-            {rally && match.status === 'completed' ? <RallyDone match={match} /> : null}
+            {rally && match.status === 'completed' ? <RallyDone match={match} moment={moment} play={play} /> : null}
             {match.status === 'cancelled' ? <Cancelled /> : null}
 
             {cricket && tossShown ? (

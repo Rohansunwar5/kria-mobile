@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import Animated, { useReducedMotion } from 'react-native-reanimated';
 import { router, useFocusEffect, useLocalSearchParams, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getTeamBrands } from '@/api/cricketMatch';
@@ -14,10 +15,14 @@ import { InlineError } from '@/components/ui/InlineError';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { colors, display, font, radius, space } from '@/constants/theme';
 import { EVENT_SPORTS, eventQuery, groupEvents, NO_FILTERS, type EventFilters } from '@/lib/eventsList';
+import { enterStagger } from '@/lib/motion';
 import { useAppSelector } from '@/store/hooks';
 
 // GET /tournament caps `limit` at 100.
 const LIMIT = 100;
+
+/** One row of the virtualised list (M21): a group title, a card, or a past row. */
+type Row = { key: string; kind: 'group'; title: string } | { key: string; kind: 'card'; t: Tournament; i: number } | { key: string; kind: 'past'; t: Tournament };
 
 /** Events tab (mock 1f): official tournaments; filters mirror the API (sport, status, city). */
 export default function Events() {
@@ -33,16 +38,25 @@ export default function Events() {
   const [failed, setFailed] = useState(false);
   const [facets, setFacets] = useState<EventFacets | null>(null);
   const [crests, setCrests] = useState<Record<string, Crest[]>>({});
-  const scroll = useRef<ScrollViewInstance>(null);
+  const scroll = useRef<FlatList<Row>>(null);
   const latest = useRef(0);
+  const loads = useRef(0);
+  const reduced = useReducedMotion();
+  // The first page of cards staggers in on the first load only, never on a refresh or filter change.
+  const [stagger, setStagger] = useState(true);
   useScrollToTop(scroll);
 
-  // "Find a badminton event" (Rankings) opens this tab on that sport.
+  // "Find a badminton event" (Rankings) opens this tab on that sport: applied during render
+  // when the link changes (React's "previous value" pattern); the effect only clears the URL.
+  const linkSport = params.sport ?? '';
+  const [takenSport, setTakenSport] = useState('');
+  if (linkSport !== takenSport) {
+    setTakenSport(linkSport);
+    if (linkSport && EVENT_SPORTS.includes(linkSport)) setFilters({ ...NO_FILTERS, sport: linkSport });
+  }
   useEffect(() => {
-    if (!params.sport) return;
-    if (EVENT_SPORTS.includes(params.sport)) setFilters({ ...NO_FILTERS, sport: params.sport });
-    router.setParams({ sport: undefined });
-  }, [params.sport]);
+    if (linkSport) router.setParams({ sport: undefined });
+  }, [linkSport]);
 
   // Search waits for a pause in typing.
   useEffect(() => {
@@ -62,6 +76,8 @@ export default function Events() {
         getEventFacets(JSON.parse(key)).catch(() => null),
       ]);
       if (id !== latest.current) return; // an older filter's answer
+      loads.current += 1;
+      setStagger(loads.current === 1);
       setList(found);
       setFacets(counts);
     } catch {
@@ -82,10 +98,41 @@ export default function Events() {
 
   const { featured, now, upcoming, past } = groupEvents(list ?? []);
   const filtered = !!(filters.sport || filters.status || filters.city || saved || term.trim().length >= 3);
+  const rows: Row[] = [];
+  let n = 0;
+  for (const g of [{ title: 'Happening now', items: now }, { title: 'Coming up', items: upcoming }]) {
+    if (!g.items.length) continue;
+    rows.push({ key: `g-${g.title}`, kind: 'group', title: g.title });
+    for (const t of g.items) rows.push({ key: t._id, kind: 'card', t, i: n++ });
+  }
+  if (past.length) {
+    rows.push({ key: 'g-past', kind: 'group', title: 'Past' });
+    for (const t of past) rows.push({ key: t._id, kind: 'past', t });
+  }
+  const renderRow = ({ item }: { item: Row }) =>
+    item.kind === 'group' ? (
+      <Text style={[s.group, s.pad]}>{item.title}</Text>
+    ) : item.kind === 'card' ? (
+      <Animated.View entering={stagger ? enterStagger(item.i, reduced) : undefined} style={[s.pad, { paddingBottom: 28 }]}>
+        <EventCard t={item.t} width="100%" imageHeight={150} crests={crests[item.t._id]} />
+      </Animated.View>
+    ) : (
+      <View style={s.pad}><PastRow t={item.t} /></View>
+    );
 
   return (
     <SafeAreaView edges={['top']} style={s.screen}>
-      <ScrollView ref={scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}>
+      <FlatList
+        ref={scroll}
+        data={rows}
+        keyExtractor={(r) => r.key}
+        renderItem={renderRow}
+        extraData={crests}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}
+        ListFooterComponent={<View style={{ height: 28 }} />}
+        ListHeaderComponent={<>
         <View style={s.header}>
           <View style={{ gap: 4, flex: 1 }}>
             <Text style={display(40)}>Events</Text>
@@ -140,27 +187,8 @@ export default function Events() {
           </View>
         ) : null}
 
-        <View style={{ paddingHorizontal: space.gutter, paddingBottom: 28 }}>
-          {[{ title: 'Happening now', items: now }, { title: 'Coming up', items: upcoming }].map((g) =>
-            g.items.length ? (
-              <View key={g.title}>
-                <Text style={s.group}>{g.title}</Text>
-                {g.items.map((t) => (
-                  <View key={t._id} style={{ paddingBottom: 28 }}>
-                    <EventCard t={t} width="100%" imageHeight={150} crests={crests[t._id]} />
-                  </View>
-                ))}
-              </View>
-            ) : null,
-          )}
-          {past.length ? (
-            <View>
-              <Text style={s.group}>Past</Text>
-              {past.map((t) => <PastRow key={t._id} t={t} />)}
-            </View>
-          ) : null}
-        </View>
-      </ScrollView>
+        </>}
+      />
     </SafeAreaView>
   );
 }
@@ -172,6 +200,7 @@ const s = StyleSheet.create({
   searchBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface1, alignItems: 'center', justifyContent: 'center' },
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, marginTop: 14, marginHorizontal: space.gutter, paddingHorizontal: 14, borderRadius: radius.input, backgroundColor: colors.surface1 },
   input: { flex: 1, fontFamily: font.regular, fontSize: 15, color: colors.text },
+  pad: { paddingHorizontal: space.gutter },
   group: { paddingTop: space.sectionGap, paddingBottom: 12, fontFamily: font.semibold, fontSize: 17, color: colors.text },
   empty: { paddingTop: 64, paddingHorizontal: 32, alignItems: 'center', gap: 14 },
   emptyIcon: { width: 72, height: 72, borderRadius: 36, borderWidth: 1.5, borderColor: colors.lineStrong, alignItems: 'center', justifyContent: 'center' },

@@ -1,20 +1,21 @@
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
-import { useFocusEffect, useScrollToTop } from 'expo-router';
+import { useFocusEffect, useIsFocused, useScrollToTop } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getPublicPlayer, type Title } from '@/api/profileApi';
 import { listMyQuickKnockouts, type QuickKnockout } from '@/api/quickKnockout';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
-import { AwardBadgeFor, AwardGrid } from '@/components/awards/AwardGrid';
+import { AwardBadgeFor, AwardGrid, BadgeWithDot, awardLabel } from '@/components/awards/AwardGrid';
 import { AwardSheet } from '@/components/awards/AwardSheet';
+import { AwardReveal } from '@/components/rewards/AwardReveal';
 import { TAB_BAR_SPACE } from '@/components/navigation/TabBar';
 import { InlineError } from '@/components/ui/InlineError';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Tap } from '@/components/ui/Tap';
 import { colors, display, font, metals, radius, space } from '@/constants/theme';
-import { allSports } from '@/lib/profileView';
-import { buildAwards, lockedHonours, type Award } from '@/lib/awardsView';
+import { buildAwards, hasDot, lockedHonours, totalsFrom, type Award } from '@/lib/awardsView';
 import type { Honor } from '@/lib/badges';
+import { useAwardReveal } from '@/lib/useAwardReveal';
 import { useCareer } from '@/lib/useCareer';
 import { useAppSelector } from '@/store/hooks';
 
@@ -50,12 +51,17 @@ export default function Awards() {
   );
 
   const ready = record && career.profile;
-  const played = career.profile?.sports ?? [];
-  const t = allSports(played);
-  const totals = { played: t.played, won: t.won, sports: played.filter((x) => x.played > 0).length };
+  const totals = totalsFrom(career.profile?.sports ?? []);
   const a = ready ? buildAwards({ titles: record.titles, honors: record.honors, achievements: career.profile!.achievements, knockouts, totals }) : null;
   const honours = a ? [...a.honours, ...a.knockouts] : [];
   const anyMilestone = a?.milestones.some((m) => m.earned);
+  // Reward spec C3: one reveal per batch, the rest wait as "New"; opening a sheet marks it seen.
+  const rv = useAwardReveal({ meId, awards: a, focused: useIsFocused(), blocked: open !== null });
+  const dot = (x: Award) => hasDot(x, rv.states);
+  const openAward = (x: Award) => {
+    rv.open(x);
+    setOpen(x);
+  };
 
   return (
     <SafeAreaView edges={['top']} style={s.screen}>
@@ -78,7 +84,7 @@ export default function Awards() {
         ) : null}
 
         {a?.featured ? (
-          <Tap scale={0.98} accessibilityLabel={`${a.featured.label}: ${a.featured.award.name}`} onPress={() => setOpen(a.featured!.award)} style={s.featured}>
+          <Tap scale={0.98} accessibilityLabel={`${a.featured.label}: ${a.featured.award.name}`} onPress={() => openAward(a.featured!.award)} style={s.featured}>
             <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
               <Defs>
                 <RadialGradient id="featGlow" cx="50%" cy="32%" r="75%" fx="50%" fy="32%">
@@ -97,19 +103,19 @@ export default function Awards() {
 
         {a && honours.length ? (
           <Section title="Honours" sub="Given by organisers, or won in a quick knockout">
-            <AwardGrid items={honours} size={88} columns={3} onOpen={setOpen} />
+            <AwardGrid items={honours} size={88} columns={3} onOpen={openAward} dot={dot} />
           </Section>
         ) : null}
 
         {a && a.milestones.length ? (
           <Section title="Career milestones" sub="Counted from every match you play">
             {anyMilestone ? (
-              <View style={{ marginHorizontal: 14 - space.gutter }}><AwardGrid items={a.milestones} size={72} columns={4} onOpen={setOpen} /></View>
+              <View style={{ marginHorizontal: 14 - space.gutter }}><AwardGrid items={a.milestones} size={72} columns={4} onOpen={openAward} dot={dot} /></View>
             ) : (
               <View>
                 {a.milestones.map((m) => (
-                  <Tap key={m.key} scale={0.99} accessibilityLabel={`${m.name}, ${m.context}`} onPress={() => setOpen(m)} style={s.mileRow}>
-                    <AwardBadgeFor award={m} size={52} />
+                  <Tap key={m.key} scale={0.99} accessibilityLabel={awardLabel(m, dot(m))} onPress={() => openAward(m)} style={s.mileRow}>
+                    <BadgeWithDot award={m} size={52} dotted={dot(m)} />
                     <Text style={s.mileName}>{m.name}</Text>
                     <Text style={s.mileCtx}>{m.context}</Text>
                   </Tap>
@@ -121,7 +127,7 @@ export default function Awards() {
 
         {a && !honours.length ? (
           <Section title="Honours you can earn" sub="Organisers give these at tournaments. Winning a quick knockout earns the bronze one.">
-            <AwardGrid items={lockedHonours()} size={72} columns={3} onOpen={setOpen} />
+            <AwardGrid items={lockedHonours()} size={72} columns={3} onOpen={openAward} dot={dot} />
           </Section>
         ) : null}
 
@@ -129,8 +135,8 @@ export default function Awards() {
           <Section title="Titles">
             <View>
               {a.titles.map((t) => (
-                <Tap key={t.key} scale={0.99} accessibilityLabel={`${t.name}, ${t.context}`} onPress={() => setOpen(t)} style={s.titleRow}>
-                  <AwardBadgeFor award={t} size={44} />
+                <Tap key={t.key} scale={0.99} accessibilityLabel={awardLabel(t, dot(t))} onPress={() => openAward(t)} style={s.titleRow}>
+                  <BadgeWithDot award={t} size={44} dotted={dot(t)} />
                   <View style={{ flex: 1, gap: 2 }}>
                     <Text style={s.titleName}>{t.name}</Text>
                     {t.context ? <Text style={s.mileCtx}>{t.context}</Text> : null}
@@ -142,6 +148,18 @@ export default function Awards() {
         ) : null}
       </ScrollView>
       <AwardSheet award={open} onClose={() => setOpen(null)} />
+      {rv.reveal ? (
+        <AwardReveal
+          award={rv.reveal.award}
+          onMinted={rv.onMinted}
+          onDone={rv.close}
+          onSeeAward={() => {
+            const shown = rv.reveal!.award;
+            rv.close();
+            openAward(shown); // opened like a tap: every key behind it is seen
+          }}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

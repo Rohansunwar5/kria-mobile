@@ -147,3 +147,89 @@ describe('featured', () => {
     expect(a.earned).toBe(1);
   });
 });
+
+describe('reveal identity and copy (reward spec C1, C4)', () => {
+  const { hasDot, nextReveal, ordinal, totalsFrom } = jest.requireActual('../src/lib/awardsView') as typeof import('../src/lib/awardsView');
+  type States = Map<string, 'new' | 'announced' | 'opened'>;
+  const a2 = (id: string, label: string, progress: number, target: number) => ({ id, label, progress, target, earned: progress >= target });
+  const make = () => buildAwards({
+    titles: [{ place: 'winner', tournamentId: 't1', categoryId: 'c1', tournamentName: 'Kria City Open 2026', categoryName: "Women's singles", awardedAt: '2026-11-24T10:00:00Z' }],
+    honors: [
+      { title: 'Best Player', badge: 'season-mvp', tournamentId: 't1', eventName: 'Kria City Open 2026', awardedAt: '2026-11-20T10:00:00Z' },
+      { title: 'Won Sunday Smash', badge: 'knockout-winner', ref: 'k1', eventName: 'Sunday Smash', sport: 'badminton' },
+      { title: 'Won Friday Rally', badge: 'knockout-winner', ref: 'k2', eventName: 'Friday Rally', sport: 'badminton' },
+    ],
+    achievements: [a2('matches-50', 'Play 50 matches', 50, 50), a2('matches-100', 'Play 100 matches', 50, 100)],
+    knockouts: [], totals: { played: 50, won: 30, sports: 1 },
+  });
+
+  it('gives every earned award stable keys and reveal copy', () => {
+    const a = make();
+    expect(a.titles[0].seenKeys).toEqual(['title_t1_c1_winner']);
+    expect(a.titles[0].reveal).toEqual({ label: 'Title · Winner', title: 'Kria City Open 2026', line: "Women's singles. Awarded 24 Nov 2026." });
+    expect(a.honours[0].seenKeys).toEqual(['hon_season-mvp_t1_Best_Player']);
+    expect(a.honours[0].reveal).toEqual({ label: 'Honour', title: 'Best Player', line: 'Kria City Open 2026 · Nov 2026' });
+    expect(a.knockouts[0].seenKeys).toEqual(['ko_k1', 'ko_k2']);
+    expect(a.knockouts[0].reveal).toEqual({ label: 'Knockout winner', title: 'Friday Rally', line: 'Your 2nd knockout win.' });
+    const m50 = a.milestones.find((m) => m.key === 'matches-50')!;
+    expect(m50.seenKeys).toEqual(['ach_matches-50']);
+    expect(m50.reveal).toEqual({ label: 'Milestone', title: '50 matches played', line: 'Next: 100.', nextTarget: 100 });
+    expect(a.milestones.find((m) => m.key === 'matches-100')!.seenKeys).toEqual([]);
+    expect(lockedHonours().every((l) => l.seenKeys.length === 0)).toBe(true);
+  });
+
+  it('a runner-up title, an undated title and a legacy title', () => {
+    expect(titleAward({ place: 'runner_up', tournamentId: 't', categoryId: 'c', tournamentName: 'Cup', categoryName: 'MS' }, 0).reveal)
+      .toEqual({ label: 'Title · Runner-up', title: 'Cup', line: 'MS.' });
+    expect(titleAward({ place: 'winner', tournamentName: 'Old Cup' }, 0).seenKeys).toEqual([]);
+  });
+
+  it('nextReveal: title beats honour beats knockout beats milestone; the batch is every new key', () => {
+    const r = nextReveal(make(), new Map() as States)!;
+    expect(r.key).toBe('title_t1_c1_winner');
+    expect(r.award.family).toBe('title');
+    expect([...r.batch].sort()).toEqual(['ach_matches-50', 'hon_season-mvp_t1_Best_Player', 'ko_k1', 'ko_k2', 'title_t1_c1_winner'].sort());
+  });
+
+  it('announced keys are never revealed again but keep the dot; opened clears it', () => {
+    const a = make();
+    const states: States = new Map([['title_t1_c1_winner', 'announced']]);
+    expect(nextReveal(a, states)!.key).toBe('hon_season-mvp_t1_Best_Player');
+    expect(hasDot(a.titles[0], states)).toBe(true);
+    expect(hasDot(a.titles[0], new Map([['title_t1_c1_winner', 'opened']]) as States)).toBe(false);
+    expect(hasDot(a.milestones.find((m) => m.key === 'matches-100')!, new Map() as States)).toBe(false);
+  });
+
+  it('shows no dot for a key whose state has not loaded yet, so the grid does not flash dots (review M12)', () => {
+    const a = make();
+    expect(hasDot(a.titles[0], new Map() as States)).toBe(false);
+    expect(hasDot(a.titles[0], new Map([['title_t1_c1_winner', 'new']]) as States)).toBe(true);
+  });
+
+  it('nothing new → null', () => {
+    const a = make();
+    const all = [...a.titles, ...a.honours, ...a.knockouts, ...a.milestones].flatMap((x) => x.seenKeys);
+    expect(nextReveal(a, new Map(all.map((k) => [k, 'opened'])) as States)).toBeNull();
+    expect(nextReveal(a, new Map(all.map((k) => [k, 'announced'])) as States)).toBeNull();
+  });
+
+  it('within titles, the newest awardedAt is revealed first', () => {
+    const a = buildAwards({
+      titles: [
+        { place: 'winner', tournamentId: 'old', categoryId: 'c', tournamentName: 'A', categoryName: 'X', awardedAt: '2026-01-01T00:00:00Z' },
+        { place: 'winner', tournamentId: 'new', categoryId: 'c', tournamentName: 'B', categoryName: 'X', awardedAt: '2026-06-01T00:00:00Z' },
+      ],
+      honors: [], achievements: [], knockouts: [], totals: { played: 0, won: 0, sports: 0 },
+    });
+    expect(nextReveal(a, new Map() as States)!.key).toBe('title_new_c_winner');
+  });
+
+  it('ordinal', () => {
+    expect([1, 2, 3, 4, 11, 12, 13, 21, 22, 101, 111].map(ordinal)).toEqual(['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '22nd', '101st', '111th']);
+  });
+
+  it('totalsFrom sums played and won and counts sports played', () => {
+    const sp = (sport: string, played: number, won: number) => ({ sport, played, decided: played, won, lost: played - won, tied: 0, noResult: 0, winRate: 0 });
+    expect(totalsFrom([sp('badminton', 10, 6), sp('cricket', 4, 1), sp('table_tennis', 0, 0)])).toEqual({ played: 14, won: 7, sports: 2 });
+  });
+});

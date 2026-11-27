@@ -43,3 +43,34 @@ export function bracketLayout(columns: BracketColumn[], cardH: number) {
   const width = columns.length ? columns.length * CARD_W + (columns.length - 1) * GUTTER : 0;
   return { tops, links, width, height };
 }
+
+export interface Seg { left: number; top: number; width: number; height: number }
+
+/**
+ * The champion's path through the bracket, as plain-View segments (reward
+ * spec §10). Only the champion's half of each link lights: a stub out of
+ * their card, a vertical run to the link's midpoint, then the wire into the
+ * next card. `ids` are the champion's card ids; the last column draws nothing.
+ * `t` is the line thickness.
+ */
+export function highlightSegments(columns: BracketColumn[], cardH: number, ids: string[], t = 2): { round: number; stub: Seg; run: Seg; wire: Seg }[] {
+  const { links } = bracketLayout(columns, cardH);
+  const half = GUTTER / 2;
+  const out: { round: number; stub: Seg; run: Seg; wire: Seg }[] = [];
+  let first = 0; // index of this column's first link
+  columns.slice(0, -1).forEach((col, c) => {
+    const i = col.cards.findIndex((card) => ids.includes(card.id));
+    if (i >= 0) {
+      const link = links[first + Math.floor(i / 2)];
+      const y = i % 2 ? link.y2 : link.y1;
+      out.push({
+        round: c,
+        stub: { left: link.x, top: y - t / 2, width: half, height: t },
+        run: { left: link.x + half - t / 2, top: Math.min(y, link.yMid), width: t, height: Math.abs(link.yMid - y) },
+        wire: { left: link.x + half, top: link.yMid - t / 2, width: half, height: t },
+      });
+    }
+    first += Math.ceil(col.cards.length / 2);
+  });
+  return out;
+}

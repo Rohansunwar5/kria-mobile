@@ -6,6 +6,7 @@ import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTimin
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { colors, ease, font, motion, radius } from '@/constants/theme';
+import { haptics } from '@/lib/haptics';
 
 export const TABS: { route: string; label: string; icon?: IconName }[] = [
   { route: 'home', label: 'Home', icon: 'home' },
@@ -54,7 +55,10 @@ export function TabBar({ state, emitter, navigateToTab, avatar }: BottomTabBarPr
                 if (!route) return;
                 // Re-tapping the active tab lets the screen scroll to top (useScrollToTop).
                 const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-                if (!on && !event.defaultPrevented) navigateToTab(route.key);
+                if (!on && !event.defaultPrevented) {
+                  haptics.select();
+                  navigateToTab(route.key);
+                }
               }}
               style={s.item}
             >
@@ -67,7 +71,7 @@ export function TabBar({ state, emitter, navigateToTab, avatar }: BottomTabBarPr
                   </View>
                 )}
               </View>
-              <Text style={[s.label, { color: ink, fontFamily: on ? font.bold : font.medium }]}>{tab.label}</Text>
+              <Text maxFontSizeMultiplier={1.3} style={[s.label, { color: ink, fontFamily: on ? font.bold : font.medium }]}>{tab.label}</Text>
             </Pressable>
           );
         })}
